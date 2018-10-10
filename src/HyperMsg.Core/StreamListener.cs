@@ -21,7 +21,15 @@ namespace HyperMsg
 			while (!token.IsCancellationRequested)
 			{
 				var buffer = await streamReader(stream);
+                OnStreamReaded(buffer);
 			}
 		}
+
+        private void OnStreamReaded(Memory<byte> buffer)
+        {
+            StreamReaded?.Invoke(buffer);
+        }
+
+        public Action<Memory<byte>> StreamReaded;
 	}
 }
