@@ -13,7 +13,7 @@ namespace HyperMsg
 
 		public void Start()
 		{
-			listeningTask = DoListening(tokenSource.Token)
+			listeningTask = Task.Run(() => DoListening(tokenSource.Token))
 				.ContinueWith(ListeningTaskContinuation);
 			OnStarted();
 		}
@@ -41,10 +41,7 @@ namespace HyperMsg
 			}
 		}
 
-		private void OnStarted()
-		{
-			Started?.Invoke(this, EventArgs.Empty);
-		}
+		private void OnStarted() => Started?.Invoke(this, EventArgs.Empty);
 
 		private void OnStopped()
 		{
@@ -54,12 +51,14 @@ namespace HyperMsg
 		protected virtual void OnCompleted()
 		{
 			Stop();
+			Completed?.Invoke(this, EventArgs.Empty);
 		}
 
-		protected virtual void OnError(Exception exception)
-		{ }
+		protected virtual void OnError(Exception exception) => Error?.Invoke(this, EventArgs.Empty);
 
 		public event EventHandler Started;
 		public event EventHandler Stopped;
+		public event EventHandler Completed;
+		public event EventHandler Error;
 	}
 }
