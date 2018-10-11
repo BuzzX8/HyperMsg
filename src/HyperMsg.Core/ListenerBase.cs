@@ -51,18 +51,15 @@ namespace HyperMsg
 			Stopped?.Invoke(this, EventArgs.Empty);
 		}
 
-		private void OnCompleted()
+		protected virtual void OnCompleted()
 		{
 			Stop();
 		}
 
-		private void OnError(AggregateException exception)
-		{
-			Error?.Invoke(this, EventArgs.Empty);
-		}
+		protected virtual void OnError(Exception exception)
+		{ }
 
 		public event EventHandler Started;
 		public event EventHandler Stopped;
-		public event EventHandler Error;
 	}
 }

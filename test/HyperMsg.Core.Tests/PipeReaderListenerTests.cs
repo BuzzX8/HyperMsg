@@ -91,24 +91,24 @@ namespace HyperMsg
 			Assert.False(listener.IsListening);
 	    }
 
-	    [Fact]
-	    public void Rises_Error_When_Unhandled_Exception_Occurs()
-	    {
-			var listener = new PipeReaderListener(pipe.Reader, b => throw new ApplicationException());
-		    var wasCalled = false;
-		    listener.Error += (s, e) =>
-		    {
-			    wasCalled = true;
-			    @event.Reset();
-		    };
-		    listener.Stopped += (s, e) => @event.Set();
-			listener.Start();
+	  //  [Fact]
+	  //  public void Rises_Error_When_Unhandled_Exception_Occurs()
+	  //  {
+			//var listener = new PipeReaderListener(pipe.Reader, b => throw new ApplicationException());
+		 //   var wasCalled = false;
+		 //   listener.Error += (s, e) =>
+		 //   {
+			//    wasCalled = true;
+			//    @event.Reset();
+		 //   };
+		 //   listener.Stopped += (s, e) => @event.Set();
+			//listener.Start();
 
-			WriteAndWaitEvent(Guid.NewGuid().ToByteArray());
+			//WriteAndWaitEvent(Guid.NewGuid().ToByteArray());
 
-			Assert.True(wasCalled);
-			Assert.False(listener.IsListening);
-	    }
+			//Assert.True(wasCalled);
+			//Assert.False(listener.IsListening);
+	  //  }
 
 		private void WriteAndWaitEvent(byte[] data)
 		{
