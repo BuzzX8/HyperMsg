@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Reactive;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HyperMsg
@@ -11,27 +13,30 @@ namespace HyperMsg
         public void StreamReaded_Passess_Bytes_Receivrd_From_Reader()
         {
             var bytes = Guid.NewGuid().ToByteArray();
-            var stream = new MemoryStream();
-            var listener = new StreamListener(stream, async s => 
-            {
-                var buffer = new Memory<byte>(new byte[bytes.Length], 0, bytes.Length);
-                int readed = await stream.ReadAsync(buffer);
-                return buffer.Slice(0, readed);
-            });
-            var @event = new ManualResetEventSlim();
-            stream.Write(bytes);
+	        var actual = (byte[])null;
+			var stream = new MemoryStream();
+	        var @event = new ManualResetEventSlim();
+			var observer = Observer.Create<Memory<byte>>(b =>
+			{
+				actual = b.ToArray();
+				@event.Set();
+			});
+	        var listener = new StreamListener(stream, s => ReadStreamAsync(s, bytes), observer);
+	        listener.Next += (s, e) => listener.Stop();
+			stream.Write(bytes);
             stream.Seek(0, SeekOrigin.Begin);
-            var actual = (byte[])null;
-            listener.StreamReaded += b =>
-            {
-                actual = b.ToArray();
-                listener.Stop();
-                @event.Set();
-            };
+
             listener.Start();
             @event.Wait(TimeSpan.FromSeconds(1));
 
             Assert.Equal(bytes, actual);
         }
+
+		private async Task<Memory<byte>> ReadStreamAsync(Stream stream, byte[] bytes)
+		{
+			var buffer = new Memory<byte>(new byte[bytes.Length], 0, bytes.Length);
+			int readed = await stream.ReadAsync(buffer);
+			return buffer.Slice(0, readed);
+		}
 	}
 }

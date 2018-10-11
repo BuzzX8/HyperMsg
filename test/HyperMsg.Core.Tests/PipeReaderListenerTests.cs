@@ -59,57 +59,6 @@ namespace HyperMsg
 			Assert.Equal(expected.Skip(bytesToRead).Take(bytesToRead), actual);
 		}
 
-		[Fact]
-		public void Stops_Listening_When_Writer_Completes()
-		{
-			var listener = new PipeReaderListener(pipe.Reader, b => 0);
-			listener.Stopped += (s, e) => @event.Set();
-			listener.Start();
-
-			pipe.Writer.Complete();
-			@event.Wait(waitTimeout);
-
-			Assert.False(listener.IsListening);
-		}
-
-	    [Fact]
-	    public void Stop_Stops_Invoking_Buffer_Reader()
-	    {
-		    var readerCalled = false;
-		    var listener = new PipeReaderListener(pipe.Reader, b =>
-		    {
-			    readerCalled = true;
-			    return 0;
-		    });
-		    listener.Stopped += (s, e) => @event.Set();
-		    listener.Start();
-
-			listener.Stop();
-		    @event.Wait(waitTimeout);
-		    
-			Assert.False(readerCalled);
-			Assert.False(listener.IsListening);
-	    }
-
-	    [Fact]
-	    public void Rises_Error_When_Unhandled_Exception_Occurs()
-	    {
-			var listener = new PipeReaderListener(pipe.Reader, b => throw new ApplicationException());
-		    var wasCalled = false;
-		    listener.Error += (s, e) =>
-		    {
-			    wasCalled = true;
-			    @event.Reset();
-		    };
-		    listener.Stopped += (s, e) => @event.Set();
-			listener.Start();
-
-			WriteAndWaitEvent(Guid.NewGuid().ToByteArray());
-
-			Assert.True(wasCalled);
-			Assert.False(listener.IsListening);
-	    }
-
 		private void WriteAndWaitEvent(byte[] data)
 		{
 			pipe.Writer.Write(data);
