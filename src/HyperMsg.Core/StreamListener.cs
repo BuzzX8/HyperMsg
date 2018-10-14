@@ -7,12 +7,12 @@ namespace HyperMsg
 {
 	public class StreamListener : ObservableListener<Memory<byte>>
 	{
-		private readonly Stream stream;
+		private readonly Func<Stream> streamProvider;
 		private readonly Func<Stream, Task<Memory<byte>>> streamReader;
 
-		public StreamListener(Stream stream, Func<Stream, Task<Memory<byte>>> streamReader, IObserver<Memory<byte>> observer) : base(observer)
+		public StreamListener(Func<Stream> streamProvider, Func<Stream, Task<Memory<byte>>> streamReader, IObserver<Memory<byte>> observer) : base(observer)
 		{
-			this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
+			this.streamProvider = streamProvider ?? throw new ArgumentNullException(nameof(streamProvider));
 			this.streamReader = streamReader ?? throw new ArgumentNullException(nameof(streamReader));
 		}
 
@@ -20,6 +20,7 @@ namespace HyperMsg
 		{
 			while (!token.IsCancellationRequested)
 			{
+                var stream = streamProvider();
 				var buffer = await streamReader(stream);
                 OnNext(buffer);
 			}

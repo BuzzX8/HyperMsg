@@ -21,7 +21,7 @@ namespace HyperMsg
 				actual = b.ToArray();
 				@event.Set();
 			});
-	        var listener = new StreamListener(stream, s => ReadStreamAsync(s, bytes), observer);
+	        var listener = new StreamListener(() => stream, s => ReadStreamAsync(s, bytes), observer);
 	        listener.Next += (s, e) => listener.Stop();
 			stream.Write(bytes);
             stream.Seek(0, SeekOrigin.Begin);
