@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -11,45 +9,52 @@ namespace HyperMsg
     public class MessageListener<T> : IObserver<Memory<byte>>
     {
         private readonly Pipe pipe;
-        private readonly StreamListener streamListener;
         private readonly PipeReaderListener readerListener;
+        private readonly DeserializeAction<T> deserializer;
+        private readonly IObserver<T> observer;
 
-        public MessageListener(DeserializeAction<T> deserializer, Func<Stream> streamProvider, IObserver<T> observer)
+        public MessageListener(DeserializeAction<T> deserializer, IObserver<T> observer)
         {
             pipe = new Pipe();
-            streamListener = new StreamListener(streamProvider, ReadStream, this);
             readerListener = new PipeReaderListener(pipe.Reader, ReadBuffer);
+            this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
+            this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
         }
+
+        public IBufferWriter<byte> GetWriter() => pipe.Writer;
 
         public void Start()
         {
-            streamListener.Start();
             readerListener.Start();
+            Started?.Invoke(this, EventArgs.Empty);
         }
 
         public void OnCompleted()
-        {
-            throw new NotImplementedException();
-        }
+        { }
 
         public void OnError(Exception error)
-        {
-            throw new NotImplementedException();
-        }
+        { }
 
         public void OnNext(Memory<byte> value)
         {
-            throw new NotImplementedException();
-        }
-
-        private async Task<Memory<byte>> ReadStream(Stream stream)
-        {
-            return null;
+            var writer = pipe.Writer;
+            writer.Write(value.Span);
+            writer.FlushAsync();
         }
 
         private int ReadBuffer(ReadOnlySequence<byte> buffer)
         {
-            return -1;
+            if (buffer.IsEmpty)
+            {
+                return 0;
+            }
+
+            var result = deserializer(buffer);
+            observer.OnNext(result.message);
+
+            return result.bytesConsumed;
         }
+
+        public event EventHandler Started;
     }
 }
