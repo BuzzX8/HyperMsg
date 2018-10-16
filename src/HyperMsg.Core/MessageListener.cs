@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessageListener<T> : IObserver<Memory<byte>>
+    public class MessageListener<T> : IObserver<Memory<byte>> where T : class
     {
         private readonly Pipe pipe;
         private readonly PipeReaderListener readerListener;
@@ -50,11 +50,18 @@ namespace HyperMsg
             }
 
             var result = deserializer(buffer);
-            observer.OnNext(result.message);
+
+            if (result.message != default(T))
+            {
+                observer.OnNext(result.message);
+            }
+            
+            DeserializerInvoked?.Invoke(this, EventArgs.Empty);
 
             return result.bytesConsumed;
         }
 
         public event EventHandler Started;
+        public event EventHandler DeserializerInvoked;
     }
 }
