@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Buffers;
-using System.IO;
 using System.IO.Pipelines;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessageListener<T> : IObserver<Memory<byte>> where T : class
+    public class MessageListener<T> : IMessageBuffer<ReadOnlyMemory<byte>> where T : class
     {
         private readonly Pipe pipe;
         private readonly PipeReaderListener readerListener;
@@ -21,28 +21,25 @@ namespace HyperMsg
             this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
         }
 
-        public IBufferWriter<byte> GetWriter() => pipe.Writer;
+	    public IBufferWriter<byte> Writer => pipe.Writer;
 
-        public void Start()
+	    public void Start()
         {
             readerListener.Start();
             Started?.Invoke(this, EventArgs.Empty);
         }
 
-        public void OnCompleted()
-        { }
+	    public void Write(ReadOnlyMemory<byte> message)
+	    {
+		    Writer.Write(message.Span);
+	    }
 
-        public void OnError(Exception error)
-        { }
+	    public Task<FlushResult> FlushAsync(CancellationToken token = default)
+	    {
+		    return pipe.Writer.FlushAsync(token).AsTask();
+	    }
 
-        public void OnNext(Memory<byte> value)
-        {
-            var writer = pipe.Writer;
-            writer.Write(value.Span);
-            writer.FlushAsync();
-        }
-
-        private int ReadBuffer(ReadOnlySequence<byte> buffer)
+		private int ReadBuffer(ReadOnlySequence<byte> buffer)
         {
             if (buffer.IsEmpty)
             {

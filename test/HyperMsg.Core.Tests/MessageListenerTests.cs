@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Reactive;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HyperMsg
@@ -12,7 +13,7 @@ namespace HyperMsg
         private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
 
         [Fact]
-        public void OnNext_Calls_OnNext_Of_Message_Observer_When_Message_Deserialized()
+        public async Task OnNext_Calls_OnNext_Of_Message_Observer_When_Message_Deserialized()
         {
             var expectedMessage = Guid.NewGuid().ToString();
             var actualMessage = (string)null;
@@ -25,7 +26,8 @@ namespace HyperMsg
             var listener = new MessageListener<string>(DeserializeString, observer);
             listener.Start();
 
-            listener.OnNext(Encoding.UTF8.GetBytes(expectedMessage));
+            listener.Write(Encoding.UTF8.GetBytes(expectedMessage));
+	        await listener.FlushAsync();
             @event.Wait(waitTimeout);
 
             Assert.Equal(expectedMessage, actualMessage);
@@ -41,7 +43,7 @@ namespace HyperMsg
             listener.DeserializerInvoked += (s, e) => @event.Set();
             listener.Start();
 
-            listener.OnNext(Guid.NewGuid().ToByteArray());
+            listener.Write(Guid.NewGuid().ToByteArray());
             @event.Wait(waitTimeout);
 
             Assert.False(wasCalled);
