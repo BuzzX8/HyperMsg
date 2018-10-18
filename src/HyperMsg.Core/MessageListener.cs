@@ -10,10 +10,10 @@ namespace HyperMsg
     {
         private readonly Pipe pipe;
         private readonly PipeReaderListener readerListener;
-        private readonly DeserializeAction<T> deserializer;
+        private readonly DeserializeFunc<T> deserializer;
         private readonly IObserver<T> observer;
 
-        public MessageListener(DeserializeAction<T> deserializer, IObserver<T> observer)
+        public MessageListener(DeserializeFunc<T> deserializer, IObserver<T> observer)
         {
             pipe = new Pipe();
             readerListener = new PipeReaderListener(pipe.Reader, ReadBuffer);
@@ -51,14 +51,14 @@ namespace HyperMsg
 
             var result = deserializer(buffer);
 
-            if (result.message != default(T))
+            if (result.Message != default(T))
             {
-                observer.OnNext(result.message);
+                observer.OnNext(result.Message);
             }
             
             DeserializerInvoked?.Invoke(this, EventArgs.Empty);
 
-            return result.bytesConsumed;
+            return result.BytesConsumed;
         }
 
         public event EventHandler Started;

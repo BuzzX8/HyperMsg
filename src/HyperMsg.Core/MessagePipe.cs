@@ -1,26 +1,26 @@
 ﻿using System;
 using System.Buffers;
 using System.IO.Pipelines;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
     public class MessagePipe<T> : IMessageBuffer<T>, IDisposable
     {
-        private readonly Action<IBufferWriter<byte>, T> serializer;
         private readonly Func<ReadOnlySequence<byte>, int> bufferReader;
-        private readonly MessageBuffer<T> buffer;
+        private readonly PipeMessageBuffer<T> buffer;
         private readonly PipeReaderListener listener;
         private readonly Pipe pipe;
 
-        public MessagePipe(Action<IBufferWriter<byte>, T> serializer, Func<ReadOnlySequence<byte>, int> bufferReader)
+        public MessagePipe(SerializeAction<T> serializer, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
             pipe = new Pipe();
-            buffer = new MessageBuffer<T>(pipe.Writer, serializer);
+            buffer = new PipeMessageBuffer<T>(pipe.Writer, serializer);
             listener = new PipeReaderListener(pipe.Reader, bufferReader);
         }
 
-        public Task<FlushResult> FlushAsync() => buffer.FlushAsync();
+        public Task<FlushResult> FlushAsync(CancellationToken token = default) => buffer.FlushAsync(token);
 
         public void Write(T message) => buffer.Write(message);
 
