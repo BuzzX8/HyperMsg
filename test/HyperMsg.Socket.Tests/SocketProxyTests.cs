@@ -31,7 +31,7 @@ namespace HyperMsg.Socket.Tests
                 acceptedSocket = s;
                 @event.Set();
             });
-            listener.Start();
+            //listener.Start();
             
             socket.Connect();
             @event.Wait(waitTimeout);
@@ -50,7 +50,7 @@ namespace HyperMsg.Socket.Tests
                 acceptedSocket = s;
                 @event.Set();
             });
-            listener.Start();
+            //listener.Start();
 
             socket.Connect();
             @event.Wait(waitTimeout);
@@ -73,7 +73,7 @@ namespace HyperMsg.Socket.Tests
                 acceptedSocket = s;
                 @event.Set();
             });
-            listener.Start();
+            //listener.Start();
 
             socket.Connect();
             @event.Wait(waitTimeout);
@@ -99,7 +99,7 @@ namespace HyperMsg.Socket.Tests
 
         public void Dispose()
         {
-            listener.Stop();
+            //listener.Stop();
             socket.Dispose();            
         }
     }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Sockets
 {
-    public class ConnectionListener : ObservableListener<SocketProxy>
+    public class ConnectionListener : ObservableWorker<SocketProxy>
     {
         private readonly Lazy<Socket> socket;
         private readonly EndPoint endpoint;
@@ -19,7 +19,7 @@ namespace HyperMsg.Sockets
 
         protected Socket Socket => socket.Value;
 
-        protected override async Task DoListening(CancellationToken token)
+        protected override async Task DoWorkAsync(CancellationToken token)
         {
             Socket.Bind(endpoint);
             Socket.Listen(1);
