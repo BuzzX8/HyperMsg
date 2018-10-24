@@ -2,11 +2,11 @@
 
 namespace HyperMsg
 {
-	public abstract class ObservableListener<T> : ListenerBase
+	public abstract class ObservableWorker<T> : BackgroundWorker
 	{
 		private readonly IObserver<T> observer;
 
-		protected ObservableListener(IObserver<T> observer)
+		protected ObservableWorker(IObserver<T> observer)
 		{
 			this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
 		}
