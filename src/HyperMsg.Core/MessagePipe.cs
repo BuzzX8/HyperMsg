@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessagePipe<T> : IMessageBuffer<T>, IDisposable
+    public class MessagePipe<T> : IMessageBuffer<T>
     {
         private readonly Func<ReadOnlySequence<byte>, int> bufferReader;
         private readonly PipeMessageBuffer<T> buffer;
@@ -24,19 +24,6 @@ namespace HyperMsg
 
         public void Write(T message) => buffer.Write(message);
 
-        public void Start()
-        {
-            listener.Start();
-        }
-
-        public void Stop()
-        {
-            listener.Stop();
-        }
-
-        public void Dispose()
-        {
-            Stop();
-        }
+        public IDisposable Run() => listener.Run();
     }
 }

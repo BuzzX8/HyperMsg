@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class PipeReaderListener : ListenerBase
+    public class PipeReaderListener : BackgroundWorker
     {
         private readonly PipeReader pipeReader;
         private readonly Func<ReadOnlySequence<byte>, int> bufferReader;
@@ -17,7 +17,7 @@ namespace HyperMsg
             this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
         }
         
-        protected override async Task DoListening(CancellationToken token)
+        protected override async Task DoWorkAsync(CancellationToken token)
         {
             while(!token.IsCancellationRequested)
             {

@@ -35,7 +35,7 @@ namespace HyperMsg
                     @event.Set();
                 }
             });
-            buffer.Start();
+            buffer.Run();
 
             buffer.Write(expected);
             buffer.FlushAsync().Wait();

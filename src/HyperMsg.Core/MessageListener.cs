@@ -23,10 +23,11 @@ namespace HyperMsg
 
 	    public IBufferWriter<byte> Writer => pipe.Writer;
 
-	    public void Start()
+	    public IDisposable Run()
         {
-            readerListener.Start();
+            var disposable = readerListener.Run();
             Started?.Invoke(this, EventArgs.Empty);
+            return disposable;
         }
 
 	    public void Write(ReadOnlyMemory<byte> message)

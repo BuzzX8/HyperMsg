@@ -24,7 +24,7 @@ namespace HyperMsg
                 @event.Set();
             });
             var listener = new MessageListener<string>(DeserializeString, observer);
-            listener.Start();
+            listener.Run();
 
             listener.Write(Encoding.UTF8.GetBytes(expectedMessage));
 	        await listener.FlushAsync();
@@ -41,7 +41,7 @@ namespace HyperMsg
             var observer = Observer.Create<string>(s => wasCalled = true);
             var listener = new MessageListener<string>(b => (null, 0), observer);
             listener.DeserializerInvoked += (s, e) => @event.Set();
-            listener.Start();
+            listener.Run();
 
             listener.Write(Guid.NewGuid().ToByteArray());
             @event.Wait(waitTimeout);

@@ -4,28 +4,29 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-	public abstract class ListenerBase
+	public abstract class BackgroundWorker : IDisposable
 	{
 		private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 		private Task listeningTask;
 
-		public bool IsListening => listeningTask != null;
-
-		public void Start()
+		public IDisposable Run()
 		{
-			listeningTask = Task.Run(() => DoListening(tokenSource.Token))
+			listeningTask = Task.Run(() => DoWorkAsync(tokenSource.Token))
 				.ContinueWith(ListeningTaskContinuation);
 			OnStarted();
+            return this;
 		}
 
-		public void Stop()
+		private void Stop()
 		{
 			tokenSource.Cancel();
 			listeningTask = null;
 			OnStopped();
 		}
 
-		protected abstract Task DoListening(CancellationToken token);
+        public void Dispose() => Stop();
+
+		protected abstract Task DoWorkAsync(CancellationToken token);
 
 		private void ListeningTaskContinuation(Task task)
 		{
