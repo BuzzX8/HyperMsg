@@ -7,13 +7,13 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class MessageBufferTests
+    public class PipeMessageBufferTests
     {
         [Fact]
         public async Task Write_Serializes_Message_Into_Writer()
         {
             var pipe = new Pipe();
-            var messageBuffer = new MessageBuffer<string>(pipe.Writer, WriteString);
+            var messageBuffer = new PipeMessageBuffer<string>(pipe.Writer, WriteString);
             var expected = Guid.NewGuid().ToString();
             messageBuffer.Write(expected);
 

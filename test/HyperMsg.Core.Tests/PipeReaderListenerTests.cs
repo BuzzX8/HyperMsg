@@ -31,11 +31,12 @@ namespace HyperMsg
                 return 0;
             });
 			listener.BufferReaded += (s, e) => @event.Set();
-			listener.Start();
 
-			WriteAndWaitEvent(expected);
-
-            Assert.Equal(expected, actual);
+            using (listener.Run())
+            {
+                WriteAndWaitEvent(expected);
+                Assert.Equal(expected, actual);
+            }
         }
 
         [Fact]
@@ -50,13 +51,15 @@ namespace HyperMsg
 		        return bytesToRead;
 	        });
 			listener.BufferReaded += (s, e) => @event.Set();
-			listener.Start();
+            using (listener.Run())
+            {
 
-			WriteAndWaitEvent(expected);
-			@event.Reset();
-			WriteAndWaitEvent(Array.Empty<byte>());
+                WriteAndWaitEvent(expected);
+                @event.Reset();
+                WriteAndWaitEvent(Array.Empty<byte>());
 
-			Assert.Equal(expected.Skip(bytesToRead).Take(bytesToRead), actual);
+                Assert.Equal(expected.Skip(bytesToRead).Take(bytesToRead), actual);
+            }
 		}
 
 		private void WriteAndWaitEvent(byte[] data)

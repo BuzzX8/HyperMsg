@@ -1,11 +1,12 @@
 ﻿using System.IO.Pipelines;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    interface IMessageBuffer<T>
+    public interface IMessageBuffer<T>
     {
         void Write(T message);
-        Task<FlushResult> FlushAsync();
+        Task<FlushResult> FlushAsync(CancellationToken token = default);
     }
 }

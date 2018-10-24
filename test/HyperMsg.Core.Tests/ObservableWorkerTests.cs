@@ -6,7 +6,7 @@ using Xunit;
 
 namespace HyperMsg
 {
-	public class ObservableListenerTests
+	public class ObservableWorkerTests
 	{
 		[Fact]
 		public void OnNext_Redirects_Call_To_Observer()
@@ -47,12 +47,12 @@ namespace HyperMsg
 		}
 	}
 
-	internal class ObservableListenerImpl : ObservableListener<string>
+	internal class ObservableListenerImpl : ObservableWorker<string>
 	{
 		public ObservableListenerImpl(IObserver<string> observer) : base(observer)
 		{ }
 
-		protected override Task DoListening(CancellationToken token) => Task.CompletedTask;
+		protected override Task DoWorkAsync(CancellationToken token) => Task.CompletedTask;
 
 		public new void OnNext(string value) => base.OnNext(value);
 
