@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.IO.Pipelines;
 using System.Reactive;
 using System.Text;
 using System.Threading;
@@ -23,11 +24,12 @@ namespace HyperMsg
                 actualMessage = s;
                 @event.Set();
             });
-            var listener = new MessageListener<string>(DeserializeString, observer);
+            var pipe = new Pipe();
+            var listener = new MessageListener<string>(pipe.Reader, DeserializeString, observer);
             listener.Run();
 
-            listener.Write(Encoding.UTF8.GetBytes(expectedMessage));
-	        await listener.FlushAsync();
+            pipe.Writer.Write(Encoding.UTF8.GetBytes(expectedMessage));
+	        await pipe.Writer.FlushAsync();
             @event.Wait(waitTimeout);
 
             Assert.Equal(expectedMessage, actualMessage);
@@ -39,11 +41,12 @@ namespace HyperMsg
             var wasCalled = false;
             var @event = new ManualResetEventSlim();
             var observer = Observer.Create<string>(s => wasCalled = true);
-            var listener = new MessageListener<string>(b => (null, 0), observer);
+            var pipe = new Pipe();
+            var listener = new MessageListener<string>(pipe.Reader, b => (null, 0), observer);
             listener.DeserializerInvoked += (s, e) => @event.Set();
             listener.Run();
 
-            listener.Write(Guid.NewGuid().ToByteArray());
+            pipe.Writer.Write(Guid.NewGuid().ToByteArray());
             @event.Wait(waitTimeout);
 
             Assert.False(wasCalled);
