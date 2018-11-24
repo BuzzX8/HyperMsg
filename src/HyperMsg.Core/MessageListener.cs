@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Buffers;
 using System.IO.Pipelines;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessageListener<T> where T : class
+    public class MessageListener<T>
     {
         private readonly PipeReaderListener readerListener;
         private readonly DeserializeFunc<T> deserializer;
@@ -35,7 +33,7 @@ namespace HyperMsg
 
             var result = deserializer(buffer);
 
-            if (result.Message != default(T))
+            if (result.Message != null)
             {
                 observer.OnNext(result.Message);
             }

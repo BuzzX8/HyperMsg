@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Buffers;
 using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessageTransceiver<T>
+    public class MessageTransceiver<T> : IMessageBuffer<T>
     {
         private readonly IStream stream;
         private readonly IMessageSerializer<T> serializer;
         private readonly IObserver<T> observer;
 
-        private PipeReaderListener listener;
+        private MessageListener<T> listener;
 
         public MessageTransceiver(IStream stream, IMessageSerializer<T> serializer, IObserver<T> observer)
         {
@@ -20,7 +19,7 @@ namespace HyperMsg
             this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
 
-            listener = new PipeReaderListener(stream.Reader, ReadBuffer);
+            listener = new MessageListener<T>(stream.Reader, serializer.Deserialize, observer);            
         }
 
         public IDisposable Run() => listener.Run();
@@ -35,18 +34,7 @@ namespace HyperMsg
             return await stream.Writer.FlushAsync(token);
         }
 
-        private int ReadBuffer(ReadOnlySequence<byte> buffer)
-        {
-            (var message, int readed) = serializer.Deserialize(buffer);
-
-            if (message != null)
-            {
-                observer.OnNext(message);
-                OnNextMessage?.Invoke(this, EventArgs.Empty);
-            }
-
-            return readed;
-        }
+        private void OnMessageReceived() => OnNextMessage?.Invoke(this, EventArgs.Empty);
 
         public event EventHandler OnNextMessage;
     }
