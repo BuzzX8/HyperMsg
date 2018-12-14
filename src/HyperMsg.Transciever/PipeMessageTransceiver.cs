@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class PipeMessageTransceiver<T> : IMessageSender<T>, IDisposable
+    public class PipeMessageTransceiver<T> : IDisposable
     {
         private readonly IMessageBuffer<T> messageBuffer;
         private readonly RunAction run1;
@@ -37,12 +37,9 @@ namespace HyperMsg
         public async Task SendAsync(T message, CancellationToken token = default)
         {
             messageBuffer.Write(message);
-            var flushResult = await messageBuffer.FlushAsync(token);
-            OnFlushResult(flushResult);
+            await messageBuffer.FlushAsync(token);
+            
         }
-
-        private void OnFlushResult(FlushResult flushResult)
-        { }
 
         public void Dispose()
         {

@@ -11,7 +11,7 @@ namespace HyperMsg
     {
         private readonly Pipe pipe;
         private readonly IStream stream;
-        private readonly IMessageSerializer<Guid> serializer;
+        private readonly ISerializer<Guid> serializer;
         private readonly IObserver<Guid> observer;
         private readonly MessageTransceiver<Guid> transceiver;
 

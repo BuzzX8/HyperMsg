@@ -8,12 +8,12 @@ namespace HyperMsg
     public class MessageTransceiver<T> : IMessageBuffer<T>
     {
         private readonly IStream stream;
-        private readonly IMessageSerializer<T> serializer;
+        private readonly ISerializer<T> serializer;
         private readonly IObserver<T> observer;
 
         private MessageListener<T> listener;
 
-        public MessageTransceiver(IStream stream, IMessageSerializer<T> serializer, IObserver<T> observer)
+        public MessageTransceiver(IStream stream, ISerializer<T> serializer, IObserver<T> observer)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
             this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
@@ -29,9 +29,9 @@ namespace HyperMsg
             serializer.Serialize(stream.Writer, message);
         }
 
-        public async Task<FlushResult> FlushAsync(CancellationToken token = default)
+        public Task FlushAsync(CancellationToken token = default)
         {
-            return await stream.Writer.FlushAsync(token);
+            return stream.Writer.FlushAsync(token).AsTask();
         }
 
         private void OnMessageReceived() => OnNextMessage?.Invoke(this, EventArgs.Empty);

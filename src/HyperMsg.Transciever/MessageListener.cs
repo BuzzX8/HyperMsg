@@ -7,10 +7,10 @@ namespace HyperMsg
     public class MessageListener<T>
     {
         private readonly PipeReaderListener readerListener;
-        private readonly DeserializeFunc<T> deserializer;
+        private readonly Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializer;
         private readonly IObserver<T> observer;
 
-        public MessageListener(PipeReader pipeReader, DeserializeFunc<T> deserializer, IObserver<T> observer)
+        public MessageListener(PipeReader pipeReader, Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializer, IObserver<T> observer)
         {
             readerListener = new PipeReaderListener(pipeReader, ReadBuffer);
             this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
