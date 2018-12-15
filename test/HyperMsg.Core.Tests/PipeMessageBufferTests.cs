@@ -17,7 +17,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToString();
             messageBuffer.Write(expected);
 
-            var flushResult = await messageBuffer.FlushAsync();
+            await messageBuffer.FlushAsync();
             var result = await pipe.Reader.ReadAsync();
             var buffer = result.Buffer.First;
 

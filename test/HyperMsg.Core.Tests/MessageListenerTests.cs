@@ -42,7 +42,7 @@ namespace HyperMsg
             var @event = new ManualResetEventSlim();
             var observer = Observer.Create<string>(s => wasCalled = true);
             var pipe = new Pipe();
-            var listener = new MessageListener<string>(pipe.Reader, b => (null, 0), observer);
+            var listener = new MessageListener<string>(pipe.Reader, b => new DeserializationResult<string>(0, null), observer);
             listener.DeserializerInvoked += (s, e) => @event.Set();
             listener.Run();
 
@@ -52,10 +52,10 @@ namespace HyperMsg
             Assert.False(wasCalled);
         }
 
-        private (string, int) DeserializeString(ReadOnlySequence<byte> buffer)
+        private DeserializationResult<string> DeserializeString(ReadOnlySequence<byte> buffer)
         {
             var bytes = buffer.First.ToArray();
-            return (Encoding.UTF8.GetString(bytes), bytes.Length);
+            return new DeserializationResult<string>(bytes.Length, Encoding.UTF8.GetString(bytes));
         }
     }
 }

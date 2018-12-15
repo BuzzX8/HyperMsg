@@ -1,41 +1,75 @@
 ﻿using System;
+using System.Buffers;
 using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HyperMsg
+namespace HyperMsg.Transciever
 {
-    public class MessageTransceiver<T> : IMessageBuffer<T>
+    public class MessageTransceiver<T> : ITransceiver<T, T>, IObserver<T>
     {
-        private readonly IStream stream;
+        private readonly ITransceiver<ReadOnlySequence<byte>, ReadOnlySequence<byte>> transport;
         private readonly ISerializer<T> serializer;
-        private readonly IObserver<T> observer;
 
-        private MessageListener<T> listener;
+        private readonly PipeMessageBuffer<T> messageBuffer;
+        private readonly MessageListener<T> messageListener;
 
-        public MessageTransceiver(IStream stream, ISerializer<T> serializer, IObserver<T> observer)
+        private readonly PipeReaderListener readerListener;
+
+        private readonly Pipe outputPipe;
+        private readonly Pipe inputPipe;
+
+        public MessageTransceiver(ISerializer<T> serializer, ITransceiver<ReadOnlySequence<byte>, ReadOnlySequence<byte>> transport)
         {
-            this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
             this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
-            this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
+            this.transport = transport ?? throw new ArgumentNullException(nameof(transport));
 
-            listener = new MessageListener<T>(stream.Reader, serializer.Deserialize, observer);            
+            outputPipe = new Pipe();
+            inputPipe = new Pipe();
+
+            messageBuffer = new PipeMessageBuffer<T>(outputPipe.Writer, serializer.Serialize);
+            messageListener = new MessageListener<T>(inputPipe.Reader, serializer.Deserialize, this);
         }
 
-        public IDisposable Run() => listener.Run();
-
-        public void Write(T message)
+        public void OnCompleted()
         {
-            serializer.Serialize(stream.Writer, message);
+            throw new NotImplementedException();
         }
 
-        public Task FlushAsync(CancellationToken token = default)
+        public void OnError(Exception error)
         {
-            return stream.Writer.FlushAsync(token).AsTask();
+            throw new NotImplementedException();
         }
 
-        private void OnMessageReceived() => OnNextMessage?.Invoke(this, EventArgs.Empty);
+        public void OnNext(T value)
+        {
+            throw new NotImplementedException();
+        }
 
-        public event EventHandler OnNextMessage;
+        public void OnNext(ReadOnlySequence<byte> value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDisposable Run()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Send(T message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task SendAsync(T message, CancellationToken token = default)
+        {
+            messageBuffer.Write(message);
+            await messageBuffer.FlushAsync(token);
+        }
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
