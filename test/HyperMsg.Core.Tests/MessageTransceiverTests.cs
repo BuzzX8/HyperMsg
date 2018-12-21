@@ -10,7 +10,7 @@ namespace HyperMsg.Transciever
     public class MessageTransceiverTests
     {
         private readonly Pipe pipe;
-        private readonly IStream stream;
+        private readonly IPipe stream;
         private readonly ISerializer<Guid> serializer;
         private readonly IObserver<Guid> observer;
         private readonly MessageTransceiver<Guid> transceiver;
@@ -20,7 +20,7 @@ namespace HyperMsg.Transciever
         public MessageTransceiverTests()
         {
             pipe = new Pipe();
-            stream = new PipeStream(pipe.Reader, pipe.Writer);
+            stream = new PipeProxy(pipe.Reader, pipe.Writer);
             //serializer = new DelegateMessageSerializer<Guid>(DeserializeGuid, SerializeGuid);
             //observer = A.Fake<IObserver<Guid>>();
             //transceiver = new MessageTransceiver<Guid>(stream, serializer, observer);
