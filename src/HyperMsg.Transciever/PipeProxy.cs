@@ -14,36 +14,31 @@ namespace HyperMsg
 
             public void Advance(int length)
             {
-                throw new NotImplementedException();
+                
             }
 
-            public ReadOnlySequence<byte> Read()
-            {
-                throw new NotImplementedException();
-            }
+            public ReadOnlySequence<byte> Read() => ReadAsync().GetAwaiter().GetResult();
 
-            public Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken token = default)
+            public async Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken token = default)
             {
+                var readResult = await reader.ReadAsync(token);                
                 throw new NotImplementedException();
             }
         }
 
         private class PipeWriterProxy : IPipeWriter
         {
-            public void Flush()
-            {
-                throw new NotImplementedException();
-            }
+            private readonly PipeWriter writer;
 
-            public Task FlushAsync(CancellationToken token = default)
-            {
-                throw new NotImplementedException();
-            }
+            public void Advance(int count) => writer.Advance(count);
 
-            public Memory<byte> GetMemory(int sizeHint)
-            {
-                throw new NotImplementedException();
-            }
+            public void Flush() => writer.FlushAsync().GetAwaiter().GetResult();
+
+            public Task FlushAsync(CancellationToken token = default) => writer.FlushAsync(token).AsTask();
+
+            public Memory<byte> GetMemory(int sizeHint = 0) => writer.GetMemory(sizeHint);
+
+            public Span<byte> GetSpan(int sizeHint = 0) => writer.GetSpan(sizeHint);
         }
 
         public PipeProxy(PipeReader reader, PipeWriter writer)

@@ -24,13 +24,13 @@ namespace HyperMsg.Transciever
 
         public void Send(T message)
         {
-            //serializer.Serialize(pipe.Writer, message);
+            serializer.Serialize(pipe.Writer, message);
             pipe.Writer.Flush();
         }
 
         public async Task SendAsync(T message, CancellationToken token = default)
         {
-            //serializer.Serialize(pipe.Writer, message);
+            serializer.Serialize(pipe.Writer, message);
             await pipe.Writer.FlushAsync(token);
         }
 

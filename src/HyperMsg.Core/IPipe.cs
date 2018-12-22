@@ -21,10 +21,8 @@ namespace HyperMsg
         void Advance(int length);
     }
 
-    public interface IPipeWriter
+    public interface IPipeWriter : IBufferWriter<byte>
     {
-        Memory<byte> GetMemory(int sizeHint);
-
         void Flush();
 
         Task FlushAsync(CancellationToken token = default);
