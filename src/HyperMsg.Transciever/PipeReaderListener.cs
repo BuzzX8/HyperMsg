@@ -6,29 +6,24 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class PipeReaderListener : BackgroundWorker
+    public class PipeReaderListener// : BackgroundWorker
     {
-        private readonly PipeReader pipeReader;
+        private readonly IPipeReader pipeReader;
         private readonly Func<ReadOnlySequence<byte>, int> bufferReader;
 
-        public PipeReaderListener(PipeReader pipeReader, Func<ReadOnlySequence<byte>, int> bufferReader)
+        public PipeReaderListener(IPipeReader pipeReader, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
             this.pipeReader = pipeReader ?? throw new ArgumentNullException(nameof(pipeReader));
             this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
         }
         
-        protected override async Task DoWorkAsync(CancellationToken token)
+        protected async Task DoWorkAsync(CancellationToken token)
         {
             while(!token.IsCancellationRequested)
             {
                 var result = await pipeReader.ReadAsync(token);
 
-				if (result.IsCompleted)
-				{
-					return;
-				}
-
-				var bytesReaded = bufferReader(result.Buffer);
+				var bytesReaded = bufferReader(result);
 				OnBufferReaded();
 
 				if (bytesReaded == 0)
@@ -36,8 +31,7 @@ namespace HyperMsg
 					continue;
 				}
 
-	            var position = result.Buffer.GetPosition(bytesReaded);
-	            pipeReader.AdvanceTo(position);
+                pipeReader.Advance(bytesReaded);
 			}
         }
 

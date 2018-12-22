@@ -4,10 +4,17 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-	public abstract class BackgroundWorker : IDisposable
+	public class BackgroundWorker : IDisposable
 	{
-		private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+		private readonly CancellationTokenSource tokenSource;
+        private readonly Func<CancellationToken, Task> workItem;
 		private Task listeningTask;
+
+        public BackgroundWorker(Func<CancellationToken, Task> workItem)
+        {
+            this.workItem = workItem ?? throw new ArgumentNullException(nameof(workItem));
+            tokenSource = new CancellationTokenSource();
+        }
 
 		public IDisposable Run()
 		{
@@ -26,7 +33,13 @@ namespace HyperMsg
 
         public void Dispose() => Stop();
 
-		protected abstract Task DoWorkAsync(CancellationToken token);
+        private async Task DoWorkAsync(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await workItem.Invoke(token);
+            }
+        }
 
 		private void ListeningTaskContinuation(Task task)
 		{
