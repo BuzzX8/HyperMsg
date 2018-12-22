@@ -11,51 +11,51 @@ namespace HyperMsg
 {
     public class MessageListenerTests
     {
-        private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
+        //private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
 
-        [Fact]
-        public async Task OnNext_Calls_OnNext_Of_Message_Observer_When_Message_Deserialized()
-        {
-            var expectedMessage = Guid.NewGuid().ToString();
-            var actualMessage = (string)null;
-            var @event = new ManualResetEventSlim();
-            var observer = Observer.Create<string>(s =>
-            {
-                actualMessage = s;
-                @event.Set();
-            });
-            var pipe = new Pipe();
-            var listener = new MessageListener<string>(pipe.Reader, DeserializeString, observer);
-            listener.Run();
+        //[Fact]
+        //public async Task OnNext_Calls_OnNext_Of_Message_Observer_When_Message_Deserialized()
+        //{
+        //    var expectedMessage = Guid.NewGuid().ToString();
+        //    var actualMessage = (string)null;
+        //    var @event = new ManualResetEventSlim();
+        //    var observer = Observer.Create<string>(s =>
+        //    {
+        //        actualMessage = s;
+        //        @event.Set();
+        //    });
+        //    var pipe = new Pipe();
+        //    var listener = new MessageListener<string>(pipe.Reader, DeserializeString, observer);
+        //    listener.Run();
 
-            pipe.Writer.Write(Encoding.UTF8.GetBytes(expectedMessage));
-	        await pipe.Writer.FlushAsync();
-            @event.Wait(waitTimeout);
+        //    pipe.Writer.Write(Encoding.UTF8.GetBytes(expectedMessage));
+	       // await pipe.Writer.FlushAsync();
+        //    @event.Wait(waitTimeout);
 
-            Assert.Equal(expectedMessage, actualMessage);
-        }
+        //    Assert.Equal(expectedMessage, actualMessage);
+        //}
 
-        [Fact]
-        public void OnNext_Does_Not_Calls_OnNext_Of_Message_Observer_When_No_Message_Deserialized()
-        {
-            var wasCalled = false;
-            var @event = new ManualResetEventSlim();
-            var observer = Observer.Create<string>(s => wasCalled = true);
-            var pipe = new Pipe();
-            var listener = new MessageListener<string>(pipe.Reader, b => new DeserializationResult<string>(0, null), observer);
-            listener.DeserializerInvoked += (s, e) => @event.Set();
-            listener.Run();
+        //[Fact]
+        //public void OnNext_Does_Not_Calls_OnNext_Of_Message_Observer_When_No_Message_Deserialized()
+        //{
+        //    var wasCalled = false;
+        //    var @event = new ManualResetEventSlim();
+        //    var observer = Observer.Create<string>(s => wasCalled = true);
+        //    var pipe = new Pipe();
+        //    var listener = new MessageListener<string>(pipe.Reader, b => new DeserializationResult<string>(0, null), observer);
+        //    listener.DeserializerInvoked += (s, e) => @event.Set();
+        //    listener.Run();
 
-            pipe.Writer.Write(Guid.NewGuid().ToByteArray());
-            @event.Wait(waitTimeout);
+        //    pipe.Writer.Write(Guid.NewGuid().ToByteArray());
+        //    @event.Wait(waitTimeout);
 
-            Assert.False(wasCalled);
-        }
+        //    Assert.False(wasCalled);
+        //}
 
-        private DeserializationResult<string> DeserializeString(ReadOnlySequence<byte> buffer)
-        {
-            var bytes = buffer.First.ToArray();
-            return new DeserializationResult<string>(bytes.Length, Encoding.UTF8.GetString(bytes));
-        }
+        //private DeserializationResult<string> DeserializeString(ReadOnlySequence<byte> buffer)
+        //{
+        //    var bytes = buffer.First.ToArray();
+        //    return new DeserializationResult<string>(bytes.Length, Encoding.UTF8.GetString(bytes));
+        //}
     }
 }
