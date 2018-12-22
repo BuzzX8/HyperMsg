@@ -2,7 +2,7 @@
 
 namespace HyperMsg
 {
-	public abstract class ObservableWorker<T> : BackgroundWorker
+	public abstract class ObservableWorker<T>// : BackgroundWorker
 	{
 		private readonly IObserver<T> observer;
 
@@ -17,15 +17,15 @@ namespace HyperMsg
 			Next?.Invoke(this, EventArgs.Empty);
 		}
 
-		protected override void OnCompleted()
+		protected void OnCompleted()
 		{
-			base.OnCompleted();
+			//base.OnCompleted();
 			observer.OnCompleted();
 		}
 
-		protected override void OnError(Exception exception)
+		protected void OnError(Exception exception)
 		{
-			base.OnError(exception);
+			//base.OnError(exception);
 			observer.OnError(exception);
 		}
 
