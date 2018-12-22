@@ -14,7 +14,7 @@ namespace HyperMsg.Transciever
         private readonly PipeMessageBuffer<T> messageBuffer;
         private readonly MessageListener<T> messageListener;
 
-        private readonly PipeReaderListener readerListener;
+        //private readonly PipeReaderListener readerListener;
 
         private readonly Pipe outputPipe;
         private readonly Pipe inputPipe;

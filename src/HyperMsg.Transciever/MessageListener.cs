@@ -6,7 +6,7 @@ namespace HyperMsg
 {
     public class MessageListener<T>
     {
-        private readonly PipeReaderListener readerListener;
+        //private readonly PipeReaderListener readerListener;
         private readonly Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializer;
         private readonly IObserver<T> observer;
 
