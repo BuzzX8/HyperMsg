@@ -12,6 +12,11 @@ namespace HyperMsg
         {
             private readonly PipeReader reader;
 
+            public PipeReaderProxy(PipeReader reader)
+            {
+                this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            }
+
             public void Advance(int length)
             {
                 
@@ -21,14 +26,19 @@ namespace HyperMsg
 
             public async Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken token = default)
             {
-                var readResult = await reader.ReadAsync(token);                
-                throw new NotImplementedException();
+                var readResult = await reader.ReadAsync(token);
+                return readResult.Buffer;
             }
         }
 
         private class PipeWriterProxy : IPipeWriter
         {
             private readonly PipeWriter writer;
+
+            public PipeWriterProxy(PipeWriter writer)
+            {
+                this.writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            }
 
             public void Advance(int count) => writer.Advance(count);
 
@@ -43,8 +53,8 @@ namespace HyperMsg
 
         public PipeProxy(PipeReader reader, PipeWriter writer)
         {
-            //Reader = reader ?? throw new ArgumentNullException(nameof(reader));
-            //Writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            Reader = new PipeReaderProxy(reader);
+            Writer = new PipeWriterProxy(writer);
         }
 
         public IPipeReader Reader { get; }

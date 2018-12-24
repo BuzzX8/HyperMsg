@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class PipeReaderWorkItem
+    public class ReadPipeAction
     {
         private readonly IPipeReader pipeReader;
         private readonly Func<ReadOnlySequence<byte>, int> bufferReader;
 
-        public PipeReaderWorkItem(IPipeReader pipeReader, Func<ReadOnlySequence<byte>, int> bufferReader)
+        public ReadPipeAction(IPipeReader pipeReader, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
             this.pipeReader = pipeReader ?? throw new ArgumentNullException(nameof(pipeReader));
             this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
         }
 
-        public async Task ReadPipeAsync(CancellationToken token = default)
+        public async Task InvokeAsync(CancellationToken token = default)
         {
             var result = await pipeReader.ReadAsync(token);
 

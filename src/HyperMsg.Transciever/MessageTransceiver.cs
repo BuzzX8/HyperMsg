@@ -16,8 +16,8 @@ namespace HyperMsg.Transciever
             this.pipe = pipe ?? throw new ArgumentNullException(nameof(pipe));
 
             var mListener = new MessageListener<T>(serializer.Deserialize, ReceiveMessage);
-            var pipeWorkItem = new PipeReaderWorkItem(pipe.Reader, mListener.ReadBuffer);
-            worker = new BackgroundWorker(pipeWorkItem.ReadPipeAsync);
+            var pipeWorkItem = new ReadPipeAction(pipe.Reader, mListener.ReadBuffer);
+            worker = new BackgroundWorker(pipeWorkItem.InvokeAsync);
         }
 
         public IDisposable Run() => worker.Run();

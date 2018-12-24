@@ -16,13 +16,13 @@ namespace HyperMsg
             var actual = (byte[])null;
             var reader = A.Fake<IPipeReader>();
             A.CallTo(() => reader.ReadAsync(A<CancellationToken>._)).Returns(Task.FromResult(new ReadOnlySequence<byte>(expected)));
-            var workItem = new PipeReaderWorkItem(reader, b =>
+            var workItem = new ReadPipeAction(reader, b =>
             {
                 actual = b.First.ToArray();
                 return 0;
             });
 
-            workItem.ReadPipeAsync().GetAwaiter().GetResult();
+            workItem.InvokeAsync().GetAwaiter().GetResult();
 
             Assert.Equal(expected, actual);            
         }
@@ -33,9 +33,9 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();            
             var reader = A.Fake<IPipeReader>();
             A.CallTo(() => reader.ReadAsync(A<CancellationToken>._)).Returns(Task.FromResult(new ReadOnlySequence<byte>(expected)));
-            var workItem = new PipeReaderWorkItem(reader, b => (int)b.Length);
+            var workItem = new ReadPipeAction(reader, b => (int)b.Length);
 
-            workItem.ReadPipeAsync().GetAwaiter().GetResult();
+            workItem.InvokeAsync().GetAwaiter().GetResult();
 
             A.CallTo(() => reader.Advance(expected.Length)).MustHaveHappened();
         }
