@@ -6,12 +6,12 @@ namespace HyperMsg
     public class MessageListener<T>
     {        
         private readonly Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializer;
-        private readonly Action<T> observer;
+        private readonly Action<T> handler;
 
-        public MessageListener(Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializer, Action<T> observer)
+        public MessageListener(Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializer, Action<T> handler)
         {            
             this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
-            this.observer = observer ?? throw new ArgumentNullException(nameof(observer));
+            this.handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
 		public int ReadBuffer(ReadOnlySequence<byte> buffer)
@@ -25,7 +25,7 @@ namespace HyperMsg
 
             if (result.Message != null)
             {
-                observer.Invoke(result.Message);
+                handler.Invoke(result.Message);
             }
 
             return result.BytesConsumed;
