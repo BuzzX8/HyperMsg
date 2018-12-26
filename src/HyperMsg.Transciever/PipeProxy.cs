@@ -11,15 +11,17 @@ namespace HyperMsg
         private class PipeReaderProxy : IPipeReader
         {
             private readonly PipeReader reader;
+            private ReadOnlySequence<byte> lastRead;
 
             public PipeReaderProxy(PipeReader reader)
             {
                 this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
             }
 
-            public void Advance(int length)
+            public void Advance(long offset)
             {
-                
+                var pos = lastRead.GetPosition(offset);
+                reader.AdvanceTo(pos);
             }
 
             public ReadOnlySequence<byte> Read() => ReadAsync().GetAwaiter().GetResult();
@@ -27,6 +29,7 @@ namespace HyperMsg
             public async Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken token = default)
             {
                 var readResult = await reader.ReadAsync(token);
+                lastRead = readResult.Buffer;
                 return readResult.Buffer;
             }
         }

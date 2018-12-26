@@ -18,7 +18,7 @@ namespace HyperMsg
 
         Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken token = default);
 
-        void Advance(int length);
+        void Advance(long offset);
     }
 
     public interface IPipeWriter : IBufferWriter<byte>
