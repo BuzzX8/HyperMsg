@@ -1,35 +1,42 @@
 ﻿using FakeItEasy;
 using System;
 using System.Buffers;
-using System.IO.Pipelines;
-using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HyperMsg.Transciever
 {
     public class MessageTransceiverTests
-    {
-        private readonly Pipe pipe;
-        private readonly IPipe stream;
+    {        
+        private readonly IPipe pipe;
         private readonly ISerializer<Guid> serializer;
-        private readonly IObserver<Guid> observer;
         private readonly MessageTransceiver<Guid> transceiver;
-
-        private TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
 
         public MessageTransceiverTests()
         {
-            pipe = new Pipe();
-            stream = new PipeProxy(pipe.Reader, pipe.Writer);
-            //serializer = new DelegateMessageSerializer<Guid>(DeserializeGuid, SerializeGuid);
-            //observer = A.Fake<IObserver<Guid>>();
-            //transceiver = new MessageTransceiver<Guid>(stream, serializer, observer);
+            pipe = A.Fake<IPipe>();
+            serializer = A.Fake<ISerializer<Guid>>();
+            transceiver = new MessageTransceiver<Guid>(serializer, pipe);
         }
 
         [Fact]
-        public void Receives_Sends_Received_Messages()
+        public void Send_Serializes_Message()
         {
-            
+            var message = Guid.NewGuid();
+
+            transceiver.Send(message);
+
+            A.CallTo(() => serializer.Serialize(pipe.Writer, message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task SendAsync_Serializes_Message()
+        {
+            var message = Guid.NewGuid();
+
+            await transceiver.SendAsync(message);
+
+            A.CallTo(() => serializer.Serialize(pipe.Writer, message)).MustHaveHappened();
         }
 
         private static (Guid, int) DeserializeGuid(ReadOnlySequence<byte> buffer)
