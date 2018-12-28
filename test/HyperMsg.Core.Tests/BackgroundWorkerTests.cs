@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg.Transciever
 {
 	public class BackgroundWorkerTests
 	{
@@ -14,7 +14,7 @@ namespace HyperMsg
 		{
 			var @event = new ManualResetEventSlim();
 			var wasCalled = false;
-			var listener = new BackgroundWorkerImpl(t =>
+			var listener = new BackgroundWorker(t =>
 			{
 				wasCalled = true;
 				@event.Set();
@@ -33,7 +33,7 @@ namespace HyperMsg
 		public void Start_Rises_Started_Event()
 		{
 			var wasCalled = false;
-			var listener = new BackgroundWorkerImpl(t => Task.CompletedTask);
+			var listener = new BackgroundWorker(t => Task.CompletedTask);
 			listener.Started += (s, e) => wasCalled = true;
 
             using (listener.Run())
@@ -44,7 +44,7 @@ namespace HyperMsg
 		public void Rises_Completed_When_Task_Completed()
 		{
 			var wasRaised = false;
-			var listener = new BackgroundWorkerImpl(t => Task.CompletedTask);
+			var listener = new BackgroundWorker(t => Task.CompletedTask);
 			var @event = new ManualResetEventSlim();
 			listener.Completed += (s, e) =>
 			{
@@ -52,19 +52,17 @@ namespace HyperMsg
 				@event.Set();
 			};
 
-            using (listener.Run())
-            {
-                @event.Wait(waitTimeout);
+            using (listener.Run()) { }
+            @event.Wait(waitTimeout);
 
-                Assert.True(wasRaised);
-            }
-		}
+            Assert.True(wasRaised);
+        }
 
 		[Fact]
 		public void Rises_Error_If_Task_Throws_Exception()
 		{
 			var wasRaised = false;
-			var listener = new BackgroundWorkerImpl(t => throw new Exception());
+			var listener = new BackgroundWorker(t => throw new Exception());
 			var @event = new ManualResetEventSlim();
 			listener.Error += (s, e) =>
 			{
@@ -84,7 +82,7 @@ namespace HyperMsg
 		public void Stop_Rises_Stopped_Event()
 		{
 			var wasRaised = false;
-			var listener = new BackgroundWorkerImpl(t => Task.CompletedTask);
+			var listener = new BackgroundWorker(t => Task.CompletedTask);
 			var @event = new ManualResetEventSlim();
 			listener.Stopped += (s, e) =>
 			{
@@ -97,21 +95,6 @@ namespace HyperMsg
 			@event.Wait(waitTimeout);
 
 			Assert.True(wasRaised);
-		}
-	}
-
-	internal class BackgroundWorkerImpl : BackgroundWorker
-	{
-		private readonly Func<CancellationToken, Task> doListening;
-
-		public BackgroundWorkerImpl(Func<CancellationToken, Task> doListening)
-		{
-			this.doListening = doListening;
-		}
-
-		protected override Task DoWorkAsync(CancellationToken token)
-		{
-			return doListening(token);
 		}
 	}
 }
