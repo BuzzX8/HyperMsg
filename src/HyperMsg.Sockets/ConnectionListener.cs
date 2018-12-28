@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Sockets
 {
-    public class ConnectionListener : ObservableWorker<SocketProxy>
+    public class ConnectionListener
     {
         private readonly Lazy<Socket> socket;
         private readonly EndPoint endpoint;
 
-        public ConnectionListener(Func<Socket> socketFactory, EndPoint endpoint, IObserver<SocketProxy> observer) : base(observer)
+        public ConnectionListener(Func<Socket> socketFactory, EndPoint endpoint)
         {
             socket = new Lazy<Socket>(socketFactory);
             this.endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
@@ -19,21 +19,9 @@ namespace HyperMsg.Sockets
 
         protected Socket Socket => socket.Value;
 
-        protected override async Task DoWorkAsync(CancellationToken token)
+        protected async Task DoWorkAsync(CancellationToken token)
         {
-            Socket.Bind(endpoint);
-            Socket.Listen(1);
-            while(!token.IsCancellationRequested)
-            {
-                var result = await Task.Run(() => Socket.Accept());
-                OnNext(new SocketProxy(result));
-            }
-        }
-
-        protected override void OnStopped()
-        {
-            base.OnStopped();
-            Socket.Close();
+            
         }
     }
 }

@@ -93,7 +93,7 @@ namespace HyperMsg.Socket.Tests
         private ConnectionListener CreateListener(Action<SocketProxy> onNext)
         {
             var observer = Observer.Create(onNext);
-            listener = new ConnectionListener(CreateSocket, endpoint, observer);
+            //listener = new ConnectionListener(CreateSocket, endpoint, observer);
             return listener;
         }
 
