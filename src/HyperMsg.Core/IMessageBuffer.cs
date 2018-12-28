@@ -1,5 +1,4 @@
-﻿using System.IO.Pipelines;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -7,6 +6,6 @@ namespace HyperMsg
     public interface IMessageBuffer<T>
     {
         void Write(T message);
-        Task<FlushResult> FlushAsync(CancellationToken token = default);
+        Task FlushAsync(CancellationToken token = default);
     }
 }
