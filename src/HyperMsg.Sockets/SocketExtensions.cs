@@ -32,6 +32,7 @@ namespace HyperMsg.Sockets
             if (MemoryMarshal.TryGetArray(buffer, out var segment))
             {
                 socket.Stream.Write(segment.Array, segment.Offset, segment.Count);
+                return;
             }
 
             throw new NotSupportedException();

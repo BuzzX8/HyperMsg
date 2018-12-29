@@ -2,12 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HyperMsg.Core\HyperMsg.Core.csproj" />
     <ProjectReference Include="..\..\src\HyperMsg.Sockets\HyperMsg.Sockets.csproj" />
-    <PackageReference Include="FakeItEasy" Version="4.9.1" />
+    <PackageReference Include="FakeItEasy" Version="4.9.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
     <PackageReference Include="System.Reactive" Version="4.1.2" />
