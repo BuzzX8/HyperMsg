@@ -57,12 +57,9 @@ namespace HyperMsg
 
 		private void OnStarted() => Started?.Invoke(this, EventArgs.Empty);
 
-		private void OnStopped()
-		{
-			Stopped?.Invoke(this, EventArgs.Empty);
-		}
+        protected virtual void OnStopped() => Stopped?.Invoke(this, EventArgs.Empty);
 
-		protected virtual void OnCompleted()
+        protected virtual void OnCompleted()
 		{
 			Stop();
 			Completed?.Invoke(this, EventArgs.Empty);

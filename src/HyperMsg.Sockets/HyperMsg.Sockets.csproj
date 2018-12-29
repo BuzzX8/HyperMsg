@@ -6,12 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FakeItEasy" Version="4.9.2" />
-    <PackageReference Include="System.IO.Pipelines" Version="4.5.2" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\HyperMsg.Core\HyperMsg.Core.csproj" />
+    <ProjectReference Include="..\HyperMsg.Transciever\HyperMsg.Transciever.csproj" />
   </ItemGroup>
 
 </Project>
