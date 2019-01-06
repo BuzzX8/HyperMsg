@@ -16,7 +16,7 @@ namespace HyperMsg.Transciever
         {
             pipe = A.Fake<IPipe>();
             serializer = A.Fake<ISerializer<Guid>>();
-            transceiver = new MessageTransceiver<Guid>(serializer, pipe);
+            //transceiver = new MessageTransceiver<Guid>(serializer, pipe);
         }
 
         [Fact]

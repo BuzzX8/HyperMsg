@@ -3,18 +3,38 @@ using System.Collections.Generic;
 
 namespace HyperMsg.Transciever
 {
-    public class TranscieverBuilder<TSend, TReceive> : ITransceiverBuilder<TSend, TReceive>
-    {
+    public class TranscieverBuilder<T> : ITransceiverBuilder<T, T>
+    {        
         private readonly List<Action<BuilderContext>> configurators;
+        private readonly Func<ICollection<ServiceDescriptor>, IServiceProvider> serviceProviderFactory;
 
-        public void Configure(Action<BuilderContext> configurator)
+        public TranscieverBuilder(Func<ICollection<ServiceDescriptor>, IServiceProvider> serviceProviderFactory)
         {
-            throw new NotImplementedException();
+            this.serviceProviderFactory = serviceProviderFactory ?? throw new ArgumentNullException(nameof(serviceProviderFactory));
+            configurators = new List<Action<BuilderContext>>();
         }
 
-        public ITransceiver<TSend, TReceive> Build()
+        public void Configure(Action<BuilderContext> configurator) => configurators.Add(configurator);
+
+        public ITransceiver<T, T> Build()
         {
-            throw new NotImplementedException();
+            var context = new BuilderContext();
+
+            foreach (var configurator in configurators)
+            {
+                configurator.Invoke(context);
+            }
+
+            RegisterTransciever(context);
+
+            var serviceProvider = serviceProviderFactory.Invoke(context.Services);
+            return (ITransceiver<T, T>)serviceProvider.GetService(typeof(ITransceiver<T, T>));
+        }
+
+        private void RegisterTransciever(BuilderContext context)
+        {
+            var transceiver = ServiceDescriptor.Describe(typeof(ITransceiver<T, T>), typeof(MessageTransceiver<T>));
+            context.Services.Add(transceiver);
         }
     }
 }
