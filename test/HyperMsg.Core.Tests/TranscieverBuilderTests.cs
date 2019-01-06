@@ -3,7 +3,7 @@ using HyperMsg.Transciever;
 using System;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg.Transciever
 {
     public class TranscieverBuilderTests
     {
