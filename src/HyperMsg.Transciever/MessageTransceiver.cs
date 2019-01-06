@@ -4,42 +4,36 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Transciever
 {
-    public class MessageTransceiver<T> : ITransceiver<T, T>
+    public class MessageTransceiver<T> : ITransceiver<T, T>, IDisposable
     {
-        private readonly IPipe pipe;
+        private readonly IPipeWriter writer;
+        private readonly IObservable<T> messageObserveble;
         private readonly ISerializer<T> serializer;
-        private readonly BackgroundWorker worker;
 
-        public MessageTransceiver(ISerializer<T> serializer, IPipe pipe)
+        public MessageTransceiver(ISerializer<T> serializer, IPipeWriter writer, IObservable<T> messageObserveble)
         {
             this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
-            this.pipe = pipe ?? throw new ArgumentNullException(nameof(pipe));
+            this.writer = writer ?? throw new ArgumentNullException(nameof(writer));
+            this.messageObserveble = messageObserveble ?? throw new ArgumentNullException(nameof(messageObserveble));
+        }        
 
-            var mListener = new MessageListener<T>(serializer.Deserialize, ReceiveMessage);
-            var pipeWorkItem = new ReadPipeAction(pipe.Reader, mListener.ReadBuffer);
-            worker = new BackgroundWorker(pipeWorkItem.InvokeAsync);
-        }
-
-        public IDisposable Run() => worker.Run();
+        public IDisposable Run() => this;
 
         public void Send(T message)
         {
-            serializer.Serialize(pipe.Writer, message);
-            pipe.Writer.Flush();
+            serializer.Serialize(writer, message);
+            writer.Flush();
         }
 
         public async Task SendAsync(T message, CancellationToken token = default)
         {
-            serializer.Serialize(pipe.Writer, message);
-            await pipe.Writer.FlushAsync(token);
+            serializer.Serialize(writer, message);
+            await writer.FlushAsync(token);
         }
 
-        public IDisposable Subscribe(IObserver<T> observer)
-        {
-            throw new NotImplementedException();
-        }
+        public IDisposable Subscribe(IObserver<T> observer) => messageObserveble.Subscribe(observer);
 
-        private void ReceiveMessage(T message)
+        public void Dispose()
         {
             throw new NotImplementedException();
         }
