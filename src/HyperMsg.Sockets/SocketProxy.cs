@@ -13,9 +13,6 @@ namespace HyperMsg.Sockets
         private readonly Lazy<Stream> stream;
         private readonly EndPoint endpoint;
 
-        public SocketProxy(EndPoint endpoint) : this(SocketFactory.CreateTcpSocket, endpoint)
-        { }
-
         public SocketProxy(Func<Socket> socketFactory, EndPoint endpoint)
         {
             socket = new Lazy<Socket>(socketFactory);
