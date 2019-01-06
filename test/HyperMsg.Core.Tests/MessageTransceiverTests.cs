@@ -7,18 +7,16 @@ using Xunit;
 namespace HyperMsg.Transciever
 {
     public class MessageTransceiverTests
-    {        
-        private readonly IPipeWriter writer;
-        private readonly ISerializer<Guid> serializer;
+    {
+        private readonly IMessageBuffer<Guid> messageBuffer;
         private readonly MessageTransceiver<Guid> transceiver;
         private readonly IObservable<Guid> observer;
 
         public MessageTransceiverTests()
         {
-            writer = A.Fake<IPipeWriter>();
-            serializer = A.Fake<ISerializer<Guid>>();
+            messageBuffer = A.Fake<IMessageBuffer<Guid>>();
             observer = A.Fake<IObservable<Guid>>();
-            transceiver = new MessageTransceiver<Guid>(serializer, writer, observer);
+            transceiver = new MessageTransceiver<Guid>(messageBuffer, observer);
         }
 
         [Fact]
@@ -28,7 +26,7 @@ namespace HyperMsg.Transciever
 
             transceiver.Send(message);
 
-            A.CallTo(() => serializer.Serialize(writer, message)).MustHaveHappened();
+            A.CallTo(() => messageBuffer.Write(message)).MustHaveHappened();
         }
 
         [Fact]
@@ -38,18 +36,7 @@ namespace HyperMsg.Transciever
 
             await transceiver.SendAsync(message);
 
-            A.CallTo(() => serializer.Serialize(writer, message)).MustHaveHappened();
-        }
-
-        private static (Guid, int) DeserializeGuid(ReadOnlySequence<byte> buffer)
-        {
-            var data = buffer.ToArray();
-            return (new Guid(data), data.Length);
-        }
-
-        private static void SerializeGuid(IBufferWriter<byte> writer, Guid message)
-        {
-            writer.Write(message.ToByteArray());
+            A.CallTo(() => messageBuffer.Write(message)).MustHaveHappened();
         }
     }
 }

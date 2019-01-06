@@ -11,6 +11,7 @@ namespace HyperMsg.Sockets
                 var pipe = (IPipe)context.ServiceProvider.GetService(typeof(IPipe));
                 var socket = SocketFactory.CreateTcpSocket();
                 var worker = new SocketWorker(pipe, socket);
+                context.Runners.Add(worker.Run);
             });
         }
     }
