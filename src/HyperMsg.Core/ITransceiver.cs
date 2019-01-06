@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public interface ITransceiver<TSend, TReceive> : IObservable<TReceive>
+    public interface ITransceiver<in TSend, out TReceive> : IObservable<TReceive>
     {
         IDisposable Run();
         void Send(TSend message);
