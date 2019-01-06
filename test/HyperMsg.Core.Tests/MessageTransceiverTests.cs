@@ -8,15 +8,17 @@ namespace HyperMsg.Transciever
 {
     public class MessageTransceiverTests
     {        
-        private readonly IPipe pipe;
+        private readonly IPipeWriter writer;
         private readonly ISerializer<Guid> serializer;
         private readonly MessageTransceiver<Guid> transceiver;
+        private readonly IObservable<Guid> observer;
 
         public MessageTransceiverTests()
         {
-            pipe = A.Fake<IPipe>();
+            writer = A.Fake<IPipeWriter>();
             serializer = A.Fake<ISerializer<Guid>>();
-            //transceiver = new MessageTransceiver<Guid>(serializer, pipe);
+            observer = A.Fake<IObservable<Guid>>();
+            transceiver = new MessageTransceiver<Guid>(serializer, writer, observer);
         }
 
         [Fact]
@@ -26,7 +28,7 @@ namespace HyperMsg.Transciever
 
             transceiver.Send(message);
 
-            A.CallTo(() => serializer.Serialize(pipe.Writer, message)).MustHaveHappened();
+            A.CallTo(() => serializer.Serialize(writer, message)).MustHaveHappened();
         }
 
         [Fact]
@@ -36,7 +38,7 @@ namespace HyperMsg.Transciever
 
             await transceiver.SendAsync(message);
 
-            A.CallTo(() => serializer.Serialize(pipe.Writer, message)).MustHaveHappened();
+            A.CallTo(() => serializer.Serialize(writer, message)).MustHaveHappened();
         }
 
         private static (Guid, int) DeserializeGuid(ReadOnlySequence<byte> buffer)
