@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HyperMsg
+namespace HyperMsg.Transciever
 {
     public class ReadPipeAction
     {

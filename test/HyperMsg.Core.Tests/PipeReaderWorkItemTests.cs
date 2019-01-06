@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg.Transciever
 {
     public class PipeReaderWorkItemTests
     {

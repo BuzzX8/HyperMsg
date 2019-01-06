@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Buffers;
 
-namespace HyperMsg
+namespace HyperMsg.Transciever
 {
     public class BufferReader<T>
     {        
