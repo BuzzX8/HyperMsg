@@ -4,7 +4,7 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class MessageListenerTests
+    public class BufferReaderTests
     {
         [Fact]
         public void ReadBuffer_Returns_Consumed_Bytes_And_Calls_Handler()
@@ -12,7 +12,7 @@ namespace HyperMsg
             var buffer = new ReadOnlySequence<byte>(Guid.NewGuid().ToByteArray());
             var message = Guid.NewGuid().ToString();
             var actualMessage = string.Empty;
-            var listener = new MessageListener<string>(b => new DeserializationResult<string>(message.Length, message), m => actualMessage = m);
+            var listener = new BufferReader<string>(b => new DeserializationResult<string>(message.Length, message), m => actualMessage = m);
 
             var consumed = listener.ReadBuffer(buffer);
 
