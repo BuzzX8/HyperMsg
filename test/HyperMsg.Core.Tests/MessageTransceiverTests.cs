@@ -16,7 +16,7 @@ namespace HyperMsg.Transciever
         {
             messageBuffer = A.Fake<IMessageBuffer<Guid>>();
             observer = A.Fake<IObservable<Guid>>();
-            transceiver = new MessageTransceiver<Guid>(messageBuffer, observer);
+            //transceiver = new MessageTransceiver<Guid>(messageBuffer, observer);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace HyperMsg.Transciever
         public void Run_Invokes_All_Child_Runners()
         {
             var runners = A.CollectionOfFake<Func<IDisposable>>(10);
-            transceiver = new MessageTransceiver<Guid>(messageBuffer, observer, runners.ToArray());
+            //transceiver = new MessageTransceiver<Guid>(messageBuffer, observer, runners.ToArray());
 
             transceiver.Run();
 

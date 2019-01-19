@@ -23,18 +23,30 @@ namespace HyperMsg.Transciever
             foreach (var configurator in configurators)
             {
                 configurator.Invoke(context);
-            }
-
-            RegisterTransciever(context);
+            }            
 
             var serviceProvider = serviceProviderFactory.Invoke(context.Services);
-            return (ITransceiver<T, T>)serviceProvider.GetService(typeof(ITransceiver<T, T>));
+
+            return CreateTransciever(serviceProvider, context.Runners);
         }
 
         private void RegisterTransciever(BuilderContext context)
         {
             var transceiver = ServiceDescriptor.Describe(typeof(ITransceiver<T, T>), typeof(MessageTransceiver<T>));
             context.Services.Add(transceiver);
+        }
+
+        private MessageTransceiver<T> CreateTransciever(IServiceProvider serviceProvider, ICollection<Func<IDisposable>> runners)
+        {
+            var writer = (IPipeWriter)serviceProvider.GetService(typeof(IPipeWriter));
+            var serializer = (ISerializer<T>)serviceProvider.GetService(typeof(ISerializer<T>));
+            var subject = (ISubject<T>)serviceProvider.GetService(typeof(ISubject<T>));
+            var messageReceiverFactory = (MessageReceiverFactory<T>)serviceProvider.GetService(typeof(MessageReceiverFactory<T>));
+
+            var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);
+            var transciever = new MessageTransceiver<T>(messageBuffer, messageReceiverFactory, subject, runners);
+
+            return transciever;
         }
     }
 }

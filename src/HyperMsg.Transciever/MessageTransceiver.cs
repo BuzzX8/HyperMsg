@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,17 +10,20 @@ namespace HyperMsg.Transciever
     public class MessageTransceiver<T> : ITransceiver<T, T>, IDisposable
     {
         private readonly IMessageBuffer<T> messageBuffer;
-        private readonly IObservable<T> messageObserveble;
+        private readonly ISubject<T> messageSubject;
         private List<Func<IDisposable>> runners;
         private List<IDisposable> handlers;
 
-        public MessageTransceiver(IMessageBuffer<T> messageBuffer, IObservable<T> messageObserveble, params Func<IDisposable>[] runners)
+        private readonly Lazy<ReadBufferAction> readBuffer;
+
+        public MessageTransceiver(IMessageBuffer<T> messageBuffer, MessageReceiverFactory<T> messageReceiverFactory, ISubject<T> messageSubject, ICollection<Func<IDisposable>> runners)
         {
             this.messageBuffer = messageBuffer ?? throw new ArgumentNullException(nameof(messageBuffer));
-            this.messageObserveble = messageObserveble ?? throw new ArgumentNullException(nameof(messageObserveble));
+            this.messageSubject = messageSubject ?? throw new ArgumentNullException(nameof(messageSubject));
             this.runners = new List<Func<IDisposable>>();
             this.runners.AddRange(runners);
             handlers = new List<IDisposable>();
+            readBuffer = new Lazy<ReadBufferAction>(() => messageReceiverFactory.Invoke(OnMessageReceived));
         }        
 
         public IDisposable Run()
@@ -36,6 +40,8 @@ namespace HyperMsg.Transciever
             await messageBuffer.FlushAsync(token);
         }
 
+        public int ReadBuffer(ReadOnlySequence<byte> buffer) => readBuffer.Value.Invoke(buffer);
+
         private void RunChildRunnersIfRequired()
         {
             if (handlers.Any())
@@ -50,7 +56,7 @@ namespace HyperMsg.Transciever
             }
         }
 
-        public IDisposable Subscribe(IObserver<T> observer) => messageObserveble.Subscribe(observer);
+        public IDisposable Subscribe(IObserver<T> observer) => messageSubject.Subscribe(observer);
 
         public void Dispose()
         {
@@ -59,5 +65,11 @@ namespace HyperMsg.Transciever
                 handler.Dispose();
             }
         }
+
+        private void OnMessageReceived(T message) => messageSubject.OnNext(message);
     }
+
+    public delegate int ReadBufferAction(ReadOnlySequence<byte> buffer);
+
+    public delegate ReadBufferAction MessageReceiverFactory<T>(Action<T> onMessage);
 }
