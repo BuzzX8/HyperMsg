@@ -1,6 +1,6 @@
-﻿using HyperMsg.Transciever;
-using System;
+﻿using System;
 using System.Buffers;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,29 +8,24 @@ namespace HyperMsg.Sockets
 {
     public class SocketPipe
     {
-        private readonly IPipe pipe;
         private readonly ISocket socket;
 
-        private ReadPipeAction readPipe;
-
-        public SocketPipe(IPipe pipe, ISocket socket)
-        {
-            this.pipe = pipe ?? throw new ArgumentNullException(nameof(pipe));
+        public SocketPipe(ISocket socket)
+        {            
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
-            readPipe = new ReadPipeAction(pipe.Reader, Write);
         }
 
-        public async Task TransferFromSocketAsync(CancellationToken token)
+        public void DoWork(object sender, DoWorkEventArgs e)
         {
-            var writer = pipe.Writer;
-            var buffer = writer.GetMemory();
-            var readed = await socket.ReadAsync(buffer, token);
-            writer.Advance(readed);
+
         }
 
-        public Task TransferToSocketAsync(CancellationToken token) => readPipe.InvokeAsync(token);
+        public int Read(ReadOnlySequence<byte> buffer)
+        {
+            return -1;
+        }
 
-        private int Write(ReadOnlySequence<byte> buffer)
+        public int Write(ReadOnlySequence<byte> buffer)
         {
             if (buffer.IsSingleSegment)
             {

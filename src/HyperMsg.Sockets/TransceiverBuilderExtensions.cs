@@ -1,18 +1,36 @@
-﻿using System.Net;
+﻿using System;
+using System.ComponentModel;
+using System.Net;
 
 namespace HyperMsg.Sockets
 {
     public static class TransceiverBuilderExtensions
     {
-        public static void UseSockets(this ITransceiverBuilder<object, object> transceiverBuilder, EndPoint endPoint)
+        public static void UseSockets<TSend, TReceive>(this ITransceiverBuilder<TSend, TReceive> transceiverBuilder, EndPoint endPoint)
         {
             transceiverBuilder.Configure(context =>
             {
-                var pipe = (IPipe)context.ServiceProvider.GetService(typeof(IPipe));
                 var socket = SocketFactory.CreateTcpSocket();
-                var worker = new SocketWorker(pipe, socket);
-                context.Runners.Add(worker.Run);
+                var socketPipe = new SocketPipe(socket);
+                var worker = new BackgroundWorker();
+                worker.DoWork += socketPipe.DoWork;
+
+                context.Runners.Add(new BgWorkerHandle(worker).Run);
             });
         }
+    }
+
+    internal class BgWorkerHandle : IDisposable
+    {
+        private readonly BackgroundWorker worker;
+
+        public BgWorkerHandle(BackgroundWorker worker)
+        {
+            this.worker = worker;
+        }
+
+        public IDisposable Run() => this;
+
+        public void Dispose() => worker.CancelAsync();
     }
 }

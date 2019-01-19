@@ -20,7 +20,7 @@ namespace HyperMsg.Sockets
         {
             this.pipe = pipe ?? throw new ArgumentNullException(nameof(pipe));
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
-            socketPipe = new SocketPipe(pipe, socket);
+            //socketPipe = new SocketPipe(pipe, socket);
 
             readerWorker = new BackgroundWorker(Read);
             writerWorker = new BackgroundWorker(Write);
