@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HyperMsg.Core\HyperMsg.Core.csproj" />
-    <ProjectReference Include="..\HyperMsg.Transciever\HyperMsg.Transciever.csproj" />
   </ItemGroup>
 
 </Project>
