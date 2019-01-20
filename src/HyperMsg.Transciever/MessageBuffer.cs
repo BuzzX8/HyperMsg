@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Transciever
 {
-    class MessageBuffer<T> : IMessageBuffer<T>
+    public class MessageBuffer<T> : IMessageBuffer<T>
     {
         private readonly IPipeWriter writer;
         private readonly Action<IBufferWriter<byte>, T> serializeAction;

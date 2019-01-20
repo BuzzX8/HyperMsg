@@ -1,6 +1,6 @@
 ﻿using FakeItEasy;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,14 +9,18 @@ namespace HyperMsg.Transciever
     public class MessageTransceiverTests
     {
         private readonly IMessageBuffer<Guid> messageBuffer;        
-        private readonly IObservable<Guid> observer;
+        private readonly ISubject<Guid> subject;
+        private readonly MessageReceiverFactory<Guid> messageReceiverFactory;
         private MessageTransceiver<Guid> transceiver;
+        private List<Func<IDisposable>> runners;
 
         public MessageTransceiverTests()
         {
             messageBuffer = A.Fake<IMessageBuffer<Guid>>();
-            observer = A.Fake<IObservable<Guid>>();
-            //transceiver = new MessageTransceiver<Guid>(messageBuffer, observer);
+            subject = A.Fake<ISubject<Guid>>();
+            messageReceiverFactory = A.Fake<MessageReceiverFactory<Guid>>();
+            runners = new List<Func<IDisposable>>(A.CollectionOfFake<Func<IDisposable>>(10));
+            transceiver = new MessageTransceiver<Guid>(messageBuffer, messageReceiverFactory, subject, runners);
         }
 
         [Fact]
@@ -42,9 +46,6 @@ namespace HyperMsg.Transciever
         [Fact]
         public void Run_Invokes_All_Child_Runners()
         {
-            var runners = A.CollectionOfFake<Func<IDisposable>>(10);
-            //transceiver = new MessageTransceiver<Guid>(messageBuffer, observer, runners.ToArray());
-
             transceiver.Run();
 
             foreach(var runner in runners)
