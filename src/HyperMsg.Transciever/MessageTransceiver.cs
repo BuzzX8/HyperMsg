@@ -11,7 +11,7 @@ namespace HyperMsg.Transciever
     {
         private readonly IMessageBuffer<T> messageBuffer;
         private readonly ISubject<T> messageSubject;
-        private List<Func<IDisposable>> runners;
+        private readonly List<Func<IDisposable>> runners;
         private List<IDisposable> handlers;
 
         private readonly Lazy<ReadBufferAction> readBuffer;
