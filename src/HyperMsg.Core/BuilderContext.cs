@@ -5,7 +5,7 @@ namespace HyperMsg
 {
     public class BuilderContext
     {
-        public ICollection<Func<IDisposable>> Runners { get; }
+        public ICollection<Func<IDisposable>> Runners { get; } = new List<Func<IDisposable>>();
 
         public IServiceProvider ServiceProvider { get; }
 
