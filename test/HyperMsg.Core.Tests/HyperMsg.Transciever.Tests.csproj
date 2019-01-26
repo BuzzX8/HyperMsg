@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RootNamespace>HyperMsg</RootNamespace>
+    <RootNamespace>HyperMsg.Transciever</RootNamespace>
     <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
