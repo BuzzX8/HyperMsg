@@ -40,11 +40,9 @@ namespace HyperMsg.Transciever
         {
             var writer = (IPipeWriter)serviceProvider.GetService(typeof(IPipeWriter));
             var serializer = (ISerializer<T>)serviceProvider.GetService(typeof(ISerializer<T>));
-            var subject = (ISubject<T>)serviceProvider.GetService(typeof(ISubject<T>));
-            var messageReceiverFactory = (MessageReceiverFactory<T>)serviceProvider.GetService(typeof(MessageReceiverFactory<T>));
 
             var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);
-            var transciever = new MessageTransceiver<T>(messageBuffer, messageReceiverFactory, subject, runners);
+            var transciever = new MessageTransceiver<T>(messageBuffer, null, runners);
 
             return transciever;
         }
