@@ -16,7 +16,20 @@ namespace HyperMsg.Transciever
 
         public int ReadBuffer(ReadOnlySequence<byte> buffer)
         {
-            throw new NotImplementedException();
+            var result = deserializeFunc.Invoke(buffer);
+
+            if (result.BytesConsumed < 0)
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (result.BytesConsumed == 0)
+            {
+                return 0;
+            }
+
+            messageHandler?.Invoke(result.Message);
+            return result.BytesConsumed;
         }
 
         public void SetMessageHandler(Action<T> handler)
