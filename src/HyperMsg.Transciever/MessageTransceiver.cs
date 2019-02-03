@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,20 +9,15 @@ namespace HyperMsg.Transciever
     public class MessageTransceiver<T> : ITransceiver<T, T>, IDisposable
     {
         private readonly IMessageBuffer<T> messageBuffer;
-        private readonly ISubject<T> messageSubject;
         private readonly List<Func<IDisposable>> runners;
         private List<IDisposable> handlers;
 
-        private readonly Lazy<ReadBufferAction> readBuffer;
-
-        public MessageTransceiver(IMessageBuffer<T> messageBuffer, MessageReceiverFactory<T> messageReceiverFactory, ISubject<T> messageSubject, ICollection<Func<IDisposable>> runners)
+        public MessageTransceiver(IMessageBuffer<T> messageBuffer, SetHandlerAction<T> setHandlerAction, ICollection<Func<IDisposable>> runners)
         {
             this.messageBuffer = messageBuffer ?? throw new ArgumentNullException(nameof(messageBuffer));
-            this.messageSubject = messageSubject ?? throw new ArgumentNullException(nameof(messageSubject));
             this.runners = new List<Func<IDisposable>>();
             this.runners.AddRange(runners);
             handlers = new List<IDisposable>();
-            readBuffer = new Lazy<ReadBufferAction>(() => messageReceiverFactory.Invoke(OnMessageReceived));
         }        
 
         public IDisposable Run()
@@ -40,7 +34,8 @@ namespace HyperMsg.Transciever
             await messageBuffer.FlushAsync(token);
         }
 
-        public int ReadBuffer(ReadOnlySequence<byte> buffer) => readBuffer.Value.Invoke(buffer);
+        public void SetMessageHandler(Action<T> handler)
+        { }
 
         private void RunChildRunnersIfRequired()
         {
@@ -56,8 +51,6 @@ namespace HyperMsg.Transciever
             }
         }
 
-        public IDisposable Subscribe(IObserver<T> observer) => messageSubject.Subscribe(observer);
-
         public void Dispose()
         {
             foreach (var handler in handlers)
@@ -65,11 +58,7 @@ namespace HyperMsg.Transciever
                 handler.Dispose();
             }
         }
-
-        private void OnMessageReceived(T message) => messageSubject.OnNext(message);
     }
 
-    public delegate int ReadBufferAction(ReadOnlySequence<byte> buffer);
-
-    public delegate ReadBufferAction MessageReceiverFactory<T>(Action<T> onMessage);
+    public delegate void SetHandlerAction<T>(Action<T> handler);
 }
