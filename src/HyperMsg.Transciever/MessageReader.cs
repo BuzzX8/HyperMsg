@@ -14,7 +14,7 @@ namespace HyperMsg.Transciever
             messageHandler = null;
         }
 
-        public int ReadBuffer(ReadOnlySequence<byte> buffer)
+        public long ReadBuffer(ReadOnlySequence<byte> buffer)
         {
             var result = deserializeFunc.Invoke(buffer);
 

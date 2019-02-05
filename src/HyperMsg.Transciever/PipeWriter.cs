@@ -2,20 +2,19 @@
 using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
-using BufferReader = System.Func<System.Buffers.ReadOnlySequence<byte>, int>;
 
 namespace HyperMsg.Transciever
 {
     public class PipeWriter : IPipeWriter
     {
         private readonly IMemoryOwner<byte> memoryOwner;
-        private readonly BufferReader bufferReader;
+        private readonly ReadBufferAction readBufferAction;
         private readonly SequencePosition position;
 
-        public PipeWriter(IMemoryOwner<byte> memoryOwner, BufferReader bufferReader)
+        public PipeWriter(IMemoryOwner<byte> memoryOwner, ReadBufferAction readBufferAction)
         {
             this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
-            this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
+            this.readBufferAction = readBufferAction ?? throw new ArgumentNullException(nameof(readBufferAction));
             position = new SequencePosition(memoryOwner.Memory, 0);
         }
 

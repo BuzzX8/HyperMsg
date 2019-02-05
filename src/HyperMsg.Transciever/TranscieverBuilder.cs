@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 
 namespace HyperMsg.Transciever
@@ -37,15 +38,23 @@ namespace HyperMsg.Transciever
         }
 
         private MessageTransceiver<T> CreateTransciever(IServiceProvider serviceProvider, ICollection<Func<IDisposable>> runners)
-        {
-            var writer = (IPipeWriter)serviceProvider.GetService(typeof(IPipeWriter));
+        {            
             var serializer = (ISerializer<T>)serviceProvider.GetService(typeof(ISerializer<T>));
+            var memoryOwner = (IMemoryOwner<byte>)serviceProvider.GetService(typeof(IMemoryOwner<byte>));
 
-            var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);
             var messageReader = new MessageReader<T>(serializer.Deserialize);
+            var pipe = CreatePipe(memoryOwner, serializer, messageReader.ReadBuffer);
+            var messageBuffer = new MessageBuffer<T>(pipe.Writer, serializer.Serialize);            
             var transciever = new MessageTransceiver<T>(messageBuffer, messageReader.SetMessageHandler, runners);
 
             return transciever;
+        }
+
+        private IPipe CreatePipe(IMemoryOwner<byte> owner, ISerializer<T> serializer, ReadBufferAction readBuffer)
+        {
+            var reader = new PipeReader();
+            var writer = new PipeWriter(owner, readBuffer);
+            return new Pipe(reader, writer);
         }
     }
 }
