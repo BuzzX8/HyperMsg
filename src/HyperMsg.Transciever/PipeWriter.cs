@@ -27,7 +27,7 @@ namespace HyperMsg.Transciever
 
         public void Flush()
         {
-            throw new NotImplementedException();
+            readBufferAction.Invoke(new ReadOnlySequence<byte>());
         }
 
         public Task FlushAsync(CancellationToken token = default)
@@ -37,9 +37,9 @@ namespace HyperMsg.Transciever
 
         public Memory<byte> GetMemory(int sizeHint = 0)
         {
-            if (Memory.Length < sizeHint)
+            if (Memory.Length < sizeHint || sizeHint < 0)
             {
-
+                throw new ArgumentOutOfRangeException();
             }
 
             throw new NotImplementedException();

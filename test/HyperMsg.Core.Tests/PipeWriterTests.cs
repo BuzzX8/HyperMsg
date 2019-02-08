@@ -7,16 +7,32 @@ namespace HyperMsg.Transciever
 {
     public class PipeWriterTests
     {
+        private readonly IMemoryOwner<byte> memoryOwner;
+        private readonly ReadBufferAction readBufferAction;
+        private readonly PipeWriter writer;
+
+        public PipeWriterTests()
+        {
+            memoryOwner = A.Fake<IMemoryOwner<byte>>();
+            readBufferAction = A.Fake<ReadBufferAction>();
+            writer = new PipeWriter(memoryOwner, readBufferAction);
+        }
+
+        [Fact]
+        public void GetMemory_Throws_Exception_Greater_Then_Available_Memory()
+        {
+            var buffer = Guid.NewGuid().ToByteArray();
+            A.CallTo(() => memoryOwner.Memory).Returns(buffer);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => writer.GetMemory(buffer.Length + 1));
+        }
+
         [Fact]
         public void Flush_Calls_BufferReader()
         {
-            var owner = A.Fake<IMemoryOwner<byte>>();
-            var reader = A.Fake<Func<ReadOnlySequence<byte>, int>>();
-            var writer = new PipeWriter(owner, reader);
-
             writer.Flush();
 
-            A.CallTo(() => reader.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
+            A.CallTo(() => readBufferAction.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
         }
     }
 }
