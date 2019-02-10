@@ -20,6 +20,8 @@ namespace HyperMsg.Transciever
 
         private Memory<byte> Memory => memoryOwner.Memory;
 
+        private Memory<byte> CommitedMemory => Memory.Slice(0, position);
+
         public int AvailableMemory => Memory.Length - position;
 
         public void Advance(int count)
@@ -34,12 +36,14 @@ namespace HyperMsg.Transciever
 
         public void Flush()
         {
-            readBufferAction.Invoke(new ReadOnlySequence<byte>());
+            var buffer = new ReadOnlySequence<byte>(CommitedMemory);
+            readBufferAction.Invoke(buffer);
         }
 
         public Task FlushAsync(CancellationToken token = default)
         {
-            throw new NotImplementedException();
+            Flush();
+            return Task.CompletedTask;
         }
 
         public Memory<byte> GetMemory(int sizeHint = 0)
@@ -49,12 +53,14 @@ namespace HyperMsg.Transciever
                 throw new ArgumentOutOfRangeException();
             }
 
-            throw new NotImplementedException();
+            if (position == 0)
+            {
+                return Memory;
+            }
+
+            return Memory.Slice(position);
         }
 
-        public Span<byte> GetSpan(int sizeHint = 0)
-        {
-            throw new NotImplementedException();
-        }
+        public Span<byte> GetSpan(int sizeHint = 0) => GetMemory(sizeHint).Span;
     }
 }

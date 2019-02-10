@@ -43,18 +43,11 @@ namespace HyperMsg.Transciever
             var memoryOwner = (IMemoryOwner<byte>)serviceProvider.GetService(typeof(IMemoryOwner<byte>));
 
             var messageReader = new MessageReader<T>(serializer.Deserialize);
-            var pipe = CreatePipe(memoryOwner, serializer, messageReader.ReadBuffer);
-            var messageBuffer = new MessageBuffer<T>(pipe.Writer, serializer.Serialize);            
+            var writer = new PipeWriter(memoryOwner, null);
+            var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);            
             var transciever = new MessageTransceiver<T>(messageBuffer, messageReader.SetMessageHandler, runners);
 
             return transciever;
-        }
-
-        private IPipe CreatePipe(IMemoryOwner<byte> owner, ISerializer<T> serializer, ReadBufferAction readBuffer)
-        {
-            var reader = new PipeReader();
-            var writer = new PipeWriter(owner, readBuffer);
-            return new Pipe(reader, writer);
         }
     }
 }

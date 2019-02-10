@@ -48,11 +48,22 @@ namespace HyperMsg.Transciever
         }
 
         [Fact]
-        public void Flush_Calls_BufferReader()
+        public void Flush_Calls_ReadBufferAction_With_Correct_Params()
         {
+            var expected = Guid.NewGuid().ToByteArray();
+            expected.CopyTo(memory);
+            var actual = default(ReadOnlySequence<byte>);            
+
+            A.CallTo(() => readBufferAction.Invoke(A<ReadOnlySequence<byte>>._)).Invokes(foc =>
+            {
+                var buffer = foc.GetArgument<ReadOnlySequence<byte>>(0);
+                actual = buffer;
+            });
+
+            writer.Advance(expected.Length);
             writer.Flush();
 
-            A.CallTo(() => readBufferAction.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
+            Assert.Equal(expected, actual.First.ToArray());
         }
     }
 }
