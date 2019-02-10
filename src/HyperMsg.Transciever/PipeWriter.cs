@@ -9,20 +9,27 @@ namespace HyperMsg.Transciever
     {
         private readonly IMemoryOwner<byte> memoryOwner;
         private readonly ReadBufferAction readBufferAction;
-        private readonly SequencePosition position;
+        private int position;
 
         public PipeWriter(IMemoryOwner<byte> memoryOwner, ReadBufferAction readBufferAction)
         {
             this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
             this.readBufferAction = readBufferAction ?? throw new ArgumentNullException(nameof(readBufferAction));
-            position = new SequencePosition(memoryOwner.Memory, 0);
+            position = 0;
         }
 
         private Memory<byte> Memory => memoryOwner.Memory;
 
+        public int AvailableMemory => Memory.Length - position;
+
         public void Advance(int count)
         {
-            throw new NotImplementedException();
+            if (count > AvailableMemory || count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            position += count;
         }
 
         public void Flush()
