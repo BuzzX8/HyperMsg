@@ -7,7 +7,7 @@ namespace HyperMsg
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface ISender<T>
+    public interface ISender<in T>
     {
         /// <summary>
         /// 

@@ -58,6 +58,16 @@ namespace HyperMsg.Transciever
                 handler.Dispose();
             }
         }
+
+        public T Receive()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> ReceiveAsync(CancellationToken token)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public delegate void SetHandlerAction<T>(Action<T> handler);
