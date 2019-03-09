@@ -6,11 +6,11 @@ namespace HyperMsg
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IMessageObserver<T>
+    public interface IReceiveNotifier<T>
     {
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler MessageReceived;
+        event Action<T> Received;
     }
 }
