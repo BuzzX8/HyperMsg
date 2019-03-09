@@ -10,7 +10,6 @@ namespace HyperMsg.Transciever
         public void Build_Run_All_Configurators()
         {
             var serviceProvider = A.Fake<IServiceProvider>();
-            A.CallTo(() => serviceProvider.GetService(typeof(IPipeWriter))).Returns(A.Fake<IPipeWriter>());
             A.CallTo(() => serviceProvider.GetService(typeof(ISerializer<Guid>))).Returns(A.Fake<ISerializer<Guid>>());
             A.CallTo(() => serviceProvider.GetService(typeof(ITransceiver<Guid, Guid>))).Returns(A.Fake<ITransceiver<Guid, Guid>>());
             var builder = new TranscieverBuilder<Guid>(d => serviceProvider);
