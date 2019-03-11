@@ -3,15 +3,13 @@ using System.Buffers;
 
 namespace HyperMsg.Transciever
 {
-    public class MessageReader<T>
+    public class MessageNotifier<T> : IReceiveNotifier<T>
     {
-        private readonly Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializeFunc;
-        private Action<T> messageHandler;
+        private readonly DeserializeFunc<T> deserializeFunc;
 
-        public MessageReader(Func<ReadOnlySequence<byte>, DeserializationResult<T>> deserializeFunc)
+        public MessageNotifier(DeserializeFunc<T> deserializeFunc)
         {
             this.deserializeFunc = deserializeFunc ?? throw new ArgumentNullException(nameof(deserializeFunc));
-            messageHandler = null;
         }
 
         public long ReadBuffer(ReadOnlySequence<byte> buffer)
@@ -28,13 +26,16 @@ namespace HyperMsg.Transciever
                 return 0;
             }
 
-            messageHandler?.Invoke(result.Message);
+            OnMessageReceived(result.Message);
+
             return result.BytesConsumed;
         }
 
-        public void SetMessageHandler(Action<T> handler)
+        private void OnMessageReceived(T message)
         {
-            messageHandler = handler;
+            Received?.Invoke(message);
         }
+
+        public event Action<T> Received;
     }
 }

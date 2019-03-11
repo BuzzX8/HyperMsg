@@ -1,26 +1,22 @@
 ﻿using System;
 using System.Buffers;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg.Transciever
 {
-    public class PipeWriter : IPipeWriter
+    public class ByteBufferWriter : IBufferWriter<byte>
     {
         private readonly IMemoryOwner<byte> memoryOwner;
-        private readonly ReadBufferAction readBufferAction;
         private int position;
 
-        public PipeWriter(IMemoryOwner<byte> memoryOwner, ReadBufferAction readBufferAction)
+        public ByteBufferWriter(IMemoryOwner<byte> memoryOwner)
         {
             this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
-            this.readBufferAction = readBufferAction ?? throw new ArgumentNullException(nameof(readBufferAction));
             position = 0;
         }
 
         private Memory<byte> Memory => memoryOwner.Memory;
 
-        private Memory<byte> CommitedMemory => Memory.Slice(0, position);
+        public Memory<byte> CommitedMemory => Memory.Slice(0, position);
 
         public int AvailableMemory => Memory.Length - position;
 
@@ -34,17 +30,7 @@ namespace HyperMsg.Transciever
             position += count;
         }
 
-        public void Flush()
-        {
-            var buffer = new ReadOnlySequence<byte>(CommitedMemory);
-            readBufferAction.Invoke(buffer);
-        }
-
-        public Task FlushAsync(CancellationToken token = default)
-        {
-            Flush();
-            return Task.CompletedTask;
-        }
+        public void Reset() => position = 0;
 
         public Memory<byte> GetMemory(int sizeHint = 0)
         {

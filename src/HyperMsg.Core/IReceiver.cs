@@ -3,24 +3,23 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public interface IMessageBuffer<T>
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IReceiver<T>
     {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="message"></param>
-        void Write(T message);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void Flush();
+        /// <returns></returns>
+        T Receive();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task FlushAsync(CancellationToken token = default);
+        Task<T> ReceiveAsync(CancellationToken token);
     }
 }

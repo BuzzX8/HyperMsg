@@ -42,12 +42,12 @@ namespace HyperMsg.Transciever
             var serializer = (ISerializer<T>)serviceProvider.GetService(typeof(ISerializer<T>));
             var memoryOwner = (IMemoryOwner<byte>)serviceProvider.GetService(typeof(IMemoryOwner<byte>));
 
-            var messageReader = new MessageReader<T>(serializer.Deserialize);
-            var writer = new PipeWriter(memoryOwner, null);
-            var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);            
-            var transciever = new MessageTransceiver<T>(messageBuffer, messageReader.SetMessageHandler, runners);
+            //var messageReader = new MessageReader<T>(serializer.Deserialize);
+            //var writer = new ByteBufferWriter(memoryOwner);
+            //var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);            
+            //var transciever = new MessageTransceiver<T>(messageBuffer, messageReader.SetMessageHandler, runners);
 
-            return transciever;
+            return null;// transciever;
         }
     }
 }

@@ -9,15 +9,20 @@ namespace HyperMsg.Transciever
 {
     public class MessageBufferTests
     {
-        private IPipeWriter writer;
+        private IMemoryOwner<byte> memoryOwner;
+        private ISender<ReadOnlySequence<byte>> sender;
         private MessageBuffer<Guid> messageBuffer;
-        private Action<IBufferWriter<byte>, Guid> serializeAction;
+        private Memory<byte> buffer;
+        private SerializeAction<Guid> serializeAction;
 
         public MessageBufferTests()
         {
-            writer = A.Fake<IPipeWriter>();
-            serializeAction = A.Fake<Action<IBufferWriter<byte>, Guid>>();
-            messageBuffer = new MessageBuffer<Guid>(writer, serializeAction);
+            buffer = new byte[100];
+            memoryOwner = A.Fake<IMemoryOwner<byte>>();
+            A.CallTo(() => memoryOwner.Memory).Returns(buffer);
+            sender = A.Fake<ISender<ReadOnlySequence<byte>>>();
+            serializeAction = A.Fake<SerializeAction<Guid>>();
+            messageBuffer = new MessageBuffer<Guid>(memoryOwner, sender, serializeAction);
         }
 
         [Fact]
@@ -27,15 +32,35 @@ namespace HyperMsg.Transciever
 
             messageBuffer.Write(message);
 
-            A.CallTo(() => serializeAction.Invoke(writer, message)).MustHaveHappened();
+            A.CallTo(() => serializeAction.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
         }
 
         [Fact]
         public async Task FlushAsync_Invokes_FlushAsync_For_Writer()
         {
+            var message = Guid.NewGuid();
+            var actualMessage = Guid.Empty;
+
+            A.CallTo(() => serializeAction.Invoke(A<IBufferWriter<byte>>._, A<Guid>._)).Invokes(foc =>
+            {
+                var writer = foc.GetArgument<IBufferWriter<byte>>(0);
+                var bytes = message.ToByteArray();
+                var buffer = writer.GetSpan(bytes.Length);
+                bytes.CopyTo(buffer);
+                writer.Advance(bytes.Length);
+            });
+
+            A.CallTo(() => sender.SendAsync(A<ReadOnlySequence<byte>>._, A<CancellationToken>._)).Invokes(foc =>
+            {
+                var buffer = foc.GetArgument<ReadOnlySequence<byte>>(0);
+                actualMessage = new Guid(buffer.ToArray());
+            });
+
+            messageBuffer.Write(message);
+
             await messageBuffer.FlushAsync();
 
-            A.CallTo(() => writer.FlushAsync(A<CancellationToken>._)).MustHaveHappened();
+            Assert.Equal(message, actualMessage);
         }
     }
 }

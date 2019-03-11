@@ -5,19 +5,17 @@ using Xunit;
 
 namespace HyperMsg.Transciever
 {
-    public class PipeWriterTests
+    public class ByteBufferWriterTests
     {
         private readonly IMemoryOwner<byte> memoryOwner;
         private readonly Memory<byte> memory;
-        private readonly ReadBufferAction readBufferAction;
-        private readonly PipeWriter writer;
+        private readonly ByteBufferWriter writer;
 
-        public PipeWriterTests()
+        public ByteBufferWriterTests()
         {
             memoryOwner = A.Fake<IMemoryOwner<byte>>();
-            memory = new Memory<byte>(Guid.NewGuid().ToByteArray());            
-            readBufferAction = A.Fake<ReadBufferAction>();
-            writer = new PipeWriter(memoryOwner, readBufferAction);
+            memory = new Memory<byte>(Guid.NewGuid().ToByteArray());
+            writer = new ByteBufferWriter(memoryOwner);
 
             A.CallTo(() => memoryOwner.Memory).Returns(memory);
         }
@@ -45,25 +43,6 @@ namespace HyperMsg.Transciever
         public void GetMemory_Throws_Exception_Greater_Then_Available_Memory()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => writer.GetMemory(memory.Length + 1));
-        }
-
-        [Fact]
-        public void Flush_Calls_ReadBufferAction_With_Correct_Params()
-        {
-            var expected = Guid.NewGuid().ToByteArray();
-            expected.CopyTo(memory);
-            var actual = default(ReadOnlySequence<byte>);            
-
-            A.CallTo(() => readBufferAction.Invoke(A<ReadOnlySequence<byte>>._)).Invokes(foc =>
-            {
-                var buffer = foc.GetArgument<ReadOnlySequence<byte>>(0);
-                actual = buffer;
-            });
-
-            writer.Advance(expected.Length);
-            writer.Flush();
-
-            Assert.Equal(expected, actual.First.ToArray());
         }
     }
 }

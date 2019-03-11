@@ -11,9 +11,8 @@ namespace HyperMsg.Sockets
             transceiverBuilder.Configure(context =>
             {
                 var socket = SocketFactory.CreateTcpSocket();
-                var socketPipe = new SocketPipe(socket);
                 var worker = new BackgroundWorker();
-                worker.DoWork += socketPipe.DoWork;
+                //worker.DoWork += socketPipe.DoWork;
 
                 context.Runners.Add(new BgWorkerHandle(worker).Run);
             });
