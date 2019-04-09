@@ -31,7 +31,12 @@ namespace HyperMsg.Transciever
                 return result.Message;
             }
 
-            throw new NotImplementedException();
+            while (result.BytesConsumed == 0)
+            {
+                result = deserialize.Invoke(new ReadOnlySequence<byte>(buffer.Slice(0, readed)));
+            }
+
+            return result.Message;
         }
     }
 }
