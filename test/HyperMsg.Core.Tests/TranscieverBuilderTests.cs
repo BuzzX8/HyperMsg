@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using System;
+using System.Buffers;
 using Xunit;
 
 namespace HyperMsg
@@ -37,6 +38,32 @@ namespace HyperMsg
             {
                 A.CallTo(() => configurator.Invoke(A<BuilderContext>._)).MustHaveHappened();
             }
+        }
+
+        [Fact]
+        public void Build_Returns_Transciever_Which_Can_Send_Messages()
+        {
+            var transciever = transcieverBuilder.Build();
+            Assert.NotNull(transciever);
+
+            var message = Guid.NewGuid();
+            transciever.Send(message);
+
+            A.CallTo(() => serializer.Serialize(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void Build_Returns_Transciever_Which_Can_Receive_Messages()
+        {
+            var expectedMessage = Guid.NewGuid();
+            A.CallTo(() => serializer.Deserialize(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(1, expectedMessage));
+            var transciever = transcieverBuilder.Build();
+            Assert.NotNull(transciever);
+
+            var actualMessage = transciever.Receive();
+
+            Assert.Equal(expectedMessage, actualMessage);
+            A.CallTo(() => serializer.Deserialize(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
         }
     }
 }
