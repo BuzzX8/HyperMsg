@@ -17,8 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\HyperMsg.Core\HyperMsg.csproj" />
-    <ProjectReference Include="..\..\src\HyperMsg.Transciever\HyperMsg.Transciever.csproj" />
+    <ProjectReference Include="..\..\src\HyperMsg.Core\HyperMsg.Core.csproj" />
   </ItemGroup>
 
 </Project>

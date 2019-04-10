@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Buffers;
 
-namespace HyperMsg.Transciever
+namespace HyperMsg
 {
     public class ByteBufferWriter : IBufferWriter<byte>
     {
