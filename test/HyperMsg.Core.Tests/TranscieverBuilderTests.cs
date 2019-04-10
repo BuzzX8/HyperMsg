@@ -6,22 +6,32 @@ namespace HyperMsg
 {
     public class TranscieverBuilderTests
     {
-        [Fact(Skip = "Not implemented")]
+        private readonly IServiceProvider serviceProvider;
+        private readonly ISerializer<Guid> serializer;
+        private readonly IStream stream;
+        private readonly TranscieverBuilder<Guid> transcieverBuilder;
+
+        public TranscieverBuilderTests()
+        {
+            serviceProvider = A.Fake<IServiceProvider>();
+            serializer = A.Fake<ISerializer<Guid>>();
+            stream = A.Fake<IStream>();
+            A.CallTo(() => serviceProvider.GetService(typeof(ISerializer<Guid>))).Returns(serializer);
+            A.CallTo(() => serviceProvider.GetService(typeof(IStream))).Returns(stream);
+            transcieverBuilder = new TranscieverBuilder<Guid>(d => serviceProvider);
+        }
+
+        [Fact]
         public void Build_Run_All_Configurators()
         {
-            var serviceProvider = A.Fake<IServiceProvider>();
-            A.CallTo(() => serviceProvider.GetService(typeof(ISerializer<Guid>))).Returns(A.Fake<ISerializer<Guid>>());
-            A.CallTo(() => serviceProvider.GetService(typeof(ITransceiver<Guid, Guid>))).Returns(A.Fake<ITransceiver<Guid, Guid>>());
-            var builder = new TranscieverBuilder<Guid>(d => serviceProvider);
-
             var configurators = A.CollectionOfFake<Action<BuilderContext>>(10);
 
             foreach(var configurator in configurators)
             {
-                builder.Configure(configurator);
+                transcieverBuilder.Configure(configurator);
             }
 
-            builder.Build();
+            transcieverBuilder.Build();
 
             foreach (var configurator in configurators)
             {

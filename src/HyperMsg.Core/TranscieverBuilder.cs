@@ -40,14 +40,9 @@ namespace HyperMsg
         private MessageTransceiver<T> CreateTransciever(IServiceProvider serviceProvider, ICollection<Func<IDisposable>> runners)
         {            
             var serializer = (ISerializer<T>)serviceProvider.GetService(typeof(ISerializer<T>));
-            var memoryOwner = (IMemoryOwner<byte>)serviceProvider.GetService(typeof(IMemoryOwner<byte>));
-
-            //var messageReader = new MessageReader<T>(serializer.Deserialize);
-            //var writer = new ByteBufferWriter(memoryOwner);
-            //var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);            
-            //var transciever = new MessageTransceiver<T>(messageBuffer, messageReader.SetMessageHandler, runners);
-
-            return null;// transciever;
+            var stream = (IStream)serviceProvider.GetService(typeof(IStream));
+            
+            return new MessageTransceiver<T>(serializer, new Memory<byte>(), new Memory<byte>(), stream);
         }
     }
 }
