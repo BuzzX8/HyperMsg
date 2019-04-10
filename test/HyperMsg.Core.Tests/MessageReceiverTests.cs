@@ -52,7 +52,7 @@ namespace HyperMsg.Transciever
         }
 
         [Fact]
-        public async Task ReceiveAsync_Returns_Deserialized_Message_()
+        public async Task ReceiveAsync_Returns_Deserialized_Messages_Received_In_Chunks()
         {
             var message1 = Guid.NewGuid();
             var message2 = Guid.NewGuid();
