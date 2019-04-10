@@ -12,19 +12,30 @@ namespace HyperMsg.Transciever
         private readonly Memory<byte> buffer;
         private readonly ReadAsyncFunc readAsync;
 
+        private int position;
+
         public MessageReceiver(DeserializeFunc<T> deserialize, Memory<byte> buffer, ReadAsyncFunc readAsync)
         {
             this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
             this.buffer = buffer;
             this.readAsync = readAsync ?? throw new ArgumentNullException(nameof(readAsync));
+            position = 0;
         }
 
         public T Receive() => ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
 
         public async Task<T> ReceiveAsync(CancellationToken token)
         {
-            var readed = await readAsync.Invoke(buffer, token);
-            var result = deserialize.Invoke(new ReadOnlySequence<byte>(buffer.Slice(0, readed)));
+            var readed = await readAsync.Invoke(buffer.Slice(position), token);
+            position += readed;
+            var result = deserialize.Invoke(new ReadOnlySequence<byte>(buffer.Slice(0, position)));
+
+            if (result.BytesConsumed < position)
+            {
+                buffer.Slice(result.BytesConsumed).CopyTo(buffer);                
+            }
+
+            position -= result.BytesConsumed;
 
             if (result.BytesConsumed > 0)
             {
