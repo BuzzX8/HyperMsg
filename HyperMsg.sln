@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{315CA476-073
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B2647DAE-711B-48F3-BA19-A682C6582ECF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperMsg.Core", "src\HyperMsg.Core\HyperMsg.Core.csproj", "{36FED8B8-E781-4921-B5BE-9C9DC3CCDEF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperMsg", "src\HyperMsg\HyperMsg.csproj", "{36FED8B8-E781-4921-B5BE-9C9DC3CCDEF9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperMsg.Transciever.Tests", "test\HyperMsg.Core.Tests\HyperMsg.Transciever.Tests.csproj", "{89AD57E6-0642-4FC8-96DA-6253BD7EC49F}"
 EndProject

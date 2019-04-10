@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HyperMsg.Core\HyperMsg.Core.csproj" />
+    <ProjectReference Include="..\HyperMsg.Core\HyperMsg.csproj" />
   </ItemGroup>
 
 </Project>
