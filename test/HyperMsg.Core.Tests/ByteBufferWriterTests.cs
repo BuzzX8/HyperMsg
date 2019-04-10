@@ -1,6 +1,4 @@
-﻿using FakeItEasy;
-using System;
-using System.Buffers;
+﻿using System;
 using Xunit;
 
 namespace HyperMsg
