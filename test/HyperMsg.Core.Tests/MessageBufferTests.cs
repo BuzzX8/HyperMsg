@@ -9,58 +9,46 @@ namespace HyperMsg
 {
     public class MessageBufferTests
     {
-        private IMemoryOwner<byte> memoryOwner;
-        private ISender<ReadOnlySequence<byte>> sender;
-        private MessageBuffer<Guid> messageBuffer;
-        private Memory<byte> buffer;
-        private SerializeAction<Guid> serializeAction;
+        private readonly SerializeAction<Guid> serializeAction;
+        private readonly Memory<byte> buffer;
+        private readonly Func<Memory<byte>, CancellationToken, Task> writeAsync;
+        private readonly MessageBuffer<Guid> messageBuffer;
 
         public MessageBufferTests()
         {
-            buffer = new byte[100];
-            memoryOwner = A.Fake<IMemoryOwner<byte>>();
-            A.CallTo(() => memoryOwner.Memory).Returns(buffer);
-            sender = A.Fake<ISender<ReadOnlySequence<byte>>>();
             serializeAction = A.Fake<SerializeAction<Guid>>();
-            messageBuffer = new MessageBuffer<Guid>(memoryOwner, sender, serializeAction);
+            buffer = new byte[100];
+            writeAsync = A.Fake<Func<Memory<byte>, CancellationToken, Task>>();
+            messageBuffer = new MessageBuffer<Guid>(serializeAction, buffer, writeAsync);
         }
 
         [Fact]
-        public void Write_Invokes_Serialize_Action()
+        public async Task FlushAsync_Provides_Buffer_Content_To_Write_Action()
+        {
+            await messageBuffer.FlushAsync();
+
+            A.CallTo(() => writeAsync.Invoke(A<Memory<byte>>._, A<CancellationToken>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task SendAsync_Serializes_And_Sends_Message()
+        {
+            var message = Guid.NewGuid();
+
+            await messageBuffer.SendAsync(message);
+
+            A.CallTo(() => writeAsync.Invoke(A<Memory<byte>>._, A<CancellationToken>._)).MustHaveHappened();
+            A.CallTo(() => serializeAction.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void Write_Calls_Serialize_Action_For_Message()
         {
             var message = Guid.NewGuid();
 
             messageBuffer.Write(message);
 
             A.CallTo(() => serializeAction.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
-        }
-
-        [Fact]
-        public async Task FlushAsync_Invokes_FlushAsync_For_Writer()
-        {
-            var message = Guid.NewGuid();
-            var actualMessage = Guid.Empty;
-
-            A.CallTo(() => serializeAction.Invoke(A<IBufferWriter<byte>>._, A<Guid>._)).Invokes(foc =>
-            {
-                var writer = foc.GetArgument<IBufferWriter<byte>>(0);
-                var bytes = message.ToByteArray();
-                var buffer = writer.GetSpan(bytes.Length);
-                bytes.CopyTo(buffer);
-                writer.Advance(bytes.Length);
-            });
-
-            A.CallTo(() => sender.SendAsync(A<ReadOnlySequence<byte>>._, A<CancellationToken>._)).Invokes(foc =>
-            {
-                var buffer = foc.GetArgument<ReadOnlySequence<byte>>(0);
-                actualMessage = new Guid(buffer.ToArray());
-            });
-
-            messageBuffer.Write(message);
-
-            await messageBuffer.FlushAsync();
-
-            Assert.Equal(message, actualMessage);
         }
     }
 }

@@ -6,25 +6,19 @@ using Xunit;
 namespace HyperMsg
 {
     public class ByteBufferWriterTests
-    {
-        private readonly IMemoryOwner<byte> memoryOwner;
+    {        
         private readonly Memory<byte> memory;
         private readonly ByteBufferWriter writer;
 
         public ByteBufferWriterTests()
-        {
-            memoryOwner = A.Fake<IMemoryOwner<byte>>();
+        {            
             memory = new Memory<byte>(Guid.NewGuid().ToByteArray());
-            writer = new ByteBufferWriter(memoryOwner);
-
-            A.CallTo(() => memoryOwner.Memory).Returns(memory);
+            writer = new ByteBufferWriter(memory);            
         }
 
         [Fact]
         public void Advance_Throws_Exception_If_Count_Greater_Then_AvailableMemory()
         {
-            var avaibleMemory = 1024;
-            A.CallTo(() => memoryOwner.Memory).Returns(new Memory<byte>(new byte[avaibleMemory]));
             Assert.Throws<ArgumentOutOfRangeException>(() => writer.Advance(writer.AvailableMemory + 1));
         }
 
