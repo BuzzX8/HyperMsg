@@ -5,16 +5,16 @@ namespace HyperMsg
 {
     public class ByteBufferWriter : IBufferWriter<byte>
     {
-        private readonly IMemoryOwner<byte> memoryOwner;
+        private readonly Memory<byte> buffer;
         private int position;
 
-        public ByteBufferWriter(IMemoryOwner<byte> memoryOwner)
+        public ByteBufferWriter(Memory<byte> buffer)
         {
-            this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
+            this.buffer = buffer;
             position = 0;
         }
 
-        private Memory<byte> Memory => memoryOwner.Memory;
+        private Memory<byte> Memory => buffer;
 
         public Memory<byte> CommitedMemory => Memory.Slice(0, position);
 

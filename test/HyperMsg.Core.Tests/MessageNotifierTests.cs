@@ -34,13 +34,5 @@ namespace HyperMsg
             A.CallTo(() => handler.Invoke(message)).MustHaveHappened();
             Assert.Equal(byteCount, readed);
         }
-
-        [Fact]
-        public void ReadBuffer_Throws_Exception_If_Consumed_Bytes_Lesser_Then_Zero()
-        {
-            var reader = new MessageNotifier<Guid>(b => new DeserializationResult<Guid>(-1, default));
-
-            Assert.Throws<InvalidOperationException>(() => reader.ReadBuffer(default));
-        }
     }
 }

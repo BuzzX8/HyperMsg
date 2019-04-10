@@ -35,7 +35,7 @@ namespace HyperMsg
             transceiver.Send(message);
 
             A.CallTo(() => serializer.Serialize(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
-            A.CallTo(() => stream.Write(A<Memory<byte>>._)).MustHaveHappened();
+            A.CallTo(() => stream.WriteAsync(A<Memory<byte>>._, A<CancellationToken>._)).MustHaveHappened();
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace HyperMsg
             await transceiver.SendAsync(message);
 
             A.CallTo(() => serializer.Serialize(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
-            A.CallTo(() => stream.Write(A<Memory<byte>>._)).MustHaveHappened();
+            A.CallTo(() => stream.WriteAsync(A<Memory<byte>>._, A<CancellationToken>._)).MustHaveHappened();
         }
 
         [Fact]
