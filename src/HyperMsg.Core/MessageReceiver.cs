@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ReadAsyncFunc = System.Func<System.Memory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.Task<int>>;
 
-namespace HyperMsg.Transciever
+namespace HyperMsg
 {
     public class MessageReceiver<T> : IReceiver<T>
     {

@@ -2,12 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>HyperMsg</RootNamespace>
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.1" />
+    <PackageReference Include="FakeItEasy" Version="4.9.2" />
+    <PackageReference Include="System.IO.Pipelines" Version="4.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HyperMsg\HyperMsg.csproj" />
   </ItemGroup>
 
 </Project>

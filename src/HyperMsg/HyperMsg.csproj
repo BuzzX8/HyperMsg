@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>7.1</LangVersion>
+    <RootNamespace>HyperMsg</RootNamespace>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HyperMsg.Core\HyperMsg.csproj" />
+    <PackageReference Include="System.Memory" Version="4.5.1" />
   </ItemGroup>
 
 </Project>

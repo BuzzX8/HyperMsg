@@ -3,7 +3,7 @@ using System;
 using System.Buffers;
 using Xunit;
 
-namespace HyperMsg.Transciever
+namespace HyperMsg
 {
     public class ByteBufferWriterTests
     {

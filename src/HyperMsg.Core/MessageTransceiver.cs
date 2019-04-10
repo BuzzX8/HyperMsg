@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HyperMsg.Transciever
+namespace HyperMsg
 {
     public class MessageTransceiver<T> : ITransceiver<T, T>, IDisposable
     {

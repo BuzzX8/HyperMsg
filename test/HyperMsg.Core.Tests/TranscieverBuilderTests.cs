@@ -2,7 +2,7 @@
 using System;
 using Xunit;
 
-namespace HyperMsg.Transciever
+namespace HyperMsg
 {
     public class TranscieverBuilderTests
     {

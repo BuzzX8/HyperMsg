@@ -2,7 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 
-namespace HyperMsg.Transciever
+namespace HyperMsg
 {
     public class TranscieverBuilder<T> : ITransceiverBuilder<T, T>
     {        

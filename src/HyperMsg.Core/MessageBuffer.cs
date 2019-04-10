@@ -3,7 +3,7 @@ using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace HyperMsg.Transciever
+namespace HyperMsg
 {
     public class MessageBuffer<T> : IMessageBuffer<T>, ISender<T>
     {
