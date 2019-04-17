@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 
 namespace HyperMsg
@@ -8,10 +7,17 @@ namespace HyperMsg
     {        
         private readonly List<Action<BuilderContext>> configurators;
         private readonly Func<ICollection<ServiceDescriptor>, IServiceProvider> serviceProviderFactory;
+        private readonly int sendingBufferSize;
+        private readonly int receivingBufferSize;
 
-        public TranscieverBuilder(Func<ICollection<ServiceDescriptor>, IServiceProvider> serviceProviderFactory)
+        public const int DefaultSendingBufferSize = 1024;
+        public const int DefaultReceivingBufferSize = 1024;
+
+        public TranscieverBuilder(Func<ICollection<ServiceDescriptor>, IServiceProvider> serviceProviderFactory, int sendingBufferSize = DefaultSendingBufferSize, int receivingBufferSize = DefaultReceivingBufferSize)
         {
             this.serviceProviderFactory = serviceProviderFactory ?? throw new ArgumentNullException(nameof(serviceProviderFactory));
+            this.sendingBufferSize = sendingBufferSize;
+            this.receivingBufferSize = receivingBufferSize;
             configurators = new List<Action<BuilderContext>>();
         }
 
@@ -40,14 +46,9 @@ namespace HyperMsg
         private MessageTransceiver<T> CreateTransciever(IServiceProvider serviceProvider, ICollection<Func<IDisposable>> runners)
         {            
             var serializer = (ISerializer<T>)serviceProvider.GetService(typeof(ISerializer<T>));
-            var memoryOwner = (IMemoryOwner<byte>)serviceProvider.GetService(typeof(IMemoryOwner<byte>));
-
-            //var messageReader = new MessageReader<T>(serializer.Deserialize);
-            //var writer = new ByteBufferWriter(memoryOwner);
-            //var messageBuffer = new MessageBuffer<T>(writer, serializer.Serialize);            
-            //var transciever = new MessageTransceiver<T>(messageBuffer, messageReader.SetMessageHandler, runners);
-
-            return null;// transciever;
+            var stream = (IStream)serviceProvider.GetService(typeof(IStream));
+            
+            return new MessageTransceiver<T>(serializer, new byte[sendingBufferSize], new byte[receivingBufferSize], stream);
         }
     }
 }
