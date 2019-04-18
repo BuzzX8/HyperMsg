@@ -20,15 +20,17 @@ namespace HyperMsg
             position = 0;
         }
 
-        public void Consume(int bytesConsumed)
+        public void Advance(int count)
         {
-            if (bytesConsumed < position)
+            if (count < position)
             {
-                buffer.Slice(bytesConsumed).CopyTo(buffer);
+                buffer.Slice(count).CopyTo(buffer);
             }
 
-            position -= bytesConsumed;
+            position -= count;
         }
+
+        public ReadOnlySequence<byte> Read() => ReadAsync(CancellationToken.None).GetAwaiter().GetResult();
 
         public async Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken token)
         {

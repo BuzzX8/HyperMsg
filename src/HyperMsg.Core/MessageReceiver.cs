@@ -27,7 +27,7 @@ namespace HyperMsg
 
             if (result.BytesConsumed > 0)
             {
-                bufferReader.Consume(result.BytesConsumed);
+                bufferReader.Advance(result.BytesConsumed);
                 return result.Message;
             }
 
@@ -37,7 +37,7 @@ namespace HyperMsg
                 result = deserialize.Invoke(readed);                
             }
 
-            bufferReader.Consume(result.BytesConsumed);
+            bufferReader.Advance(result.BytesConsumed);
 
             return result.Message;
         }
