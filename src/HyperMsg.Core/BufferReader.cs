@@ -22,6 +22,11 @@ namespace HyperMsg
 
         public void Advance(int count)
         {
+            if (count > position)
+            {
+                throw new IndexOutOfRangeException();
+            }
+
             if (count < position)
             {
                 buffer.Slice(count).CopyTo(buffer);
