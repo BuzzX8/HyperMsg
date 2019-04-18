@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ReadAsyncFunc = System.Func<System.Memory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.Task<int>>;
 
 namespace HyperMsg
 {
     public class MessageReceiver<T> : IReceiver<T>
     {
-        private readonly DeserializeFunc<T> deserialize;        
-        private readonly ReadAsyncFunc readAsync;
+        private readonly DeserializeFunc<T> deserialize;
         private readonly IBufferReader bufferReader;        
 
         public MessageReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader)
