@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 using ReadAsyncFunc = System.Func<System.Memory<byte>, System.Threading.CancellationToken, System.Threading.Tasks.Task<int>>;
@@ -8,44 +7,37 @@ namespace HyperMsg
 {
     public class MessageReceiver<T> : IReceiver<T>
     {
-        private readonly DeserializeFunc<T> deserialize;
-        private readonly Memory<byte> buffer;
+        private readonly DeserializeFunc<T> deserialize;        
         private readonly ReadAsyncFunc readAsync;
-
-        private int position;
+        private readonly BufferReader bufferReader;        
 
         public MessageReceiver(DeserializeFunc<T> deserialize, Memory<byte> buffer, ReadAsyncFunc readAsync)
         {
-            this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
-            this.buffer = buffer;
-            this.readAsync = readAsync ?? throw new ArgumentNullException(nameof(readAsync));
-            position = 0;
+            this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));            
+            this.readAsync = readAsync ?? throw new ArgumentNullException(nameof(readAsync));            
+            bufferReader = new BufferReader(buffer, readAsync);
         }
 
         public T Receive() => ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
 
         public async Task<T> ReceiveAsync(CancellationToken token)
         {
-            var readed = await readAsync.Invoke(buffer.Slice(position), token);
-            position += readed;
-            var result = deserialize.Invoke(new ReadOnlySequence<byte>(buffer.Slice(0, position)));
-
-            if (result.BytesConsumed < position)
-            {
-                buffer.Slice(result.BytesConsumed).CopyTo(buffer);                
-            }
-
-            position -= result.BytesConsumed;
+            var readed = await bufferReader.ReadAsync(token);
+            var result = deserialize.Invoke(readed);
 
             if (result.BytesConsumed > 0)
             {
+                bufferReader.Consume(result.BytesConsumed);
                 return result.Message;
             }
 
             while (result.BytesConsumed == 0)
             {
-                result = deserialize.Invoke(new ReadOnlySequence<byte>(buffer.Slice(0, readed)));
+                readed = await bufferReader.ReadAsync(token);
+                result = deserialize.Invoke(readed);                
             }
+
+            bufferReader.Consume(result.BytesConsumed);
 
             return result.Message;
         }
