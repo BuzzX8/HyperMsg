@@ -6,7 +6,7 @@ using ReadAsyncFunc = System.Func<System.Memory<byte>, System.Threading.Cancella
 
 namespace HyperMsg
 {
-    public class BufferReader
+    public class BufferReader : IBufferReader
     {
         private readonly Memory<byte> buffer;
         private readonly ReadAsyncFunc readAsync;

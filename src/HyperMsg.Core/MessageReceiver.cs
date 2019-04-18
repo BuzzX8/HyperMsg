@@ -9,13 +9,12 @@ namespace HyperMsg
     {
         private readonly DeserializeFunc<T> deserialize;        
         private readonly ReadAsyncFunc readAsync;
-        private readonly BufferReader bufferReader;        
+        private readonly IBufferReader bufferReader;        
 
-        public MessageReceiver(DeserializeFunc<T> deserialize, Memory<byte> buffer, ReadAsyncFunc readAsync)
+        public MessageReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader)
         {
-            this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));            
-            this.readAsync = readAsync ?? throw new ArgumentNullException(nameof(readAsync));            
-            bufferReader = new BufferReader(buffer, readAsync);
+            this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
+            this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
         }
 
         public T Receive() => ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -31,10 +30,19 @@ namespace HyperMsg
                 return result.Message;
             }
 
+            const int DefaultReadCount = 50;
+            int readCount = 0;
+
             while (result.BytesConsumed == 0)
             {
                 readed = await bufferReader.ReadAsync(token);
-                result = deserialize.Invoke(readed);                
+                result = deserialize.Invoke(readed);
+                readCount++;
+
+                if (readCount == DefaultReadCount)
+                {
+                    throw new InvalidOperationException();
+                }
             }
 
             bufferReader.Advance(result.BytesConsumed);
