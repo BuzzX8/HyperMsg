@@ -1,10 +1,18 @@
 name: HyperMsg.Core
 steps:
   - task: DotNetCoreCLI@2
+    name: build
+    displayName: Build
     inputs:
       command: build
       projects: src/**/*.csproj
   - task: DotNetCoreCLI@2
+    name: test
+    displayName: Test
     inputs:
       command: test
       projects: test/**/*.csproj
+  - task: PublishTestResults@2
+    inputs:
+      testRunner: 'XUnit'
+      testResultsFiles: '**/TEST-*.xml'
