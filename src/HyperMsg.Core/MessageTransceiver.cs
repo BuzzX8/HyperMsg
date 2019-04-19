@@ -12,7 +12,7 @@ namespace HyperMsg
         public MessageTransceiver(ISerializer<T> serializer, Memory<byte> sendBuffer, Memory<byte> receiveBuffer, IStream stream)
         {
             messageBuffer = new MessageBuffer<T>(serializer.Serialize, sendBuffer, stream.WriteAsync);
-            messageReceiver = new MessageReceiver<T>(serializer.Deserialize, receiveBuffer, stream.ReadAsync);
+            messageReceiver = new MessageReceiver<T>(serializer.Deserialize, new BufferReader(receiveBuffer, stream.ReadAsync));
         }
 
         public void Send(T message) => messageBuffer.Send(message);

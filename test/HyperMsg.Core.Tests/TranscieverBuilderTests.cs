@@ -1,6 +1,8 @@
 ﻿using FakeItEasy;
 using System;
 using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HyperMsg
@@ -19,6 +21,7 @@ namespace HyperMsg
             stream = A.Fake<IStream>();
             A.CallTo(() => serviceProvider.GetService(typeof(ISerializer<Guid>))).Returns(serializer);
             A.CallTo(() => serviceProvider.GetService(typeof(IStream))).Returns(stream);
+            A.CallTo(() => stream.ReadAsync(A<Memory<byte>>._, A<CancellationToken>._)).Returns(Task.FromResult(sizeof(long)));
             transcieverBuilder = new TranscieverBuilder<Guid>(d => serviceProvider);
         }
 
