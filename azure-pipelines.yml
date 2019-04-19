@@ -17,3 +17,9 @@ steps:
     displayName: 'Publish test results'
     inputs:
       testRunner: 'XUnit'
+  - task: DotNetCoreCLI@2
+    name: pack
+    displayName: Pack
+    inputs:      
+      command: pack
+      searchPatternPack: 'src/**/*.csproj'
