@@ -23,3 +23,7 @@ steps:
     inputs:      
       command: pack
       searchPatternPack: 'src/**/*.csproj'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'push'
+      feedPublish: 'HyperMsg'
