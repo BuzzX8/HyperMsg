@@ -2,8 +2,8 @@
 
 namespace HyperMsg.Sockets
 {
-    public static class SocketFactory
+    internal static class SocketFactory
     {
-        public static ISocket CreateTcpSocket() => new SocketProxy(new Socket(SocketType.Stream, ProtocolType.Tcp));
+        public static Socket CreateTcpSocket() => new Socket(SocketType.Stream, ProtocolType.Tcp);
     }
 }
