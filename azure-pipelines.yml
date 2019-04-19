@@ -4,3 +4,7 @@ steps:
     inputs:
       command: build
       projects: src/**/*.csproj
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: test
+      projects: test/**/*.csproj
