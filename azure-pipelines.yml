@@ -1,0 +1,6 @@
+name: HyperMsg.Core
+steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: build
+      projects: src/**/*.csproj
