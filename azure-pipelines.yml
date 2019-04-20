@@ -1,14 +1,17 @@
 name: HyperMsg.Core
-steps:
-  - task: DotNetCoreCLI@2
-    name: build
-    displayName: Build
-    inputs:
-      command: build
-      projects: src/**/*.csproj
-  - task: DotNetCoreCLI@2
-    name: test
-    displayName: Test
-    inputs:
-      command: test
-      projects: test/**/*.csproj
+jobs:
+- job:
+  displayName: Build and Test
+  steps:
+    - task: DotNetCoreCLI@2
+      name: build
+      displayName: Build
+      inputs:
+        command: build
+        projects: src/**/*.csproj
+    - task: DotNetCoreCLI@2
+      name: test
+      displayName: Test
+      inputs:
+        command: test
+        projects: test/**/*.csproj
