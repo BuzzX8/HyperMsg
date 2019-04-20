@@ -1,6 +1,6 @@
 name: HyperMsg.Core
 jobs:
-- job: build_and_test
+- job: BuildAndTest
   displayName: 'Build and Test'
   steps:
     - task: DotNetCoreCLI@2
@@ -15,9 +15,9 @@ jobs:
       inputs:
         command: test
         projects: test/**/*.csproj
-- job:
+- job: publish
   displayName: 'Publish package'
-  dependsOn: build_and_test
+  dependsOn: BuildAndTest
   steps:
     - task: DotNetCoreCLI@2
       name: pack
@@ -26,4 +26,7 @@ jobs:
         command: 'pack'
         searchPatternPack: 'src/**/*.csproj'
         nobuild: true
-        versioningScheme: 'byBuildNumber'
+        majorVersion: 0
+        minorVersion: 0
+        patchVersion: $(Build.BuildId)
+        versioningScheme: byPrereleaseNumber
