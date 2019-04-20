@@ -29,4 +29,7 @@ steps:
     inputs:
       command: 'push'
       feedPublish: 'HyperMsg'
+      majorVersion: '0'
+      minorVersion: '0'
+      patchVersion: '0'
       versioningScheme: byPrereleaseNumber
