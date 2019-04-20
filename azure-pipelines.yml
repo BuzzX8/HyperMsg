@@ -9,18 +9,27 @@ jobs:
       inputs:
         command: build
         projects: src/**/*.csproj
+
     - task: DotNetCoreCLI@2
       name: test
       displayName: Test
       inputs:
         command: test
         projects: test/**/*.csproj
+    
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: 'src'
+        Contents: '**/*.dll'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
     - task: PublishPipelineArtifact@0
       name: PublishPipelineArtifacts
       displayName: Publish pipeline artifacts      
       inputs:
         artifactName: 'drop'
         targetPath: '$(Build.ArtifactStagingDirectory)'
+
 - job: publish
   displayName: 'Publish package'
   dependsOn: BuildAndTest
