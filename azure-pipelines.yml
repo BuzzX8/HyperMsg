@@ -15,12 +15,12 @@ jobs:
       inputs:
         command: test
         projects: test/**/*.csproj
-    - task: PublishBuildArtifacts@1
-      name: PublishBuildArtifacts
-      displayName: Publish build artifacts      
+    - task: PublishPipelineArtifact@0
+      name: PublishPipelineArtifacts
+      displayName: Publish pipeline artifacts      
       inputs:
         artifactName: 'drop'
-        pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        targetPath: '$(Build.ArtifactStagingDirectory)'
 - job: publish
   displayName: 'Publish package'
   dependsOn: BuildAndTest
