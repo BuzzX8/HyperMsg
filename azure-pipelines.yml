@@ -29,3 +29,4 @@ steps:
     inputs:
       command: 'push'
       feedPublish: 'HyperMsg'
+      versioningScheme: byPrereleaseNumber
