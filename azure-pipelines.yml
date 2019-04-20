@@ -34,6 +34,10 @@ jobs:
   displayName: 'Publish package'
   dependsOn: BuildAndTest
   steps:
+    - task: DownloadPipelineArtifact@1
+      inputs:
+        artifactName: 'drop'
+        
     - task: DotNetCoreCLI@2
       name: pack
       displayName: 'Create NuGet package'
