@@ -12,9 +12,3 @@ steps:
     inputs:
       command: test
       projects: test/**/*.csproj
-  - task: PublishTestResults@2
-    name: publish_test_results
-    displayName: 'Publish test results'
-    inputs:
-      testRunner: 'XUnit'
-      testResultsFiles: ''
