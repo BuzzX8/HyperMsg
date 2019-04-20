@@ -1,6 +1,6 @@
 name: HyperMsg.Core
 jobs:
-- job:  
+- job: build_and_test
   displayName: 'Build and Test'
   steps:
     - task: DotNetCoreCLI@2
@@ -17,6 +17,7 @@ jobs:
         projects: test/**/*.csproj
 - job:
   displayName: 'Publish package'
+  dependsOn: build_and_test
   steps:
     - task: DotNetCoreCLI@2
       name: pack
