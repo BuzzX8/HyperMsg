@@ -20,6 +20,7 @@ jobs:
       - task: DotNetCoreCLI@2
         inputs:
           command: 'pack'
+          
       - task: PublishBuildArtifacts@1
         inputs:
           ArtifactName: 'drop'
@@ -32,3 +33,7 @@ jobs:
         inputs:
           artifactName: 'drop'
           itemPattern: '*'
+
+      - task: DotNetCoreCLI@2
+        inputs:
+          command: 'push'
