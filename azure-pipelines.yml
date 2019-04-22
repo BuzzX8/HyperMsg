@@ -18,7 +18,7 @@ jobs:
 
       - task: CopyFiles@2
         inputs:
-          SourceFolder: '$(Build.BinariesDirectory)'
+          SourceFolder: 'src/**/bin/**/*.*'
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
       - task: PublishBuildArtifacts@1
