@@ -8,12 +8,19 @@ jobs:
         inputs:
           command: build
           projects: src/**/*.csproj
+          
       - task: DotNetCoreCLI@2
         name: test
         displayName: Test
         inputs:
           command: test
-          projects: test/**/*.csproj      
+          projects: test/**/*.csproj
+
+      - task: CopyFiles@2
+        inputs:
+          SourceFolder: '$(Build.BinariesDirectory)'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
       - task: PublishBuildArtifacts@1
         inputs:
           ArtifactName: 'drop'
