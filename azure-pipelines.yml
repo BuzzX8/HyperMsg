@@ -13,4 +13,7 @@ jobs:
         displayName: Test
         inputs:
           command: test
-          projects: test/**/*.csproj
+          projects: test/**/*.csproj      
+      - task: PublishBuildArtifacts@1
+        inputs:
+          ArtifactName: 'drop'
