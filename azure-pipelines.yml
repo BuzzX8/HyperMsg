@@ -35,8 +35,5 @@ jobs:
           itemPattern: '*'
           downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: 'push'
-          feedPublish: 'HyperMsg'
+      - script: ls $(Build.ArtifactStagingDirectory)
 
