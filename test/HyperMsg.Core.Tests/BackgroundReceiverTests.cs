@@ -20,72 +20,67 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Run_Invokes_Message_Handler()
+        public void Run_Invokes_MessageReceived()
         {
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;            
             var @event = new ManualResetEventSlim();
             A.CallTo(() => messageReceiver.ReceiveAsync(A<CancellationToken>._)).Returns(Task.FromResult(expected));
-                        
-            backgroundReceiver.Run(m =>
+
+            Assert.False(backgroundReceiver.IsRunning);
+            backgroundReceiver.MessageReceived += m =>
             {
                 actual = m;
                 @event.Set();
-            });            
+            };
+            backgroundReceiver.Run();
+            Assert.True(backgroundReceiver.IsRunning);
             @event.Wait(waitTimeout);
 
             Assert.Equal(expected, actual);
         }
 
-        [Fact(Skip = "Fails on Linux")]
-        public void Dispose_Stops_Background_Task()
+        [Fact]
+        public void Dispose_Initiates_Background_Task_Cancellation()
         {
             var @event = new ManualResetEventSlim();
-            var @event2 = new ManualResetEventSlim();
-            var wasInvoked = false;
+            var isTaskCompleted = false;
 
-            var disp = backgroundReceiver.Run(m =>
+            backgroundReceiver.BackgroundTaskCompleted += t =>
             {
-                @event.Wait();
-                wasInvoked = true;
-                event2.Set();
-            });
-            Assert.Same(backgroundReceiver, disp);
-
+                isTaskCompleted = true;
+                @event.Set();
+            };
+            backgroundReceiver.Run();
+            
             backgroundReceiver.Dispose();
-            @event.Set();
-            event2.Wait(waitTimeout);
-
-            Assert.False(wasInvoked);
-        }
-
-        [Fact(Skip = "TODO: ")]
-        public void OnUnhandledException_Rises_With_Correct_Exception()
-        {
-            var expected = new ArgumentNullException();
-            var actual = (Exception)null;
-            backgroundReceiver.OnUnhandlerException += e => actual = e;
-            var @event = new ManualResetEventSlim();
-
-            backgroundReceiver.Run(m =>
-            {
-                try
-                {
-                    throw expected;
-                }
-                finally
-                {
-                    @event.Set();
-                }
-            });
             @event.Wait(waitTimeout);
 
-            Assert.Equal(expected, actual);
+            Assert.True(isTaskCompleted);
+        }
+
+        [Fact]
+        public void UnhandledException_Rises_With_Correct_Exception()
+        {
+            var wasInvoked = false;            
+            var @event = new ManualResetEventSlim();
+
+            backgroundReceiver.UnhandledException += e =>
+            {
+                wasInvoked = true;
+                @event.Set();
+            };
+            backgroundReceiver.MessageReceived += m => throw new Exception();
+
+            backgroundReceiver.Run();
+            @event.Wait(waitTimeout);
+
+            Assert.True(wasInvoked);
         }
 
         public void Dispose()
         {
-            backgroundReceiver.Dispose();
+            backgroundReceiver.Stop();
         }
     }
 }
