@@ -23,7 +23,12 @@ namespace HyperMsg
             && backgroundTask.Status != TaskStatus.Canceled;
 
         public void Run()
-        {            
+        {
+            if (IsRunning)
+            {
+                return;
+            }
+
             tokenSource = new CancellationTokenSource();
             tokenSourceDisposed = false;
             backgroundTask = RunBackgroundTask(tokenSource.Token);
@@ -55,7 +60,7 @@ namespace HyperMsg
 
         private Task RunBackgroundTask(CancellationToken token)
         {
-            return Task.Run(DoWorkAsync).ContinueWith(OnBackgroundTaskFault, TaskContinuationOptions.OnlyOnFaulted);            
+            return Task.Run(DoWorkAsync).ContinueWith(OnBackgroundTaskCompleted);
         }
 
         private async Task DoWorkAsync()
@@ -74,14 +79,26 @@ namespace HyperMsg
             MessageReceived?.Invoke(message);
         }
 
+        private void OnBackgroundTaskCompleted(Task task)
+        {
+            BackgroundTaskCompleted?.Invoke(task);
+
+            if (task.Status == TaskStatus.Faulted)
+            {
+                OnBackgroundTaskFault(task);
+            }
+        }
+
         private void OnBackgroundTaskFault(Task task)
         {
             var exception = task.Exception.Flatten()?.InnerException;
-            OnUnhandlerException?.Invoke(exception);
+            UnhandledException?.Invoke(exception);
         }
 
         public Action<T> MessageReceived;
 
-        public Action<Exception> OnUnhandlerException;
+        public Action<Task> BackgroundTaskCompleted;
+
+        public Action<Exception> UnhandledException;
     }
 }

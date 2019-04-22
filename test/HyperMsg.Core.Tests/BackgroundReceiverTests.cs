@@ -44,32 +44,28 @@ namespace HyperMsg
         public void Dispose_Initiates_Background_Task_Cancellation()
         {
             var @event = new ManualResetEventSlim();
-            var @event2 = new ManualResetEventSlim();
-            var wasInvoked = false;
+            var isTaskCompleted = false;
 
-            backgroundReceiver.MessageReceived += m =>
+            backgroundReceiver.BackgroundTaskCompleted += t =>
             {
-                @event.Wait();
-                wasInvoked = true;
-                event2.Set();
+                isTaskCompleted = true;
+                @event.Set();
             };
             backgroundReceiver.Run();
             
             backgroundReceiver.Dispose();
-            @event.Set();
-            event2.Wait(waitTimeout);
+            @event.Wait(waitTimeout);
 
-            Assert.False(wasInvoked);
-            Assert.False(backgroundReceiver.IsRunning);
+            Assert.True(isTaskCompleted);
         }
 
         [Fact]
-        public void OnUnhandledException_Rises_With_Correct_Exception()
+        public void UnhandledException_Rises_With_Correct_Exception()
         {
             var wasInvoked = false;            
             var @event = new ManualResetEventSlim();
 
-            backgroundReceiver.OnUnhandlerException += e =>
+            backgroundReceiver.UnhandledException += e =>
             {
                 wasInvoked = true;
                 @event.Set();
@@ -84,7 +80,7 @@ namespace HyperMsg
 
         public void Dispose()
         {
-            backgroundReceiver.Dispose();
+            backgroundReceiver.Stop();
         }
     }
 }
