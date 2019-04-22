@@ -1,6 +1,7 @@
 name: HyperMsg.Core
 jobs:
   - job: BuildAndTest
+    displayName: Build and test
     steps:
       - task: DotNetCoreCLI@2
         name: build
@@ -8,7 +9,7 @@ jobs:
         inputs:
           command: build
           projects: src/**/*.csproj
-          
+
       - task: DotNetCoreCLI@2
         name: test
         displayName: Test
@@ -19,7 +20,15 @@ jobs:
       - task: DotNetCoreCLI@2
         inputs:
           command: 'pack'
-
       - task: PublishBuildArtifacts@1
         inputs:
           ArtifactName: 'drop'
+
+  - job: Publish
+    displayName: Publish packages
+    dependsOn: BuildAndTest
+    steps:
+      - task: DownloadBuildArtifacts@0
+        inputs:
+          artifactName: 'drop'
+          itemPattern: '*'
