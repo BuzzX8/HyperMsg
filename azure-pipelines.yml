@@ -35,5 +35,5 @@ jobs:
           itemPattern: '*'
           downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-      - script: ls $(Build.ArtifactStagingDirectory)
+      - script: ls $(Build.ArtifactStagingDirectory)/drop/
 
