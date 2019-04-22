@@ -32,9 +32,10 @@ jobs:
       - task: DownloadBuildArtifacts@0
         inputs:
           artifactName: 'drop'
-          itemPattern: '*'          
+          itemPattern: '*'
+          downloadPath: '$(System.ArtifactsDirectory)'
 
       - task: DotNetCoreCLI@2
         inputs:
           command: 'push'
-          searchPatternPush: '$(System.ArtifactsDirectory)/*.nupkg'
+          searchPatternPush: '$(System.ArtifactsDirectory)/**/*.nupkg'
