@@ -16,10 +16,9 @@ jobs:
           command: test
           projects: test/**/*.csproj
 
-      - task: CopyFiles@2
+      - task: DotNetCoreCLI@2
         inputs:
-          SourceFolder: 'src/**/bin/**/*.*'
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          command: 'pack'
 
       - task: PublishBuildArtifacts@1
         inputs:
