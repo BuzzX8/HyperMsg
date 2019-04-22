@@ -38,4 +38,5 @@ jobs:
       - task: DotNetCoreCLI@2
         inputs:
           command: 'push'
-          searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+          feedPublish: 'HyperMsg'
+
