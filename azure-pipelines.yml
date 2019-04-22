@@ -35,11 +35,9 @@ jobs:
           itemPattern: '*'
           downloadPath: '$(Build.ArtifactStagingDirectory)'
 
-      - script: echo $(Build.ArtifactStagingDirectory)
-      
       - task: DotNetCoreCLI@2
         inputs:
           command: 'push'
-          searchPatternPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+          searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
           feedPublish: 'HyperMsg'
 
