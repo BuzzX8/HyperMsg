@@ -22,16 +22,16 @@ namespace HyperMsg
             var readed = await bufferReader.ReadAsync(token);
             var result = deserialize.Invoke(readed);
 
-            if (result.BytesConsumed > 0)
+            if (result.MessageSize > 0)
             {
-                bufferReader.Advance(result.BytesConsumed);
+                bufferReader.Advance(result.MessageSize);
                 return result.Message;
             }
 
             const int DefaultReadCount = 50;
             int readCount = 0;
 
-            while (result.BytesConsumed == 0)
+            while (result.MessageSize == 0)
             {
                 readed = await bufferReader.ReadAsync(token);
                 result = deserialize.Invoke(readed);
@@ -43,7 +43,7 @@ namespace HyperMsg
                 }
             }
 
-            bufferReader.Advance(result.BytesConsumed);
+            bufferReader.Advance(result.MessageSize);
 
             return result.Message;
         }
