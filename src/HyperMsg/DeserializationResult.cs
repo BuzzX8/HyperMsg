@@ -2,6 +2,10 @@
 
 namespace HyperMsg
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public struct DeserializationResult<T> : IEquatable<DeserializationResult<T>>
     {
         public DeserializationResult(int bytesConsumed, T message)
@@ -11,15 +15,21 @@ namespace HyperMsg
                 throw new ArgumentOutOfRangeException(nameof(bytesConsumed));
             }
 
-            BytesConsumed = bytesConsumed;
+            MessageSize = bytesConsumed;
             Message = message;
         }
 
-        public int BytesConsumed { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int MessageSize { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public T Message { get; }
 
-        public override int GetHashCode() => BytesConsumed.GetHashCode() ^ Message.GetHashCode();
+        public override int GetHashCode() => MessageSize.GetHashCode() ^ Message.GetHashCode();
 
         public override bool Equals(object obj)
         {
@@ -43,7 +53,9 @@ namespace HyperMsg
                 return false;
             }
 
-            return BytesConsumed.Equals(other.BytesConsumed);
+            return MessageSize.Equals(other.MessageSize);
         }
+
+        public override string ToString() => $"{nameof(MessageSize)}:{MessageSize};{nameof(Message)}:{Message}";
     }
 }
