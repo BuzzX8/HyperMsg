@@ -30,7 +30,7 @@ namespace HyperMsg
             };
         }
 
-        public ServiceDescriptor Describe(Type serviceType, Func<IServiceProvider, object> implementationFactory)
+        public static ServiceDescriptor Describe(Type serviceType, Func<IServiceProvider, object> implementationFactory)
         {
             return new ServiceDescriptor
             {
