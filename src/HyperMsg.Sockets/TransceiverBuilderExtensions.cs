@@ -4,7 +4,7 @@ namespace HyperMsg.Sockets
 {
     public static class TransceiverBuilderExtensions
     {
-        public static void UseSockets<TSend, TReceive>(this ITransceiverBuilder<TSend, TReceive> transceiverBuilder, EndPoint endpoint)
+        public static void UseSockets<TSend, TReceive>(this IConfigurableBuilder<TSend, TReceive> transceiverBuilder, EndPoint endpoint)
         {
             transceiverBuilder.Configure(context =>
             {

@@ -2,10 +2,10 @@
 
 namespace HyperMsg
 {
-    public interface ITransceiverBuilder<in TSend, TReceive>
+    public interface IConfigurableBuilder<T>
     {
         void Configure(Action<BuilderContext> configurator);
 
-        ITransceiver<TSend, TReceive> Build();
+        T Build();
     }
 }
