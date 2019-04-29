@@ -18,7 +18,7 @@ namespace HyperMsg
         [Fact]
         public void Build_Run_All_Configurators()
         {
-            var configurators = A.CollectionOfFake<Action<BuilderContext>>(10);
+            var configurators = A.CollectionOfFake<Action<Configuration>>(10);
 
             foreach(var configurator in configurators)
             {
@@ -29,7 +29,7 @@ namespace HyperMsg
 
             foreach (var configurator in configurators)
             {
-                A.CallTo(() => configurator.Invoke(A<BuilderContext>._)).MustHaveHappened();
+                A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
             }
         }
 

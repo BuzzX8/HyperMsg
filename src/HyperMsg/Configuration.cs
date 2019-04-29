@@ -2,7 +2,7 @@
 
 namespace HyperMsg
 {
-    public class BuilderContext
+    public class Configuration
     {
         public IList<ServiceDescriptor> Services { get; } = new List<ServiceDescriptor>();
 

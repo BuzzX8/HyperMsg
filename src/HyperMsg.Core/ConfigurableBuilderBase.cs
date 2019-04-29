@@ -5,20 +5,20 @@ namespace HyperMsg
 {
     public abstract class ConfigurableBuilderBase<T> : IConfigurable
     {        
-        private readonly List<Action<BuilderContext>> configurators;
+        private readonly List<Action<Configuration>> configurators;
         private readonly ServiceProviderFactory serviceProviderFactory;
 
         public ConfigurableBuilderBase(ServiceProviderFactory serviceProviderFactory)
         {
             this.serviceProviderFactory = serviceProviderFactory ?? throw new ArgumentNullException(nameof(serviceProviderFactory));
-            configurators = new List<Action<BuilderContext>>();
+            configurators = new List<Action<Configuration>>();
         }
 
-        public void Configure(Action<BuilderContext> configurator) => configurators.Add(configurator);
+        public void Configure(Action<Configuration> configurator) => configurators.Add(configurator);
 
         public T Build()
         {
-            var context = new BuilderContext();
+            var context = new Configuration();
 
             foreach (var configurator in configurators)
             {
