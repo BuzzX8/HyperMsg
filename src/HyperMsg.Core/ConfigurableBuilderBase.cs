@@ -18,7 +18,7 @@ namespace HyperMsg
 
         public T Build()
         {
-            var context = new BuilderContext(null);
+            var context = new BuilderContext();
 
             foreach (var configurator in configurators)
             {
