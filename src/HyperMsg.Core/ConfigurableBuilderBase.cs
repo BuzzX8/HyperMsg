@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HyperMsg
 {
-    public abstract class ConfigurableBuilderBase<T> : IConfigurableBuilder<T>
+    public abstract class ConfigurableBuilderBase<T> : IConfigurable
     {        
         private readonly List<Action<BuilderContext>> configurators;
         private readonly ServiceProviderFactory serviceProviderFactory;

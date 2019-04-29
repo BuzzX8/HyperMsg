@@ -16,8 +16,8 @@ namespace HyperMsg
         {
             return new ServiceDescriptor
             {
-                ServiceType = serviceType,
-                ImplementationType = implementationType
+                ServiceType = serviceType ?? throw new ArgumentNullException(nameof(serviceType)),
+                ImplementationType = implementationType ?? throw new ArgumentNullException(nameof(implementationType))
             };
         }
 
@@ -25,8 +25,8 @@ namespace HyperMsg
         {
             return new ServiceDescriptor
             {
-                ServiceType = serviceType,
-                ImplementationInstance = implementationInstance
+                ServiceType = serviceType ?? throw new ArgumentNullException(nameof(serviceType)),
+                ImplementationInstance = implementationInstance ?? throw new ArgumentNullException(nameof(implementationInstance))
             };
         }
 
@@ -34,8 +34,8 @@ namespace HyperMsg
         {
             return new ServiceDescriptor
             {
-                ServiceType = serviceType,
-                ImplementationFactory = implementationFactory
+                ServiceType = serviceType ?? throw new ArgumentNullException(nameof(serviceType)),
+                ImplementationFactory = implementationFactory ?? throw new ArgumentNullException(nameof(implementationFactory))
             };                
         }
     }

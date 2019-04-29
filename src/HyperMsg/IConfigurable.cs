@@ -2,10 +2,8 @@
 
 namespace HyperMsg
 {
-    public interface IConfigurableBuilder<T>
+    public interface IConfigurable
     {
         void Configure(Action<BuilderContext> configurator);
-
-        T Build();
     }
 }
