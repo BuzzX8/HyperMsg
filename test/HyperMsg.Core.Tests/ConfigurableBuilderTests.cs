@@ -4,12 +4,12 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class ConfigurableBuilderBaseTests
+    public class ConfigurableBuilderTests
     {
         private readonly IServiceProvider serviceProvider;
         private readonly ConfigurableBuilderImpl builder;
 
-        public ConfigurableBuilderBaseTests()
+        public ConfigurableBuilderTests()
         {
             serviceProvider = A.Fake<IServiceProvider>();
             builder = new ConfigurableBuilderImpl(d => serviceProvider);
@@ -18,7 +18,7 @@ namespace HyperMsg
         [Fact]
         public void Build_Run_All_Configurators()
         {
-            var configurators = A.CollectionOfFake<Action<BuilderContext>>(10);
+            var configurators = A.CollectionOfFake<Action<Configuration>>(10);
 
             foreach(var configurator in configurators)
             {
@@ -29,16 +29,16 @@ namespace HyperMsg
 
             foreach (var configurator in configurators)
             {
-                A.CallTo(() => configurator.Invoke(A<BuilderContext>._)).MustHaveHappened();
+                A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
             }
         }
 
-        private class ConfigurableBuilderImpl : ConfigurableBuilderBase<string>
+        private class ConfigurableBuilderImpl : ConfigurableBuilde<string>
         {
             public ConfigurableBuilderImpl(ServiceProviderFactory serviceProviderFactory) : base(serviceProviderFactory)
             { }
 
-            protected override string Build(IServiceProvider serviceProvider)
+            protected override string Build(IServiceProvider serviceProvider, Configuration configuration)
             {
                 return string.Empty;
             }
