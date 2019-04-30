@@ -4,12 +4,12 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class ConfigurableBuilderBaseTests
+    public class ConfigurableBuilderTests
     {
         private readonly IServiceProvider serviceProvider;
         private readonly ConfigurableBuilderImpl builder;
 
-        public ConfigurableBuilderBaseTests()
+        public ConfigurableBuilderTests()
         {
             serviceProvider = A.Fake<IServiceProvider>();
             builder = new ConfigurableBuilderImpl(d => serviceProvider);
@@ -33,12 +33,12 @@ namespace HyperMsg
             }
         }
 
-        private class ConfigurableBuilderImpl : ConfigurableBuilderBase<string>
+        private class ConfigurableBuilderImpl : ConfigurableBuilde<string>
         {
             public ConfigurableBuilderImpl(ServiceProviderFactory serviceProviderFactory) : base(serviceProviderFactory)
             { }
 
-            protected override string Build(IServiceProvider serviceProvider)
+            protected override string Build(IServiceProvider serviceProvider, Configuration configuration)
             {
                 return string.Empty;
             }
