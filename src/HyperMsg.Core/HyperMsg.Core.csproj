@@ -1,15 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.1</LangVersion>
     <RootNamespace>HyperMsg</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="FakeItEasy" Version="4.9.2" />
-    <PackageReference Include="System.IO.Pipelines" Version="4.5.2" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\HyperMsg\HyperMsg.csproj" />
