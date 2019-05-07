@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public interface ICommandHandler
+    public interface ICommandHandler<T>
     {
-        void Handle<T>(T command);
+        void Handle(T command);
 
-        Task HandleAsync<T>(T command, CancellationToken token = default);
+        Task HandleAsync(T command, CancellationToken token = default);
     }
 }
