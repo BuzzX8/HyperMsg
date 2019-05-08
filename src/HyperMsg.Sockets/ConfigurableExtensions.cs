@@ -9,8 +9,9 @@ namespace HyperMsg.Sockets
             configurable.Configure(context =>
             {
                 var socket = new SocketProxy(SocketFactory.CreateTcpSocket(), endpoint);
-                var stream = new SocketStream(socket);
-                context.Services.Add(ServiceDescriptor.Describe(typeof(IStream), stream));
+                var transport = new SocketTransport(socket);
+                context.Services.Add(ServiceDescriptor.Describe(typeof(IStream), transport));
+                context.Services.Add(ServiceDescriptor.Describe(typeof(IHandler<TransportCommands>), transport));
             });
         }
     }

@@ -12,17 +12,17 @@ namespace HyperMsg
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="command"></param>
-        void Handle<T>(T command);
+        /// <param name="message"></param>
+        void Handle<T>(T message);
 
         /// <summary>
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="command"></param>
+        /// <param name="message"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task HandleAsync<T>(T command, CancellationToken token = default);
+        Task HandleAsync<T>(T message, CancellationToken token = default);
     }
 
     /// <summary>
@@ -34,15 +34,15 @@ namespace HyperMsg
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="command"></param>
-        void Handle(T command);
+        /// <param name="message"></param>
+        void Handle(T message);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="command"></param>
+        /// <param name="message"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task HandleAsync(T command, CancellationToken token = default);
+        Task HandleAsync(T message, CancellationToken token = default);
     }    
 }
