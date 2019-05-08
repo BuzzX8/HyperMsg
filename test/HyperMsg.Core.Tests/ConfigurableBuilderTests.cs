@@ -7,12 +7,13 @@ namespace HyperMsg
     public class ConfigurableBuilderTests
     {
         private readonly IServiceProvider serviceProvider;
-        private readonly ConfigurableBuilderImpl builder;
+        private readonly ConfigurableBuilder<string> builder;
 
         public ConfigurableBuilderTests()
         {
             serviceProvider = A.Fake<IServiceProvider>();
-            builder = new ConfigurableBuilderImpl(d => serviceProvider);
+            A.CallTo(() => serviceProvider.GetService(typeof(string))).Returns(string.Empty);
+            builder = new ConfigurableBuilder<string>(d => serviceProvider);
         }
 
         [Fact]
@@ -30,17 +31,6 @@ namespace HyperMsg
             foreach (var configurator in configurators)
             {
                 A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
-            }
-        }
-
-        private class ConfigurableBuilderImpl : ConfigurableBuilde<string>
-        {
-            public ConfigurableBuilderImpl(ServiceProviderFactory serviceProviderFactory) : base(serviceProviderFactory)
-            { }
-
-            protected override string Build(IServiceProvider serviceProvider, Configuration configuration)
-            {
-                return string.Empty;
             }
         }
     }

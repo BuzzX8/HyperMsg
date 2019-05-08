@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace HyperMsg
 {
-    public abstract class ConfigurableBuilde<T> : IConfigurable
+    public class ConfigurableBuilder<T> : IConfigurable
     {        
         private readonly List<Action<Configuration>> configurators;
         private readonly ServiceProviderFactory serviceProviderFactory;
 
-        public ConfigurableBuilde(ServiceProviderFactory serviceProviderFactory)
+        public ConfigurableBuilder(ServiceProviderFactory serviceProviderFactory)
         {
             this.serviceProviderFactory = serviceProviderFactory ?? throw new ArgumentNullException(nameof(serviceProviderFactory));
             configurators = new List<Action<Configuration>>();
@@ -27,9 +27,7 @@ namespace HyperMsg
 
             var serviceProvider = serviceProviderFactory.Invoke(configuration.Services);
 
-            return Build(serviceProvider, configuration);
+            return (T)serviceProvider.GetService(typeof(T));
         }
-
-        protected abstract T Build(IServiceProvider serviceProvider, Configuration configuration);
     }
 }
