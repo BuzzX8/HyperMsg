@@ -1,20 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : IDisposable
+    public class BackgroundReceiver<T> : IDisposable, IHandler<ReceiveMode>
     {
         private readonly IReceiver<T> messageReceiver;
+        private readonly IEnumerable<IHandler<T>> messageHandlers;
 
         private CancellationTokenSource tokenSource;        
         private Task backgroundTask;
         private bool tokenSourceDisposed;
 
-        public BackgroundReceiver(IReceiver<T> messageReceiver)
+        public BackgroundReceiver(IReceiver<T> messageReceiver, IEnumerable<IHandler<T>> messageHandlers)
         {
             this.messageReceiver = messageReceiver ?? throw new ArgumentNullException(nameof(messageReceiver));
+            this.messageHandlers = messageHandlers ?? throw new ArgumentNullException(nameof(messageHandlers));
             backgroundTask = Task.CompletedTask;
         }
 
@@ -31,7 +34,7 @@ namespace HyperMsg
 
             tokenSource = new CancellationTokenSource();
             tokenSourceDisposed = false;
-            backgroundTask = RunBackgroundTask(tokenSource.Token);
+            backgroundTask = RunBackgroundTask();
         }
 
         public void Dispose()
@@ -58,7 +61,7 @@ namespace HyperMsg
             return backgroundTask.Wait(waitTimeout);
         }
 
-        private Task RunBackgroundTask(CancellationToken token)
+        private Task RunBackgroundTask()
         {
             return Task.Run(DoWorkAsync).ContinueWith(OnBackgroundTaskCompleted);
         }
@@ -70,13 +73,12 @@ namespace HyperMsg
             while (!token.IsCancellationRequested)
             {
                 var message = await messageReceiver.ReceiveAsync(token);
-                OnMessageReceived(message);
+                
+                foreach (var handler in messageHandlers)
+                {
+                    await handler.HandleAsync(message, token);
+                }
             }
-        }
-
-        private void OnMessageReceived(T message)
-        {
-            MessageReceived?.Invoke(message);
         }
 
         private void OnBackgroundTaskCompleted(Task task)
@@ -93,6 +95,26 @@ namespace HyperMsg
         {
             var exception = task.Exception.Flatten()?.InnerException;
             UnhandledException?.Invoke(exception);
+        }
+
+        public void Handle(ReceiveMode message)
+        {
+            switch (message)
+            {
+                case ReceiveMode.Proactive:
+                    Stop();
+                    break;
+
+                case ReceiveMode.Reactive:
+                    Run();
+                    break;
+            }
+        }
+
+        public Task HandleAsync(ReceiveMode message, CancellationToken token = default)
+        {
+            Handle(message);
+            return Task.CompletedTask;
         }
 
         public Action<T> MessageReceived;
