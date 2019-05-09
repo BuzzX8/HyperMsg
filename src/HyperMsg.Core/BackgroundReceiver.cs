@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : IDisposable, IHandler<ReceiveModeCommands>
+    public class BackgroundReceiver<T> : IDisposable, IHandler<ReceiveMode>
     {
         private readonly IReceiver<T> messageReceiver;
         private readonly IEnumerable<IHandler<T>> messageHandlers;
@@ -34,7 +34,7 @@ namespace HyperMsg
 
             tokenSource = new CancellationTokenSource();
             tokenSourceDisposed = false;
-            backgroundTask = RunBackgroundTask(tokenSource.Token);
+            backgroundTask = RunBackgroundTask();
         }
 
         public void Dispose()
@@ -61,7 +61,7 @@ namespace HyperMsg
             return backgroundTask.Wait(waitTimeout);
         }
 
-        private Task RunBackgroundTask(CancellationToken token)
+        private Task RunBackgroundTask()
         {
             return Task.Run(DoWorkAsync).ContinueWith(OnBackgroundTaskCompleted);
         }
@@ -97,21 +97,21 @@ namespace HyperMsg
             UnhandledException?.Invoke(exception);
         }
 
-        public void Handle(ReceiveModeCommands message)
+        public void Handle(ReceiveMode message)
         {
             switch (message)
             {
-                case ReceiveModeCommands.SetProactiveMode:
+                case ReceiveMode.Proactive:
                     Stop();
                     break;
 
-                case ReceiveModeCommands.SetReactiveMode:
+                case ReceiveMode.Reactive:
                     Run();
                     break;
             }
         }
 
-        public Task HandleAsync(ReceiveModeCommands message, CancellationToken token = default)
+        public Task HandleAsync(ReceiveMode message, CancellationToken token = default)
         {
             Handle(message);
             return Task.CompletedTask;
