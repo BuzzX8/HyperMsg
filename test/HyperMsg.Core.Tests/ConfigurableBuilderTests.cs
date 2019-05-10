@@ -17,7 +17,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Build_Run_All_Configurators()
+        public void Build_Invokes_Configurators()
         {
             var configurators = A.CollectionOfFake<Action<Configuration>>(10);
 
@@ -32,6 +32,18 @@ namespace HyperMsg
             {
                 A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
             }
+        }
+
+        [Fact]
+        public void Build_Invokes_Parametrized_Configurators()
+        {
+            var settings = Guid.NewGuid();
+            var configurator = A.Fake<Action<Configuration, object>>();
+            builder.Configure(configurator, settings);
+
+            builder.Build();
+
+            A.CallTo(() => configurator.Invoke(A<Configuration>._, settings)).MustHaveHappened();
         }
     }
 }
