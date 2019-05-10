@@ -9,23 +9,27 @@ namespace HyperMsg
         private readonly List<(Action<Configuration, object>, object)> parametrizedConfigurators;
         private readonly ServiceProviderFactory serviceProviderFactory;
 
+        private readonly Dictionary<string, object> settings;
+
         public ConfigurableBuilder(ServiceProviderFactory serviceProviderFactory)
         {
             this.serviceProviderFactory = serviceProviderFactory ?? throw new ArgumentNullException(nameof(serviceProviderFactory));
             configurators = new List<Action<Configuration>>();
             parametrizedConfigurators = new List<(Action<Configuration, object>, object)>();
+            settings = new Dictionary<string, object>();
         }
 
         public void Configure(Action<Configuration> configurator) => configurators.Add(configurator);
 
-        public void Configure(Action<Configuration, object> configurator, object settings)
+        public void Configure(Action<Configuration> configurator, string settingsName, object settings)
         {
-            parametrizedConfigurators.Add((configurator, settings));
+            configurators.Add(configurator);
+            this.settings.Add(settingsName, settings);
         }
 
         public T Build()
         {
-            var configuration = new Configuration();
+            var configuration = new Configuration(new List<ServiceDescriptor>(), settings);            
 
             foreach (var configurator in configurators)
             {

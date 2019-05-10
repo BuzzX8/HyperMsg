@@ -1,11 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace HyperMsg
 {
     public class Configuration
     {
-        public IList<ServiceDescriptor> Services { get; } = new List<ServiceDescriptor>();
+        public Configuration(ICollection<ServiceDescriptor> services, IReadOnlyDictionary<string, object> settings)
+        {
+            Services = services ?? throw new ArgumentNullException(nameof(services));
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        }
 
-        public IDictionary<string, object> Settings { get; } = new Dictionary<string, object>();
+        public ICollection<ServiceDescriptor> Services { get; } = new List<ServiceDescriptor>();
+
+        public IReadOnlyDictionary<string, object> Settings { get; } = new Dictionary<string, object>();
     }
 }

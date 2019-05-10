@@ -6,7 +6,7 @@ namespace HyperMsg
     {
         public static void UseTransciever<T>(this IConfigurable configurable)
         {
-            configurable.Configure((c, s) => 
+            configurable.Configure((c) => 
             {
                 var service = ServiceDescriptor.Describe(typeof(ITransceiver<T, T>), p =>
                 {
@@ -16,7 +16,7 @@ namespace HyperMsg
                     return transciever;
                 });
                 c.Services.Add(service);
-            }, null);
+            }, "bs", "");
         }
     }
 }

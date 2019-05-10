@@ -6,6 +6,6 @@ namespace HyperMsg
     {
         void Configure(Action<Configuration> configurator);
 
-        void Configure(Action<Configuration, object> configurator, object settings);
+        void Configure(Action<Configuration> configurator, string settingsName, object settings);
     }
 }

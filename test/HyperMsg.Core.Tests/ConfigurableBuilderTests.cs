@@ -38,12 +38,12 @@ namespace HyperMsg
         public void Build_Invokes_Parametrized_Configurators()
         {
             var settings = Guid.NewGuid();
-            var configurator = A.Fake<Action<Configuration, object>>();
-            builder.Configure(configurator, settings);
+            var configurator = A.Fake<Action<Configuration>>();
+            builder.Configure(configurator, "", settings);
 
             builder.Build();
 
-            A.CallTo(() => configurator.Invoke(A<Configuration>._, settings)).MustHaveHappened();
+            A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
         }
     }
 }
