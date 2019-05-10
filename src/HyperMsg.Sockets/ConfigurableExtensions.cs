@@ -4,15 +4,18 @@ namespace HyperMsg.Sockets
 {
     public static class ConfigurableExtensions
     {
-        public static void UseSockets<T>(this IConfigurable configurable, EndPoint endpoint)
+        public static void UseSockets(this IConfigurable configurable, EndPoint endpoint)
         {
-            configurable.Configure(context =>
-            {
-                var socket = new SocketProxy(SocketFactory.CreateTcpSocket(), endpoint);
-                var transport = new SocketTransport(socket);
-                context.Services.Add(ServiceDescriptor.Describe(typeof(IStream), transport));
-                context.Services.Add(ServiceDescriptor.Describe(typeof(IHandler<TransportCommands>), transport));
-            });
+            configurable.AddSetting(nameof(EndPoint), endpoint);
+            configurable.Configure(AddSocketServices);
+        }
+
+        private static void AddSocketServices(Configuration configuration)
+        {
+            var socket = new SocketProxy(SocketFactory.CreateTcpSocket(), (EndPoint)configuration.Settings[nameof(EndPoint)]);
+            var transport = new SocketTransport(socket);
+            configuration.Services.Add(ServiceDescriptor.Describe(typeof(IStream), transport));
+            configuration.Services.Add(ServiceDescriptor.Describe(typeof(IHandler<TransportCommands>), transport));
         }
     }
 }

@@ -17,7 +17,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Build_Run_All_Configurators()
+        public void Build_Invokes_Configurators()
         {
             var configurators = A.CollectionOfFake<Action<Configuration>>(10);
 
