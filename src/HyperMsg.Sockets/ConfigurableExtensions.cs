@@ -4,9 +4,10 @@ namespace HyperMsg.Sockets
 {
     public static class ConfigurableExtensions
     {
-        public static void UseSockets<T>(this IConfigurable configurable, EndPoint endpoint)
+        public static void UseSockets(this IConfigurable configurable, EndPoint endpoint)
         {
-            configurable.Configure(AddSocketServices, nameof(EndPoint), endpoint);
+            configurable.AddSetting(nameof(EndPoint), endpoint);
+            configurable.Configure(AddSocketServices);
         }
 
         private static void AddSocketServices(Configuration configuration)

@@ -19,13 +19,9 @@ namespace HyperMsg
             settings = new Dictionary<string, object>();
         }
 
-        public void Configure(Action<Configuration> configurator) => configurators.Add(configurator);
+        public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void Configure(Action<Configuration> configurator, string settingsName, object settings)
-        {
-            configurators.Add(configurator);
-            this.settings.Add(settingsName, settings);
-        }
+        public void Configure(Action<Configuration> configurator) => configurators.Add(configurator);
 
         public T Build()
         {

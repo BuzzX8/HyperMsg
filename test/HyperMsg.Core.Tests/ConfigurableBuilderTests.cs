@@ -33,17 +33,5 @@ namespace HyperMsg
                 A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
             }
         }
-
-        [Fact]
-        public void Build_Invokes_Parametrized_Configurators()
-        {
-            var settings = Guid.NewGuid();
-            var configurator = A.Fake<Action<Configuration>>();
-            builder.Configure(configurator, "", settings);
-
-            builder.Build();
-
-            A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
-        }
     }
 }

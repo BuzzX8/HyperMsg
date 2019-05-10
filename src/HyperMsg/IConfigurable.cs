@@ -4,8 +4,8 @@ namespace HyperMsg
 {
     public interface IConfigurable
     {
-        void Configure(Action<Configuration> configurator);
+        void AddSetting(string settingName, object setting);
 
-        void Configure(Action<Configuration> configurator, string settingsName, object settings);
+        void Configure(Action<Configuration> configurator);
     }
 }

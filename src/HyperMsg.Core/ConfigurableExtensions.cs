@@ -16,7 +16,7 @@ namespace HyperMsg
                     return transciever;
                 });
                 c.Services.Add(service);
-            }, "bs", "");
+            });
         }
     }
 }
