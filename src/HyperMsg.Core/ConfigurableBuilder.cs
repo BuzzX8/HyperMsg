@@ -20,14 +20,14 @@ namespace HyperMsg
 
         public T Build()
         {
-            var configurationContext = default(IConfigurationContext);
+            var context = new ConfigurationContext();
 
             foreach (var configurator in configurators)
             {
-                configurator.Invoke(null);
+                configurator.Invoke(context);
             }
 
-            return (T)configurationContext.GetService(typeof(T));
+            return (T)context.GetService(typeof(T));
         }
     }
 }
