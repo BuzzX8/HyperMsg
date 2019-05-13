@@ -10,12 +10,12 @@ namespace HyperMsg.Sockets
             configurable.Configure(AddSocketServices);
         }
 
-        private static void AddSocketServices(Configuration configuration)
+        private static void AddSocketServices(IConfigurationContext context)
         {
-            var socket = new SocketProxy(SocketFactory.CreateTcpSocket(), (EndPoint)configuration.Settings[nameof(EndPoint)]);
+            var socket = new SocketProxy(SocketFactory.CreateTcpSocket(), (EndPoint)context.GetSetting(nameof(EndPoint)));
             var transport = new SocketTransport(socket);
-            configuration.Services.Add(ServiceDescriptor.Describe(typeof(IStream), transport));
-            configuration.Services.Add(ServiceDescriptor.Describe(typeof(IHandler<TransportCommands>), transport));
+            context.RegisterService(typeof(IStream), transport);
+            context.RegisterService(typeof(IHandler<TransportCommands>), transport);
         }
     }
 }

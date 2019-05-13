@@ -5,21 +5,18 @@ using Xunit;
 namespace HyperMsg
 {
     public class ConfigurableBuilderTests
-    {
-        private readonly IServiceProvider serviceProvider;
+    {        
         private readonly ConfigurableBuilder<string> builder;
 
         public ConfigurableBuilderTests()
         {
-            serviceProvider = A.Fake<IServiceProvider>();
-            A.CallTo(() => serviceProvider.GetService(typeof(string))).Returns(string.Empty);
-            builder = new ConfigurableBuilder<string>(d => serviceProvider);
+            builder = new ConfigurableBuilder<string>();
         }
 
         [Fact]
         public void Build_Invokes_Configurators()
         {
-            var configurators = A.CollectionOfFake<Action<Configuration>>(10);
+            var configurators = A.CollectionOfFake<Action<IConfigurationContext>>(10);
 
             foreach(var configurator in configurators)
             {
@@ -30,7 +27,7 @@ namespace HyperMsg
 
             foreach (var configurator in configurators)
             {
-                A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
+                A.CallTo(() => configurator.Invoke(A<IConfigurationContext>._)).MustHaveHappened();
             }
         }
     }

@@ -5,41 +5,29 @@ namespace HyperMsg
 {
     public class ConfigurableBuilder<T> : IConfigurable
     {        
-        private readonly List<Action<Configuration>> configurators;
-        private readonly List<(Action<Configuration, object>, object)> parametrizedConfigurators;
-        private readonly ServiceProviderFactory serviceProviderFactory;
-
+        private readonly List<Action<IConfigurationContext>> configurators;
         private readonly Dictionary<string, object> settings;
 
-        public ConfigurableBuilder(ServiceProviderFactory serviceProviderFactory)
+        public ConfigurableBuilder()
         {
-            this.serviceProviderFactory = serviceProviderFactory ?? throw new ArgumentNullException(nameof(serviceProviderFactory));
-            configurators = new List<Action<Configuration>>();
-            parametrizedConfigurators = new List<(Action<Configuration, object>, object)>();
+            configurators = new List<Action<IConfigurationContext>>();
             settings = new Dictionary<string, object>();
         }
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void Configure(Action<Configuration> configurator) => configurators.Add(configurator);
+        public void Configure(Action<IConfigurationContext> configurator) => configurators.Add(configurator);
 
         public T Build()
         {
-            var configuration = new Configuration(new List<ServiceDescriptor>(), settings);            
+            var configurationContext = default(IConfigurationContext);
 
             foreach (var configurator in configurators)
             {
-                configurator.Invoke(configuration);
+                configurator.Invoke(null);
             }
 
-            foreach (var configurator in parametrizedConfigurators)
-            {
-                configurator.Item1(configuration, configurator.Item2);
-            }
-
-            var serviceProvider = serviceProviderFactory.Invoke(configuration.Services);
-
-            return (T)serviceProvider.GetService(typeof(T));
+            return (T)configurationContext.GetService(typeof(T));
         }
     }
 }
