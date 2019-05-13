@@ -1,33 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
+using Configurator = System.Action<HyperMsg.IConfigurationContext>;
 
 namespace HyperMsg
 {
     public class ConfigurableBuilder<T> : IConfigurable
     {        
-        private readonly List<Action<IConfigurationContext>> configurators;
+        private readonly Queue<Configurator> configurators;
         private readonly Dictionary<string, object> settings;
+                
+        private Configurator currentConfigurator;
+        private ConfigurationContext currentContext;
 
         public ConfigurableBuilder()
         {
-            configurators = new List<Action<IConfigurationContext>>();
+            configurators = new Queue<Configurator>();
             settings = new Dictionary<string, object>();
         }
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void Configure(Action<IConfigurationContext> configurator) => configurators.Add(configurator);
+        public void Configure(Configurator configurator) => configurators.Enqueue(configurator);
 
         public T Build()
         {
-            var context = new ConfigurationContext();
+            currentContext = new ConfigurationContext(Resolve);
+            InvokeNextConfigurator();
 
-            foreach (var configurator in configurators)
+            return (T)currentContext.GetService(typeof(T));
+        }
+
+        private void Resolve(Type serviceType)
+        {
+            InvokeNextConfigurator();
+
+            if (!currentContext.Services.ContainsKey(serviceType))
             {
-                configurator.Invoke(context);
+                Resolve(serviceType);
             }
+        }
 
-            return (T)context.GetService(typeof(T));
+        private void InvokeNextConfigurator()
+        {
+            while (configurators.Count > 0)
+            {
+                currentConfigurator = configurators.Dequeue();
+                currentConfigurator.Invoke(currentContext);
+            }
         }
     }
 }
