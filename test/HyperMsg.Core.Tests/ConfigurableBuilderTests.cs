@@ -5,23 +5,21 @@ using Xunit;
 namespace HyperMsg
 {
     public class ConfigurableBuilderTests
-    {
-        private readonly IServiceProvider serviceProvider;
+    {        
         private readonly ConfigurableBuilder<string> builder;
 
         public ConfigurableBuilderTests()
         {
-            serviceProvider = A.Fake<IServiceProvider>();
-            A.CallTo(() => serviceProvider.GetService(typeof(string))).Returns(string.Empty);
-            builder = new ConfigurableBuilder<string>(d => serviceProvider);
+            builder = new ConfigurableBuilder<string>();
         }
 
         [Fact]
         public void Build_Invokes_Configurators()
         {
-            var configurators = A.CollectionOfFake<Action<Configuration>>(10);
+            var configurators = A.CollectionOfFake<Action<IConfigurationContext>>(10);
+            builder.Configure(c => c.RegisterService(typeof(string), ""));
 
-            foreach(var configurator in configurators)
+            foreach (var configurator in configurators)
             {
                 builder.Configure(configurator);
             }
@@ -30,8 +28,76 @@ namespace HyperMsg
 
             foreach (var configurator in configurators)
             {
-                A.CallTo(() => configurator.Invoke(A<Configuration>._)).MustHaveHappened();
+                A.CallTo(() => configurator.Invoke(A<IConfigurationContext>._)).MustHaveHappened();
             }
+        }
+
+        [Fact]
+        public void Build_Returns_Registered_Service()
+        {
+            var expected = Guid.NewGuid().ToString();
+            builder.Configure(c =>
+            {
+                c.RegisterService(typeof(string), expected);
+            });
+
+            var actual = builder.Build();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ConfigurationContext_GetSetting_Returns_Previuosly_Added_Setting()
+        {
+            var expected = Guid.NewGuid();
+            var actual = Guid.Empty;
+            builder.AddSetting(nameof(Guid), expected);
+            builder.Configure(c =>
+            {
+                actual = (Guid)c.GetSetting(nameof(Guid));
+                c.RegisterService(typeof(string), "");
+            });
+
+            builder.Build();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ConfigurationContext_GetService_Returns_Previously_Registered_Service()
+        {
+            var expected = Guid.NewGuid();
+            var actual = Guid.Empty;
+            builder.Configure(c => c.RegisterService(typeof(Guid), expected));
+
+            builder.Configure(c =>
+            {
+                actual = (Guid)c.GetService(typeof(Guid));
+                c.RegisterService(typeof(string), "");
+            });
+
+            builder.Build();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ConfigurationContext_GetService_Returns_Service_Registered_After()
+        {
+            var expected = Guid.NewGuid();
+            var actual = Guid.Empty;
+
+            builder.Configure(c =>
+            {
+                actual = (Guid)c.GetService(typeof(Guid));
+                c.RegisterService(typeof(string), "");
+            });
+
+            builder.Configure(c => c.RegisterService(typeof(Guid), expected));            
+
+            builder.Build();
+
+            Assert.Equal(expected, actual);
         }
     }
 }

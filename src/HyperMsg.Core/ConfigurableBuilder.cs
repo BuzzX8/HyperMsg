@@ -1,45 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
+using Configurator = System.Action<HyperMsg.IConfigurationContext>;
 
 namespace HyperMsg
 {
     public class ConfigurableBuilder<T> : IConfigurable
     {        
-        private readonly List<Action<Configuration>> configurators;
-        private readonly List<(Action<Configuration, object>, object)> parametrizedConfigurators;
-        private readonly ServiceProviderFactory serviceProviderFactory;
-
+        private readonly Queue<Configurator> configurators;
         private readonly Dictionary<string, object> settings;
+                
+        private Configurator currentConfigurator;
+        private ConfigurationContext currentContext;
 
-        public ConfigurableBuilder(ServiceProviderFactory serviceProviderFactory)
+        public ConfigurableBuilder()
         {
-            this.serviceProviderFactory = serviceProviderFactory ?? throw new ArgumentNullException(nameof(serviceProviderFactory));
-            configurators = new List<Action<Configuration>>();
-            parametrizedConfigurators = new List<(Action<Configuration, object>, object)>();
+            configurators = new Queue<Configurator>();
             settings = new Dictionary<string, object>();
         }
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void Configure(Action<Configuration> configurator) => configurators.Add(configurator);
+        public void Configure(Configurator configurator) => configurators.Enqueue(configurator);
 
         public T Build()
         {
-            var configuration = new Configuration(new List<ServiceDescriptor>(), settings);            
+            currentContext = new ConfigurationContext(settings, ResolveService);
+            InvokeNextConfigurator();
 
-            foreach (var configurator in configurators)
+            return (T)currentContext.GetService(typeof(T));
+        }
+
+        private void ResolveService(Type serviceType)
+        {
+            InvokeNextConfigurator();
+
+            if (!currentContext.Services.ContainsKey(serviceType))
             {
-                configurator.Invoke(configuration);
+                ResolveService(serviceType);
             }
+        }
 
-            foreach (var configurator in parametrizedConfigurators)
+        private void InvokeNextConfigurator()
+        {
+            while (configurators.Count > 0)
             {
-                configurator.Item1(configuration, configurator.Item2);
+                currentConfigurator = configurators.Dequeue();
+                currentConfigurator.Invoke(currentContext);
             }
-
-            var serviceProvider = serviceProviderFactory.Invoke(configuration.Services);
-
-            return (T)serviceProvider.GetService(typeof(T));
         }
     }
 }

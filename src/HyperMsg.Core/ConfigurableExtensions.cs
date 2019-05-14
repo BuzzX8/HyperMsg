@@ -6,16 +6,13 @@ namespace HyperMsg
     {
         public static void UseTransciever<T>(this IConfigurable configurable)
         {
-            configurable.Configure((c) => 
+            configurable.Configure(context => 
             {
-                var service = ServiceDescriptor.Describe(typeof(ITransceiver<T, T>), p =>
-                {
-                    var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
-                    var stream = (IStream)p.GetService(typeof(IStream));
-                    var transciever = new MessageTransceiver<T>(serializer, new Memory<byte>(), new Memory<byte>(), stream);
-                    return transciever;
-                });
-                c.Services.Add(service);
+                var serializer = (ISerializer<T>)context.GetService(typeof(ISerializer<T>));
+                var stream = (IStream)context.GetService(typeof(IStream));
+                var transciever = new MessageTransceiver<T>(serializer, new Memory<byte>(), new Memory<byte>(), stream);
+
+                context.RegisterService(typeof(ITransceiver<T, T>), transciever);
             });
         }
     }
