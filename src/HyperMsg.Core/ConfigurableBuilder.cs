@@ -24,19 +24,19 @@ namespace HyperMsg
 
         public T Build()
         {
-            currentContext = new ConfigurationContext(Resolve);
+            currentContext = new ConfigurationContext(settings, ResolveService);
             InvokeNextConfigurator();
 
             return (T)currentContext.GetService(typeof(T));
         }
 
-        private void Resolve(Type serviceType)
+        private void ResolveService(Type serviceType)
         {
             InvokeNextConfigurator();
 
             if (!currentContext.Services.ContainsKey(serviceType))
             {
-                Resolve(serviceType);
+                ResolveService(serviceType);
             }
         }
 

@@ -47,6 +47,23 @@ namespace HyperMsg
         }
 
         [Fact]
+        public void ConfigurationContext_GetSetting_Returns_Previuosly_Added_Setting()
+        {
+            var expected = Guid.NewGuid();
+            var actual = Guid.Empty;
+            builder.AddSetting(nameof(Guid), expected);
+            builder.Configure(c =>
+            {
+                actual = (Guid)c.GetSetting(nameof(Guid));
+                c.RegisterService(typeof(string), "");
+            });
+
+            builder.Build();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public void ConfigurationContext_GetService_Returns_Previously_Registered_Service()
         {
             var expected = Guid.NewGuid();

@@ -5,22 +5,23 @@ namespace HyperMsg
 {
     internal class ConfigurationContext : IConfigurationContext
     {
-        private readonly Dictionary<string, object> settings;        
-        private readonly Action<Type> requireService;
+        private readonly Dictionary<string, object> settings;
+        private readonly Action<Type> resolveService;
 
         internal readonly Dictionary<Type, object> Services;
 
-        internal ConfigurationContext(Action<Type> requireService)
+        internal ConfigurationContext(Dictionary<string, object> settings, Action<Type> resolveService)
         {
-            this.requireService = requireService;
-            Services = new Dictionary<Type, object>();
+            this.settings = settings;
+            this.resolveService = resolveService;
+            Services = new Dictionary<Type, object>();            
         }
 
         public object GetService(Type serviceType)
         {
             if (!Services.ContainsKey(serviceType))
             {
-                requireService(serviceType);
+                resolveService(serviceType);
             }
 
             return Services[serviceType];
