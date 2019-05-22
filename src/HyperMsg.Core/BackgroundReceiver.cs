@@ -10,15 +10,10 @@ namespace HyperMsg
         private readonly IReceiver<T> messageReceiver;
         private readonly IEnumerable<IHandler<T>> messageHandlers;
 
-        private CancellationTokenSource tokenSource;        
-        private Task backgroundTask;
-        private bool tokenSourceDisposed;
-
         public BackgroundReceiver(IReceiver<T> messageReceiver, IEnumerable<IHandler<T>> messageHandlers)
         {
             this.messageReceiver = messageReceiver ?? throw new ArgumentNullException(nameof(messageReceiver));
             this.messageHandlers = messageHandlers ?? throw new ArgumentNullException(nameof(messageHandlers));
-            backgroundTask = Task.CompletedTask;
         }
 
         protected override async Task DoWorkIterationAsync(CancellationToken cancellationToken)
