@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Sockets
 {
-    internal class SocketProxy : ISocket, IDisposable
+    internal class SocketProxy : ISocket, ISupportsTls, IDisposable
     {
         private readonly Socket socket;        
         private readonly EndPoint endpoint;
@@ -37,7 +37,7 @@ namespace HyperMsg.Sockets
 
         public void Dispose() => Disconnect();
 
-        public void SetTransportLevelSecurity()
+        public void SetTls()
         {
             if (stream == null)
             {
