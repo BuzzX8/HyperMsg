@@ -23,7 +23,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Run_Invokes_Message_Handler()
+        public void Invokes_Message_Handler_After_Switching_To_Reactive_Mode()
         {
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;            
@@ -38,7 +38,7 @@ namespace HyperMsg
             messageHandlers.Add(handler);
 
             Assert.False(backgroundReceiver.IsRunning);
-            backgroundReceiver.Run();
+            backgroundReceiver.Handle(ReceiveMode.Reactive);
             Assert.True(backgroundReceiver.IsRunning);
             @event.Wait(waitTimeout);
 
@@ -56,8 +56,8 @@ namespace HyperMsg
                 isTaskCompleted = true;
                 @event.Set();
             };
-            backgroundReceiver.Run();
-            
+            backgroundReceiver.Handle(ReceiveMode.Reactive);
+
             backgroundReceiver.Dispose();
             @event.Wait(waitTimeout);
 
@@ -80,7 +80,7 @@ namespace HyperMsg
             A.CallTo(() => handler.HandleAsync(A<Guid>._, A<CancellationToken>._)).Returns(Task.FromException(expected));
             messageHandlers.Add(handler);
 
-            backgroundReceiver.Run();
+            backgroundReceiver.Handle(ReceiveMode.Reactive);
             @event.Wait(waitTimeout);
             
             Assert.Equal(expected, actual);
@@ -88,7 +88,7 @@ namespace HyperMsg
 
         public void Dispose()
         {
-            backgroundReceiver.Stop();
+            backgroundReceiver.Handle(ReceiveMode.Proactive);
         }
     }
 }

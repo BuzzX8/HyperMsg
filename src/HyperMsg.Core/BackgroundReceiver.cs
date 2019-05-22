@@ -5,96 +5,25 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : IDisposable, IHandler<ReceiveMode>
+    public class BackgroundReceiver<T> : BackgroundWorker, IHandler<ReceiveMode>
     {
         private readonly IReceiver<T> messageReceiver;
         private readonly IEnumerable<IHandler<T>> messageHandlers;
-
-        private CancellationTokenSource tokenSource;        
-        private Task backgroundTask;
-        private bool tokenSourceDisposed;
 
         public BackgroundReceiver(IReceiver<T> messageReceiver, IEnumerable<IHandler<T>> messageHandlers)
         {
             this.messageReceiver = messageReceiver ?? throw new ArgumentNullException(nameof(messageReceiver));
             this.messageHandlers = messageHandlers ?? throw new ArgumentNullException(nameof(messageHandlers));
-            backgroundTask = Task.CompletedTask;
         }
 
-        public bool IsRunning => backgroundTask.Status != TaskStatus.RanToCompletion
-            && backgroundTask.Status != TaskStatus.Faulted
-            && backgroundTask.Status != TaskStatus.Canceled;
-
-        public void Run()
+        protected override async Task DoWorkIterationAsync(CancellationToken cancellationToken)
         {
-            if (IsRunning)
+            var message = await messageReceiver.ReceiveAsync(cancellationToken);
+
+            foreach (var handler in messageHandlers)
             {
-                return;
+                await handler.HandleAsync(message, cancellationToken);
             }
-
-            tokenSource = new CancellationTokenSource();
-            tokenSourceDisposed = false;
-            backgroundTask = RunBackgroundTask();
-        }
-
-        public void Dispose()
-        {
-            if (tokenSourceDisposed)
-            {
-                return;
-            }
-
-            tokenSource?.Cancel();
-            tokenSource?.Dispose();
-            tokenSourceDisposed = true;
-        }
-
-        public void Stop()
-        {
-            Dispose();
-            backgroundTask.Wait();            
-        }
-
-        public bool Stop(TimeSpan waitTimeout)
-        {
-            Dispose();
-            return backgroundTask.Wait(waitTimeout);
-        }
-
-        private Task RunBackgroundTask()
-        {
-            return Task.Run(DoWorkAsync).ContinueWith(OnBackgroundTaskCompleted);
-        }
-
-        private async Task DoWorkAsync()
-        {
-            var token = tokenSource.Token;
-
-            while (!token.IsCancellationRequested)
-            {
-                var message = await messageReceiver.ReceiveAsync(token);
-                
-                foreach (var handler in messageHandlers)
-                {
-                    await handler.HandleAsync(message, token);
-                }
-            }
-        }
-
-        private void OnBackgroundTaskCompleted(Task task)
-        {
-            BackgroundTaskCompleted?.Invoke(task);
-
-            if (task.Status == TaskStatus.Faulted)
-            {
-                OnBackgroundTaskFault(task);
-            }
-        }
-
-        private void OnBackgroundTaskFault(Task task)
-        {
-            var exception = task.Exception.Flatten()?.InnerException;
-            UnhandledException?.Invoke(exception);
         }
 
         public void Handle(ReceiveMode message)
@@ -116,11 +45,5 @@ namespace HyperMsg
             Handle(message);
             return Task.CompletedTask;
         }
-
-        public Action<T> MessageReceived;
-
-        public Action<Task> BackgroundTaskCompleted;
-
-        public Action<Exception> UnhandledException;
     }
 }
