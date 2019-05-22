@@ -6,21 +6,21 @@ namespace HyperMsg
 {
     public class MessageTransceiver<T> : ITransceiver<T, T>
     {
-        private readonly MessageBuffer<T> messageBuffer;
-        private readonly MessageReceiver<T> messageReceiver;
+        private readonly IReceiver<T> receiver;
+        private readonly ISender<T> sender;
 
-        public MessageTransceiver(ISerializer<T> serializer, Memory<byte> sendBuffer, Memory<byte> receiveBuffer, IStream stream)
+        public MessageTransceiver(IReceiver<T> receiver, ISender<T> sender)
         {
-            messageBuffer = new MessageBuffer<T>(serializer.Serialize, sendBuffer, stream.WriteAsync);
-            messageReceiver = new MessageReceiver<T>(serializer.Deserialize, new BufferReader(receiveBuffer, stream.ReadAsync));
+            this.receiver = receiver ?? throw new ArgumentNullException(nameof(receiver));
+            this.sender = sender ?? throw new ArgumentNullException(nameof(sender));
         }
 
-        public void Send(T message) => messageBuffer.Send(message);
+        public void Send(T message) => sender.Send(message);
 
-        public Task SendAsync(T message, CancellationToken token = default) => messageBuffer.SendAsync(message, token);
+        public Task SendAsync(T message, CancellationToken cancellationToken) => sender.SendAsync(message, cancellationToken);
 
-        public T Receive() => messageReceiver.Receive();
+        public T Receive() => receiver.Receive();
 
-        public Task<T> ReceiveAsync(CancellationToken token = default) => messageReceiver.ReceiveAsync(token);
+        public Task<T> ReceiveAsync(CancellationToken cancellationToken) => receiver.ReceiveAsync(cancellationToken);
     }
 }

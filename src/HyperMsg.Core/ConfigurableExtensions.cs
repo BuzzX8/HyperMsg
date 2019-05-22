@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HyperMsg
+﻿namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
@@ -8,9 +6,9 @@ namespace HyperMsg
         {
             configurable.Configure(context => 
             {
-                var serializer = (ISerializer<T>)context.GetService(typeof(ISerializer<T>));
-                var stream = (IStream)context.GetService(typeof(IStream));
-                var transciever = new MessageTransceiver<T>(serializer, new Memory<byte>(), new Memory<byte>(), stream);
+                var receiver = (IReceiver<T>)context.GetService(typeof(IReceiver<T>));
+                var sender = (ISender<T>)context.GetService(typeof(ISender<T>));
+                var transciever = new MessageTransceiver<T>(receiver, sender);
 
                 context.RegisterService(typeof(ITransceiver<T, T>), transciever);
             });
