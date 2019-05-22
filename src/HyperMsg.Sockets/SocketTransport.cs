@@ -26,7 +26,8 @@ namespace HyperMsg.Sockets
                     break;
 
                 case TransportCommands.SetTransportLevelSecurity:
-                    throw new NotImplementedException();
+                    SetTls();
+                    break;
             }
         }
 
@@ -41,10 +42,21 @@ namespace HyperMsg.Sockets
                     return socket.DisconnectAsync(token);
 
                 case TransportCommands.SetTransportLevelSecurity:
-                    throw new NotImplementedException();
+                    SetTls();
+                    break;
             }
 
             return Task.CompletedTask;
+        }
+
+        private void SetTls()
+        {
+            if (!(socket is ISupportsTls tls))
+            {
+                throw new NotSupportedException();
+            }
+
+            tls.SetTls();
         }
 
         public int Read(Memory<byte> buffer) => socket.Read(buffer);
