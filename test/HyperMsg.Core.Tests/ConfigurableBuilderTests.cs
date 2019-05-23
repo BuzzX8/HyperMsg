@@ -97,6 +97,7 @@ namespace HyperMsg
             builder.UseCoreServices<Guid>(100, 100);
             builder.Configure(context =>
             {
+                context.RegisterService(typeof(ISerializer<Guid>), A.Fake<ISerializer<Guid>>());
                 context.RegisterService(typeof(IStream), A.Fake<IStream>());
                 context.RegisterService(typeof(IHandler<TransportCommands>), A.Fake<IHandler<TransportCommands>>());
             });
@@ -109,6 +110,21 @@ namespace HyperMsg
             var actual = builder.Build();
 
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Build_Throws_Exception_If_No_Registered_Dependencies()
+        {
+            var builder = new ConfigurableBuilder<string>();
+            var expected = Guid.NewGuid().ToString();
+            builder.UseCoreServices<Guid>(100, 100);
+            builder.Configure(context =>
+            {
+                var transceiver = (ITransceiver<Guid, Guid>)context.GetService(typeof(ITransceiver<Guid, Guid>));
+                context.RegisterService(typeof(string), expected);
+            });
+
+            Assert.Throws<Exception>(() => builder.Build());
         }
     }
 }
