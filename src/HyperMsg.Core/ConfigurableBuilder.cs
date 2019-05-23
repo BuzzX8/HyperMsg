@@ -42,6 +42,11 @@ namespace HyperMsg
 
         private void InvokeNextConfigurator()
         {
+            if (configurators.Count == 0)
+            {
+                throw new Exception();
+            }
+
             while (configurators.Count > 0)
             {
                 currentConfigurator = configurators.Dequeue();
