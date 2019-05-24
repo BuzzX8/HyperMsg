@@ -124,7 +124,17 @@ namespace HyperMsg
                 context.RegisterService(typeof(string), expected);
             });
 
-            Assert.Throws<Exception>(() => builder.Build());
+            Assert.Throws<InvalidOperationException>(() => builder.Build());
+        }
+
+        [Fact]
+        public void Builder_Rethrows_Exception_Thrown_By_Configurator()
+        {
+            var builder = new ConfigurableBuilder<string>();
+            builder.Configure(context => throw new ArgumentNullException());
+            builder.Configure(context => context.RegisterService(typeof(string), ""));
+
+            Assert.Throws<AggregateException>(() => builder.Build());
         }
     }
 }

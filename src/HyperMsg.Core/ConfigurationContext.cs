@@ -6,24 +6,17 @@ namespace HyperMsg
     internal class ConfigurationContext : IConfigurationContext
     {
         private readonly Dictionary<string, object> settings;
-        private readonly Dictionary<Type, object> services;
-        private readonly Action<Type> resolveService;
+        private readonly ConfigurationTaskRunner resolver;
 
-        internal ConfigurationContext(Dictionary<string, object> settings, Dictionary<Type, object> services, Action<Type> resolveService)
+        internal ConfigurationContext(Dictionary<string, object> settings, ConfigurationTaskRunner resolver)
         {
             this.settings = settings;
-            this.services = services;
-            this.resolveService = resolveService;
+            this.resolver = resolver;
         }
 
         public object GetService(Type serviceType)
         {
-            if (!services.ContainsKey(serviceType))
-            {
-                resolveService(serviceType);
-            }
-
-            return services[serviceType];
+            return resolver.ResolveDependencyAsync(serviceType).Result;
         }
 
         public object GetSetting(string settingName)
@@ -33,7 +26,7 @@ namespace HyperMsg
 
         public void RegisterService(Type serviceType, object serviceInstance)
         {
-            services.Add(serviceType, serviceInstance);
+            resolver.RegisterDependency(serviceType, serviceInstance);
         }
     }
 }
