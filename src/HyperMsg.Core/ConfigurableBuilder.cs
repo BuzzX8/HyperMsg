@@ -6,47 +6,28 @@ namespace HyperMsg
 {
     public class ConfigurableBuilder<T> : IConfigurable
     {        
-        private readonly Queue<Configurator> configurators;
+        private readonly List<Configurator> configurators;
         private readonly Dictionary<string, object> settings;
-                
-        private Configurator currentConfigurator;
-        private ConfigurationContext currentContext;
+        private readonly Lazy<T> service;        
 
         public ConfigurableBuilder()
         {
-            configurators = new Queue<Configurator>();
+            configurators = new List<Configurator>();
             settings = new Dictionary<string, object>();
+            service = new Lazy<T>(BuildService);
         }
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void Configure(Configurator configurator) => configurators.Enqueue(configurator);
+        public void Configure(Configurator configurator) => configurators.Add(configurator);
 
-        public T Build()
+        public T Build() => service.Value;
+
+        private T BuildService()
         {
-            currentContext = new ConfigurationContext(settings, ResolveService);
-            InvokeNextConfigurator();
-
-            return (T)currentContext.GetService(typeof(T));
-        }
-
-        private void ResolveService(Type serviceType)
-        {
-            InvokeNextConfigurator();
-
-            if (!currentContext.Services.ContainsKey(serviceType))
-            {
-                ResolveService(serviceType);
-            }
-        }
-
-        private void InvokeNextConfigurator()
-        {
-            while (configurators.Count > 0)
-            {
-                currentConfigurator = configurators.Dequeue();
-                currentConfigurator.Invoke(currentContext);
-            }
+            var resolver = new ConfigurationTaskRunner(configurators);
+            resolver.RunConfiguration(settings);
+            return resolver.GetService<T>();
         }
     }
 }
