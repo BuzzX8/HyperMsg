@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,18 @@ namespace HyperMsg.Integration
 
         void SendObjects(IEnumerable<JObject> objects);
 
-        Task SendObjectsAsync(IEnumerable<JObject> objects);
+        Task SendObjectsAsync(IEnumerable<JObject> objects, CancellationToken cancellationToken);
+
+        event EventHandler<ObjectReceivedEventArgs> ObjectReceived;
+    }
+
+    public class ObjectReceivedEventArgs : EventArgs
+    {
+        public ObjectReceivedEventArgs(JObject @object)
+        {
+            Object = @object;
+        }
+
+        public JObject Object { get; }
     }
 }
