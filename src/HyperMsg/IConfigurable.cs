@@ -11,6 +11,4 @@ namespace HyperMsg
 
         void AddService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory);
     }
-
-    public delegate object ServiceFactory(IServiceProvider serviceProvider, IReadOnlyDictionary<string, object> settings);
 }

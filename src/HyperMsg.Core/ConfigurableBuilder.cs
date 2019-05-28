@@ -53,7 +53,6 @@ namespace HyperMsg
                 return createdServices[serviceInterface];
             }
 
-
             throw new InvalidOperationException($"Can not resolve service for interface {serviceInterface}");
         }
 

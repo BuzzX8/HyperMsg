@@ -8,7 +8,7 @@ namespace HyperMsg
     public class ConfigurableBuilderTests
     {
         [Fact]
-        public void Build_Invokes_All_Service_Factories()
+        public void Build_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
         {
             var builder = new ConfigurableBuilder<string>();
             var factory = A.Fake<ServiceFactory>();
