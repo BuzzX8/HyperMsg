@@ -1,33 +1,97 @@
 ﻿using System;
 using System.Collections.Generic;
-using Configurator = System.Action<HyperMsg.IConfigurationContext>;
+using System.Linq;
 
 namespace HyperMsg
 {
-    public class ConfigurableBuilder<T> : IConfigurable
-    {        
-        private readonly List<Configurator> configurators;
+    public class ConfigurableBuilder<T> : IConfigurable, IServiceProvider
+    {
         private readonly Dictionary<string, object> settings;
-        private readonly Lazy<T> service;        
+        private readonly Dictionary<Type, ServiceFactory> singleInterfaceServices;
+        private readonly List<(IEnumerable<Type> interfaces, ServiceFactory factory)> multiInterfaceServices;
+        private readonly Dictionary<Type, object> createdServices;
 
         public ConfigurableBuilder()
-        {
-            configurators = new List<Configurator>();
+        {            
             settings = new Dictionary<string, object>();
-            service = new Lazy<T>(BuildService);
+            singleInterfaceServices = new Dictionary<Type, ServiceFactory>();
+            multiInterfaceServices = new List<(IEnumerable<Type> interfaces, ServiceFactory factory)>();
+            createdServices = new Dictionary<Type, object>();
         }
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void Configure(Configurator configurator) => configurators.Add(configurator);
-
-        public T Build() => service.Value;
-
-        private T BuildService()
+        public void AddService(Type serviceIterface, ServiceFactory serviceFactory)
         {
-            var resolver = new ConfigurationTaskRunner(configurators);
-            resolver.RunConfiguration(settings);
-            return resolver.GetService<T>();
+            singleInterfaceServices.Add(serviceIterface, serviceFactory);
+        }
+
+        public void AddService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory)
+        {
+            multiInterfaceServices.Add((serviceInterfaces, serviceFactory));
+        }
+
+        public T Build() => (T)GetService(typeof(T));
+
+        public object GetService(Type serviceInterface)
+        {
+            if (createdServices.ContainsKey(serviceInterface))
+            {
+                return createdServices[serviceInterface];
+            }
+
+            if (singleInterfaceServices.ContainsKey(serviceInterface))
+            {
+                return CreateSingleInterfaceService(serviceInterface);
+            }
+
+            var itemToRemove = CreateMultiInterfaceService(serviceInterface);
+
+            if (itemToRemove != default)
+            {
+                multiInterfaceServices.Remove(itemToRemove);
+                return createdServices[serviceInterface];
+            }
+
+            throw new InvalidOperationException($"Can not resolve service for interface {serviceInterface}");
+        }
+
+        private (IEnumerable<Type> interfaces, ServiceFactory factory) CreateMultiInterfaceService(Type serviceInterface)
+        {
+            var itemToRemove = default((IEnumerable<Type> interfaces, ServiceFactory factory));
+
+            foreach (var tuple in multiInterfaceServices)
+            {
+                (var interfaces, var factory) = tuple;
+
+                if (!interfaces.Contains(serviceInterface))
+                {
+                    continue;
+                }
+
+                var service = factory.Invoke(this, settings);
+
+                foreach (var @interface in interfaces)
+                {
+                    createdServices.Add(@interface, service);
+                }
+
+                itemToRemove = tuple;
+                break;
+            }
+
+            return itemToRemove;
+        }
+
+        private object CreateSingleInterfaceService(Type serviceInterface)
+        {
+            var factory = singleInterfaceServices[serviceInterface];
+            var service = factory.Invoke(this, settings);
+
+            singleInterfaceServices.Remove(serviceInterface);
+            createdServices.Add(serviceInterface, service);
+
+            return service;
         }
     }
 }
