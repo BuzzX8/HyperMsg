@@ -11,20 +11,12 @@ namespace HyperMsg
         public void Build_Invokes_All_Service_Factories()
         {
             var builder = new ConfigurableBuilder<string>();
-            var factories = A.CollectionOfFake<ServiceFactory>(2);
-            builder.AddService(new[] { typeof(string) }, (p, s) => string.Empty);
-
-            foreach (var factory in factories)
-            {
-                builder.AddService(typeof(Guid), factory);
-            }
+            var factory = A.Fake<ServiceFactory>();
+            builder.AddService(typeof(string), (p, s) => string.Empty);
 
             builder.Build();
 
-            foreach (var factory in factories)
-            {
-                A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).MustHaveHappened();
-            }
+            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).MustNotHaveHappened();
         }
 
         [Fact]
@@ -130,9 +122,13 @@ namespace HyperMsg
         {
             var builder = new ConfigurableBuilder<string>();
             builder.AddService(typeof(Guid), (p, s) => throw new ArgumentNullException());
-            builder.AddService(typeof(string), (p, s) => string.Empty);
+            builder.AddService(typeof(string), (p, s) =>
+            {
+                p.GetService(typeof(Guid));
+                return string.Empty;
+            });
 
-            Assert.Throws<AggregateException>(() => builder.Build());
+            Assert.Throws<ArgumentNullException>(() => builder.Build());
         }
     }
 }
