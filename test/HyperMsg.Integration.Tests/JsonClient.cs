@@ -28,7 +28,7 @@ namespace HyperMsg.Integration
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
             await transportHandler.HandleAsync(TransportCommands.OpenConnection, cancellationToken);
-            await receiveModeHandler.HandleAsync(ReceiveMode.Reactive, cancellationToken);
+            await receiveModeHandler.HandleAsync(ReceiveMode.Proactive, cancellationToken);
         }
 
         public void Disconnect() => transportHandler.Handle(TransportCommands.CloseConnection);
@@ -69,12 +69,18 @@ namespace HyperMsg.Integration
 
         public void Handle(JObject message)
         {
-            throw new NotImplementedException();
+            OnObjectReceived(message);
         }
 
-        public Task HandleAsync(JObject message, CancellationToken token = default(CancellationToken))
+        public Task HandleAsync(JObject message, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            OnObjectReceived(message);
+            return Task.CompletedTask;
+        }
+
+        private void OnObjectReceived(JObject @object)
+        {
+            ObjectReceived?.Invoke(this, new ObjectReceivedEventArgs(@object));
         }
 
         public event EventHandler<ObjectReceivedEventArgs> ObjectReceived;

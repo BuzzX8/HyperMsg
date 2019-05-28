@@ -9,7 +9,9 @@ namespace HyperMsg.Integration
     {
         public DeserializationResult<JObject> Deserialize(ReadOnlySequence<byte> buffer)
         {
-            throw new NotImplementedException();
+            var bytes = buffer.ToArray();
+            var @object = Encoding.UTF8.GetString(bytes);
+            return new DeserializationResult<JObject>(bytes.Length, JObject.Parse(@object));
         }
 
         public void Serialize(IBufferWriter<byte> writer, JObject message)

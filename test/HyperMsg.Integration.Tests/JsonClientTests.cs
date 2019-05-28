@@ -1,8 +1,6 @@
 ﻿using HyperMsg.Sockets;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -57,31 +55,20 @@ namespace HyperMsg.Integration
         }
 
         [Fact]
-        public void SendObjects_Serializes_And_Transmits_Multiple_Objects()
-        {
-            var expectedMessages = Enumerable.Range(1, 5).Select(i => JObject.Parse($"{{ object: {i} }}"));
-            StartListenerAndConnectClient();
-
-            client.SendObjects(expectedMessages);
-
-            int received = acceptedSocket.Receive(receivingBuffer);
-            var messages = Encoding.UTF8.GetString(new ReadOnlySpan<byte>(receivingBuffer, 0, received));
-
-            throw new NotImplementedException();
-        }
-
-        [Fact]
         public void ObjectReceived_Rises_When_Received_Json_Data()
         {
             var expectedMessage = "{ Subject: 'Hello', Message: 'World' }";
             var receivedObject = default(JObject);
+            var @event = new ManualResetEventSlim();
             client.ObjectReceived += (s, e) =>
             {
                 receivedObject = e.Object;
+                @event.Set();
             };
             StartListenerAndConnectClient();
 
             acceptedSocket.Send(Encoding.UTF8.GetBytes(expectedMessage));
+            @event.Wait(TimeSpan.FromSeconds(2));
 
             Assert.NotNull(receivedObject);
             Assert.Equal(JObject.Parse(expectedMessage), receivedObject);
@@ -104,6 +91,7 @@ namespace HyperMsg.Integration
 
         public void Dispose()
         {
+            client.Disconnect();
             acceptedSocket?.Close();
             listener.StopListening();
         }

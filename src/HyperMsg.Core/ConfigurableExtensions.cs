@@ -63,7 +63,7 @@ namespace HyperMsg
 
         public static void UseBackgrounReceiver<T>(this IConfigurable configurable)
         {
-            configurable.AddService(typeof(IHandler<T>), (p, s) =>
+            configurable.AddService(typeof(IHandler<ReceiveMode>), (p, s) =>
             {
                 var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
                 var handlers = (IEnumerable<IHandler<T>>)p.GetService(typeof(IEnumerable<IHandler<T>>));
