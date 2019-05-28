@@ -16,13 +16,11 @@ namespace HyperMsg
 
         public static void UseTransciever<T>(this IConfigurable configurable)
         {
-            configurable.Configure(context => 
+            configurable.AddService(typeof(ITransceiver<T, T>), (p, s) =>
             {
-                var receiver = (IReceiver<T>)context.GetService(typeof(IReceiver<T>));
-                var sender = (ISender<T>)context.GetService(typeof(ISender<T>));
-                var transciever = new MessageTransceiver<T>(receiver, sender);
-
-                context.RegisterService(typeof(ITransceiver<T, T>), transciever);
+                var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
+                var sender = (ISender<T>)p.GetService(typeof(ISender<T>));
+                return new MessageTransceiver<T>(receiver, sender);
             });
         }
 
@@ -31,27 +29,22 @@ namespace HyperMsg
             const string SettingName = "MessageBuffer.BufferSize";
 
             configurable.AddSetting(SettingName, bufferSize);
-            configurable.Configure(context =>
+            configurable.AddService(new[] { typeof(ISender<T>), typeof(IMessageBuffer<T>) }, (p, s) =>
             {
-                var serializer = (ISerializer<T>)context.GetService(typeof(ISerializer<T>));
-                var stream = (IStream)context.GetService(typeof(IStream));
-                var buffSize = (int)context.GetSetting(SettingName);
-                var messageBuffer = new MessageBuffer<T>(serializer.Serialize, new byte[bufferSize], stream.WriteAsync);
-
-                context.RegisterService(typeof(ISender<T>), messageBuffer);
-                context.RegisterService(typeof(IMessageBuffer<T>), messageBuffer);
+                var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
+                var stream = (IStream)p.GetService(typeof(IStream));
+                var buffSize = (int)s[SettingName];
+                return new MessageBuffer<T>(serializer.Serialize, new byte[bufferSize], stream.WriteAsync);
             });
         }
 
         public static void UseMessageReceiver<T>(this IConfigurable configurable)
         {
-            configurable.Configure(context =>
+            configurable.AddService(typeof(IReceiver<T>), (p, s) =>
             {
-                var reader = (IBufferReader)context.GetService(typeof(IBufferReader));
-                var serializer = (ISerializer<T>)context.GetService(typeof(ISerializer<T>));
-                var receiver = new MessageReceiver<T>(serializer.Deserialize, reader);
-
-                context.RegisterService(typeof(IReceiver<T>), receiver);
+                var reader = (IBufferReader)p.GetService(typeof(IBufferReader));
+                var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
+                return new MessageReceiver<T>(serializer.Deserialize, reader);
             });
         }
 
@@ -60,36 +53,29 @@ namespace HyperMsg
             const string SettingName = "BufferReader.BufferSize";
 
             configurable.AddSetting(SettingName, bufferSize);
-            configurable.Configure(context =>
+            configurable.AddService(typeof(IBufferReader), (p, s) =>
             {
-                var buffSize = (int)context.GetSetting(SettingName);
-                var stream = (IStream)context.GetService(typeof(IStream));
-                var reader = new BufferReader(new byte[buffSize], stream.ReadAsync);
-
-                context.RegisterService(typeof(IBufferReader), reader);
+                var buffSize = (int)s[SettingName];
+                var stream = (IStream)p.GetService(typeof(IStream));
+                return new BufferReader(new byte[buffSize], stream.ReadAsync);
             });
         }
 
         public static void UseBackgrounReceiver<T>(this IConfigurable configurable)
         {
-            configurable.Configure(context =>
+            configurable.AddService(typeof(IHandler<T>), (p, s) =>
             {
-                var receiver = (IReceiver<T>)context.GetService(typeof(IReceiver<T>));
-                var handlers = (IEnumerable<IHandler<T>>)context.GetService(typeof(IEnumerable<IHandler<T>>));
-                var backgroundReceiver = new BackgroundReceiver<T>(receiver, handlers);
-
-                context.RegisterService(typeof(IHandler<T>), backgroundReceiver);
+                var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
+                var handlers = (IEnumerable<IHandler<T>>)p.GetService(typeof(IEnumerable<IHandler<T>>));
+                return new BackgroundReceiver<T>(receiver, handlers);
             });
         }
 
         public static void UseHandlerCollection<T>(this IConfigurable configurable)
         {
-            configurable.Configure(context =>
+            configurable.AddService(new[] { typeof(IEnumerable<IHandler<T>>), typeof(ICollection<IHandler<T>>) }, (p, s) =>
             {
-                var collection = new List<IHandler<T>>();
-
-                context.RegisterService(typeof(IEnumerable<IHandler<T>>), collection);
-                context.RegisterService(typeof(ICollection<IHandler<T>>), collection);
+                return new List<IHandler<T>>();                
             });
         }
     }

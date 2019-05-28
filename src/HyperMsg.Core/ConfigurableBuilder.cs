@@ -19,7 +19,15 @@ namespace HyperMsg
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void Configure(Configurator configurator) => configurators.Add(configurator);
+        public void AddService(Type serviceIterface, ServiceFactory serviceFactory)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory)
+        {
+            throw new NotImplementedException();
+        }
 
         public T Build() => service.Value;
 

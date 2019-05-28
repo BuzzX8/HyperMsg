@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace HyperMsg
@@ -7,22 +8,22 @@ namespace HyperMsg
     public class ConfigurableBuilderTests
     {
         [Fact]
-        public void Build_Invokes_All_Configurators()
+        public void Build_Invokes_All_Service_Factories()
         {
             var builder = new ConfigurableBuilder<string>();
-            var configurators = A.CollectionOfFake<Action<IConfigurationContext>>(10);
-            builder.Configure(c => c.RegisterService(typeof(string), ""));
+            var factories = A.CollectionOfFake<ServiceFactory>(2);
+            builder.AddService(new[] { typeof(string) }, (p, s) => string.Empty);
 
-            foreach (var configurator in configurators)
+            foreach (var factory in factories)
             {
-                builder.Configure(configurator);
+                builder.AddService(typeof(Guid), factory);
             }
 
             builder.Build();
 
-            foreach (var configurator in configurators)
+            foreach (var factory in factories)
             {
-                A.CallTo(() => configurator.Invoke(A<IConfigurationContext>._)).MustHaveHappened();
+                A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).MustHaveHappened();
             }
         }
 
@@ -31,10 +32,9 @@ namespace HyperMsg
         {
             var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
-            builder.Configure(c =>
-            {
-                c.RegisterService(typeof(string), expected);
-            });
+            var factory = A.Fake<ServiceFactory>();
+            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).Returns(expected);
+            builder.AddService(typeof(string), factory);
 
             var actual = builder.Build();
 
@@ -48,10 +48,10 @@ namespace HyperMsg
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
             builder.AddSetting(nameof(Guid), expected);
-            builder.Configure(c =>
+            builder.AddService(typeof(string), (p, s) =>
             {
-                actual = (Guid)c.GetSetting(nameof(Guid));
-                c.RegisterService(typeof(string), "");
+                actual = (Guid)s[nameof(Guid)];
+                return string.Empty;
             });
 
             builder.Build();
@@ -66,7 +66,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
 
-            builder.Configure(c => c.RegisterService(typeof(IStream), A.Fake<IStream>()));
+            builder.AddService(typeof(IStream), (p, s) => A.Fake<IStream>());
             builder.UseBufferReader(100);
 
             var reader = builder.Build();
@@ -82,7 +82,7 @@ namespace HyperMsg
             var actual = Guid.Empty;
 
             builder.UseBufferReader(100);
-            builder.Configure(c => c.RegisterService(typeof(IStream), A.Fake<IStream>()));            
+            builder.AddService(typeof(IStream), (p, s) => A.Fake<IStream>());
 
             var reader = builder.Build();
 
@@ -95,16 +95,14 @@ namespace HyperMsg
             var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
             builder.UseCoreServices<Guid>(100, 100);
-            builder.Configure(context =>
+            builder.AddService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
+            builder.AddService(typeof(IStream), (p, s) => A.Fake<IStream>());
+            builder.AddService(typeof(IHandler<TransportCommands>), (p, s) => A.Fake<IHandler<TransportCommands>>());
+
+            builder.AddService(typeof(string), (p, s) =>
             {
-                context.RegisterService(typeof(ISerializer<Guid>), A.Fake<ISerializer<Guid>>());
-                context.RegisterService(typeof(IStream), A.Fake<IStream>());
-                context.RegisterService(typeof(IHandler<TransportCommands>), A.Fake<IHandler<TransportCommands>>());
-            });
-            builder.Configure(context =>
-            {
-                var transceiver = (ITransceiver<Guid, Guid>)context.GetService(typeof(ITransceiver<Guid, Guid>));
-                context.RegisterService(typeof(string), expected);
+                var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
+                return expected;
             });
 
             var actual = builder.Build();
@@ -118,21 +116,21 @@ namespace HyperMsg
             var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
             builder.UseCoreServices<Guid>(100, 100);
-            builder.Configure(context =>
+            builder.AddService(typeof(string), (p, s) =>
             {
-                var transceiver = (ITransceiver<Guid, Guid>)context.GetService(typeof(ITransceiver<Guid, Guid>));
-                context.RegisterService(typeof(string), expected);
+                var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
+                return expected;
             });
 
             Assert.Throws<InvalidOperationException>(() => builder.Build());
         }
 
         [Fact]
-        public void Builder_Rethrows_Exception_Thrown_By_Configurator()
+        public void Builder_Rethrows_Exception_Thrown_By_Factory()
         {
             var builder = new ConfigurableBuilder<string>();
-            builder.Configure(context => throw new ArgumentNullException());
-            builder.Configure(context => context.RegisterService(typeof(string), ""));
+            builder.AddService(typeof(Guid), (p, s) => throw new ArgumentNullException());
+            builder.AddService(typeof(string), (p, s) => string.Empty);
 
             Assert.Throws<AggregateException>(() => builder.Build());
         }
