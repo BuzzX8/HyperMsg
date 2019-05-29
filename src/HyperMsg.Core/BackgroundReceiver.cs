@@ -8,19 +8,25 @@ namespace HyperMsg
     public class BackgroundReceiver<T> : BackgroundWorker, IHandler<ReceiveMode>
     {
         private readonly IReceiver<T> messageReceiver;
-        private readonly IEnumerable<IHandler<T>> messageHandlers;
+        private readonly Func<IEnumerable<IHandler<T>>> handlersProvider;
 
-        public BackgroundReceiver(IReceiver<T> messageReceiver, IEnumerable<IHandler<T>> messageHandlers)
+        public BackgroundReceiver(IReceiver<T> messageReceiver, Func<IEnumerable<IHandler<T>>> handlersProvider)
         {
             this.messageReceiver = messageReceiver ?? throw new ArgumentNullException(nameof(messageReceiver));
-            this.messageHandlers = messageHandlers ?? throw new ArgumentNullException(nameof(messageHandlers));
+            this.handlersProvider = handlersProvider ?? throw new ArgumentNullException(nameof(handlersProvider));
         }
 
         protected override async Task DoWorkIterationAsync(CancellationToken cancellationToken)
         {
             var message = await messageReceiver.ReceiveAsync(cancellationToken);
+            var handlers = handlersProvider.Invoke();
 
-            foreach (var handler in messageHandlers)
+            if (handlers == null)
+            {
+                return;
+            }
+
+            foreach (var handler in handlers)
             {
                 await handler.HandleAsync(message, cancellationToken);
             }

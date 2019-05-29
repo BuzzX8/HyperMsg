@@ -9,6 +9,7 @@ namespace HyperMsg
         private readonly Dictionary<string, object> settings;
         private readonly Dictionary<Type, ServiceFactory> singleInterfaceServices;
         private readonly List<(IEnumerable<Type> interfaces, ServiceFactory factory)> multiInterfaceServices;
+        private readonly List<Configurator> configurators;
         private readonly Dictionary<Type, object> createdServices;
 
         public ConfigurableBuilder()
@@ -16,22 +17,30 @@ namespace HyperMsg
             settings = new Dictionary<string, object>();
             singleInterfaceServices = new Dictionary<Type, ServiceFactory>();
             multiInterfaceServices = new List<(IEnumerable<Type> interfaces, ServiceFactory factory)>();
+            configurators = new List<Configurator>();
             createdServices = new Dictionary<Type, object>();
         }
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
 
-        public void AddService(Type serviceIterface, ServiceFactory serviceFactory)
-        {
-            singleInterfaceServices.Add(serviceIterface, serviceFactory);
-        }
+        public void RegisterService(Type serviceIterface, ServiceFactory serviceFactory) => singleInterfaceServices.Add(serviceIterface, serviceFactory);
 
-        public void AddService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory)
+        public void RegisterConfigurator(Configurator configurator) => configurators.Add(configurator);
+
+        public void RegisterService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory)
         {
             multiInterfaceServices.Add((serviceInterfaces, serviceFactory));
         }
 
-        public T Build() => (T)GetService(typeof(T));
+        public T Build()
+        {
+            foreach (var configurator in configurators)
+            {
+                configurator.Invoke(this, settings);
+            }
+
+            return (T)GetService(typeof(T));
+        }
 
         public object GetService(Type serviceInterface)
         {

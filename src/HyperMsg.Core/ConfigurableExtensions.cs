@@ -6,7 +6,8 @@ namespace HyperMsg
     {
         public static void UseCoreServices<T>(this IConfigurable configurable, int inputBufferSize, int outputBufferSize)
         {
-            configurable.UseHandlerCollection<T>();
+            configurable.UseHandlerRepository<T>();
+            configurable.UseCompositeHandler();
             configurable.UseBackgrounReceiver<T>();
             configurable.UseBufferReader(inputBufferSize);
             configurable.UseMessageReceiver<T>();
@@ -16,7 +17,7 @@ namespace HyperMsg
 
         public static void UseTransciever<T>(this IConfigurable configurable)
         {
-            configurable.AddService(typeof(ITransceiver<T, T>), (p, s) =>
+            configurable.RegisterService(typeof(ITransceiver<T, T>), (p, s) =>
             {
                 var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
                 var sender = (ISender<T>)p.GetService(typeof(ISender<T>));
@@ -29,7 +30,7 @@ namespace HyperMsg
             const string SettingName = "MessageBuffer.BufferSize";
 
             configurable.AddSetting(SettingName, bufferSize);
-            configurable.AddService(new[] { typeof(ISender<T>), typeof(IMessageBuffer<T>) }, (p, s) =>
+            configurable.RegisterService(new[] { typeof(ISender<T>), typeof(IMessageBuffer<T>) }, (p, s) =>
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
                 var stream = (IStream)p.GetService(typeof(IStream));
@@ -40,7 +41,7 @@ namespace HyperMsg
 
         public static void UseMessageReceiver<T>(this IConfigurable configurable)
         {
-            configurable.AddService(typeof(IReceiver<T>), (p, s) =>
+            configurable.RegisterService(typeof(IReceiver<T>), (p, s) =>
             {
                 var reader = (IBufferReader)p.GetService(typeof(IBufferReader));
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
@@ -53,7 +54,7 @@ namespace HyperMsg
             const string SettingName = "BufferReader.BufferSize";
 
             configurable.AddSetting(SettingName, bufferSize);
-            configurable.AddService(typeof(IBufferReader), (p, s) =>
+            configurable.RegisterService(typeof(IBufferReader), (p, s) =>
             {
                 var buffSize = (int)s[SettingName];
                 var stream = (IStream)p.GetService(typeof(IStream));
@@ -63,20 +64,21 @@ namespace HyperMsg
 
         public static void UseBackgrounReceiver<T>(this IConfigurable configurable)
         {
-            configurable.AddService(typeof(IHandler<ReceiveMode>), (p, s) =>
+            configurable.RegisterConfigurator((p, s) =>
             {
                 var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
-                var handlers = (IEnumerable<IHandler<T>>)p.GetService(typeof(IEnumerable<IHandler<T>>));
-                return new BackgroundReceiver<T>(receiver, handlers);
+                var repository = (IHandlerRepository)p.GetService(typeof(IHandlerRepository));
+                var bgReceiver = new BackgroundReceiver<T>(receiver, repository.GetHandlers<T>);
+                repository.AddHandler(bgReceiver);
             });
         }
 
-        public static void UseHandlerCollection<T>(this IConfigurable configurable)
+        public static void UseCompositeHandler(this IConfigurable configurable) => configurable.RegisterService(typeof(IHandler), (p, s) =>
         {
-            configurable.AddService(new[] { typeof(IEnumerable<IHandler<T>>), typeof(ICollection<IHandler<T>>) }, (p, s) =>
-            {
-                return new List<IHandler<T>>();                
-            });
-        }
+            var repository = (IHandlerRepository)p.GetService(typeof(IHandlerRepository));
+            return new CompositeHandler(repository);
+        });
+
+        public static void UseHandlerRepository<T>(this IConfigurable configurable) => configurable.RegisterService(typeof(IHandlerRepository), (p, s) => new HandlerRepository());
     }
 }
