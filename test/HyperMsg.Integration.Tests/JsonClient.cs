@@ -9,31 +9,29 @@ namespace HyperMsg.Integration
     public class JsonClient : IJsonClient, IHandler<JObject>
     {
         private readonly IMessageBuffer<JObject> messageBuffer;
-        private readonly IHandler<TransportCommands> transportHandler;
-        private readonly IHandler<ReceiveMode> receiveModeHandler;
+        private readonly IHandler handler;
 
-        public JsonClient(IMessageBuffer<JObject> messageBuffer, IHandler<TransportCommands> transportHandler, IHandler<ReceiveMode> receiveModeHandler)
+        public JsonClient(IMessageBuffer<JObject> messageBuffer, IHandler handler)
         {
             this.messageBuffer = messageBuffer;
-            this.transportHandler = transportHandler;
-            this.receiveModeHandler = receiveModeHandler;
+            this.handler = handler;
         }
 
         public void Connect()
         {
-            transportHandler.Handle(TransportCommands.OpenConnection);
-            receiveModeHandler.Handle(ReceiveMode.Reactive);
+            handler.Handle(TransportOperations.OpenConnection);
+            handler.Handle(ReceiveMode.Reactive);
         }
 
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
-            await transportHandler.HandleAsync(TransportCommands.OpenConnection, cancellationToken);
-            await receiveModeHandler.HandleAsync(ReceiveMode.Proactive, cancellationToken);
+            await handler.HandleAsync(TransportOperations.OpenConnection, cancellationToken);
+            await handler.HandleAsync(ReceiveMode.Proactive, cancellationToken);
         }
 
-        public void Disconnect() => transportHandler.Handle(TransportCommands.CloseConnection);
+        public void Disconnect() => handler.Handle(TransportOperations.CloseConnection);
 
-        public Task DisconnectAsync(CancellationToken cancellationToken) => transportHandler.HandleAsync(TransportCommands.CloseConnection, cancellationToken);
+        public Task DisconnectAsync(CancellationToken cancellationToken) => handler.HandleAsync(TransportOperations.CloseConnection, cancellationToken);
 
         public void SendObject(JObject @object)
         {
