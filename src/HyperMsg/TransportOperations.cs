@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg
 {
-    public enum TransportCommands
+    public enum TransportOperations
     {
         OpenConnection,
         CloseConnection,

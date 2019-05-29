@@ -10,7 +10,7 @@ namespace HyperMsg
     public class BackgroundReceiverTests : IDisposable
     {
         private readonly IReceiver<Guid> messageReceiver;
-        private readonly List<IHandler<Guid>> messageHandlers;
+        private readonly Func<IEnumerable<IHandler<Guid>>> handlerProvider;
         private readonly BackgroundReceiver<Guid> backgroundReceiver;
 
         private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
@@ -18,8 +18,8 @@ namespace HyperMsg
         public BackgroundReceiverTests()
         {
             messageReceiver = A.Fake<IReceiver<Guid>>();
-            messageHandlers = new List<IHandler<Guid>>();
-            backgroundReceiver = new BackgroundReceiver<Guid>(messageReceiver, messageHandlers);            
+            handlerProvider = A.Fake<Func<IEnumerable<IHandler<Guid>>>>();
+            backgroundReceiver = new BackgroundReceiver<Guid>(messageReceiver, handlerProvider);            
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace HyperMsg
                 actual = foc.GetArgument<Guid>(0);
                 @event.Set();
             });
-            messageHandlers.Add(handler);
+            A.CallTo(() => handlerProvider.Invoke()).Returns(new[] { handler });
 
             Assert.False(backgroundReceiver.IsRunning);
             backgroundReceiver.Handle(ReceiveMode.Reactive);
@@ -78,7 +78,7 @@ namespace HyperMsg
             };
             var handler = A.Fake<IHandler<Guid>>();
             A.CallTo(() => handler.HandleAsync(A<Guid>._, A<CancellationToken>._)).Returns(Task.FromException(expected));
-            messageHandlers.Add(handler);
+            A.CallTo(() => handlerProvider.Invoke()).Returns(new[] { handler });
 
             backgroundReceiver.Handle(ReceiveMode.Reactive);
             @event.Wait(waitTimeout);

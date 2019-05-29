@@ -7,8 +7,10 @@ namespace HyperMsg
     {
         void AddSetting(string settingName, object setting);
 
-        void AddService(Type serviceInterface, ServiceFactory serviceFactory);
+        void RegisterConfigurator(Configurator configurator);
 
-        void AddService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory);
+        void RegisterService(Type serviceInterface, ServiceFactory serviceFactory);
+
+        void RegisterService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory);
     }
 }
