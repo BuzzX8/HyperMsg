@@ -12,7 +12,7 @@ namespace HyperMsg
         {
             var builder = new ConfigurableBuilder<string>();
             var factory = A.Fake<ServiceFactory>();
-            builder.AddService(typeof(string), (p, s) => string.Empty);
+            builder.RegisterService(typeof(string), (p, s) => string.Empty);
 
             builder.Build();
 
@@ -26,7 +26,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToString();
             var factory = A.Fake<ServiceFactory>();
             A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).Returns(expected);
-            builder.AddService(typeof(string), factory);
+            builder.RegisterService(typeof(string), factory);
 
             var actual = builder.Build();
 
@@ -40,7 +40,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
             builder.AddSetting(nameof(Guid), expected);
-            builder.AddService(typeof(string), (p, s) =>
+            builder.RegisterService(typeof(string), (p, s) =>
             {
                 actual = (Guid)s[nameof(Guid)];
                 return string.Empty;
@@ -58,7 +58,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
 
-            builder.AddService(typeof(IStream), (p, s) => A.Fake<IStream>());
+            builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
             builder.UseBufferReader(100);
 
             var reader = builder.Build();
@@ -74,7 +74,7 @@ namespace HyperMsg
             var actual = Guid.Empty;
 
             builder.UseBufferReader(100);
-            builder.AddService(typeof(IStream), (p, s) => A.Fake<IStream>());
+            builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
 
             var reader = builder.Build();
 
@@ -87,11 +87,11 @@ namespace HyperMsg
             var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
             builder.UseCoreServices<Guid>(100, 100);
-            builder.AddService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
-            builder.AddService(typeof(IStream), (p, s) => A.Fake<IStream>());
-            builder.AddService(typeof(IHandler<TransportOperations>), (p, s) => A.Fake<IHandler<TransportOperations>>());
+            builder.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
+            builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
+            builder.RegisterService(typeof(IHandler<TransportOperations>), (p, s) => A.Fake<IHandler<TransportOperations>>());
 
-            builder.AddService(typeof(string), (p, s) =>
+            builder.RegisterService(typeof(string), (p, s) =>
             {
                 var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
                 return expected;
@@ -108,7 +108,7 @@ namespace HyperMsg
             var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
             builder.UseCoreServices<Guid>(100, 100);
-            builder.AddService(typeof(string), (p, s) =>
+            builder.RegisterService(typeof(string), (p, s) =>
             {
                 var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
                 return expected;
@@ -121,8 +121,8 @@ namespace HyperMsg
         public void Builder_Rethrows_Exception_Thrown_By_Factory()
         {
             var builder = new ConfigurableBuilder<string>();
-            builder.AddService(typeof(Guid), (p, s) => throw new ArgumentNullException());
-            builder.AddService(typeof(string), (p, s) =>
+            builder.RegisterService(typeof(Guid), (p, s) => throw new ArgumentNullException());
+            builder.RegisterService(typeof(string), (p, s) =>
             {
                 p.GetService(typeof(Guid));
                 return string.Empty;

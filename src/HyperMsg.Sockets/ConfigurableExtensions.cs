@@ -7,7 +7,7 @@ namespace HyperMsg.Sockets
         public static void UseSockets(this IConfigurable configurable, EndPoint endpoint)
         {
             configurable.AddSetting(nameof(EndPoint), endpoint);
-            configurable.AddService(typeof(IStream), (p, s) =>
+            configurable.RegisterService(typeof(IStream), (p, s) =>
             {
                 var repository = (IHandlerRepository)p.GetService(typeof(IHandlerRepository));
                 var socket = new SocketProxy(SocketFactory.CreateTcpSocket(), (EndPoint)s[nameof(EndPoint)]);                
