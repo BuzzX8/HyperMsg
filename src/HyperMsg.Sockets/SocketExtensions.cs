@@ -17,11 +17,11 @@ namespace HyperMsg.Sockets
             throw new NotSupportedException();
         }
 
-        public static Task<int> ReadAsync(this ISocket socket, Memory<byte> buffer, CancellationToken token = default)
+        public static Task<int> ReadAsync(this ISocket socket, Memory<byte> buffer, CancellationToken cancellationToken)
         {
             if (MemoryMarshal.TryGetArray<byte>(buffer, out var segment))
             {
-                return socket.Stream.ReadAsync(segment.Array, segment.Offset, segment.Count);
+                return socket.Stream.ReadAsync(segment.Array, segment.Offset, segment.Count, cancellationToken);
             }
 
             throw new NotSupportedException();
@@ -38,11 +38,11 @@ namespace HyperMsg.Sockets
             throw new NotSupportedException();
         }
 
-        public static Task WriteAsync(this ISocket socket, ReadOnlyMemory<byte> buffer, CancellationToken token = default)
+        public static Task WriteAsync(this ISocket socket, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
             if (MemoryMarshal.TryGetArray(buffer, out var segment))
             {
-                return socket.Stream.WriteAsync(segment.Array, segment.Offset, segment.Count);
+                return socket.Stream.WriteAsync(segment.Array, segment.Offset, segment.Count, cancellationToken);
             }
 
             throw new NotSupportedException();

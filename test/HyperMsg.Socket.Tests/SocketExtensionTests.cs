@@ -2,6 +2,7 @@
 using HyperMsg.Sockets;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,13 +10,23 @@ namespace HyperMsg.Socket.Tests
 {
     public class SocketExtensionTests
     {
+        private readonly byte[] bytes;
+        private readonly MemoryStream stream;
+        private readonly ISocket socket;
+        private readonly CancellationToken token;
+
+        public SocketExtensionTests()
+        {
+            bytes = Guid.NewGuid().ToByteArray();
+            stream = new MemoryStream(bytes);
+            socket = A.Fake<ISocket>();
+            token = new CancellationToken();
+            A.CallTo(() => socket.Stream).Returns(stream);
+        }
+
         [Fact]
         public void Read_Reads_Bytes_From_Stream_Into_Buffer()
-        {
-            var bytes = Guid.NewGuid().ToByteArray();
-            var stream = new MemoryStream(bytes);
-            var socket = A.Fake<ISocket>();
-            A.CallTo(() => socket.Stream).Returns(stream);
+        {            
             var actualBytes = new byte[bytes.Length];
 
             int readed = socket.Read(actualBytes);
@@ -27,26 +38,17 @@ namespace HyperMsg.Socket.Tests
         [Fact]
         public async Task ReadAsync_Reads_Bytes_From_Stream_Into_Buffer()
         {
-            var bytes = Guid.NewGuid().ToByteArray();
-            var stream = new MemoryStream(bytes);
-            var socket = A.Fake<ISocket>();
-            A.CallTo(() => socket.Stream).Returns(stream);
             var actualBytes = new byte[bytes.Length];
 
-            int readed = await socket.ReadAsync(actualBytes);
+            int readed = await socket.ReadAsync(actualBytes, token);
 
             Assert.Equal(bytes.Length, readed);
             Assert.Equal(bytes, actualBytes);
         }
 
-        //[Fact]
+        [Fact]
         public void Write_Writes_Bytes_Into_Stream()
         {
-            var bytes = Guid.NewGuid().ToByteArray();
-            var stream = new MemoryStream();
-            var socket = A.Fake<ISocket>();
-            A.CallTo(() => socket.Stream).Returns(stream);
-            
             socket.Write(bytes);
 
             var actualBytes = stream.ToArray();
@@ -57,12 +59,7 @@ namespace HyperMsg.Socket.Tests
         [Fact]
         public async Task WriteAsync_Writes_Bytes_Into_Stream()
         {
-            var bytes = Guid.NewGuid().ToByteArray();
-            var stream = new MemoryStream();
-            var socket = A.Fake<ISocket>();
-            A.CallTo(() => socket.Stream).Returns(stream);
-
-            await socket.WriteAsync(bytes);
+            await socket.WriteAsync(bytes, token);
                         
             Assert.Equal(bytes, stream.ToArray());
         }
