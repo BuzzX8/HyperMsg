@@ -20,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\HyperMsg.Core\HyperMsg.Core.csproj" />
     <ProjectReference Include="..\..\src\HyperMsg.Sockets\HyperMsg.Sockets.csproj" />
-    <ProjectReference Include="..\..\src\HyperMsg\HyperMsg.csproj" />
   </ItemGroup>
 
 </Project>
