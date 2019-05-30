@@ -8,7 +8,7 @@ namespace HyperMsg
     public class BackgroundWorkerTests : IDisposable
     {
         private BackgroundWorkerImpl worker;
-        private readonly TimeSpan waitTimeOut = TimeSpan.FromSeconds(2);
+        private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
 
         [Fact]
         public void Run_Periodically_Invokes_DoWorkIterationAsync()
@@ -19,6 +19,7 @@ namespace HyperMsg
             {
                 if (invokeCount == 0)
                 {
+                    worker.InvokeStop();
                     @event.Set();
                     return Task.CompletedTask;
                 }
@@ -28,7 +29,7 @@ namespace HyperMsg
             });
 
             worker.InvokeRun();
-            @event.Wait(waitTimeOut);
+            @event.Wait(waitTimeout);
 
             Assert.Equal(0, invokeCount);
         }
@@ -50,7 +51,7 @@ namespace HyperMsg
 
             worker.InvokeStop();
             @event.Set();
-            event2.Wait(waitTimeOut);
+            event2.Wait(waitTimeout);
 
             Assert.False(wasInvoked);
         }
@@ -69,7 +70,7 @@ namespace HyperMsg
             };
 
             worker.InvokeRun();
-            @event.Wait(waitTimeOut);
+            @event.Wait(waitTimeout);
 
             Assert.Equal(expected, actual);
         }
@@ -79,7 +80,7 @@ namespace HyperMsg
         {
             var @event = new ManualResetEventSlim();
             var isTaskCompleted = false;
-            worker = new BackgroundWorkerImpl(t => Task.Delay(waitTimeOut));
+            worker = new BackgroundWorkerImpl(t => Task.Delay(waitTimeout));
             worker.BackgroundTaskCompleted += t =>
             {
                 isTaskCompleted = true;
@@ -88,9 +89,28 @@ namespace HyperMsg
             worker.InvokeRun();
 
             worker.Dispose();
-            @event.Wait(waitTimeOut);
+            @event.Wait(waitTimeout);
 
             Assert.True(isTaskCompleted);
+        }
+
+        [Fact]
+        public void Stop_Completes_BackgroundTask_When_DoWorkIterationAsync_Locked()
+        {
+            var @event = new ManualResetEventSlim();
+            var event2 = new ManualResetEventSlim();
+            worker = new BackgroundWorkerImpl(t =>
+            {
+                @event.Wait();
+                return Task.CompletedTask;
+            });
+            worker.BackgroundTaskCompleted += t => event2.Set();
+            worker.InvokeRun();            
+                        
+            worker.InvokeStop();
+            event2.Wait(waitTimeout);
+
+            Assert.True(event2.IsSet);
         }
 
         public void Dispose() => worker?.Dispose();

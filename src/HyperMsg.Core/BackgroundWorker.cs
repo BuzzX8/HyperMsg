@@ -8,12 +8,6 @@ namespace HyperMsg
     {
         private CancellationTokenSource tokenSource;
         private Task backgroundTask;
-        private bool tokenSourceDisposed;
-
-        protected BackgroundWorker()
-        {
-            backgroundTask = Task.CompletedTask;
-        }
 
         public bool IsRunning => backgroundTask.Status != TaskStatus.RanToCompletion
             && backgroundTask.Status != TaskStatus.Faulted
@@ -21,52 +15,51 @@ namespace HyperMsg
 
         protected void Run()
         {
-            if (IsRunning)
+            if (backgroundTask != null)
             {
                 return;
             }
 
             tokenSource = new CancellationTokenSource();
-            tokenSourceDisposed = false;
-            backgroundTask = RunBackgroundTask();
+            RunBackgroundTask();
         }
 
         public void Dispose()
         {
-            if (tokenSourceDisposed)
+            if (tokenSource == null)
             {
                 return;
             }
 
-            tokenSource?.Cancel();
-            tokenSource?.Dispose();
-            tokenSourceDisposed = true;
+            Stop();
+            tokenSource.Dispose();
+            tokenSource = null;
         }
 
         protected void Stop()
         {
-            Dispose();
-            backgroundTask.Wait();
+            if (tokenSource == null)
+            {
+                return;
+            }
+
+            tokenSource.Cancel();
+            backgroundTask = null;
         }
 
-        protected bool Stop(TimeSpan waitTimeout)
-        {
-            Dispose();
-            return backgroundTask.Wait(waitTimeout);
-        }
-
-        private Task RunBackgroundTask()
-        {
-            return Task.Run(DoWorkAsync).ContinueWith(OnBackgroundTaskCompleted);
-        }
-
-        private async Task DoWorkAsync()
+        private void RunBackgroundTask()
         {
             var token = tokenSource.Token;
+            backgroundTask = Task.Run(() => DoWorkAsync(token), token);
+            backgroundTask.ConfigureAwait(false);
+            backgroundTask.ContinueWith(OnBackgroundTaskCompleted);
+        }
 
-            while (!token.IsCancellationRequested)
+        private async Task DoWorkAsync(CancellationToken cancellationToken)
+        {            
+            while (!cancellationToken.IsCancellationRequested)
             {
-                await DoWorkIterationAsync(token);
+                await Task.Run(() => DoWorkIterationAsync(cancellationToken), cancellationToken);
             }
         }
 
