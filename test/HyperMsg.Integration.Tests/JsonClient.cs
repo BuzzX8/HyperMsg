@@ -26,12 +26,20 @@ namespace HyperMsg.Integration
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
             await handler.HandleAsync(TransportOperations.OpenConnection, cancellationToken);
-            await handler.HandleAsync(ReceiveMode.Proactive, cancellationToken);
+            await handler.HandleAsync(ReceiveMode.Reactive, cancellationToken);
         }
 
-        public void Disconnect() => handler.Handle(TransportOperations.CloseConnection);
+        public void Disconnect()
+        {
+            handler.Handle(ReceiveMode.Proactive);
+            handler.Handle(TransportOperations.CloseConnection);
+        }
 
-        public Task DisconnectAsync(CancellationToken cancellationToken) => handler.HandleAsync(TransportOperations.CloseConnection, cancellationToken);
+        public async Task DisconnectAsync(CancellationToken cancellationToken)
+        {
+            await handler.HandleAsync(ReceiveMode.Proactive);
+            await handler.HandleAsync(TransportOperations.CloseConnection, cancellationToken);
+        }
 
         public void SendObject(JObject @object)
         {
