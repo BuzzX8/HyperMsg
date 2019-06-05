@@ -25,11 +25,11 @@ namespace HyperMsg
         {
             switch (message)
             {
-                case ReceiveMode.Proactive:
+                case ReceiveMode.SetProactive:
                     Stop();
                     break;
 
-                case ReceiveMode.Reactive:
+                case ReceiveMode.SetReactive:
                     Run();
                     break;
             }

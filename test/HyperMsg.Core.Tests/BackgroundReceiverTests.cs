@@ -34,7 +34,7 @@ namespace HyperMsg
                 @event.Set();
             });            
             
-            backgroundReceiver.Handle(ReceiveMode.Reactive);            
+            backgroundReceiver.Handle(ReceiveMode.SetReactive);            
             @event.Wait(waitTimeout);
 
             A.CallTo(() => publisher.PublishAsync(expected, A<CancellationToken>._)).MustHaveHappened();
