@@ -6,7 +6,6 @@ namespace HyperMsg
     {
         public static void UseCoreServices<T>(this IConfigurable configurable, int inputBufferSize, int outputBufferSize)
         {
-            configurable.UseHandlerRepository<T>();
             configurable.UseCompositeHandler();
             configurable.UseBackgrounReceiver<T>();
             configurable.UseBufferReader(inputBufferSize);
@@ -67,18 +66,15 @@ namespace HyperMsg
             configurable.RegisterConfigurator((p, s) =>
             {
                 var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
-                var repository = (IHandlerRepository)p.GetService(typeof(IHandlerRepository));
-                var bgReceiver = new BackgroundReceiver<T>(receiver, repository.GetHandlers<T>);
-                repository.AddHandler(bgReceiver);
+                var repository = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
+                //var bgReceiver = new BackgroundReceiver<T>(receiver, repository.GetHandlers<T>);
+                //repository.AddHandler(bgReceiver);
             });
         }
 
-        public static void UseCompositeHandler(this IConfigurable configurable) => configurable.RegisterService(typeof(IHandler), (p, s) =>
+        public static void UseCompositeHandler(this IConfigurable configurable) => configurable.RegisterService(new[] { typeof(ISender), typeof(IHandlerRegistry) }, (p, s) =>
         {
-            var repository = (IHandlerRepository)p.GetService(typeof(IHandlerRepository));
-            return new CompositeHandler(repository);
+            return new MessageMediator();
         });
-
-        public static void UseHandlerRepository<T>(this IConfigurable configurable) => configurable.RegisterService(typeof(IHandlerRepository), (p, s) => new HandlerRepository());
     }
 }
