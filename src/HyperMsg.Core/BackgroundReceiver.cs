@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,18 +7,18 @@ namespace HyperMsg
     public class BackgroundReceiver<T> : BackgroundWorker, IHandler<ReceiveMode>
     {
         private readonly IReceiver<T> messageReceiver;
-        private readonly ISender sender;
+        private readonly IPublisher publisher;
 
-        public BackgroundReceiver(IReceiver<T> messageReceiver, ISender sender)
+        public BackgroundReceiver(IReceiver<T> messageReceiver, IPublisher publisher)
         {
             this.messageReceiver = messageReceiver ?? throw new ArgumentNullException(nameof(messageReceiver));
-            this.sender = sender ?? throw new ArgumentNullException(nameof(sender));
+            this.publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
         }
 
         protected override async Task DoWorkIterationAsync(CancellationToken cancellationToken)
         {
             var message = await messageReceiver.ReceiveAsync(cancellationToken);
-            await sender.SendAsync(message, cancellationToken);
+            await publisher.PublishAsync(message, cancellationToken);
         }
 
         public void Handle(ReceiveMode message)
@@ -36,7 +35,7 @@ namespace HyperMsg
             }
         }
 
-        public Task HandleAsync(ReceiveMode message, CancellationToken token = default)
+        public Task HandleAsync(ReceiveMode message, CancellationToken token)
         {
             Handle(message);
             return Task.CompletedTask;

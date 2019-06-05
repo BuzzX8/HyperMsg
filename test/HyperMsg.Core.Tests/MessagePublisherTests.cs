@@ -7,9 +7,9 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class MessageMediatorTests
+    public class MessagePublisherTests
     {
-        private readonly MessageMediator mediator = new MessageMediator();
+        private readonly MessagePublisher publisher = new MessagePublisher();
 
         [Fact]
         public void Send_Calls_Handle_For_Each_Registered_Handler()
@@ -19,7 +19,7 @@ namespace HyperMsg
 
             var expected = Guid.NewGuid().ToString();            
 
-            mediator.Send(expected);
+            publisher.Publish(expected);
 
             foreach (var handler in handlers)
             {
@@ -35,7 +35,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToString();
             var cancellationToken = new CancellationToken();            
 
-            await mediator.SendAsync(expected, cancellationToken);
+            await publisher.PublishAsync(expected, cancellationToken);
 
             foreach (var handler in handlers)
             {
@@ -47,7 +47,7 @@ namespace HyperMsg
         {
             foreach (var handler in handlers)
             {
-                mediator.Register(handler);
+                publisher.Register(handler);
             }
         }
     }

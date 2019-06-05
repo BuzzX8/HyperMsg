@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace HyperMsg
+﻿namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
@@ -66,15 +64,16 @@ namespace HyperMsg
             configurable.RegisterConfigurator((p, s) =>
             {
                 var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
-                var repository = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
-                //var bgReceiver = new BackgroundReceiver<T>(receiver, repository.GetHandlers<T>);
-                //repository.AddHandler(bgReceiver);
+                var publisher = (IPublisher)p.GetService(typeof(IPublisher));
+                var registry = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
+                var bgReceiver = new BackgroundReceiver<T>(receiver, publisher);
+                registry.Register(bgReceiver);
             });
         }
 
-        public static void UseCompositeHandler(this IConfigurable configurable) => configurable.RegisterService(new[] { typeof(ISender), typeof(IHandlerRegistry) }, (p, s) =>
+        public static void UseCompositeHandler(this IConfigurable configurable) => configurable.RegisterService(new[] { typeof(IPublisher), typeof(IHandlerRegistry) }, (p, s) =>
         {
-            return new MessageMediator();
+            return new MessagePublisher();
         });
     }
 }
