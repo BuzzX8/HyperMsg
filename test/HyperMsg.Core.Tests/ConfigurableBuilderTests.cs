@@ -89,7 +89,7 @@ namespace HyperMsg
             builder.UseCoreServices<Guid>(100, 100);
             builder.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
             builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
-            builder.RegisterService(typeof(IHandler<TransportOperations>), (p, s) => A.Fake<IHandler<TransportOperations>>());
+            builder.RegisterService(typeof(IHandler<TransportMessage>), (p, s) => A.Fake<IHandler<TransportMessage>>());
 
             builder.RegisterService(typeof(string), (p, s) =>
             {

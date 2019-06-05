@@ -2,7 +2,7 @@
 {
     public enum ReceiveMode
     {
-        Proactive,
-        Reactive
+        SetProactive,
+        SetReactive
     }
 }
