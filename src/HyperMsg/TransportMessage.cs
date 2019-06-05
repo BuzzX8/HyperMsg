@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg
 {
-    public enum TransportMessages
+    public enum TransportMessage
     {
         Open,
         Opening,
