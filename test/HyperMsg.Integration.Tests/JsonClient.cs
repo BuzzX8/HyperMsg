@@ -9,9 +9,9 @@ namespace HyperMsg.Integration
     public class JsonClient : IJsonClient, IHandler<JObject>
     {
         private readonly IMessageBuffer<JObject> messageBuffer;
-        private readonly IHandler handler;
+        private readonly IPublisher handler;
 
-        public JsonClient(IMessageBuffer<JObject> messageBuffer, IHandler handler)
+        public JsonClient(IMessageBuffer<JObject> messageBuffer, IPublisher handler)
         {
             this.messageBuffer = messageBuffer;
             this.handler = handler;
@@ -19,26 +19,26 @@ namespace HyperMsg.Integration
 
         public void Connect()
         {
-            handler.Handle(TransportOperations.OpenConnection);
-            handler.Handle(ReceiveMode.Reactive);
+            handler.Publish(TransportOperations.OpenConnection);
+            handler.Publish(ReceiveMode.Reactive);
         }
 
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
-            await handler.HandleAsync(TransportOperations.OpenConnection, cancellationToken);
-            await handler.HandleAsync(ReceiveMode.Reactive, cancellationToken);
+            await handler.PublishAsync(TransportOperations.OpenConnection, cancellationToken);
+            await handler.PublishAsync(ReceiveMode.Reactive, cancellationToken);
         }
 
         public void Disconnect()
         {
-            handler.Handle(ReceiveMode.Proactive);
-            handler.Handle(TransportOperations.CloseConnection);
+            handler.Publish(ReceiveMode.Proactive);
+            handler.Publish(TransportOperations.CloseConnection);
         }
 
         public async Task DisconnectAsync(CancellationToken cancellationToken)
         {
-            await handler.HandleAsync(ReceiveMode.Proactive);
-            await handler.HandleAsync(TransportOperations.CloseConnection, cancellationToken);
+            await handler.PublishAsync(ReceiveMode.Proactive, cancellationToken);
+            await handler.PublishAsync(TransportOperations.CloseConnection, cancellationToken);
         }
 
         public void SendObject(JObject @object)

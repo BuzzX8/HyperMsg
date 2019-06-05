@@ -19,8 +19,8 @@ namespace HyperMsg
         /// 
         /// </summary>
         /// <param name="message"></param>
-        /// <param name="token"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SendAsync(T message, CancellationToken token);
+        Task SendAsync(T message, CancellationToken cancellationToken);
     }
 }

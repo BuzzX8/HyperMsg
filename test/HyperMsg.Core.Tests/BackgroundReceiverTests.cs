@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -10,7 +9,7 @@ namespace HyperMsg
     public class BackgroundReceiverTests : IDisposable
     {
         private readonly IReceiver<Guid> messageReceiver;
-        private readonly Func<IEnumerable<IHandler<Guid>>> handlerProvider;
+        private readonly IPublisher publisher;
         private readonly BackgroundReceiver<Guid> backgroundReceiver;
 
         private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
@@ -18,8 +17,8 @@ namespace HyperMsg
         public BackgroundReceiverTests()
         {
             messageReceiver = A.Fake<IReceiver<Guid>>();
-            handlerProvider = A.Fake<Func<IEnumerable<IHandler<Guid>>>>();
-            backgroundReceiver = new BackgroundReceiver<Guid>(messageReceiver, handlerProvider);            
+            publisher = A.Fake<IPublisher>();
+            backgroundReceiver = new BackgroundReceiver<Guid>(messageReceiver, publisher);
         }
 
         [Fact]
@@ -33,13 +32,12 @@ namespace HyperMsg
             {
                 actual = m;
                 @event.Set();
-            });
-            A.CallTo(() => handlerProvider.Invoke()).Returns(new[] { handler });
+            });            
             
             backgroundReceiver.Handle(ReceiveMode.Reactive);            
             @event.Wait(waitTimeout);
 
-            Assert.Equal(expected, actual);
+            A.CallTo(() => publisher.PublishAsync(expected, A<CancellationToken>._)).MustHaveHappened();
         }
 
         public void Dispose() => backgroundReceiver.Dispose();
