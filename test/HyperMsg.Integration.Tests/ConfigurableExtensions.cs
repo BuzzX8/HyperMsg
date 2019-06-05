@@ -11,10 +11,10 @@ namespace HyperMsg.Integration
             configurable.RegisterService(typeof(IJsonClient), (p, s) =>
             {
                 var messageBuffer = (IMessageBuffer<JObject>)p.GetService(typeof(IMessageBuffer<JObject>));
-                var handler = (IHandler)p.GetService(typeof(IHandler));
-                var repository = (IHandlerRepository)p.GetService(typeof(IHandlerRepository));
+                var handler = (IPublisher)p.GetService(typeof(IPublisher));
+                var repository = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
                 var client = new JsonClient(messageBuffer, handler);
-                repository.AddHandler(client);
+                repository.Register(client);
 
                 return client;
             });

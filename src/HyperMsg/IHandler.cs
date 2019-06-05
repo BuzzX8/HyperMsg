@@ -21,6 +21,6 @@ namespace HyperMsg
         /// <param name="message"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task HandleAsync(T message, CancellationToken token = default);
+        Task HandleAsync(T message, CancellationToken cancellationToken);
     }    
 }

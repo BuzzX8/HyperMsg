@@ -9,10 +9,10 @@ namespace HyperMsg.Sockets
             configurable.AddSetting(nameof(EndPoint), endpoint);
             configurable.RegisterService(typeof(IStream), (p, s) =>
             {
-                var repository = (IHandlerRepository)p.GetService(typeof(IHandlerRepository));
+                var registry = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
                 var socket = new SocketProxy(SocketFactory.CreateTcpSocket(), (EndPoint)s[nameof(EndPoint)]);                
                 var transport = new SocketTransport(socket);
-                repository.AddHandler(transport);
+                registry.Register(transport);
 
                 return transport;
             });
