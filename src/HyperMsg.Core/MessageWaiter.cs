@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -6,13 +7,15 @@ namespace HyperMsg
     public class MessageWaiter<T>
     {        
         private TaskCompletionSource<T> completionSource;
-        private object message;
+        private bool isMessageSet = false;
+        private T message;
 
         public Task<T> WaitAsync(CancellationToken cancellationToken)
         {
-            if (message != null)
+            if (isMessageSet)
             {
-                return Task.FromResult((T)message);
+                isMessageSet = false;
+                return Task.FromResult(message);
             }
 
             return (completionSource = new TaskCompletionSource<T>()).Task;            
@@ -20,9 +23,15 @@ namespace HyperMsg
 
         public void SetMessage(T message)
         {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             if(completionSource == null)
             {
                 this.message = message;
+                isMessageSet = true;
                 return;
             }
 
