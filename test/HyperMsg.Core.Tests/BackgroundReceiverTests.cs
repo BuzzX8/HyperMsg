@@ -22,7 +22,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Invokes_Message_Handler_After_Switching_To_Reactive_Mode()
+        public void Invokes_Message_Handler_After_Open_Transport_Message()
         {
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;            
@@ -34,7 +34,7 @@ namespace HyperMsg
                 @event.Set();
             });            
             
-            backgroundReceiver.Handle(ReceiveMode.SetReactive);            
+            backgroundReceiver.Handle(TransportMessage.Opened);            
             @event.Wait(waitTimeout);
 
             A.CallTo(() => publisher.PublishAsync(expected, A<CancellationToken>._)).MustHaveHappened();

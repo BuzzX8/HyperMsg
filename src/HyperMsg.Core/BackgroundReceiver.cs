@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : BackgroundWorker, IHandler<ReceiveMode>
+    public class BackgroundReceiver<T> : BackgroundWorker, IHandler<TransportMessage>
     {
         private readonly IReceiver<T> messageReceiver;
         private readonly IPublisher publisher;
@@ -21,21 +21,21 @@ namespace HyperMsg
             await publisher.PublishAsync(message, cancellationToken);
         }
 
-        public void Handle(ReceiveMode message)
+        public void Handle(TransportMessage message)
         {
             switch (message)
             {
-                case ReceiveMode.SetProactive:
-                    Stop();
+                case TransportMessage.Opened:
+                    Run();
                     break;
 
-                case ReceiveMode.SetReactive:
-                    Run();
+                case TransportMessage.Closed:
+                    Stop();
                     break;
             }
         }
 
-        public Task HandleAsync(ReceiveMode message, CancellationToken token)
+        public Task HandleAsync(TransportMessage message, CancellationToken token)
         {
             Handle(message);
             return Task.CompletedTask;
