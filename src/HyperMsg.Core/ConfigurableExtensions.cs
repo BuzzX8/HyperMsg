@@ -63,10 +63,11 @@
         {
             configurable.RegisterConfigurator((p, s) =>
             {
-                var receiver = (IReceiver<T>)p.GetService(typeof(IReceiver<T>));
-                var publisher = (IPublisher)p.GetService(typeof(IPublisher));
+                var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
+                var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
+                var messageHandler = (IHandler<T>)p.GetService(typeof(IHandler<T>));
                 var registry = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
-                var bgReceiver = new BackgroundReceiver<T>(receiver, publisher);
+                var bgReceiver = new BackgroundReceiver<T>(serializer.Deserialize, bufferReader, messageHandler);
                 registry.Register(bgReceiver);
             });
         }
