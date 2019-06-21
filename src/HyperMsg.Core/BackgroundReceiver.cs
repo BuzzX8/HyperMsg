@@ -8,7 +8,6 @@ namespace HyperMsg
     {
         private readonly DeserializeFunc<T> deserialize;
         private readonly IBufferReader bufferReader;
-        private readonly IReceiver<T> messageReceiver;
         private readonly IHandler<T> messageHandler;
 
         public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, IHandler<T> messageHandler)
