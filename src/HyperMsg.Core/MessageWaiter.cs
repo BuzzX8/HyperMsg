@@ -1,21 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
     public class MessageWaiter<T>
-    {        
+    {
+        private readonly Queue<T> messageQueue = new Queue<T>();
         private TaskCompletionSource<T> completionSource;
-        private bool isMessageSet = false;
-        private T message;
 
         public Task<T> WaitAsync(CancellationToken cancellationToken)
         {
-            if (isMessageSet)
-            {
-                isMessageSet = false;
-                return Task.FromResult(message);
+            if (messageQueue.Count > 0)
+            {                
+                return Task.FromResult(messageQueue.Dequeue());
             }
 
             return (completionSource = new TaskCompletionSource<T>()).Task;            
@@ -30,8 +29,7 @@ namespace HyperMsg
 
             if(completionSource == null)
             {
-                this.message = message;
-                isMessageSet = true;
+                messageQueue.Enqueue(message);
                 return;
             }
 

@@ -36,6 +36,20 @@ namespace HyperMsg
         }
 
         [Fact]
+        public void WaitAsync_Returns_Enqueued_Messages_In_Correct_Order()
+        {
+            var message2 = Guid.NewGuid().ToString();
+            messageWaiter.SetMessage(message);
+            messageWaiter.SetMessage(message2);
+
+            messageWaiter.WaitAsync(CancellationToken.None);
+            var task2 = messageWaiter.WaitAsync(CancellationToken.None);
+
+            Assert.True(task2.IsCompletedSuccessfully);
+            Assert.Equal(message2, task2.Result);
+        }
+
+        [Fact]
         public void SetMessage_Completes_Waiting_Task()
         {
             var task = messageWaiter.WaitAsync(CancellationToken.None);
