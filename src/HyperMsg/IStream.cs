@@ -20,9 +20,9 @@ namespace HyperMsg
         /// 
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="token"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<int> ReadAsync(Memory<byte> buffer, CancellationToken token = default);
+        Task<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken);
 
         /// <summary>
         /// 
@@ -34,8 +34,8 @@ namespace HyperMsg
         /// 
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="token"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task WriteAsync(Memory<byte> buffer, CancellationToken token = default);
+        Task WriteAsync(Memory<byte> buffer, CancellationToken cancellationToken);
     }
 }

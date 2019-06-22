@@ -7,20 +7,20 @@ namespace HyperMsg
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IHandler<T>
+    public interface IMessageSender<in T>
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="message"></param>
-        void Handle(T message);
+        void Send(T message);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="message"></param>
-        /// <param name="token"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task HandleAsync(T message, CancellationToken cancellationToken);
-    }    
+        Task SendAsync(T message, CancellationToken cancellationToken);
+    }
 }
