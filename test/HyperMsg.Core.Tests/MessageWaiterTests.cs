@@ -50,6 +50,17 @@ namespace HyperMsg
         }
 
         [Fact]
+        public void Cancels_Wait_Task_When_Provided_Token_Signals_Cancellation()
+        {
+            var tokenSource = new CancellationTokenSource();
+            var task = messageWaiter.WaitAsync(tokenSource.Token);
+
+            tokenSource.Cancel();
+
+            Assert.True(task.IsCanceled);
+        }
+
+        [Fact]
         public void SetMessage_Completes_Waiting_Task()
         {
             var task = messageWaiter.WaitAsync(CancellationToken.None);
