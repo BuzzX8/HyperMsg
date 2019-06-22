@@ -89,13 +89,13 @@ namespace HyperMsg
             builder.UseCoreServices<Guid>(100, 100);
             builder.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
             builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
-            builder.RegisterService(typeof(IHandler<TransportMessage>), (p, s) => A.Fake<IHandler<TransportMessage>>());
+            builder.RegisterService(typeof(IMessageHandler<TransportMessage>), (p, s) => A.Fake<IMessageHandler<TransportMessage>>());
 
-            builder.RegisterService(typeof(string), (p, s) =>
-            {
-                var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
-                return expected;
-            });
+            //builder.RegisterService(typeof(string), (p, s) =>
+            //{
+            //    var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
+            //    return expected;
+            //});
 
             var actual = builder.Build();
 
@@ -108,11 +108,11 @@ namespace HyperMsg
             var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
             builder.UseCoreServices<Guid>(100, 100);
-            builder.RegisterService(typeof(string), (p, s) =>
-            {
-                var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
-                return expected;
-            });
+            //builder.RegisterService(typeof(string), (p, s) =>
+            //{
+            //    var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
+            //    return expected;
+            //});
 
             Assert.Throws<InvalidOperationException>(() => builder.Build());
         }

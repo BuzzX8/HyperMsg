@@ -11,9 +11,8 @@ namespace HyperMsg.Integration
             configurable.RegisterService(typeof(IJsonClient), (p, s) =>
             {
                 var messageBuffer = (IMessageBuffer<JObject>)p.GetService(typeof(IMessageBuffer<JObject>));
-                var handler = (IPublisher)p.GetService(typeof(IPublisher));
                 var repository = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
-                var client = new JsonClient(messageBuffer, handler);
+                var client = new JsonClient(messageBuffer);
                 repository.Register(client);
 
                 return client;

@@ -11,7 +11,7 @@ namespace HyperMsg
     {
         private readonly DeserializeFunc<Guid> deserializeFunc;
         private readonly IBufferReader bufferReader;
-        private readonly IHandler<Guid> handler;
+        private readonly IMessageHandler<Guid> handler;
         private readonly BackgroundReceiver<Guid> backgroundReceiver;
 
         private readonly ManualResetEventSlim @event = new ManualResetEventSlim();
@@ -21,7 +21,7 @@ namespace HyperMsg
         {
             deserializeFunc = A.Fake<DeserializeFunc<Guid>>();
             bufferReader = A.Fake<IBufferReader>();
-            handler = A.Fake<IHandler<Guid>>();
+            handler = A.Fake<IMessageHandler<Guid>>();
             backgroundReceiver = new BackgroundReceiver<Guid>(deserializeFunc, bufferReader, handler);
         }
 

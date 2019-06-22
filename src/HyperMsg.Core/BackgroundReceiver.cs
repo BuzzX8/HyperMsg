@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : BackgroundWorker, IHandler<TransportMessage>
+    public class BackgroundReceiver<T> : BackgroundWorker, IMessageHandler<TransportMessage>
     {
         private readonly DeserializeFunc<T> deserialize;
         private readonly IBufferReader bufferReader;
-        private readonly IHandler<T> messageHandler;
+        private readonly IMessageHandler<T> messageHandler;
 
-        public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, IHandler<T> messageHandler)
+        public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, IMessageHandler<T> messageHandler)
         {
             this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
             this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));

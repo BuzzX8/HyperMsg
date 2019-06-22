@@ -6,39 +6,37 @@ using Newtonsoft.Json.Linq;
 
 namespace HyperMsg.Integration
 {
-    public class JsonClient : IJsonClient, IHandler<JObject>
+    public class JsonClient : IJsonClient, IMessageHandler<JObject>
     {
         private readonly IMessageBuffer<JObject> messageBuffer;
-        private readonly IPublisher handler;
 
-        public JsonClient(IMessageBuffer<JObject> messageBuffer, IPublisher handler)
+        public JsonClient(IMessageBuffer<JObject> messageBuffer)
         {
             this.messageBuffer = messageBuffer;
-            this.handler = handler;
         }
 
         public void Connect()
         {
-            handler.Publish(TransportMessage.Open);
-            handler.Publish(ReceiveMode.SetReactive);
+            //handler.Publish(TransportMessage.Open);
+            //handler.Publish(ReceiveMode.SetReactive);
         }
 
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
-            await handler.PublishAsync(TransportMessage.Open, cancellationToken);
-            await handler.PublishAsync(ReceiveMode.SetReactive, cancellationToken);
+            //await handler.PublishAsync(TransportMessage.Open, cancellationToken);
+            //await handler.PublishAsync(ReceiveMode.SetReactive, cancellationToken);
         }
 
         public void Disconnect()
         {
-            handler.Publish(ReceiveMode.SetProactive);
-            handler.Publish(TransportMessage.Close);
+            //handler.Publish(ReceiveMode.SetProactive);
+            //handler.Publish(TransportMessage.Close);
         }
 
         public async Task DisconnectAsync(CancellationToken cancellationToken)
         {
-            await handler.PublishAsync(ReceiveMode.SetProactive, cancellationToken);
-            await handler.PublishAsync(TransportMessage.Close, cancellationToken);
+            //await handler.PublishAsync(ReceiveMode.SetProactive, cancellationToken);
+            //await handler.PublishAsync(TransportMessage.Close, cancellationToken);
         }
 
         public void SendObject(JObject @object)
