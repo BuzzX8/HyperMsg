@@ -7,7 +7,7 @@ namespace HyperMsg
     public class MessageReceiver<T> : IReceiver<T>
     {
         private readonly DeserializeFunc<T> deserialize;
-        private readonly IBufferReader bufferReader;        
+        private readonly IBufferReader bufferReader;
 
         public MessageReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader)
         {

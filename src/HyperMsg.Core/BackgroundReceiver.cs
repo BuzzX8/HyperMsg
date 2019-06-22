@@ -4,38 +4,46 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : BackgroundWorker, IHandler<ReceiveMode>
+    public class BackgroundReceiver<T> : BackgroundWorker, IHandler<TransportMessage>
     {
-        private readonly IReceiver<T> messageReceiver;
-        private readonly IPublisher publisher;
+        private readonly DeserializeFunc<T> deserialize;
+        private readonly IBufferReader bufferReader;
+        private readonly IHandler<T> messageHandler;
 
-        public BackgroundReceiver(IReceiver<T> messageReceiver, IPublisher publisher)
+        public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, IHandler<T> messageHandler)
         {
-            this.messageReceiver = messageReceiver ?? throw new ArgumentNullException(nameof(messageReceiver));
-            this.publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
+            this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
+            this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
+            this.messageHandler = messageHandler ?? throw new ArgumentNullException(nameof(messageHandler));
         }
 
         protected override async Task DoWorkIterationAsync(CancellationToken cancellationToken)
         {
-            var message = await messageReceiver.ReceiveAsync(cancellationToken);
-            await publisher.PublishAsync(message, cancellationToken);
+            var buffer = await bufferReader.ReadAsync(cancellationToken);
+            var result = deserialize.Invoke(buffer);
+
+            if (result.MessageSize > 0)
+            {
+                bufferReader.Advance(result.MessageSize);
+                await messageHandler.HandleAsync(result.Message, cancellationToken);
+            }            
         }
 
-        public void Handle(ReceiveMode message)
+        public void Handle(TransportMessage message)
         {
             switch (message)
             {
-                case ReceiveMode.SetProactive:
-                    Stop();
+                case TransportMessage.Opened:
+                    Run();
                     break;
 
-                case ReceiveMode.SetReactive:
-                    Run();
+                case TransportMessage.Closed:
+                    Stop();
                     break;
             }
         }
 
-        public Task HandleAsync(ReceiveMode message, CancellationToken token)
+        public Task HandleAsync(TransportMessage message, CancellationToken token)
         {
             Handle(message);
             return Task.CompletedTask;
