@@ -1,13 +1,9 @@
 ﻿namespace HyperMsg
 {
-    public enum TransportMessage
+    public enum TransportCommand
     {
         Open,
-        Opening,
-        Opened,
         Close,
-        Closing,
-        Closed,
         SetTransportLevelSecurity
     }
 }
