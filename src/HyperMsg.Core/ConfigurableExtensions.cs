@@ -43,9 +43,7 @@
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
                 var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
                 var messageHandler = (IMessageHandler<T>)p.GetService(typeof(IMessageHandler<T>));
-                var registry = (IHandlerRegistry)p.GetService(typeof(IHandlerRegistry));
                 var bgReceiver = new BackgroundReceiver<T>(serializer.Deserialize, bufferReader, messageHandler);
-                registry.Register(bgReceiver);
             });
         }
     }

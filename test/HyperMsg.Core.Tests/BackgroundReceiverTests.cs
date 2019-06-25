@@ -30,12 +30,12 @@ namespace HyperMsg
         {
             A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Invokes(foc =>
             {
-                backgroundReceiver.Handle(TransportMessage.Closed);
+                backgroundReceiver.Handle(TransportEvent.Closed);
                 @event.Set();
             })
             .Returns(Task.FromResult(new ReadOnlySequence<byte>()));            
 
-            backgroundReceiver.Handle(TransportMessage.Opened);
+            backgroundReceiver.Handle(TransportEvent.Opened);
             @event.Wait(waitTimeout);
 
             A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).MustHaveHappened();
@@ -49,11 +49,11 @@ namespace HyperMsg
             A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Returns(buffer);
             A.CallTo(() => deserializeFunc.Invoke(buffer)).Invokes(foc =>
             {
-                backgroundReceiver.Handle(TransportMessage.Closed);
+                backgroundReceiver.Handle(TransportEvent.Closed);
                 @event.Set();
             });
 
-            backgroundReceiver.Handle(TransportMessage.Opened);
+            backgroundReceiver.Handle(TransportEvent.Opened);
             @event.Wait(waitTimeout);
 
             A.CallTo(() => deserializeFunc.Invoke(buffer)).MustHaveHappened();
@@ -67,11 +67,11 @@ namespace HyperMsg
             A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(messageSize, Guid.Empty));
             A.CallTo(() => bufferReader.Advance(messageSize)).Invokes(foc =>
             {
-                backgroundReceiver.Handle(TransportMessage.Closed);
+                backgroundReceiver.Handle(TransportEvent.Closed);
                 @event.Set();                
             });
 
-            backgroundReceiver.Handle(TransportMessage.Opened);
+            backgroundReceiver.Handle(TransportEvent.Opened);
             @event.Wait(waitTimeout);
 
             A.CallTo(() => bufferReader.Advance(messageSize)).MustHaveHappened();
@@ -85,11 +85,11 @@ namespace HyperMsg
             A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(16, message));
             A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).Invokes(foc =>
             {
-                backgroundReceiver.Handle(TransportMessage.Closed);
+                backgroundReceiver.Handle(TransportEvent.Closed);
                 @event.Set();
             }).Returns(Task.CompletedTask);
 
-            backgroundReceiver.Handle(TransportMessage.Opened);
+            backgroundReceiver.Handle(TransportEvent.Opened);
             @event.Wait(waitTimeout);
 
             A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).MustHaveHappened();
