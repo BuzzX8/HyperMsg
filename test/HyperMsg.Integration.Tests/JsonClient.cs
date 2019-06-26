@@ -39,26 +39,10 @@ namespace HyperMsg.Integration
             //await handler.PublishAsync(TransportMessage.Close, cancellationToken);
         }
 
-        public void SendObject(JObject @object)
-        {
-            messageBuffer.Write(@object);
-            messageBuffer.Flush();
-        }
-
         public Task SendObjectAsync(JObject @object, CancellationToken cancellationToken)
         {
             messageBuffer.Write(@object);
             return messageBuffer.FlushAsync(cancellationToken);
-        }
-
-        public void SendObjects(IEnumerable<JObject> objects)
-        {
-            foreach (var @object in objects)
-            {
-                messageBuffer.Write(@object);
-            }
-
-            messageBuffer.Flush();
         }
 
         public Task SendObjectsAsync(IEnumerable<JObject> objects, CancellationToken cancellationToken)

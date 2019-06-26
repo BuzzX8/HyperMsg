@@ -41,20 +41,6 @@ namespace HyperMsg.Integration
         }
 
         [Fact]
-        public void SendObject_Serializes_And_Transmits_JObject()
-        {            
-            var expectedMessage = JObject.Parse("{ Subject: 'Hello', Message: 'World' }");
-            StartListenerAndConnectClient();
-
-            client.SendObject(expectedMessage);
-            
-            int received = acceptedSocket.Receive(receivingBuffer);
-            var actualMessage = JObject.Parse(Encoding.UTF8.GetString(new ReadOnlySpan<byte>(receivingBuffer, 0, received)));
-
-            Assert.Equal(expectedMessage, actualMessage);
-        }
-
-        [Fact]
         public void ObjectReceived_Rises_When_Received_Json_Data()
         {
             var expectedMessage = "{ Subject: 'Hello', Message: 'World' }";
@@ -85,13 +71,13 @@ namespace HyperMsg.Integration
             };
             listener.StartListening(endPoint);
 
-            client.Connect();
+            client.ConnectAsync(CancellationToken.None);
             @event.Wait();
         }
 
         public void Dispose()
         {
-            client.Disconnect();
+            client.DisconnectAsync(CancellationToken.None).Wait();
             acceptedSocket?.Close();
             listener.StopListening();
         }
