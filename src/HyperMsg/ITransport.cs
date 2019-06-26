@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -6,6 +7,6 @@ namespace HyperMsg
     {
         IStream GetStream();
 
-        Task ProcessCommandAsync(TransportCommand command);
+        Task ProcessCommandAsync(TransportCommand command, CancellationToken cancellationToken);
     }
 }

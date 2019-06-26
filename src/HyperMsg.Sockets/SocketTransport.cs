@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Sockets
 {
-    public class SocketTransport : IStream, IHandler<TransportMessage>
+    public class SocketTransport : ITransport, IStream
     {
         private readonly ISocket socket;
 
@@ -13,35 +13,19 @@ namespace HyperMsg.Sockets
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
         }
 
-        public void Handle(TransportMessage message)
+        public IStream GetStream() => this;
+
+        public Task ProcessCommandAsync(TransportCommand command, CancellationToken token = default)
         {
-            switch (message)
+            switch (command)
             {
-                case TransportMessage.Open:
-                    socket.Connect();
-                    break;
-
-                case TransportMessage.Close:
-                    socket.Disconnect();
-                    break;
-
-                case TransportMessage.SetTransportLevelSecurity:
-                    SetTls();
-                    break;
-            }
-        }
-
-        public Task HandleAsync(TransportMessage message, CancellationToken token = default)
-        {
-            switch (message)
-            {
-                case TransportMessage.Open:
+                case TransportCommand.Open:
                     return socket.ConnectAsync(token);
 
-                case TransportMessage.Close:
+                case TransportCommand.Close:
                     return socket.DisconnectAsync(token);
 
-                case TransportMessage.SetTransportLevelSecurity:
+                case TransportCommand.SetTransportLevelSecurity:
                     SetTls();
                     break;
             }

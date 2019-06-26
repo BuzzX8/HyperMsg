@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : BackgroundWorker, ITransportEventHandler
+    public class BackgroundReceiver<T> : BackgroundWorker
     {
         private readonly DeserializeFunc<T> deserialize;
         private readonly IBufferReader bufferReader;
@@ -29,24 +29,24 @@ namespace HyperMsg
             }            
         }
 
-        public void Handle(TransportEvent message)
-        {
-            switch (message)
-            {
-                case TransportEvent.Opened:
-                    Run();
-                    break;
+        //public void Handle(TransportEvent message)
+        //{
+        //    switch (message)
+        //    {
+        //        case TransportEvent.Opened:
+        //            Run();
+        //            break;
 
-                case TransportEvent.Closed:
-                    Stop();
-                    break;
-            }
-        }
+        //        case TransportEvent.Closed:
+        //            Stop();
+        //            break;
+        //    }
+        //}
 
-        public Task HandleAsync(TransportEvent message, CancellationToken token)
-        {
-            Handle(message);
-            return Task.CompletedTask;
-        }
+        //public Task HandleAsync(TransportEvent message, CancellationToken token)
+        //{
+        //    Handle(message);
+        //    return Task.CompletedTask;
+        //}
     }
 }
