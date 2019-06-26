@@ -18,12 +18,6 @@ namespace HyperMsg
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        ReadOnlySequence<byte> Read();
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken cancellationToken);

@@ -13,12 +13,6 @@ namespace HyperMsg
         /// 
         /// </summary>
         /// <param name="message"></param>
-        void Handle(T message);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="message"></param>
         /// <param name="token"></param>
         /// <returns></returns>
         Task HandleAsync(T message, CancellationToken cancellationToken);
