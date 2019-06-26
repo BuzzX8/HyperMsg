@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class DelegateHandler<T> : IHandler<T>
+    public class DelegateHandler<T> : IMessageHandler<T>
     {
         private readonly Action<T> handleAction;
         private readonly Func<T, CancellationToken, Task<T>> handleAsyncFunc;

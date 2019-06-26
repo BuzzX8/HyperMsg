@@ -89,11 +89,10 @@ namespace HyperMsg
             builder.UseCoreServices<Guid>(100, 100);
             builder.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
             builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
-            builder.RegisterService(typeof(IHandler<TransportMessage>), (p, s) => A.Fake<IHandler<TransportMessage>>());
-
+            builder.RegisterService(typeof(IMessageHandler<Guid>), (p, s) => A.Fake<IMessageHandler<Guid>>());
             builder.RegisterService(typeof(string), (p, s) =>
             {
-                var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
+                var sender = (IMessageSender<Guid>)p.GetService(typeof(IMessageSender<Guid>));
                 return expected;
             });
 
@@ -108,11 +107,6 @@ namespace HyperMsg
             var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
             builder.UseCoreServices<Guid>(100, 100);
-            builder.RegisterService(typeof(string), (p, s) =>
-            {
-                var transceiver = (ITransceiver<Guid, Guid>)p.GetService(typeof(ITransceiver<Guid, Guid>));
-                return expected;
-            });
 
             Assert.Throws<InvalidOperationException>(() => builder.Build());
         }

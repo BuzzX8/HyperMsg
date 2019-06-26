@@ -2,6 +2,6 @@
 {
     public interface IHandlerRegistry
     {
-        void Register<T>(IHandler<T> handler);
+        void Register<T>(IMessageHandler<T> handler);
     }
 }

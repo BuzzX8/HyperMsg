@@ -14,13 +14,8 @@ namespace HyperMsg
         /// <summary>
         /// 
         /// </summary>
-        void Flush();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="token"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task FlushAsync(CancellationToken token = default);
+        Task FlushAsync(CancellationToken cancellationToken);
     }
 }

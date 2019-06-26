@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BackgroundReceiver<T> : BackgroundWorker, IHandler<TransportMessage>
+    public class BackgroundReceiver<T> : BackgroundWorker, ITransportEventHandler
     {
         private readonly DeserializeFunc<T> deserialize;
         private readonly IBufferReader bufferReader;
-        private readonly IHandler<T> messageHandler;
+        private readonly IMessageHandler<T> messageHandler;
 
-        public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, IHandler<T> messageHandler)
+        public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, IMessageHandler<T> messageHandler)
         {
             this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
             this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
@@ -29,21 +29,21 @@ namespace HyperMsg
             }            
         }
 
-        public void Handle(TransportMessage message)
+        public void Handle(TransportEvent message)
         {
             switch (message)
             {
-                case TransportMessage.Opened:
+                case TransportEvent.Opened:
                     Run();
                     break;
 
-                case TransportMessage.Closed:
+                case TransportEvent.Closed:
                     Stop();
                     break;
             }
         }
 
-        public Task HandleAsync(TransportMessage message, CancellationToken token)
+        public Task HandleAsync(TransportEvent message, CancellationToken token)
         {
             Handle(message);
             return Task.CompletedTask;
