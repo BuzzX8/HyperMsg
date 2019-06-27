@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -8,5 +9,7 @@ namespace HyperMsg
         IStream GetStream();
 
         Task ProcessCommandAsync(TransportCommand command, CancellationToken cancellationToken);
+
+        event EventHandler<TransportEventArgs> TransportEvent;
     }
 }
