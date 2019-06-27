@@ -29,24 +29,18 @@ namespace HyperMsg
             }            
         }
 
-        //public void Handle(TransportEvent message)
-        //{
-        //    switch (message)
-        //    {
-        //        case TransportEvent.Opened:
-        //            Run();
-        //            break;
+        public void HandleTransportEvent(object sender, TransportEventArgs eventArgs)
+        {
+            switch (eventArgs.Event)
+            {
+                case TransportEvent.Opened:
+                    Run();
+                    break;
 
-        //        case TransportEvent.Closed:
-        //            Stop();
-        //            break;
-        //    }
-        //}
-
-        //public Task HandleAsync(TransportEvent message, CancellationToken token)
-        //{
-        //    Handle(message);
-        //    return Task.CompletedTask;
-        //}
+                case TransportEvent.Closed:
+                    Stop();
+                    break;
+            }
+        }
     }
 }

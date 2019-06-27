@@ -15,15 +15,15 @@ namespace HyperMsg.Sockets
 
         public IStream GetStream() => this;
 
-        public Task ProcessCommandAsync(TransportCommand command, CancellationToken token = default)
+        public Task ProcessCommandAsync(TransportCommand command, CancellationToken cancellationToken)
         {
             switch (command)
             {
                 case TransportCommand.Open:
-                    return socket.ConnectAsync(token);
+                    return OpenAsync(cancellationToken);
 
                 case TransportCommand.Close:
-                    return socket.DisconnectAsync(token);
+                    return CloseAsync(cancellationToken);
 
                 case TransportCommand.SetTransportLevelSecurity:
                     SetTls();
@@ -31,6 +31,25 @@ namespace HyperMsg.Sockets
             }
 
             return Task.CompletedTask;
+        }
+
+        private async Task OpenAsync(CancellationToken cancellationToken)
+        {
+            OnTransportEvent(HyperMsg.TransportEvent.Opening);
+            await socket.ConnectAsync(cancellationToken);
+            OnTransportEvent(HyperMsg.TransportEvent.Opened);
+        }
+
+        private async Task CloseAsync(CancellationToken cancellationToken)
+        {
+            OnTransportEvent(HyperMsg.TransportEvent.Closing);
+            await socket.DisconnectAsync(cancellationToken);
+            OnTransportEvent(HyperMsg.TransportEvent.Closed);
+        }
+
+        private void OnTransportEvent(TransportEvent @event)
+        {
+            TransportEvent?.Invoke(this, new TransportEventArgs(@event));
         }
 
         private void SetTls()
@@ -50,5 +69,7 @@ namespace HyperMsg.Sockets
         public void Write(Memory<byte> buffer) => socket.Write(buffer);
 
         public Task WriteAsync(Memory<byte> buffer, CancellationToken token = default) => socket.WriteAsync(buffer, token);
+
+        public event EventHandler<TransportEventArgs> TransportEvent;
     }
 }

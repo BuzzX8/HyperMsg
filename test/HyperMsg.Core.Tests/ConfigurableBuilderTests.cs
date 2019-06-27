@@ -58,7 +58,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
 
-            builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
+            builder.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
             builder.UseBufferReader(100);
 
             var reader = builder.Build();
@@ -74,7 +74,7 @@ namespace HyperMsg
             var actual = Guid.Empty;
 
             builder.UseBufferReader(100);
-            builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
+            builder.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
 
             var reader = builder.Build();
 
@@ -88,7 +88,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToString();
             builder.UseCoreServices<Guid>(100, 100);
             builder.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
-            builder.RegisterService(typeof(IStream), (p, s) => A.Fake<IStream>());
+            builder.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
             builder.RegisterService(typeof(IMessageHandler<Guid>), (p, s) => A.Fake<IMessageHandler<Guid>>());
             builder.RegisterService(typeof(string), (p, s) =>
             {

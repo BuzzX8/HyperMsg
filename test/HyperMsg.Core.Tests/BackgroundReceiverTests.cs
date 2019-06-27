@@ -25,75 +25,76 @@ namespace HyperMsg
             backgroundReceiver = new BackgroundReceiver<Guid>(deserializeFunc, bufferReader, handler);
         }
 
-        //[Fact]
-        //public void DoWorkIterationAsync_Reads_Buffer_With_BufferReader()
-        //{
-        //    A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Invokes(foc =>
-        //    {
-        //        backgroundReceiver.Handle(TransportEvent.Closed);
-        //        @event.Set();
-        //    })
-        //    .Returns(Task.FromResult(new ReadOnlySequence<byte>()));            
+        [Fact]
+        public void DoWorkIterationAsync_Reads_Buffer_With_BufferReader()
+        {
+            A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Invokes(foc =>
+            {                
+                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                @event.Set();
+            })
+            .Returns(Task.FromResult(new ReadOnlySequence<byte>()));
 
-        //    backgroundReceiver.Handle(TransportEvent.Opened);
-        //    @event.Wait(waitTimeout);
+            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            @event.Wait(waitTimeout);
 
-        //    A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).MustHaveHappened();
-        //}
+            A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).MustHaveHappened();
+        }
 
-        //[Fact]
-        //public void DoWorkIterationAsync_Invokes_Deserialization_Func()
-        //{
-        //    var buffer = new ReadOnlySequence<byte>(Guid.NewGuid().ToByteArray());
+        [Fact]
+        public void DoWorkIterationAsync_Invokes_Deserialization_Func()
+        {
+            var buffer = new ReadOnlySequence<byte>(Guid.NewGuid().ToByteArray());
 
-        //    A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Returns(buffer);
-        //    A.CallTo(() => deserializeFunc.Invoke(buffer)).Invokes(foc =>
-        //    {
-        //        backgroundReceiver.Handle(TransportEvent.Closed);
-        //        @event.Set();
-        //    });
+            A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Returns(buffer);
+            A.CallTo(() => deserializeFunc.Invoke(buffer)).Invokes(foc =>
+            {
+                
+                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                @event.Set();
+            });
 
-        //    backgroundReceiver.Handle(TransportEvent.Opened);
-        //    @event.Wait(waitTimeout);
+            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            @event.Wait(waitTimeout);
 
-        //    A.CallTo(() => deserializeFunc.Invoke(buffer)).MustHaveHappened();
-        //}
+            A.CallTo(() => deserializeFunc.Invoke(buffer)).MustHaveHappened();
+        }
 
-        //[Fact]
-        //public void DoWorkIterationAsync_Advances_Buffer_Reader_When_Message_Deserialized()
-        //{
-        //    var messageSize = 16;
+        [Fact]
+        public void DoWorkIterationAsync_Advances_Buffer_Reader_When_Message_Deserialized()
+        {
+            var messageSize = 16;
 
-        //    A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(messageSize, Guid.Empty));
-        //    A.CallTo(() => bufferReader.Advance(messageSize)).Invokes(foc =>
-        //    {
-        //        backgroundReceiver.Handle(TransportEvent.Closed);
-        //        @event.Set();                
-        //    });
+            A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(messageSize, Guid.Empty));
+            A.CallTo(() => bufferReader.Advance(messageSize)).Invokes(foc =>
+            {
+                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                @event.Set();
+            });
 
-        //    backgroundReceiver.Handle(TransportEvent.Opened);
-        //    @event.Wait(waitTimeout);
+            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            @event.Wait(waitTimeout);
 
-        //    A.CallTo(() => bufferReader.Advance(messageSize)).MustHaveHappened();
-        //}
+            A.CallTo(() => bufferReader.Advance(messageSize)).MustHaveHappened();
+        }
 
-        //[Fact]
-        //public void DoWorkIterationAsync_Invokes_MessageHandler_When_Message_Deserialized()
-        //{
-        //    var message = Guid.NewGuid();
+        [Fact]
+        public void DoWorkIterationAsync_Invokes_MessageHandler_When_Message_Deserialized()
+        {
+            var message = Guid.NewGuid();
 
-        //    A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(16, message));
-        //    A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).Invokes(foc =>
-        //    {
-        //        backgroundReceiver.Handle(TransportEvent.Closed);
-        //        @event.Set();
-        //    }).Returns(Task.CompletedTask);
+            A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(16, message));
+            A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).Invokes(foc =>
+            {
+                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                @event.Set();
+            }).Returns(Task.CompletedTask);
 
-        //    backgroundReceiver.Handle(TransportEvent.Opened);
-        //    @event.Wait(waitTimeout);
+            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            @event.Wait(waitTimeout);
 
-        //    A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).MustHaveHappened();
-        //}
+            A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).MustHaveHappened();
+        }
 
         public void Dispose() => backgroundReceiver.Dispose();
     }
