@@ -17,7 +17,8 @@
             configurable.RegisterService(new[] { typeof(IMessageSender<T>), typeof(IMessageBuffer<T>) }, (p, s) =>
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
-                var stream = (IStream)p.GetService(typeof(IStream));
+                var transport = (ITransport)p.GetService(typeof(ITransport));
+                var stream = transport.GetStream();
                 var buffSize = (int)s[SettingName];
                 return new MessageBuffer<T>(serializer.Serialize, new byte[bufferSize], stream.WriteAsync);
             });
@@ -31,7 +32,8 @@
             configurable.RegisterService(typeof(IBufferReader), (p, s) =>
             {
                 var buffSize = (int)s[SettingName];
-                var stream = (IStream)p.GetService(typeof(IStream));
+                var transport = (ITransport)p.GetService(typeof(ITransport));
+                var stream = transport.GetStream();
                 return new BufferReader(new byte[buffSize], stream.ReadAsync);
             });
         }
@@ -44,6 +46,9 @@
                 var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
                 var messageHandler = (IMessageHandler<T>)p.GetService(typeof(IMessageHandler<T>));
                 var bgReceiver = new BackgroundReceiver<T>(serializer.Deserialize, bufferReader, messageHandler);
+
+                var transport = (ITransport)p.GetService(typeof(ITransport));
+                transport.TransportEvent += bgReceiver.HandleTransportEvent;
             });
         }
     }

@@ -12,10 +12,10 @@ namespace HyperMsg.Sockets
 
         void Connect();
 
-        Task ConnectAsync(CancellationToken token);
+        Task ConnectAsync(CancellationToken cancellationToken);
 
         void Disconnect();
 
-        Task DisconnectAsync(CancellationToken token);
+        Task DisconnectAsync(CancellationToken cancellationToken);
     }
 }

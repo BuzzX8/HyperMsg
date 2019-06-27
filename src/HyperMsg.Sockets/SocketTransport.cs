@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Sockets
 {
-    public class SocketTransport : IStream, IHandler<TransportMessage>
+    public class SocketTransport : ITransport, IStream
     {
         private readonly ISocket socket;
 
@@ -13,40 +13,43 @@ namespace HyperMsg.Sockets
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
         }
 
-        public void Handle(TransportMessage message)
+        public IStream GetStream() => this;
+
+        public Task ProcessCommandAsync(TransportCommand command, CancellationToken cancellationToken)
         {
-            switch (message)
+            switch (command)
             {
-                case TransportMessage.Open:
-                    socket.Connect();
-                    break;
+                case TransportCommand.Open:
+                    return OpenAsync(cancellationToken);
 
-                case TransportMessage.Close:
-                    socket.Disconnect();
-                    break;
+                case TransportCommand.Close:
+                    return CloseAsync(cancellationToken);
 
-                case TransportMessage.SetTransportLevelSecurity:
-                    SetTls();
-                    break;
-            }
-        }
-
-        public Task HandleAsync(TransportMessage message, CancellationToken token = default)
-        {
-            switch (message)
-            {
-                case TransportMessage.Open:
-                    return socket.ConnectAsync(token);
-
-                case TransportMessage.Close:
-                    return socket.DisconnectAsync(token);
-
-                case TransportMessage.SetTransportLevelSecurity:
+                case TransportCommand.SetTransportLevelSecurity:
                     SetTls();
                     break;
             }
 
             return Task.CompletedTask;
+        }
+
+        private async Task OpenAsync(CancellationToken cancellationToken)
+        {
+            OnTransportEvent(HyperMsg.TransportEvent.Opening);
+            await socket.ConnectAsync(cancellationToken);
+            OnTransportEvent(HyperMsg.TransportEvent.Opened);
+        }
+
+        private async Task CloseAsync(CancellationToken cancellationToken)
+        {
+            OnTransportEvent(HyperMsg.TransportEvent.Closing);
+            await socket.DisconnectAsync(cancellationToken);
+            OnTransportEvent(HyperMsg.TransportEvent.Closed);
+        }
+
+        private void OnTransportEvent(TransportEvent @event)
+        {
+            TransportEvent?.Invoke(this, new TransportEventArgs(@event));
         }
 
         private void SetTls()
@@ -66,5 +69,7 @@ namespace HyperMsg.Sockets
         public void Write(Memory<byte> buffer) => socket.Write(buffer);
 
         public Task WriteAsync(Memory<byte> buffer, CancellationToken token = default) => socket.WriteAsync(buffer, token);
+
+        public event EventHandler<TransportEventArgs> TransportEvent;
     }
 }
