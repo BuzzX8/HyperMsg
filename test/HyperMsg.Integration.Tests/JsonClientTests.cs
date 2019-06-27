@@ -20,7 +20,7 @@ namespace HyperMsg.Integration
 
         public JsonClientTests()
         {            
-            var clientBuilder = new ConfigurableBuilder<IJsonClient>();
+            var clientBuilder = new ConfigurableServiceProvider<IJsonClient>();
             clientBuilder.UseCoreServices<JObject>(2048, 2048);
             clientBuilder.UseSockets(endPoint);
             clientBuilder.UseJsonSerializer();

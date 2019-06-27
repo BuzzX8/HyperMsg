@@ -7,28 +7,28 @@ namespace HyperMsg
 {
     public class ConfigurableBuilderTests
     {
-        [Fact]
-        public void Build_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
-        {
-            var builder = new ConfigurableBuilder<string>();
-            var factory = A.Fake<ServiceFactory>();
-            builder.RegisterService(typeof(string), (p, s) => string.Empty);
+        private readonly ConfigurableServiceProvider provider = new ConfigurableServiceProvider();
 
-            builder.Build();
+        [Fact]
+        public void GetService_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
+        {            
+            var factory = A.Fake<ServiceFactory>();
+            provider.RegisterService(typeof(string), (p, s) => string.Empty);
+
+            provider.GetService<string>();
 
             A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).MustNotHaveHappened();
         }
 
         [Fact]
-        public void Build_Returns_Registered_Service()
+        public void GetService_Returns_Registered_Service()
         {
-            var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
             var factory = A.Fake<ServiceFactory>();
             A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).Returns(expected);
-            builder.RegisterService(typeof(string), factory);
+            provider.RegisterService(typeof(string), factory);
 
-            var actual = builder.Build();
+            var actual = provider.GetService<string>();
 
             Assert.Equal(expected, actual);
         }
@@ -36,92 +36,86 @@ namespace HyperMsg
         [Fact]
         public void ConfigurationContext_GetSetting_Returns_Previuosly_Added_Setting()
         {
-            var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
-            builder.AddSetting(nameof(Guid), expected);
-            builder.RegisterService(typeof(string), (p, s) =>
+            provider.AddSetting(nameof(Guid), expected);
+            provider.RegisterService(typeof(string), (p, s) =>
             {
                 actual = (Guid)s[nameof(Guid)];
                 return string.Empty;
             });
 
-            builder.Build();
+            provider.GetService<string>();
 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void Build_Resolves_Direct_Dependency_Registered_Before_Service()
+        public void GetService_Resolves_Direct_Dependency_Registered_Before_Service()
         {
-            var builder = new ConfigurableBuilder<IBufferReader>();
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
 
-            builder.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
-            builder.UseBufferReader(100);
+            provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
+            provider.UseBufferReader(100);
 
-            var reader = builder.Build();
+            var reader = provider.GetService<IBufferReader>();
 
             Assert.NotNull(reader);
         }
 
         [Fact]
-        public void Build_Resolves_Direct_Dependency_Registered_After_Service()
+        public void GetService_Resolves_Direct_Dependency_Registered_After_Service()
         {
-            var builder = new ConfigurableBuilder<IBufferReader>();
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
 
-            builder.UseBufferReader(100);
-            builder.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
+            provider.UseBufferReader(100);
+            provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
 
-            var reader = builder.Build();
+            var reader = provider.GetService<IBufferReader>();
 
             Assert.NotNull(reader);
         }
 
         [Fact]
-        public void Build_Resolves_Complex_Dependencies()
+        public void GetService_Resolves_Complex_Dependencies()
         {
-            var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
-            builder.UseCoreServices<Guid>(100, 100);
-            builder.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
-            builder.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
-            builder.RegisterService(typeof(string), (p, s) =>
+            provider.UseCoreServices<Guid>(100, 100);
+            provider.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
+            provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
+            provider.RegisterService(typeof(string), (p, s) =>
             {
                 var sender = (IMessageSender<Guid>)p.GetService(typeof(IMessageSender<Guid>));
                 return expected;
             });
 
-            var actual = builder.Build();
+            var actual = provider.GetService<string>();
 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void Build_Throws_Exception_If_No_Registered_Dependencies()
+        public void GetService_Throws_Exception_If_No_Registered_Dependencies()
         {
-            var builder = new ConfigurableBuilder<string>();
             var expected = Guid.NewGuid().ToString();
-            builder.UseCoreServices<Guid>(100, 100);
+            provider.UseCoreServices<Guid>(100, 100);
 
-            Assert.Throws<InvalidOperationException>(() => builder.Build());
+            Assert.Throws<InvalidOperationException>(() => provider.GetService<string>());
         }
 
         [Fact]
         public void Builder_Rethrows_Exception_Thrown_By_Factory()
         {
-            var builder = new ConfigurableBuilder<string>();
-            builder.RegisterService(typeof(Guid), (p, s) => throw new ArgumentNullException());
-            builder.RegisterService(typeof(string), (p, s) =>
+            provider.RegisterService(typeof(Guid), (p, s) => throw new ArgumentNullException());
+            provider.RegisterService(typeof(string), (p, s) =>
             {
                 p.GetService(typeof(Guid));
                 return string.Empty;
             });
 
-            Assert.Throws<ArgumentNullException>(() => builder.Build());
+            Assert.Throws<ArgumentNullException>(() => provider.GetService<string>());
         }
     }
 }
