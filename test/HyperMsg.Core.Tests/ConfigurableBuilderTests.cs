@@ -89,7 +89,6 @@ namespace HyperMsg
             builder.UseCoreServices<Guid>(100, 100);
             builder.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
             builder.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
-            builder.RegisterService(typeof(IMessageHandler<Guid>), (p, s) => A.Fake<IMessageHandler<Guid>>());
             builder.RegisterService(typeof(string), (p, s) =>
             {
                 var sender = (IMessageSender<Guid>)p.GetService(typeof(IMessageSender<Guid>));

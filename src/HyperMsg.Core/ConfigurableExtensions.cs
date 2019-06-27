@@ -4,6 +4,7 @@
     {
         public static void UseCoreServices<T>(this IConfigurable configurable, int inputBufferSize, int outputBufferSize)
         {
+            configurable.UseMessageHandlerAggregate<T>();
             configurable.UseBackgrounReceiver<T>();
             configurable.UseBufferReader(inputBufferSize);
             configurable.UseMessageBuffer<T>(outputBufferSize);
@@ -36,6 +37,14 @@
                 var stream = transport.GetStream();
                 return new BufferReader(new byte[buffSize], stream.ReadAsync);
             });
+        }
+
+        public static void UseMessageHandlerAggregate<T>(this IConfigurable configurable)
+        {
+            configurable.RegisterService(new[] { typeof(IMessageHandler<T>), typeof(IMessageHandlerRegistry<T>) }, (p, s) =>
+            {
+                return new MessageHandlerAggregate<T>();
+            }); 
         }
 
         public static void UseBackgrounReceiver<T>(this IConfigurable configurable)
