@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessagePublisher : IHandlerRegistry
+    public class MessageHandlerAggregate<T> : IMessageHandlerRegistry<T>, IMessageHandler<T>
     {
         private readonly Dictionary<Type, List<object>> handlers = new Dictionary<Type, List<object>>();
 
-        public void Register<T>(IMessageHandler<T> handler)
+        public void Register(IMessageHandler<T> handler)
         {
             if (!handlers.ContainsKey(typeof(T)))
             {
@@ -20,7 +20,7 @@ namespace HyperMsg
             handlers[typeof(T)].Add(handler);
         }
 
-        public async Task PublishAsync<T>(T message, CancellationToken cancellationToken)
+        public async Task HandleAsync(T message, CancellationToken cancellationToken)
         {
             if (!handlers.ContainsKey(typeof(T)))
             {

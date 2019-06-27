@@ -7,19 +7,19 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class MessagePublisherTests
+    public class MessageHandlerAggregateTests
     {
-        private readonly MessagePublisher publisher = new MessagePublisher();
+        private readonly MessageHandlerAggregate<Guid> publisher = new MessageHandlerAggregate<Guid>();
 
         [Fact]
-        public async Task SendAsync_Calls_Handle_For_Each_Registered_Handler()
+        public async Task HandleAsync_Calls_HandleAsync_For_Each_Registered_Handler()
         {
-            var handlers = A.CollectionOfFake<IMessageHandler<string>>(4);
+            var handlers = A.CollectionOfFake<IMessageHandler<Guid>>(4);
             AddHandlers(handlers);
-            var expected = Guid.NewGuid().ToString();
+            var expected = Guid.NewGuid();
             var cancellationToken = new CancellationToken();
 
-            await publisher.PublishAsync(expected, cancellationToken);
+            await publisher.HandleAsync(expected, cancellationToken);
 
             foreach (var handler in handlers)
             {
@@ -27,7 +27,7 @@ namespace HyperMsg
             }
         }
 
-        private void AddHandlers<T>(IEnumerable<IMessageHandler<T>> handlers)
+        private void AddHandlers(IEnumerable<IMessageHandler<Guid>> handlers)
         {
             foreach (var handler in handlers)
             {
