@@ -15,8 +15,6 @@ namespace HyperMsg
             this.handleAsyncFunc = handleAsyncFunc;
         }
 
-        public void Handle(T message) => handleAction.Invoke(message);
-
         public Task HandleAsync(T message, CancellationToken cancellationToken = default)
         {
             if (handleAsyncFunc != null)

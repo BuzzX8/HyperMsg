@@ -12,6 +12,8 @@ namespace HyperMsg
         private readonly List<Configurator> configurators;
         private readonly Dictionary<Type, object> createdServices;
 
+        private bool configuratorsInvoked = false;
+
         public ConfigurableServiceProvider()
         {            
             settings = new Dictionary<string, object>();
@@ -34,12 +36,21 @@ namespace HyperMsg
 
         public T GetService<T>()
         {
+            if (!configuratorsInvoked)
+            {
+                RunConfigurators();
+                configuratorsInvoked = true;
+            }
+
+            return (T)GetService(typeof(T));
+        }
+
+        private void RunConfigurators()
+        {
             foreach (var configurator in configurators)
             {
                 configurator.Invoke(this, settings);
             }
-
-            return (T)GetService(typeof(T));
         }
 
         public object GetService(Type serviceInterface)
