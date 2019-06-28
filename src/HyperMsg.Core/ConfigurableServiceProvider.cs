@@ -36,25 +36,14 @@ namespace HyperMsg
 
         public T GetService<T>()
         {
-            if (!configuratorsInvoked)
-            {
-                RunConfigurators();
-                configuratorsInvoked = true;
-            }
-
+            EnsureConfiguratorsRun();
             return (T)GetService(typeof(T));
-        }
-
-        private void RunConfigurators()
-        {
-            foreach (var configurator in configurators)
-            {
-                configurator.Invoke(this, settings);
-            }
         }
 
         public object GetService(Type serviceInterface)
         {
+            EnsureConfiguratorsRun();
+
             if (createdServices.ContainsKey(serviceInterface))
             {
                 return createdServices[serviceInterface];
@@ -74,6 +63,23 @@ namespace HyperMsg
             }
 
             throw new InvalidOperationException($"Can not resolve service for interface {serviceInterface}");
+        }
+
+        private void EnsureConfiguratorsRun()
+        {
+            if (!configuratorsInvoked)
+            {
+                RunConfigurators();
+                configuratorsInvoked = true;
+            }
+        }
+
+        private void RunConfigurators()
+        {
+            foreach (var configurator in configurators)
+            {
+                configurator.Invoke(this, settings);
+            }
         }
 
         private (IEnumerable<Type> interfaces, ServiceFactory factory) CreateMultiInterfaceService(Type serviceInterface)
