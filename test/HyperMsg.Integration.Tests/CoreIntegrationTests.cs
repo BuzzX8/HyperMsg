@@ -1,9 +1,7 @@
 ﻿using HyperMsg.Sockets;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -30,11 +28,12 @@ namespace HyperMsg.Integration
             serviceProvider.RegisterConfigurator((p, s) =>
             {
                 var registry = (IMessageHandlerRegistry<Guid>)p.GetService(typeof(IMessageHandlerRegistry<Guid>));
-                registry.Register(new DelegateHandler<Guid>(g =>
+                registry.Register((g, t) =>
                 {
                     receivedMessage = g;
                     receiveEvent.Set();
-                }));
+                    return Task.CompletedTask;
+                });
             });
 
             transport = serviceProvider.GetService<ITransport>();

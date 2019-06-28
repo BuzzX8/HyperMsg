@@ -14,7 +14,7 @@ namespace HyperMsg
         [Fact]
         public async Task HandleAsync_Calls_HandleAsync_For_Each_Registered_Handler()
         {
-            var handlers = A.CollectionOfFake<IMessageHandler<Guid>>(4);
+            var handlers = A.CollectionOfFake<AsyncHandler<Guid>>(4);
             AddHandlers(handlers);
             var expected = Guid.NewGuid();
             var cancellationToken = new CancellationToken();
@@ -23,11 +23,11 @@ namespace HyperMsg
 
             foreach (var handler in handlers)
             {
-                A.CallTo(() => handler.HandleAsync(expected, cancellationToken)).MustHaveHappened();
+                A.CallTo(() => handler.Invoke(expected, cancellationToken)).MustHaveHappened();
             }
         }
 
-        private void AddHandlers(IEnumerable<IMessageHandler<Guid>> handlers)
+        private void AddHandlers(IEnumerable<AsyncHandler<Guid>> handlers)
         {
             foreach (var handler in handlers)
             {

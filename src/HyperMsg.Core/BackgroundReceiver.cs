@@ -8,9 +8,9 @@ namespace HyperMsg
     {
         private readonly DeserializeFunc<T> deserialize;
         private readonly IBufferReader bufferReader;
-        private readonly IMessageHandler<T> messageHandler;
+        private readonly AsyncHandler<T> messageHandler;
 
-        public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, IMessageHandler<T> messageHandler)
+        public BackgroundReceiver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, AsyncHandler<T> messageHandler)
         {
             this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
             this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
@@ -25,11 +25,11 @@ namespace HyperMsg
             if (result.MessageSize > 0)
             {
                 bufferReader.Advance(result.MessageSize);
-                await messageHandler.HandleAsync(result.Message, cancellationToken);
+                await messageHandler.Invoke(result.Message, cancellationToken);
             }            
         }
 
-        public void HandleTransportEvent(object sender, TransportEventArgs eventArgs)
+        public Task HandleTransportEventAsync(TransportEventArgs eventArgs, CancellationToken cancellationToken)
         {
             switch (eventArgs.Event)
             {
@@ -41,6 +41,8 @@ namespace HyperMsg
                     Stop();
                     break;
             }
+
+            return Task.CompletedTask;
         }
     }
 }

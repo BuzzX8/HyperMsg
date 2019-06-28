@@ -37,32 +37,31 @@ namespace HyperMsg
         public T GetService<T>()
         {
             EnsureConfiguratorsRun();
-            return (T)GetService(typeof(T));
+
+            return (T)((IServiceProvider)this).GetService(typeof(T));
         }
 
-        public object GetService(Type serviceInterface)
+        object IServiceProvider.GetService(Type serviceType)
         {
-            EnsureConfiguratorsRun();
-
-            if (createdServices.ContainsKey(serviceInterface))
+            if (createdServices.ContainsKey(serviceType))
             {
-                return createdServices[serviceInterface];
+                return createdServices[serviceType];
             }
 
-            if (singleInterfaceServices.ContainsKey(serviceInterface))
+            if (singleInterfaceServices.ContainsKey(serviceType))
             {
-                return CreateSingleInterfaceService(serviceInterface);
+                return CreateSingleInterfaceService(serviceType);
             }
 
-            var itemToRemove = CreateMultiInterfaceService(serviceInterface);
+            var itemToRemove = CreateMultiInterfaceService(serviceType);
 
             if (itemToRemove != default)
             {
                 multiInterfaceServices.Remove(itemToRemove);
-                return createdServices[serviceInterface];
+                return createdServices[serviceType];
             }
 
-            throw new InvalidOperationException($"Can not resolve service for interface {serviceInterface}");
+            throw new InvalidOperationException($"Can not resolve service for interface {serviceType}");
         }
 
         private void EnsureConfiguratorsRun()

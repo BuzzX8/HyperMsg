@@ -41,10 +41,17 @@
 
         public static void UseMessageHandlerAggregate<T>(this IConfigurable configurable)
         {
-            configurable.RegisterService(new[] { typeof(IMessageHandler<T>), typeof(IMessageHandlerRegistry<T>) }, (p, s) =>
+            configurable.RegisterService(typeof(IMessageHandlerRegistry<T>), (p, s) =>
             {
                 return new MessageHandlerAggregate<T>();
-            }); 
+            });
+
+            configurable.RegisterService(typeof(AsyncHandler<T>), (p, s) =>
+            {
+                var aggregate = (MessageHandlerAggregate<T>)p.GetService(typeof(IMessageHandlerRegistry<T>));
+
+                return (AsyncHandler<T>)aggregate.HandleAsync;
+            });
         }
 
         public static void UseBackgrounReceiver<T>(this IConfigurable configurable)
@@ -53,11 +60,11 @@
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
                 var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
-                var messageHandler = (IMessageHandler<T>)p.GetService(typeof(IMessageHandler<T>));
+                var messageHandler = (AsyncHandler<T>)p.GetService(typeof(AsyncHandler<T>));
                 var bgReceiver = new BackgroundReceiver<T>(serializer.Deserialize, bufferReader, messageHandler);
 
                 var transport = (ITransport)p.GetService(typeof(ITransport));
-                transport.TransportEvent += bgReceiver.HandleTransportEvent;
+                transport.TransportEvent += bgReceiver.HandleTransportEventAsync;
             });
         }
     }
