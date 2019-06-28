@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace HyperMsg
 {
-    public class ConfigurableBuilder<T> : IConfigurable, IServiceProvider
+    public class ConfigurableServiceProvider : IConfigurable, IServiceProvider
     {
         private readonly Dictionary<string, object> settings;
         private readonly Dictionary<Type, ServiceFactory> singleInterfaceServices;
@@ -12,7 +12,9 @@ namespace HyperMsg
         private readonly List<Configurator> configurators;
         private readonly Dictionary<Type, object> createdServices;
 
-        public ConfigurableBuilder()
+        private bool configuratorsInvoked = false;
+
+        public ConfigurableServiceProvider()
         {            
             settings = new Dictionary<string, object>();
             singleInterfaceServices = new Dictionary<Type, ServiceFactory>();
@@ -32,18 +34,16 @@ namespace HyperMsg
             multiInterfaceServices.Add((serviceInterfaces, serviceFactory));
         }
 
-        public T Build()
+        public T GetService<T>()
         {
-            foreach (var configurator in configurators)
-            {
-                configurator.Invoke(this, settings);
-            }
-
+            EnsureConfiguratorsRun();
             return (T)GetService(typeof(T));
         }
 
         public object GetService(Type serviceInterface)
         {
+            EnsureConfiguratorsRun();
+
             if (createdServices.ContainsKey(serviceInterface))
             {
                 return createdServices[serviceInterface];
@@ -63,6 +63,23 @@ namespace HyperMsg
             }
 
             throw new InvalidOperationException($"Can not resolve service for interface {serviceInterface}");
+        }
+
+        private void EnsureConfiguratorsRun()
+        {
+            if (!configuratorsInvoked)
+            {
+                RunConfigurators();
+                configuratorsInvoked = true;
+            }
+        }
+
+        private void RunConfigurators()
+        {
+            foreach (var configurator in configurators)
+            {
+                configurator.Invoke(this, settings);
+            }
         }
 
         private (IEnumerable<Type> interfaces, ServiceFactory factory) CreateMultiInterfaceService(Type serviceInterface)
