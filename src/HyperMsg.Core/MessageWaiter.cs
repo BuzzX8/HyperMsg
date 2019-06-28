@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessageWaiter<T> : IMessageWaiter<T>
+    public class MessageWaiter<T>
     {
         private readonly Queue<T> messageQueue = new Queue<T>();
         private readonly object sync = new object();

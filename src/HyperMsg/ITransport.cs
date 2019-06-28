@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -10,6 +9,6 @@ namespace HyperMsg
 
         Task ProcessCommandAsync(TransportCommand command, CancellationToken cancellationToken);
 
-        event EventHandler<TransportEventArgs> TransportEvent;
+        event AsyncHandler<TransportEventArgs> TransportEvent;
     }
 }

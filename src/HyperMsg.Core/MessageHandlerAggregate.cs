@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessageHandlerAggregate<T> : IMessageHandlerRegistry<T>, IMessageHandler<T>
+    public class MessageHandlerAggregate<T> : IMessageHandlerRegistry<T>
     {
-        private readonly List<IMessageHandler<T>> handlers = new List<IMessageHandler<T>>();
+        private readonly List<AsyncHandler<T>> handlers = new List<AsyncHandler<T>>();
 
-        public void Register(IMessageHandler<T> handler)
+        public void Register(AsyncHandler<T> handler)
         {
             handlers.Add(handler);
         }
@@ -17,7 +17,7 @@ namespace HyperMsg
         {
             foreach (var handler in handlers)
             {
-                await handler.HandleAsync(message, cancellationToken);
+                await handler.Invoke(message, cancellationToken);
             }
         }
     }

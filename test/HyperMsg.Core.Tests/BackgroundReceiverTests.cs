@@ -11,7 +11,7 @@ namespace HyperMsg
     {
         private readonly DeserializeFunc<Guid> deserializeFunc;
         private readonly IBufferReader bufferReader;
-        private readonly IMessageHandler<Guid> handler;
+        private readonly AsyncHandler<Guid> handler;
         private readonly BackgroundReceiver<Guid> backgroundReceiver;
 
         private readonly ManualResetEventSlim @event = new ManualResetEventSlim();
@@ -21,7 +21,7 @@ namespace HyperMsg
         {
             deserializeFunc = A.Fake<DeserializeFunc<Guid>>();
             bufferReader = A.Fake<IBufferReader>();
-            handler = A.Fake<IMessageHandler<Guid>>();
+            handler = A.Fake<AsyncHandler<Guid>>();
             backgroundReceiver = new BackgroundReceiver<Guid>(deserializeFunc, bufferReader, handler);
         }
 
@@ -30,12 +30,12 @@ namespace HyperMsg
         {
             A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Invokes(foc =>
             {                
-                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closed), CancellationToken.None);
                 @event.Set();
             })
             .Returns(Task.FromResult(new ReadOnlySequence<byte>()));
 
-            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), CancellationToken.None);
             @event.Wait(waitTimeout);
 
             A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).MustHaveHappened();
@@ -50,11 +50,11 @@ namespace HyperMsg
             A.CallTo(() => deserializeFunc.Invoke(buffer)).Invokes(foc =>
             {
                 
-                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closed), CancellationToken.None);
                 @event.Set();
             });
 
-            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), CancellationToken.None);
             @event.Wait(waitTimeout);
 
             A.CallTo(() => deserializeFunc.Invoke(buffer)).MustHaveHappened();
@@ -68,11 +68,11 @@ namespace HyperMsg
             A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(messageSize, Guid.Empty));
             A.CallTo(() => bufferReader.Advance(messageSize)).Invokes(foc =>
             {
-                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closed), CancellationToken.None);
                 @event.Set();
             });
 
-            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), CancellationToken.None);
             @event.Wait(waitTimeout);
 
             A.CallTo(() => bufferReader.Advance(messageSize)).MustHaveHappened();
@@ -84,16 +84,16 @@ namespace HyperMsg
             var message = Guid.NewGuid();
 
             A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).Returns(new DeserializationResult<Guid>(16, message));
-            A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).Invokes(foc =>
+            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).Invokes(foc =>
             {
-                backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Closed));
+                backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closed), CancellationToken.None);
                 @event.Set();
             }).Returns(Task.CompletedTask);
 
-            backgroundReceiver.HandleTransportEvent(null, new TransportEventArgs(TransportEvent.Opened));
+            backgroundReceiver.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), CancellationToken.None);
             @event.Wait(waitTimeout);
 
-            A.CallTo(() => handler.HandleAsync(message, A<CancellationToken>._)).MustHaveHappened();
+            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
         }
 
         public void Dispose() => backgroundReceiver.Dispose();
