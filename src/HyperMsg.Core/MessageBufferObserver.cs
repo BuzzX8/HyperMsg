@@ -35,10 +35,15 @@ namespace HyperMsg
                     break;
                 }
 
-                MessageDeserialized?.Invoke(result.Message);
+                OnMessageDeserialized(result.Message);
             }
 
             bufferReader.Advance(deserializeSize);
+        }
+
+        private void OnMessageDeserialized(T message)
+        {
+            MessageDeserialized?.Invoke(message);
         }
 
         public event Action<T> MessageDeserialized;
