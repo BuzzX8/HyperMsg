@@ -7,49 +7,47 @@ namespace HyperMsg
 {
     public class BackgroundWorkerTests : IDisposable
     {
-        private BackgroundWorkerImpl worker;
+        private BackgroundWorker worker;
         private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
 
         [Fact]
-        public void Run_Periodically_Invokes_DoWorkIterationAsync()
+        public async Task Run_Periodically_Invokes_DoWorkIterationAsync()
         {
             var invokeCount = 5;
             var @event = new ManualResetEventSlim();
-            worker = new BackgroundWorkerImpl(t => 
+            worker = new BackgroundWorker(async t => 
             {
                 if (invokeCount == 0)
                 {
-                    worker.InvokeStop();
+                    await StopWorkerAsync(t);
                     @event.Set();
-                    return Task.CompletedTask;
                 }
 
                 invokeCount--;
-                return Task.CompletedTask;
             });
 
-            worker.InvokeRun();
+            await RunWorkerAsync();
             @event.Wait(waitTimeout);
 
             Assert.Equal(0, invokeCount);
         }
 
         [Fact]
-        public void Stop_Stops_Invoking_DoWorkIterationAsync_And_Invokes_BackgroundTaskCompleted()
+        public async Task Stop_Stops_Invoking_DoWorkIterationAsync_And_Invokes_BackgroundTaskCompleted()
         {
             var @event = new ManualResetEventSlim();
             var @event2 = new ManualResetEventSlim();
             var wasInvoked = false;
-            worker = new BackgroundWorkerImpl(t =>
+            worker = new BackgroundWorker(t =>
             {
                 @event.Wait();
                 wasInvoked = true;
                 return Task.CompletedTask;
             });
             worker.BackgroundTaskCompleted += t => event2.Set();
-            worker.InvokeRun();
+            await RunWorkerAsync();
 
-            worker.InvokeStop();
+            await StopWorkerAsync();
             @event.Set();
             event2.Wait(waitTimeout);
 
@@ -57,36 +55,36 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Invokes_UnhandledException_When_DoWorkIterationAsync_Throws_Exception()
+        public async Task Invokes_UnhandledException_When_DoWorkIterationAsync_Throws_Exception()
         {
             var @event = new ManualResetEventSlim();
             var expected = new InvalidOperationException();
             var actual = default(Exception);
-            worker = new BackgroundWorkerImpl(t => throw expected);
+            worker = new BackgroundWorker(t => throw expected);
             worker.UnhandledException += e =>
             {
                 actual = e;
                 @event.Set();
             };
 
-            worker.InvokeRun();
+            await RunWorkerAsync();
             @event.Wait(waitTimeout);
 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void Dispose_Initiates_Background_Task_Cancellation()
+        public async Task Dispose_Initiates_Background_Task_Cancellation()
         {
             var @event = new ManualResetEventSlim();
             var isTaskCompleted = false;
-            worker = new BackgroundWorkerImpl(t => Task.Delay(waitTimeout));
+            worker = new BackgroundWorker(t => Task.Delay(waitTimeout));
             worker.BackgroundTaskCompleted += t =>
             {
                 isTaskCompleted = true;
                 @event.Set();
             };
-            worker.InvokeRun();
+            await RunWorkerAsync();
 
             worker.Dispose();
             @event.Wait(waitTimeout);
@@ -95,40 +93,28 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Stop_Completes_BackgroundTask_When_DoWorkIterationAsync_Locked()
+        public async Task Stop_Completes_BackgroundTask_When_DoWorkIterationAsync_Locked()
         {
             var @event = new ManualResetEventSlim();
             var event2 = new ManualResetEventSlim();
-            worker = new BackgroundWorkerImpl(t =>
+            worker = new BackgroundWorker(t =>
             {
                 @event.Wait();
                 return Task.CompletedTask;
             });
             worker.BackgroundTaskCompleted += t => event2.Set();
-            worker.InvokeRun();            
-                        
-            worker.InvokeStop();
+            await RunWorkerAsync();
+
+            await StopWorkerAsync();
             event2.Wait(waitTimeout);
 
             Assert.True(event2.IsSet);
         }
 
+        private Task RunWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), CancellationToken.None);
+
+        private Task StopWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closing), CancellationToken.None);
+
         public void Dispose() => worker?.Dispose();
-    }
-
-    public class BackgroundWorkerImpl : BackgroundWorker
-    {
-        private readonly Func<CancellationToken, Task> workIterationFunc;
-
-        public BackgroundWorkerImpl(Func<CancellationToken, Task> workIterationFunc)
-        {
-            this.workIterationFunc = workIterationFunc;
-        }
-
-        protected override Task DoWorkIterationAsync(CancellationToken cancellationToken) => workIterationFunc(cancellationToken);
-
-        public void InvokeRun() => Run();
-
-        public void InvokeStop() => Stop();
     }
 }

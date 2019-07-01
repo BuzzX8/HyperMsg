@@ -61,10 +61,10 @@
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
                 var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
                 var messageHandler = (AsyncHandler<T>)p.GetService(typeof(AsyncHandler<T>));
-                var bgReceiver = new BackgroundReceiver<T>(serializer.Deserialize, bufferReader, messageHandler);
+                //var bgReceiver = new BackgroundReceiver<T>(serializer.Deserialize, bufferReader, messageHandler);
 
                 var transport = (ITransport)p.GetService(typeof(ITransport));
-                transport.TransportEvent += bgReceiver.HandleTransportEventAsync;
+                //transport.TransportEvent += bgReceiver.HandleTransportEventAsync;
             });
         }
     }
