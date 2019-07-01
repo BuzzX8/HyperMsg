@@ -104,6 +104,14 @@ namespace HyperMsg
             A.CallTo(() => deserializeFunc.Invoke(buffer.Slice(messageSize))).MustHaveHappened();
         }
 
+        [Fact]
+        public async Task CheckBufferAsync_Throws_Exception_If_Deserializer_Returns_Incorrect_Result()
+        {
+            PushDeserializationResult((int)buffer.Length + 1, Guid.Empty);
+
+            await Assert.ThrowsAsync<DeserializationException>(() => observer.CheckBufferAsync(CancellationToken.None));
+        }
+
         private void PushDeserializationResult(int messageSize, Guid message) => deserializationResults.Push(new DeserializationResult<Guid>(messageSize, message));
 
         private void PushEmptyDeserializationResult() => deserializationResults.Push(new DeserializationResult<Guid>(0, Guid.Empty));

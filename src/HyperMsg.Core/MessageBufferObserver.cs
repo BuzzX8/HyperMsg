@@ -28,6 +28,12 @@ namespace HyperMsg
             for (int i = 0; i < deserializeInvokeCount; i++)
             {
                 result = deserialize(buffer);
+
+                if (result.MessageSize > buffer.Length)
+                {
+                    throw new DeserializationException();
+                }
+
                 deserializeSize += result.MessageSize;
 
                 if (result.MessageSize == 0)
