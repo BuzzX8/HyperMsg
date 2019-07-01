@@ -26,7 +26,7 @@ namespace HyperMsg
             {
                 bufferReader.Advance(result.MessageSize);
                 await messageHandler.Invoke(result.Message, cancellationToken);
-            }            
+            }
         }
 
         public Task HandleTransportEventAsync(TransportEventArgs eventArgs, CancellationToken cancellationToken)
