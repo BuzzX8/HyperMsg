@@ -35,6 +35,7 @@ namespace HyperMsg
                     break;
                 }
 
+                buffer = buffer.Slice(result.MessageSize);
                 OnMessageDeserialized(result.Message);
             }
 

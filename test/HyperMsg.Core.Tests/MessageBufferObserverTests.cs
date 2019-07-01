@@ -14,15 +14,21 @@ namespace HyperMsg
         private readonly DeserializeFunc<Guid> deserializeFunc;
         private readonly IBufferReader bufferReader;
         private readonly MessageBufferObserver<Guid> observer;
+                
         private readonly Stack<DeserializationResult<Guid>> deserializationResults;
+        private readonly ReadOnlySequence<byte> buffer;
 
         public MessageBufferObserverTests()
         {
             deserializeFunc = A.Fake<DeserializeFunc<Guid>>();
             bufferReader = A.Fake<IBufferReader>();
             observer = new MessageBufferObserver<Guid>(deserializeFunc, bufferReader);
+
             deserializationResults = new Stack<DeserializationResult<Guid>>();
+            buffer = new ReadOnlySequence<byte>(Enumerable.Range(0, 100).Select(i => (byte)i).ToArray());
+
             PushEmptyDeserializationResult();
+            A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Returns(buffer);
             A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).ReturnsLazily(foc => deserializationResults.Pop());
         }
 
@@ -85,6 +91,17 @@ namespace HyperMsg
             await observer.CheckBufferAsync(CancellationToken.None);
 
             Assert.Equal(expectedMessages, actualMessages);
+        }
+
+        [Fact]
+        public async Task CheckBufferAsync_Corrrectly_Slices_Buffer()
+        {
+            var messageSize = 20;
+            PushDeserializationResult(messageSize, Guid.Empty);
+
+            await observer.CheckBufferAsync(CancellationToken.None);
+
+            A.CallTo(() => deserializeFunc.Invoke(buffer.Slice(messageSize))).MustHaveHappened();
         }
 
         private void PushDeserializationResult(int messageSize, Guid message) => deserializationResults.Push(new DeserializationResult<Guid>(messageSize, message));
