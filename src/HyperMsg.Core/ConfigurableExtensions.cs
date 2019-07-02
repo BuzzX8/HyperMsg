@@ -21,7 +21,7 @@
                 var transport = (ITransport)p.GetService(typeof(ITransport));
                 var stream = transport.GetStream();
                 var buffSize = (int)s[SettingName];
-                return new MessageBuffer<T>(serializer.Serialize, new byte[bufferSize], stream.WriteAsync);
+                return null;// new MessageBuffer<T>(serializer.Serialize, new byte[bufferSize], stream.WriteAsync);
             });
         }
 

@@ -1,42 +1,31 @@
 ﻿using System;
+using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
     public class MessageBuffer<T> : IMessageBuffer<T>, IMessageSender<T>
-    {        
+    {
+        private readonly IBufferWriter<byte> bufferWriter;
         private readonly SerializeAction<T> serializeAction;
-        private readonly ByteBufferWriter writer;
-        private readonly Func<Memory<byte>, CancellationToken, Task> writeAsync;
+        private readonly AsyncAction flushDelegate;
 
-        public MessageBuffer(SerializeAction<T> serializeAction, Memory<byte> buffer, Func<Memory<byte>, CancellationToken, Task> writeAsync)
-        {            
+        public MessageBuffer(IBufferWriter<byte> bufferWriter, SerializeAction<T> serializeAction, AsyncAction flushDelegate)
+        {
+            this.bufferWriter = bufferWriter ?? throw new ArgumentNullException(nameof(bufferWriter));
             this.serializeAction = serializeAction ?? throw new ArgumentNullException(nameof(serializeAction));
-            this.writeAsync = writeAsync ?? throw new ArgumentNullException(nameof(writeAsync));
-            writer = new ByteBufferWriter(buffer);
+            this.flushDelegate = flushDelegate ?? throw new ArgumentNullException(nameof(flushDelegate));
         }
 
-        public void Flush() => FlushAsync().GetAwaiter().GetResult();
+        public Task FlushAsync(CancellationToken cancellationToken) => flushDelegate.Invoke(cancellationToken);
 
-        public async Task FlushAsync(CancellationToken token = default)
-        {
-            await writeAsync.Invoke(writer.CommitedMemory, token);
-            writer.Reset();
-        }
-
-        public void Send(T message)
+        public async Task SendAsync(T message, CancellationToken cancellationToken)
         {
             Write(message);
-            Flush();
+            await FlushAsync(cancellationToken);
         }
 
-        public async Task SendAsync(T message, CancellationToken token = default)
-        {
-            Write(message);
-            await FlushAsync(token);
-        }
-
-        public void Write(T message) => serializeAction.Invoke(writer, message);
+        public void Write(T message) => serializeAction.Invoke(bufferWriter, message);
     }
 }
