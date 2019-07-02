@@ -119,5 +119,20 @@ namespace HyperMsg
 
             Assert.Throws<ArgumentNullException>(() => provider.GetService<string>());
         }
+
+        [Fact]
+        public void Dispose_Disposes_Disposable_Services()
+        {
+            var service = A.Fake<IBufferReader>(o =>
+            {
+                o.Implements<IDisposable>();
+            });
+            provider.RegisterService(typeof(IBufferReader), (p, s) => service);
+            provider.GetService<IBufferReader>();
+
+            provider.Dispose();
+
+            A.CallTo(() => ((IDisposable)service).Dispose()).MustHaveHappened();
+        }
     }
 }
