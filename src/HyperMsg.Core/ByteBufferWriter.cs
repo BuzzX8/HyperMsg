@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class ByteBufferWriter : IBufferWriter<byte>
+    public class ByteBufferWriter : IBufferWriter<byte>, IDisposable
     {
-        private readonly Memory<byte> buffer;
+        private readonly IMemoryOwner<byte> memoryOwner;
+        private readonly AsyncHandler<Memory<byte>> flushHandler;
         private int position;
 
-        public ByteBufferWriter(Memory<byte> buffer)
+        public ByteBufferWriter(IMemoryOwner<byte> memoryOwner, AsyncHandler<Memory<byte>> flushHandler)
         {
-            this.buffer = buffer;
+            this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
+            this.flushHandler = flushHandler ?? throw new ArgumentNullException(nameof(flushHandler));
             position = 0;
         }
 
-        private Memory<byte> Memory => buffer;
+        private Memory<byte> Memory => memoryOwner.Memory;
 
         public Memory<byte> CommitedMemory => Memory.Slice(0, position);
 
@@ -29,8 +33,6 @@ namespace HyperMsg
 
             position += count;
         }
-
-        public void Reset() => position = 0;
 
         public Memory<byte> GetMemory(int sizeHint = 0)
         {
@@ -48,5 +50,13 @@ namespace HyperMsg
         }
 
         public Span<byte> GetSpan(int sizeHint = 0) => GetMemory(sizeHint).Span;
+
+        public async Task FlushAsync(CancellationToken cancellationToken)
+        {
+            await flushHandler.Invoke(CommitedMemory, cancellationToken);
+            position = 0;
+        }
+
+        public void Dispose() => memoryOwner.Dispose();
     }
 }
