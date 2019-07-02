@@ -5,13 +5,13 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class ConfigurableBuilderTests
+    public class ConfigurableServiceProviderTests
     {
         private readonly ConfigurableServiceProvider provider = new ConfigurableServiceProvider();
 
         [Fact]
         public void GetService_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
-        {            
+        {
             var factory = A.Fake<ServiceFactory>();
             provider.RegisterService(typeof(string), (p, s) => string.Empty);
 

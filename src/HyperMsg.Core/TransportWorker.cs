@@ -1,27 +1,38 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AsyncAction = System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task>;
 
 namespace HyperMsg
 {
-    public abstract class BackgroundWorker : IDisposable
+    public class TransportWorker : IDisposable
     {
+        private readonly AsyncAction asyncAction;
+
         private CancellationTokenSource tokenSource;
         private Task backgroundTask;
+
+        public TransportWorker(AsyncAction asyncAction)
+        {
+            this.asyncAction = asyncAction ?? throw new ArgumentNullException(nameof(asyncAction));
+        }
 
         public bool IsRunning => backgroundTask.Status != TaskStatus.RanToCompletion
             && backgroundTask.Status != TaskStatus.Faulted
             && backgroundTask.Status != TaskStatus.Canceled;
 
-        protected void Run()
+        public Task HandleTransportEventAsync(TransportEventArgs eventArgs, CancellationToken cancellationToken)
         {
-            if (backgroundTask != null)
+            switch (eventArgs.Event)
             {
-                return;
+                case TransportEvent.Opened:
+                    return RunAsync(cancellationToken);
+
+                case TransportEvent.Closed:
+                    return StopAsync(cancellationToken);
             }
 
-            tokenSource = new CancellationTokenSource();
-            RunBackgroundTask();
+            return Task.CompletedTask;
         }
 
         public void Dispose()
@@ -31,20 +42,33 @@ namespace HyperMsg
                 return;
             }
 
-            Stop();
+            StopAsync(CancellationToken.None).Wait();
             tokenSource.Dispose();
             tokenSource = null;
         }
 
-        protected void Stop()
+        private Task RunAsync(CancellationToken cancellationToken)
+        {
+            if (backgroundTask != null)
+            {
+                return Task.CompletedTask;
+            }
+
+            tokenSource = new CancellationTokenSource();
+            RunBackgroundTask();
+            return Task.CompletedTask;
+        }
+
+        private Task StopAsync(CancellationToken cancellationToken)
         {
             if (tokenSource == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             tokenSource.Cancel();
             backgroundTask = null;
+            return Task.CompletedTask;
         }
 
         private void RunBackgroundTask()
@@ -59,11 +83,9 @@ namespace HyperMsg
         {            
             while (!cancellationToken.IsCancellationRequested)
             {
-                await Task.Run(() => DoWorkIterationAsync(cancellationToken), cancellationToken);
+                await Task.Run(() => asyncAction(cancellationToken), cancellationToken);
             }
         }
-
-        protected abstract Task DoWorkIterationAsync(CancellationToken cancellationToken);
 
         private void OnBackgroundTaskCompleted(Task task)
         {
