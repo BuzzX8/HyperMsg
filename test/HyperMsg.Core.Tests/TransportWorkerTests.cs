@@ -5,22 +5,23 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class BackgroundWorkerTests : IDisposable
+    public class TransportWorkerTests : IDisposable
     {
-        private BackgroundWorker worker;
+        private TransportWorker worker;
         private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
 
         [Fact]
-        public async Task Run_Periodically_Invokes_DoWorkIterationAsync()
+        public async Task OpenTransport_Periodically_Invokes_AsyncAction()
         {
             var invokeCount = 5;
             var @event = new ManualResetEventSlim();
-            worker = new BackgroundWorker(async t => 
+            worker = new TransportWorker(async t => 
             {
                 if (invokeCount == 0)
                 {
                     await StopWorkerAsync(t);
                     @event.Set();
+                    return;
                 }
 
                 invokeCount--;
@@ -33,12 +34,12 @@ namespace HyperMsg
         }
 
         [Fact]
-        public async Task Stop_Stops_Invoking_DoWorkIterationAsync_And_Invokes_BackgroundTaskCompleted()
+        public async Task ClosedTransport_Stops_Invoking_AsyncAction_And_Invokes_BackgroundTaskCompleted()
         {
             var @event = new ManualResetEventSlim();
             var @event2 = new ManualResetEventSlim();
             var wasInvoked = false;
-            worker = new BackgroundWorker(t =>
+            worker = new TransportWorker(t =>
             {
                 @event.Wait();
                 wasInvoked = true;
@@ -55,12 +56,12 @@ namespace HyperMsg
         }
 
         [Fact]
-        public async Task Invokes_UnhandledException_When_DoWorkIterationAsync_Throws_Exception()
+        public async Task Invokes_UnhandledException_When_AsyncAction_Throws_Exception()
         {
             var @event = new ManualResetEventSlim();
             var expected = new InvalidOperationException();
             var actual = default(Exception);
-            worker = new BackgroundWorker(t => throw expected);
+            worker = new TransportWorker(t => throw expected);
             worker.UnhandledException += e =>
             {
                 actual = e;
@@ -78,7 +79,7 @@ namespace HyperMsg
         {
             var @event = new ManualResetEventSlim();
             var isTaskCompleted = false;
-            worker = new BackgroundWorker(t => Task.Delay(waitTimeout));
+            worker = new TransportWorker(t => Task.Delay(waitTimeout));
             worker.BackgroundTaskCompleted += t =>
             {
                 isTaskCompleted = true;
@@ -93,11 +94,11 @@ namespace HyperMsg
         }
 
         [Fact]
-        public async Task Stop_Completes_BackgroundTask_When_DoWorkIterationAsync_Locked()
+        public async Task ClosedTransport_Completes_BackgroundTask_When_AsyncAction_Locked()
         {
             var @event = new ManualResetEventSlim();
             var event2 = new ManualResetEventSlim();
-            worker = new BackgroundWorker(t =>
+            worker = new TransportWorker(t =>
             {
                 @event.Wait();
                 return Task.CompletedTask;
@@ -113,7 +114,7 @@ namespace HyperMsg
 
         private Task RunWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), CancellationToken.None);
 
-        private Task StopWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closing), CancellationToken.None);
+        private Task StopWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closed), CancellationToken.None);
 
         public void Dispose() => worker?.Dispose();
     }

@@ -5,14 +5,14 @@ using AsyncAction = System.Func<System.Threading.CancellationToken, System.Threa
 
 namespace HyperMsg
 {
-    public class BackgroundWorker : IDisposable
+    public class TransportWorker : IDisposable
     {
         private readonly AsyncAction asyncAction;
 
         private CancellationTokenSource tokenSource;
         private Task backgroundTask;
 
-        public BackgroundWorker(AsyncAction asyncAction)
+        public TransportWorker(AsyncAction asyncAction)
         {
             this.asyncAction = asyncAction ?? throw new ArgumentNullException(nameof(asyncAction));
         }
