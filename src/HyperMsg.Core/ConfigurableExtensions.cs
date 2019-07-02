@@ -1,4 +1,6 @@
-﻿namespace HyperMsg
+﻿using System.Buffers;
+
+namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
@@ -6,24 +8,26 @@
         {
             configurable.UseMessageHandlerAggregate<T>();
             configurable.UseBackgrounReceiver<T>();
+            configurable.UseSharedMemoryPool();
+
             configurable.UseBufferReader(inputBufferSize);
-            configurable.UseMessageBuffer<T>(outputBufferSize);
+            configurable.UseBufferWriter(outputBufferSize);
+            configurable.UseMessageBuffer<T>();
         }
 
-        public static void UseMessageBuffer<T>(this IConfigurable configurable, int bufferSize)
+        public static void UseMessageBuffer<T>(this IConfigurable configurable)
         {
-            const string SettingName = "MessageBuffer.BufferSize";
-
-            configurable.AddSetting(SettingName, bufferSize);
             configurable.RegisterService(new[] { typeof(IMessageSender<T>), typeof(IMessageBuffer<T>) }, (p, s) =>
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
-                var transport = (ITransport)p.GetService(typeof(ITransport));
-                var stream = transport.GetStream();
-                var buffSize = (int)s[SettingName];
-                return new MessageBuffer<T>(serializer.Serialize, new byte[bufferSize], stream.WriteAsync);
+                var bufferWriter = (IBufferWriter<byte>)p.GetService(typeof(IBufferWriter<byte>));
+                var flushHandler = (FlushHandler)p.GetService(typeof(FlushHandler));
+
+                return new MessageBuffer<T>(bufferWriter, serializer.Serialize, flushHandler);
             });
         }
+
+        public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(typeof(MemoryPool<byte>), (p, s) => MemoryPool<byte>.Shared);
 
         public static void UseBufferReader(this IConfigurable configurable, int bufferSize)
         {
@@ -33,9 +37,32 @@
             configurable.RegisterService(typeof(IBufferReader), (p, s) =>
             {
                 var buffSize = (int)s[SettingName];
+                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
                 var transport = (ITransport)p.GetService(typeof(ITransport));
                 var stream = transport.GetStream();
-                return new BufferReader(new byte[buffSize], stream.ReadAsync);
+                
+                return new BufferReader(memoryPool.Rent(buffSize), stream.ReadAsync);
+            });
+        }
+
+        public static void UseBufferWriter(this IConfigurable configurable, int bufferSize)
+        {
+            const string SettingName = "MessageBuffer.BufferSize";
+
+            configurable.AddSetting(SettingName, bufferSize);
+            configurable.RegisterService(typeof(IBufferWriter<byte>), (p, s) =>
+            {
+                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
+                var transport = (ITransport)p.GetService(typeof(ITransport));
+                var stream = transport.GetStream();
+                var buffSize = (int)s[SettingName];
+
+                return new ByteBufferWriter(memoryPool.Rent(buffSize), stream.WriteAsync);
+            });
+            configurable.RegisterService(typeof(FlushHandler), (p, s) =>
+            {
+                var writer = (ByteBufferWriter)p.GetService(typeof(IBufferWriter<byte>));
+                return new FlushHandler(writer.FlushAsync);
             });
         }
 

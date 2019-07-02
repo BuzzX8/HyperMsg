@@ -8,26 +8,27 @@ using Xunit;
 namespace HyperMsg
 {
     public class MessageBufferTests
-    {
+    {        
+        private readonly IBufferWriter<byte> bufferWriter;
         private readonly SerializeAction<Guid> serializeAction;
-        private readonly Memory<byte> buffer;
-        private readonly Func<Memory<byte>, CancellationToken, Task> writeAsync;
         private readonly MessageBuffer<Guid> messageBuffer;
+        private readonly FlushHandler flushDelegate;
 
         public MessageBufferTests()
-        {
+        {            
+            bufferWriter = A.Fake<IBufferWriter<byte>>();
             serializeAction = A.Fake<SerializeAction<Guid>>();
-            buffer = new byte[100];
-            writeAsync = A.Fake<Func<Memory<byte>, CancellationToken, Task>>();
-            messageBuffer = new MessageBuffer<Guid>(serializeAction, buffer, writeAsync);
+            flushDelegate = A.Fake<FlushHandler>();
+            messageBuffer = new MessageBuffer<Guid>(bufferWriter, serializeAction, flushDelegate);
         }
 
         [Fact]
-        public async Task FlushAsync_Provides_Buffer_Content_To_Write_Action()
+        public async Task FlushAsync_Calls_FlushDelegate()
         {
-            await messageBuffer.FlushAsync();
-
-            A.CallTo(() => writeAsync.Invoke(A<Memory<byte>>._, A<CancellationToken>._)).MustHaveHappened();
+            var token = new CancellationToken();
+            await messageBuffer.FlushAsync(token);
+                        
+            A.CallTo(() => flushDelegate.Invoke(token)).MustHaveHappened();
         }
 
         [Fact]
@@ -35,10 +36,9 @@ namespace HyperMsg
         {
             var message = Guid.NewGuid();
 
-            await messageBuffer.SendAsync(message);
-
-            A.CallTo(() => writeAsync.Invoke(A<Memory<byte>>._, A<CancellationToken>._)).MustHaveHappened();
-            A.CallTo(() => serializeAction.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
+            await messageBuffer.SendAsync(message, CancellationToken.None);
+                        
+            A.CallTo(() => serializeAction.Invoke(bufferWriter, message)).MustHaveHappened();
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace HyperMsg
 
             messageBuffer.Write(message);
 
-            A.CallTo(() => serializeAction.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
+            A.CallTo(() => serializeAction.Invoke(bufferWriter, message)).MustHaveHappened();
         }
     }
 }

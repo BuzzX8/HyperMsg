@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using System;
+using System.Buffers;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,14 +12,17 @@ namespace HyperMsg
     public class BufferReaderTests
     {
         private readonly Memory<byte> buffer;
+        private readonly IMemoryOwner<byte> memoryOwner;
         private readonly ReadAsyncFunc readAsync;
         private readonly BufferReader reader;
 
         public BufferReaderTests()
         {
             buffer = new Memory<byte>(new byte[100]);
+            memoryOwner = A.Fake<IMemoryOwner<byte>>();
+            A.CallTo(() => memoryOwner.Memory).Returns(buffer);
             readAsync = A.Fake<ReadAsyncFunc>();
-            reader = new BufferReader(buffer, readAsync);
+            reader = new BufferReader(memoryOwner, readAsync);
         }
 
         [Fact]
