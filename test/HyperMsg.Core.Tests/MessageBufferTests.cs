@@ -12,13 +12,13 @@ namespace HyperMsg
         private readonly IBufferWriter<byte> bufferWriter;
         private readonly SerializeAction<Guid> serializeAction;
         private readonly MessageBuffer<Guid> messageBuffer;
-        private readonly AsyncAction flushDelegate;
+        private readonly FlushHandler flushDelegate;
 
         public MessageBufferTests()
         {            
             bufferWriter = A.Fake<IBufferWriter<byte>>();
             serializeAction = A.Fake<SerializeAction<Guid>>();
-            flushDelegate = A.Fake<AsyncAction>();
+            flushDelegate = A.Fake<FlushHandler>();
             messageBuffer = new MessageBuffer<Guid>(bufferWriter, serializeAction, flushDelegate);
         }
 

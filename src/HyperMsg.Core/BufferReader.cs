@@ -6,19 +6,21 @@ using ReadAsyncFunc = System.Func<System.Memory<byte>, System.Threading.Cancella
 
 namespace HyperMsg
 {
-    public class BufferReader : IBufferReader
+    public class BufferReader : IBufferReader, IDisposable
     {
-        private readonly Memory<byte> buffer;
+        private readonly IMemoryOwner<byte> memoryOwner;
         private readonly ReadAsyncFunc readAsync;
 
         private int position;
 
-        public BufferReader(Memory<byte> buffer, ReadAsyncFunc readAsync)
+        public BufferReader(IMemoryOwner<byte> memoryOwner, ReadAsyncFunc readAsync)
         {
-            this.buffer = buffer;
+            this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
             this.readAsync = readAsync ?? throw new ArgumentNullException(nameof(readAsync));
             position = 0;
         }
+
+        private Memory<byte> Memory => memoryOwner.Memory;
 
         public void Advance(int count)
         {
@@ -29,7 +31,7 @@ namespace HyperMsg
 
             if (count < position)
             {
-                buffer.Slice(count).CopyTo(buffer);
+                Memory.Slice(count).CopyTo(Memory);
             }
 
             position -= count;
@@ -39,10 +41,12 @@ namespace HyperMsg
 
         public async Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken token)
         {
-            var readed = await readAsync.Invoke(buffer.Slice(position), token);
+            var readed = await readAsync.Invoke(Memory.Slice(position), token);
             position += readed;
 
-            return new ReadOnlySequence<byte>(buffer.Slice(0, position));
+            return new ReadOnlySequence<byte>(Memory.Slice(0, position));
         }
+
+        public void Dispose() => memoryOwner.Dispose();
     }
 }

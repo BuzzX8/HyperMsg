@@ -57,6 +57,7 @@ namespace HyperMsg
             var actual = Guid.Empty;
 
             provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
+            provider.UseSharedMemoryPool();
             provider.UseBufferReader(100);
 
             var reader = provider.GetService<IBufferReader>();
@@ -70,8 +71,9 @@ namespace HyperMsg
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
 
-            provider.UseBufferReader(100);
             provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
+            provider.UseSharedMemoryPool();
+            provider.UseBufferReader(100);            
 
             var reader = provider.GetService<IBufferReader>();
 
