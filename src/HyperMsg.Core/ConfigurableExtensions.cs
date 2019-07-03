@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 
 namespace HyperMsg
 {
@@ -70,14 +71,14 @@ namespace HyperMsg
         {
             configurable.RegisterService(typeof(IMessageHandlerRegistry<T>), (p, s) =>
             {
-                return new MessageHandlerAggregate<T>();
+                return new MessageHandlerRegistry<T>();
             });
 
-            configurable.RegisterService(typeof(AsyncHandler<T>), (p, s) =>
+            configurable.RegisterService(typeof(Action<T>), (p, s) =>
             {
-                var aggregate = (MessageHandlerAggregate<T>)p.GetService(typeof(IMessageHandlerRegistry<T>));
+                var aggregate = (MessageHandlerRegistry<T>)p.GetService(typeof(IMessageHandlerRegistry<T>));
 
-                return (AsyncHandler<T>)aggregate.HandleAsync;
+                return (Action<T>)aggregate.Handle;
             });
         }
 
@@ -87,8 +88,9 @@ namespace HyperMsg
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
                 var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
-                var messageHandler = (AsyncHandler<T>)p.GetService(typeof(AsyncHandler<T>));
+                var messageHandler = (Action<T>)p.GetService(typeof(Action<T>));
                 var observer = new MessageBufferObserver<T>(serializer.Deserialize, bufferReader);
+                observer.MessageDeserialized += messageHandler;
                 var bgReceiver = new TransportWorker(observer.CheckBufferAsync);
 
                 var transport = (ITransport)p.GetService(typeof(ITransport));
