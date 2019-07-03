@@ -22,7 +22,7 @@ namespace HyperMsg.Integration
             await OpenTransportAsync();
 
             await messageSender.SendAsync(expectedMessage, CancellationToken.None);            
-            actualMessage = new Guid(ReceiveMessage());
+            actualMessage = new Guid(GetReceivedBytes());
 
             Assert.Equal(expectedMessage, actualMessage);
         }

@@ -31,7 +31,7 @@ namespace HyperMsg.Integration
             listeningSocket.Bind(EndPoint);
             listeningSocket.Listen(1);
 
-            receiveBuffer = new byte[100];
+            receiveBuffer = new byte[200];
         }
 
         protected async Task OpenTransportAsync()
@@ -41,7 +41,7 @@ namespace HyperMsg.Integration
             AcceptedSocket = await acceptTask;
         }
 
-        protected ReadOnlySpan<byte> ReceiveMessage()
+        protected ReadOnlySpan<byte> GetReceivedBytes()
         {
             var received = AcceptedSocket.Receive(receiveBuffer);
             return new ReadOnlySpan<byte>(receiveBuffer, 0, received);
