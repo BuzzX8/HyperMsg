@@ -16,7 +16,7 @@ namespace HyperMsg.Integration
         protected Socket AcceptedSocket;
 
         private Socket listeningSocket;
-        private byte[] receiveBuffer;
+        private readonly byte[] receiveBuffer;
 
         protected TestFixtureBase()
         {
