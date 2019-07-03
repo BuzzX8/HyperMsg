@@ -5,23 +5,24 @@ using Xunit;
 
 namespace HyperMsg.Integration
 {
-    public class MessageSenderTests : TestFixtureBase
+    public class MessageBufferTests : TestFixtureBase
     {
-        private readonly IMessageSender<Guid> messageSender;
+        private readonly IMessageBuffer<Guid> messageBuffer;
 
-        public MessageSenderTests()
+        public MessageBufferTests()
         {
-            messageSender = ServiceProvider.GetService<IMessageSender<Guid>>();
+            messageBuffer = ServiceProvider.GetService<IMessageBuffer<Guid>>();
         }
 
         [Fact]
-        public async Task SendAsync_Transmits_Message_Over_Transport()
+        public async Task FlushAsync_Transmits_Message_Over_Transport()
         {
             var expectedMessage = Guid.NewGuid();
             var actualMessage = Guid.Empty;
             await OpenTransportAsync();
 
-            await messageSender.SendAsync(expectedMessage, CancellationToken.None);            
+            messageBuffer.Write(expectedMessage);
+            await messageBuffer.FlushAsync(CancellationToken.None);
             actualMessage = new Guid(ReceiveMessage());
 
             Assert.Equal(expectedMessage, actualMessage);

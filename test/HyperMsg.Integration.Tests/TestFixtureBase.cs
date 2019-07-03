@@ -16,6 +16,7 @@ namespace HyperMsg.Integration
         protected Socket AcceptedSocket;
 
         private Socket listeningSocket;
+        private byte[] receiveBuffer;
 
         protected TestFixtureBase()
         {
@@ -29,6 +30,8 @@ namespace HyperMsg.Integration
             listeningSocket = new Socket(SocketType.Stream, ProtocolType.Tcp);
             listeningSocket.Bind(EndPoint);
             listeningSocket.Listen(1);
+
+            receiveBuffer = new byte[100];
         }
 
         protected async Task OpenTransportAsync()
@@ -38,10 +41,16 @@ namespace HyperMsg.Integration
             AcceptedSocket = await acceptTask;
         }
 
-        public void Dispose()
+        protected ReadOnlySpan<byte> ReceiveMessage()
         {
-            AcceptedSocket?.Close();
+            var received = AcceptedSocket.Receive(receiveBuffer);
+            return new ReadOnlySpan<byte>(receiveBuffer, 0, received);
+        }
+
+        public void Dispose()
+        {            
             listeningSocket.Close();
+            AcceptedSocket?.Close();
         }
     }
 }
