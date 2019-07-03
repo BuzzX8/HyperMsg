@@ -5,6 +5,7 @@ using Xunit;
 
 namespace HyperMsg.Integration
 {
+    [Collection("Integration")]
     public class MessageHandlerRegistryTests : TestFixtureBase
     {
         private readonly IMessageHandlerRegistry<Guid> registry;

@@ -5,6 +5,7 @@ using Xunit;
 
 namespace HyperMsg.Integration
 {
+    [Collection("Integration")]
     public class MessageSenderTests : TestFixtureBase
     {
         private readonly IMessageSender<Guid> messageSender;
