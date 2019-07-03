@@ -4,13 +4,15 @@ using System.Linq;
 
 namespace HyperMsg
 {
-    public class ConfigurableServiceProvider : IConfigurable, IServiceProvider
+    public class ConfigurableServiceProvider : IConfigurable, IServiceProvider, IDisposable
     {
         private readonly Dictionary<string, object> settings;
         private readonly Dictionary<Type, ServiceFactory> singleInterfaceServices;
         private readonly List<(IEnumerable<Type> interfaces, ServiceFactory factory)> multiInterfaceServices;
         private readonly List<Configurator> configurators;
+
         private readonly Dictionary<Type, object> createdServices;
+        private readonly List<IDisposable> disposables;
 
         private bool configuratorsInvoked = false;
 
@@ -21,6 +23,7 @@ namespace HyperMsg
             multiInterfaceServices = new List<(IEnumerable<Type> interfaces, ServiceFactory factory)>();
             configurators = new List<Configurator>();
             createdServices = new Dictionary<Type, object>();
+            disposables = new List<IDisposable>();
         }
 
         public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
@@ -95,6 +98,7 @@ namespace HyperMsg
                 }
 
                 var service = factory.Invoke(this, settings);
+                RegisterIfDisposable(service);
 
                 foreach (var @interface in interfaces)
                 {
@@ -112,11 +116,22 @@ namespace HyperMsg
         {
             var factory = singleInterfaceServices[serviceInterface];
             var service = factory.Invoke(this, settings);
+            RegisterIfDisposable(service);
 
             singleInterfaceServices.Remove(serviceInterface);
             createdServices.Add(serviceInterface, service);
 
             return service;
         }
+
+        private void RegisterIfDisposable(object service)
+        {
+            if (service is IDisposable)
+            {
+                disposables.Add((IDisposable)service);
+            }
+        }
+
+        public void Dispose() => disposables.ForEach(d => d.Dispose());
     }
 }
