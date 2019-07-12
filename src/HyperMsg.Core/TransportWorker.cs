@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using AsyncAction = System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task>;
 
 namespace HyperMsg
 {

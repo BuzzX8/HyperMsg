@@ -24,7 +24,8 @@ namespace HyperMsg
                 var bufferWriter = (IBufferWriter<byte>)p.GetService(typeof(IBufferWriter<byte>));
                 var flushHandler = (FlushHandler)p.GetService(typeof(FlushHandler));
 
-                return new MessageBuffer<T>(bufferWriter, serializer.Serialize, flushHandler);
+                return new MessageBuffer<T>(bufferWriter, serializer.Serialize, new AsyncAction(flushHandler));
+
             });
         }
 

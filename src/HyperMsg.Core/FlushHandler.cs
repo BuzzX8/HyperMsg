@@ -3,5 +3,5 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public delegate Task FlushHandler(CancellationToken cancellationToken);
+    internal delegate Task FlushHandler(CancellationToken cancellationToken);
 }

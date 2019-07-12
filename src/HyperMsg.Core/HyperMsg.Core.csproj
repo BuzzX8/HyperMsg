@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
     <RootNamespace>HyperMsg</RootNamespace>
-    <Version>0.4.0-alpha</Version>
+    <Version>0.10.0-alpha</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HyperMsg" Version="0.9.7-alpha" />
+    <ProjectReference Include="..\HyperMsg\HyperMsg.csproj" />
   </ItemGroup>
 
 </Project>
