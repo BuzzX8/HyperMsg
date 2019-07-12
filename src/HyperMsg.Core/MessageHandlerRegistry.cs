@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -11,9 +13,14 @@ namespace HyperMsg
 
         public void Register(AsyncAction<T> handler) => asyncHandlers += handler;
 
-        public void Handle(T message)
+        public async Task HandleAsync(T message, CancellationToken cancellationToken)
         {
             handlers?.Invoke(message);
+
+            if (asyncHandlers != null)
+            {
+                await asyncHandlers.Invoke(message, cancellationToken);
+            }
         }
     }
 }

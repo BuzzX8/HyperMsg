@@ -42,17 +42,20 @@ namespace HyperMsg
                 }
 
                 buffer = buffer.Slice(result.MessageSize);
-                OnMessageDeserialized(result.Message);
+                await OnMessageDeserializedAsync(result.Message, cancellationToken);
             }
 
             bufferReader.Advance(deserializeSize);
         }
 
-        private void OnMessageDeserialized(T message)
+        private async Task OnMessageDeserializedAsync(T message, CancellationToken cancellationToken)
         {
-            MessageDeserialized?.Invoke(message);
+            if (MessageDeserialized != null)
+            {
+                await MessageDeserialized?.Invoke(message, cancellationToken);
+            }
         }
 
-        public event Action<T> MessageDeserialized;
+        public event AsyncAction<T> MessageDeserialized;
     }
 }
