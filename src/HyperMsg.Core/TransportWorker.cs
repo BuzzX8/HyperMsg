@@ -73,7 +73,7 @@ namespace HyperMsg
         private void RunBackgroundTask()
         {
             var token = tokenSource.Token;
-            backgroundTask = Task.Run(() => DoWorkAsync(token), token);
+            backgroundTask = DoWorkAsync(token);
             backgroundTask.ConfigureAwait(false);
             backgroundTask.ContinueWith(OnBackgroundTaskCompleted);
         }
