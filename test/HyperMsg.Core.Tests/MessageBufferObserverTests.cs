@@ -59,7 +59,7 @@ namespace HyperMsg
         public async Task CheckBufferAsync_Does_Not_Rises_MessageDeserialized_If_DeserializetionFunc_Returns_Zero_Result()
         {
             bool eventRaised = false;
-            observer.MessageDeserialized += m => eventRaised = true;
+            observer.MessageDeserialized += (m, t) => { eventRaised = true; return Task.CompletedTask; };
 
             await observer.CheckBufferAsync(CancellationToken.None);
 
@@ -71,7 +71,7 @@ namespace HyperMsg
         {
             var expectedMessage = Guid.NewGuid();
             var actualMessage = Guid.Empty;
-            observer.MessageDeserialized += m => actualMessage = m;
+            observer.MessageDeserialized += (m, t) => { actualMessage = m; return Task.CompletedTask; };
             PushDeserializationResult(16, expectedMessage);
 
             await observer.CheckBufferAsync(CancellationToken.None);
@@ -86,7 +86,7 @@ namespace HyperMsg
             PushDeserializationResult(2, Guid.NewGuid());
             var expectedMessages = deserializationResults.Take(deserializationResults.Count - 1).Select(r => r.Message).ToArray();
             var actualMessages = new List<Guid>();
-            observer.MessageDeserialized += m => actualMessages.Add(m);
+            observer.MessageDeserialized += (m, t) => { actualMessages.Add(m); return Task.CompletedTask; };
 
             await observer.CheckBufferAsync(CancellationToken.None);
 

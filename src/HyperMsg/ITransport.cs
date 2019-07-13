@@ -9,6 +9,6 @@ namespace HyperMsg
 
         Task ProcessCommandAsync(TransportCommand command, CancellationToken cancellationToken);
 
-        event AsyncHandler<TransportEventArgs> TransportEvent;
+        event AsyncAction<TransportEventArgs> TransportEvent;
     }
 }

@@ -75,6 +75,6 @@ namespace HyperMsg.Sockets
 
         public Task WriteAsync(Memory<byte> buffer, CancellationToken token = default) => socket.WriteAsync(buffer, token);
 
-        public event AsyncHandler<TransportEventArgs> TransportEvent;
+        public event AsyncAction<TransportEventArgs> TransportEvent;
     }
 }

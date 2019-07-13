@@ -11,7 +11,7 @@ namespace HyperMsg
     {        
         private readonly Memory<byte> memory;
         private readonly IMemoryOwner<byte> memoryOwner;
-        private readonly AsyncHandler<Memory<byte>> flushHandler;
+        private readonly AsyncAction<Memory<byte>> flushHandler;
         private readonly ByteBufferWriter writer;
 
         public ByteBufferWriterTests()
@@ -19,7 +19,7 @@ namespace HyperMsg
             memory = new Memory<byte>(Guid.NewGuid().ToByteArray());
             memoryOwner = A.Fake<IMemoryOwner<byte>>();
             A.CallTo(() => memoryOwner.Memory).Returns(memory);
-            flushHandler = A.Fake<AsyncHandler<Memory<byte>>>();
+            flushHandler = A.Fake<AsyncAction<Memory<byte>>>();
             writer = new ByteBufferWriter(memoryOwner, flushHandler);
         }
 

@@ -22,9 +22,10 @@ namespace HyperMsg
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
                 var bufferWriter = (IBufferWriter<byte>)p.GetService(typeof(IBufferWriter<byte>));
-                var flushHandler = (FlushHandler)p.GetService(typeof(FlushHandler));
+                var flushHandler = (InternalDelegates)p.GetService(typeof(InternalDelegates));
 
-                return new MessageBuffer<T>(bufferWriter, serializer.Serialize, flushHandler);
+                return new MessageBuffer<T>(bufferWriter, serializer.Serialize, new AsyncAction(flushHandler));
+
             });
         }
 
@@ -60,10 +61,10 @@ namespace HyperMsg
 
                 return new ByteBufferWriter(memoryPool.Rent(buffSize), stream.WriteAsync);
             });
-            configurable.RegisterService(typeof(FlushHandler), (p, s) =>
+            configurable.RegisterService(typeof(InternalDelegates), (p, s) =>
             {
                 var writer = (ByteBufferWriter)p.GetService(typeof(IBufferWriter<byte>));
-                return new FlushHandler(writer.FlushAsync);
+                return new InternalDelegates(writer.FlushAsync);
             });
         }
 
@@ -74,11 +75,11 @@ namespace HyperMsg
                 return new MessageHandlerRegistry<T>();
             });
 
-            configurable.RegisterService(typeof(Action<T>), (p, s) =>
+            configurable.RegisterService(typeof(MessageHandler<T>), (p, s) =>
             {
                 var aggregate = (MessageHandlerRegistry<T>)p.GetService(typeof(IMessageHandlerRegistry<T>));
 
-                return (Action<T>)aggregate.Handle;
+                return (MessageHandler<T>)aggregate.HandleAsync;
             });
         }
 
@@ -88,9 +89,9 @@ namespace HyperMsg
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
                 var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
-                var messageHandler = (Action<T>)p.GetService(typeof(Action<T>));
+                var messageHandler = (MessageHandler<T>)p.GetService(typeof(MessageHandler<T>));
                 var observer = new MessageBufferObserver<T>(serializer.Deserialize, bufferReader);
-                observer.MessageDeserialized += messageHandler;
+                observer.MessageDeserialized += new AsyncAction<T>(messageHandler);
                 var bgReceiver = new TransportWorker(observer.CheckBufferAsync);
 
                 var transport = (ITransport)p.GetService(typeof(ITransport));

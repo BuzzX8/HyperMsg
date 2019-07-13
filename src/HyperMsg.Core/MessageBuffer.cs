@@ -9,9 +9,9 @@ namespace HyperMsg
     {
         private readonly IBufferWriter<byte> bufferWriter;
         private readonly SerializeAction<T> serializeAction;
-        private readonly FlushHandler flushHandler;
+        private readonly AsyncAction flushHandler;
 
-        public MessageBuffer(IBufferWriter<byte> bufferWriter, SerializeAction<T> serializeAction, FlushHandler flushHandler)
+        public MessageBuffer(IBufferWriter<byte> bufferWriter, SerializeAction<T> serializeAction, AsyncAction flushHandler)
         {
             this.bufferWriter = bufferWriter ?? throw new ArgumentNullException(nameof(bufferWriter));
             this.serializeAction = serializeAction ?? throw new ArgumentNullException(nameof(serializeAction));

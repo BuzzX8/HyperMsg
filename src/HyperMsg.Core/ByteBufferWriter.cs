@@ -8,10 +8,10 @@ namespace HyperMsg
     public class ByteBufferWriter : IBufferWriter<byte>, IDisposable
     {
         private readonly IMemoryOwner<byte> memoryOwner;
-        private readonly AsyncHandler<Memory<byte>> flushHandler;
+        private readonly AsyncAction<Memory<byte>> flushHandler;
         private int position;
 
-        public ByteBufferWriter(IMemoryOwner<byte> memoryOwner, AsyncHandler<Memory<byte>> flushHandler)
+        public ByteBufferWriter(IMemoryOwner<byte> memoryOwner, AsyncAction<Memory<byte>> flushHandler)
         {
             this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
             this.flushHandler = flushHandler ?? throw new ArgumentNullException(nameof(flushHandler));

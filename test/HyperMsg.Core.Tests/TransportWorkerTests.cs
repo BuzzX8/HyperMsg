@@ -49,8 +49,8 @@ namespace HyperMsg
             await RunWorkerAsync();
 
             await StopWorkerAsync();
-            @event.Set();
             event2.Wait(waitTimeout);
+            @event.Set();
 
             Assert.False(wasInvoked);
         }
@@ -112,9 +112,9 @@ namespace HyperMsg
             Assert.True(event2.IsSet);
         }
 
-        private Task RunWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), CancellationToken.None);
+        private Task RunWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Opened), cancellationToken);
 
-        private Task StopWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closed), CancellationToken.None);
+        private Task StopWorkerAsync(CancellationToken cancellationToken = default) => worker.HandleTransportEventAsync(new TransportEventArgs(TransportEvent.Closed), cancellationToken);
 
         public void Dispose() => worker?.Dispose();
     }
