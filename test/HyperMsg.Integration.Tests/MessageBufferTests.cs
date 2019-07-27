@@ -8,13 +8,18 @@ using Xunit;
 namespace HyperMsg.Integration
 {
     [Collection("Integration")]
-    public class MessageBufferTests : TestFixtureBase
+    public class MessageBufferTests : SocketFixtureBase<Guid>
     {
         private readonly IMessageBuffer<Guid> messageBuffer;
 
-        public MessageBufferTests()
+        public MessageBufferTests() : base(8080)
         {
-            messageBuffer = ServiceProvider.GetService<IMessageBuffer<Guid>>();
+            
+        }
+
+        protected override void ConfigureSerializer(IConfigurable configurable)
+        {
+            configurable.UseGuidSerializer();
         }
 
         [Fact]
