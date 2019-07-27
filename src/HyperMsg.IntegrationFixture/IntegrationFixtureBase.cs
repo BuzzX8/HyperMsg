@@ -7,6 +7,7 @@ namespace HyperMsg.Integration
     public abstract class IntegrationFixtureBase<T>
     {
         private readonly ConfigurableServiceProvider serviceProvider;
+        private bool configured;
 
         private readonly Lazy<IMessageSender<T>> messageSender;
         private readonly Lazy<IMessageBuffer<T>> messageBuffer;
@@ -20,19 +21,56 @@ namespace HyperMsg.Integration
             messageBuffer = new Lazy<IMessageBuffer<T>>(() => serviceProvider.GetService<IMessageBuffer<T>>());
             handlerRegistry = new Lazy<IMessageHandlerRegistry<T>>(() => serviceProvider.GetService<IMessageHandlerRegistry<T>>());
             transport = new Lazy<ITransport>(() => serviceProvider.GetService<ITransport>());
+        }
+
+        protected IMessageSender<T> MessageSender
+        {
+            get
+            {
+                ConfigureServiceProvider();
+                return messageSender.Value;
+            }
+        }
+
+        protected IMessageBuffer<T> MessageBuffer
+        {
+            get
+            {
+                ConfigureServiceProvider();
+                return messageBuffer.Value;
+            }
+        }
+
+        protected IMessageHandlerRegistry<T> HandlerRegistry
+        {
+            get
+            {
+                ConfigureServiceProvider();
+                return handlerRegistry.Value;
+            }
+        }
+
+        protected ITransport Transport
+        {
+            get
+            {
+                ConfigureServiceProvider();
+                return transport.Value;
+            }
+        }
+
+        private void ConfigureServiceProvider()
+        {
+            if (configured)
+            {
+                return;
+            }
 
             serviceProvider.UseCoreServices<T>(1024, 1024);
             ConfigureSerializer(serviceProvider);
             ConfigureTransport(serviceProvider);
+            configured = true;
         }
-
-        protected IMessageSender<T> MessageSender => messageSender.Value;
-
-        protected IMessageBuffer<T> MessageBuffer => messageBuffer.Value;
-
-        protected IMessageHandlerRegistry<T> HandlerRegistry => handlerRegistry.Value;
-
-        protected ITransport Transport => transport.Value;
 
         protected abstract void ConfigureSerializer(IConfigurable configurable);
 

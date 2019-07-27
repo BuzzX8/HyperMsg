@@ -7,16 +7,12 @@ using Xunit;
 
 namespace HyperMsg.Integration
 {
-    [Collection("Integration")]
     public class MessageHandlerRegistryTests : TestFixtureBase
-    {
-        private readonly IMessageHandlerRegistry<Guid> registry;
+    {        
         private readonly TimeSpan waitTimeout = TimeSpan.FromSeconds(2);
 
-        public MessageHandlerRegistryTests()
-        {
-            registry = ServiceProvider.GetService<IMessageHandlerRegistry<Guid>>();
-        }
+        public MessageHandlerRegistryTests() : base(8081)
+        { }
 
         [Fact]
         public async Task Registered_Handler_Invoked_When_Message_Received()
@@ -26,7 +22,7 @@ namespace HyperMsg.Integration
             var @event = new ManualResetEventSlim();
 
             var received = 0;
-            registry.Register(g =>
+            HandlerRegistry.Register(g =>
             {
                 actualMessages.Add(g);
                 received++;

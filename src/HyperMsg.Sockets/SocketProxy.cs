@@ -18,7 +18,7 @@ namespace HyperMsg.Sockets
         public SocketProxy(Socket socket, EndPoint endpoint)
         {
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
-            this.endpoint = endpoint;
+            this.endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
         }
 
         public bool ValidateAllCertificates { get; }
