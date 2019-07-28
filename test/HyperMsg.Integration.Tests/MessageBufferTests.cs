@@ -7,15 +7,10 @@ using Xunit;
 
 namespace HyperMsg.Integration
 {
-    [Collection("Integration")]
     public class MessageBufferTests : TestFixtureBase
     {
-        private readonly IMessageBuffer<Guid> messageBuffer;
-
-        public MessageBufferTests()
-        {
-            messageBuffer = ServiceProvider.GetService<IMessageBuffer<Guid>>();
-        }
+        public MessageBufferTests() : base(8080)
+        { }
 
         [Fact]
         public async Task FlushAsync_Transmits_Single_Message_Over_Transport()
@@ -24,8 +19,8 @@ namespace HyperMsg.Integration
             var actualMessage = Guid.Empty;
             await OpenTransportAsync();
 
-            messageBuffer.Write(expectedMessage);
-            await messageBuffer.FlushAsync(CancellationToken.None);
+            MessageBuffer.Write(expectedMessage);
+            await MessageBuffer.FlushAsync(CancellationToken.None);
             actualMessage = new Guid(GetReceivedBytes());
 
             Assert.Equal(expectedMessage, actualMessage);
@@ -37,8 +32,8 @@ namespace HyperMsg.Integration
             var expectedMessages = Enumerable.Range(0, 10).Select(i => Guid.NewGuid()).ToList();
             OpenTransportAsync().Wait();
 
-            expectedMessages.ForEach(m => messageBuffer.Write(m));
-            messageBuffer.FlushAsync(CancellationToken.None).Wait();
+            expectedMessages.ForEach(m => MessageBuffer.Write(m));
+            MessageBuffer.FlushAsync(CancellationToken.None).Wait();
 
             var actualMessages = DeserializeGuids(GetReceivedBytes());
 

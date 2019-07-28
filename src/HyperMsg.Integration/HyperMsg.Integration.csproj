@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>HyperMsg.Integration</AssemblyName>
+    <RootNamespace>HyperMsg.Integration</RootNamespace>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HyperMsg.Core" Version="0.10.1-alpha" />
+    <PackageReference Include="HyperMsg.Sockets" Version="0.10.0-alpha" />
+  </ItemGroup>
+
+</Project>
