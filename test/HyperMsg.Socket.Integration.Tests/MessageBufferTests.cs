@@ -27,13 +27,13 @@ namespace HyperMsg.Integration
         }
 
         [Fact]
-        public void FlushAsync_Transmits_Multiple_Messages_Over_Transport()
+        public async Task FlushAsync_Transmits_Multiple_Messages_Over_Transport()
         {
             var expectedMessages = Enumerable.Range(0, 10).Select(i => Guid.NewGuid()).ToList();
-            OpenTransportAsync().Wait();
+            await OpenTransportAsync();
 
             expectedMessages.ForEach(m => MessageBuffer.Write(m));
-            MessageBuffer.FlushAsync(CancellationToken.None).Wait();
+            await MessageBuffer.FlushAsync(CancellationToken.None);
 
             var actualMessages = DeserializeGuids(GetReceivedBytes());
 
