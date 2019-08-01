@@ -23,6 +23,8 @@ namespace HyperMsg.Integration
             transport = new Lazy<ITransport>(() => serviceProvider.GetService<ITransport>());
         }
 
+        protected IConfigurable Configurable => serviceProvider;
+
         protected IMessageSender<T> MessageSender
         {
             get
@@ -71,6 +73,8 @@ namespace HyperMsg.Integration
             ConfigureTransport(serviceProvider);
             configured = true;
         }
+
+        protected TService GetService<TService>() => serviceProvider.GetService<TService>();
 
         protected abstract void ConfigureSerializer(IConfigurable configurable);
 
