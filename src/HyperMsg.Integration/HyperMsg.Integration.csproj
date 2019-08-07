@@ -4,7 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>HyperMsg.Integration</AssemblyName>
     <RootNamespace>HyperMsg.Integration</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.2-alpha</Version>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
