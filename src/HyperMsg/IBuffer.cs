@@ -4,9 +4,11 @@ namespace HyperMsg
 {
     public interface IBuffer
     {
+        IBufferReader Reader { get; }
+
         IBufferWriter<byte> Writer { get; }
 
-        event AsyncAction<IBufferReader> DataCommitted;
+        event AsyncAction<IBuffer> Flushed;
     }
 
     public interface ISendingBuffer : IBuffer
