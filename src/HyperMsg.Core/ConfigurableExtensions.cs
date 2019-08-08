@@ -36,7 +36,7 @@ namespace HyperMsg
             const string SettingName = "BufferReader.BufferSize";
 
             configurable.AddSetting(SettingName, bufferSize);
-            configurable.RegisterService(typeof(IBufferReader), (p, s) =>
+            configurable.RegisterService(typeof(IBufferReader<byte>), (p, s) =>
             {
                 var buffSize = (int)s[SettingName];
                 var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
@@ -88,7 +88,7 @@ namespace HyperMsg
             configurable.RegisterConfigurator((p, s) =>
             {
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
-                var bufferReader = (IBufferReader)p.GetService(typeof(IBufferReader));
+                var bufferReader = (IBufferReader<byte>)p.GetService(typeof(IBufferReader<byte>));
                 var messageHandler = (MessageHandler<T>)p.GetService(typeof(MessageHandler<T>));
                 var observer = new MessageBufferObserver<T>(serializer.Deserialize, bufferReader);
                 observer.MessageDeserialized += new AsyncAction<T>(messageHandler);

@@ -7,7 +7,7 @@ namespace HyperMsg
     /// <summary>
     /// 
     /// </summary>
-    public interface IBufferReader
+    public interface IBufferReader<T>
     {
         /// <summary>
         /// 
@@ -20,6 +20,6 @@ namespace HyperMsg
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ReadOnlySequence<byte>> ReadAsync(CancellationToken cancellationToken);
+        Task<ReadOnlySequence<T>> ReadAsync(CancellationToken cancellationToken);
     }
 }

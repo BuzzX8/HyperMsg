@@ -12,7 +12,7 @@ namespace HyperMsg
     public class MessageBufferObserverTests
     {
         private readonly DeserializeFunc<Guid> deserializeFunc;
-        private readonly IBufferReader bufferReader;
+        private readonly IBufferReader<byte> bufferReader;
         private readonly MessageBufferObserver<Guid> observer;
                 
         private readonly Stack<DeserializationResult<Guid>> deserializationResults;
@@ -21,7 +21,7 @@ namespace HyperMsg
         public MessageBufferObserverTests()
         {
             deserializeFunc = A.Fake<DeserializeFunc<Guid>>();
-            bufferReader = A.Fake<IBufferReader>();
+            bufferReader = A.Fake<IBufferReader<byte>>();
             observer = new MessageBufferObserver<Guid>(deserializeFunc, bufferReader);
 
             deserializationResults = new Stack<DeserializationResult<Guid>>();

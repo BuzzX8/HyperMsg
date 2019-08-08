@@ -7,12 +7,12 @@ namespace HyperMsg
     public class MessageBufferObserver<T>
     {
         private readonly DeserializeFunc<T> deserialize;
-        private readonly IBufferReader bufferReader;
+        private readonly IBufferReader<byte> bufferReader;
         private readonly int deserializeInvokeCount;
 
         private const int DefaultDeserializeInvokeCount = 10;
 
-        public MessageBufferObserver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, int deserializeInvokeCount = DefaultDeserializeInvokeCount)
+        public MessageBufferObserver(DeserializeFunc<T> deserialize, IBufferReader<byte> bufferReader, int deserializeInvokeCount = DefaultDeserializeInvokeCount)
         {
             this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
             this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));

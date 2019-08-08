@@ -60,7 +60,7 @@ namespace HyperMsg
             provider.UseSharedMemoryPool();
             provider.UseBufferReader(100);
 
-            var reader = provider.GetService<IBufferReader>();
+            var reader = provider.GetService<IBufferReader<byte>>();
 
             Assert.NotNull(reader);
         }
@@ -75,7 +75,7 @@ namespace HyperMsg
             provider.UseSharedMemoryPool();
             provider.UseBufferReader(100);            
 
-            var reader = provider.GetService<IBufferReader>();
+            var reader = provider.GetService<IBufferReader<byte>>();
 
             Assert.NotNull(reader);
         }
@@ -123,12 +123,12 @@ namespace HyperMsg
         [Fact]
         public void Dispose_Disposes_Disposable_Services()
         {
-            var service = A.Fake<IBufferReader>(o =>
+            var service = A.Fake<IBufferReader<byte>>(o =>
             {
                 o.Implements<IDisposable>();
             });
-            provider.RegisterService(typeof(IBufferReader), (p, s) => service);
-            provider.GetService<IBufferReader>();
+            provider.RegisterService(typeof(IBufferReader<byte>), (p, s) => service);
+            provider.GetService<IBufferReader<byte>>();
 
             provider.Dispose();
 

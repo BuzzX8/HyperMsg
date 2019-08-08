@@ -4,7 +4,7 @@ namespace HyperMsg
 {
     public interface IBuffer
     {
-        IBufferReader Reader { get; }
+        IBufferReader<byte> Reader { get; }
 
         IBufferWriter<byte> Writer { get; }
 
