@@ -64,7 +64,7 @@ namespace HyperMsg
         public void Writer_FlushAsync_Rises_Flushed_Event()
         {
             var wasRised = false;
-            buffer.Flushed += (b, t) =>
+            buffer.FlushRequested += (b, t) =>
             {
                 wasRised = true;
                 Assert.Same(buffer, b);

@@ -1,4 +1,6 @@
 ﻿using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -8,7 +10,11 @@ namespace HyperMsg
 
         IBufferWriter<byte> Writer { get; }
 
-        event AsyncAction<IBuffer> Flushed;
+        void Clear();
+
+        Task FlushAsync(CancellationToken cancellationToken);
+
+        event AsyncAction<IBuffer> FlushRequested;
     }
 
     public interface ISendingBuffer : IBuffer

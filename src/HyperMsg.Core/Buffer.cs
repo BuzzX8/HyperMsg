@@ -48,10 +48,6 @@ namespace HyperMsg
             return Task.FromResult(new ReadOnlySequence<byte>(Memory.Slice(position, length)));
         }
 
-        public event AsyncAction<IBuffer> Flushed;
-
-        public void Dispose() => memoryOwner.Dispose();
-
         void IBufferWriter<byte>.Advance(int count)
         {
             if (count > AvailableMemory || count < 0)
@@ -82,5 +78,13 @@ namespace HyperMsg
             var writer = (IBufferWriter<byte>)this;
             return writer.GetMemory(sizeHint).Span;
         }
+
+        public void Clear() => throw new NotImplementedException();
+
+        public Task FlushAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+
+        public void Dispose() => memoryOwner.Dispose();
+
+        public event AsyncAction<IBuffer> FlushRequested;
     }
 }
