@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg.Sockets
 {
-    public class SocketTransport : ITransport, IStream
+    public class SocketTransport : ITransport
     {
         private readonly ISocket socket;
 
@@ -12,8 +12,6 @@ namespace HyperMsg.Sockets
         {
             this.socket = socket ?? throw new ArgumentNullException(nameof(socket));
         }
-
-        public IStream GetStream() => this;
 
         public Task ProcessCommandAsync(TransportCommand command, CancellationToken cancellationToken)
         {
@@ -31,6 +29,16 @@ namespace HyperMsg.Sockets
             }
 
             return Task.CompletedTask;
+        }
+
+        public async Task HandleFlushRequestAsync(IBufferReader<byte> bufferReader, CancellationToken cancellationToken)
+        {
+            var bytes = bufferReader.Read();
+
+            if (bytes.IsSingleSegment)
+            {
+                await WriteAsync(bytes.First, cancellationToken);
+            }
         }
 
         private async Task OpenAsync(CancellationToken cancellationToken)
@@ -73,7 +81,7 @@ namespace HyperMsg.Sockets
 
         public void Write(Memory<byte> buffer) => socket.Write(buffer);
 
-        public Task WriteAsync(Memory<byte> buffer, CancellationToken token = default) => socket.WriteAsync(buffer, token);
+        public Task WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken token = default) => socket.WriteAsync(buffer, token);
 
         public event AsyncAction<TransportEventArgs> TransportEvent;
     }

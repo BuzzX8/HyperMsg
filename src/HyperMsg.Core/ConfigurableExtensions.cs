@@ -41,7 +41,6 @@ namespace HyperMsg
                 var buffSize = (int)s[SettingName];
                 var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
                 var transport = (ITransport)p.GetService(typeof(ITransport));
-                var stream = transport.GetStream();
 
                 return null;// new BufferReader(memoryPool.Rent(buffSize), stream.ReadAsync);
             });
@@ -55,8 +54,7 @@ namespace HyperMsg
             configurable.RegisterService(typeof(IBufferWriter<byte>), (p, s) =>
             {
                 var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
-                var transport = (ITransport)p.GetService(typeof(ITransport));
-                var stream = transport.GetStream();
+                var transport = (ITransport)p.GetService(typeof(ITransport));                
                 var buffSize = (int)s[SettingName];
 
                 return null;// new ByteBufferWriter(memoryPool.Rent(buffSize), stream.WriteAsync);
