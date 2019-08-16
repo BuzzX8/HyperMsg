@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class Buffer : IBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
+    public class Buffer : IReceivingBuffer, ISendingBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
     {
         private readonly IMemoryOwner<byte> memoryOwner;
 
@@ -43,10 +43,7 @@ namespace HyperMsg
             length -= count;
         }
 
-        Task<ReadOnlySequence<byte>> IBufferReader<byte>.ReadAsync(CancellationToken cancellationToken)
-        {
-            return Task.FromResult(new ReadOnlySequence<byte>(CommitedMemory));
-        }
+        ReadOnlySequence<byte> IBufferReader<byte>.Read() => new ReadOnlySequence<byte>(CommitedMemory);
 
         void IBufferWriter<byte>.Advance(int count)
         {
@@ -106,6 +103,6 @@ namespace HyperMsg
 
         public void Dispose() => memoryOwner.Dispose();
 
-        public event AsyncAction<IBuffer> FlushRequested;
+        public event AsyncAction<IBufferReader<byte>> FlushRequested;
     }
 }

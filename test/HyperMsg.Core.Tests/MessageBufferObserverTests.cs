@@ -28,7 +28,7 @@ namespace HyperMsg
             buffer = new ReadOnlySequence<byte>(Enumerable.Range(0, 100).Select(i => (byte)i).ToArray());
 
             PushEmptyDeserializationResult();
-            A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Returns(buffer);
+            A.CallTo(() => bufferReader.Read()).Returns(buffer);
             A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).ReturnsLazily(foc => deserializationResults.Pop());
         }
 
@@ -37,7 +37,7 @@ namespace HyperMsg
         {
             var buffer = new ReadOnlySequence<byte>(Guid.NewGuid().ToByteArray());
             var token = new CancellationToken();
-            A.CallTo(() => bufferReader.ReadAsync(token)).Returns(Task.FromResult(buffer));
+            A.CallTo(() => bufferReader.Read()).Returns(buffer);
 
             await observer.CheckBufferAsync(token);
 

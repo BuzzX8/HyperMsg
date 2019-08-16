@@ -21,7 +21,7 @@ namespace HyperMsg
 
         public async Task CheckBufferAsync(CancellationToken cancellationToken)
         {
-            var buffer = await bufferReader.ReadAsync(cancellationToken);
+            var buffer = bufferReader.Read();
             var result = default(DeserializationResult<T>);
             var deserializeSize = 0;
 

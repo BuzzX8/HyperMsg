@@ -14,7 +14,7 @@ namespace HyperMsg
 
         Task FlushAsync(CancellationToken cancellationToken);
 
-        event AsyncAction<IBuffer> FlushRequested;
+        event AsyncAction<IBufferReader<byte>> FlushRequested;
     }
 
     public interface ISendingBuffer : IBuffer

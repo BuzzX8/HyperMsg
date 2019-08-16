@@ -42,8 +42,8 @@ namespace HyperMsg
                 var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
                 var transport = (ITransport)p.GetService(typeof(ITransport));
                 var stream = transport.GetStream();
-                
-                return new BufferReader(memoryPool.Rent(buffSize), stream.ReadAsync);
+
+                return null;// new BufferReader(memoryPool.Rent(buffSize), stream.ReadAsync);
             });
         }
 
@@ -59,12 +59,13 @@ namespace HyperMsg
                 var stream = transport.GetStream();
                 var buffSize = (int)s[SettingName];
 
-                return new ByteBufferWriter(memoryPool.Rent(buffSize), stream.WriteAsync);
+                return null;// new ByteBufferWriter(memoryPool.Rent(buffSize), stream.WriteAsync);
             });
             configurable.RegisterService(typeof(InternalDelegates), (p, s) =>
             {
-                var writer = (ByteBufferWriter)p.GetService(typeof(IBufferWriter<byte>));
-                return new InternalDelegates(writer.FlushAsync);
+                //var writer = (ByteBufferWriter)p.GetService(typeof(IBufferWriter<byte>));
+                //return new InternalDelegates(writer.FlushAsync);
+                return null;
             });
         }
 

@@ -24,18 +24,18 @@ namespace HyperMsg
         }
 
         [Fact]
-        public async Task ReadAsync_Returns_Written_Bytes()
+        public void ReadAsync_Returns_Written_Bytes()
         {
             var expectedBytes = Guid.NewGuid().ToByteArray();
             WriteBytes(expectedBytes);
 
-            var actualBytes = await buffer.Reader.ReadAsync(default);
+            var actualBytes = buffer.Reader.Read();
 
             Assert.Equal(expectedBytes, actualBytes.ToArray());
         }
 
         [Fact]
-        public async Task Reader_Advance_Advances_Reading_Position()
+        public void Reader_Advance_Advances_Reading_Position()
         {
             var bytes = Guid.NewGuid().ToByteArray();
             var advanceCount = bytes.Length / 2;
@@ -43,7 +43,7 @@ namespace HyperMsg
             WriteBytes(bytes);
 
             buffer.Reader.Advance(advanceCount);
-            var actualBytes = await buffer.Reader.ReadAsync(default);
+            var actualBytes = buffer.Reader.Read();
 
             Assert.Equal(expectedBytes, actualBytes.ToArray());
         }
@@ -61,12 +61,12 @@ namespace HyperMsg
         }
 
         [Fact]
-        public async Task Clear_Removes_All_Data_From_Buffer()
+        public void Clear_Removes_All_Data_From_Buffer()
         {
             WriteBytes(Guid.NewGuid().ToByteArray());
 
             buffer.Clear();
-            var bytes = await buffer.Reader.ReadAsync(default);
+            var bytes = buffer.Reader.Read();
 
             Assert.Equal(0, bytes.Length);
         }
