@@ -23,21 +23,21 @@ namespace HyperMsg
 
         public IBufferWriter<byte> Writer => this;
 
-        private Memory<byte> CommitedMemory => Memory.Slice(0, position);
+        private Memory<byte> CommitedMemory => Memory.Slice(position, length);
 
         private int AvailableMemory => Memory.Length - length;
 
         void IBufferReader<byte>.Advance(int count)
         {
-            if (count > length)
+            if (count < 0)
             {
-                throw new IndexOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            //if (count < position)
-            //{
-            //    Memory.Slice(count).CopyTo(Memory);
-            //}
+            if (count > length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
 
             position += count;
             length -= count;
@@ -45,11 +45,16 @@ namespace HyperMsg
 
         Task<ReadOnlySequence<byte>> IBufferReader<byte>.ReadAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult(new ReadOnlySequence<byte>(Memory.Slice(position, length)));
+            return Task.FromResult(new ReadOnlySequence<byte>(CommitedMemory));
         }
 
         void IBufferWriter<byte>.Advance(int count)
         {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
             if (count > AvailableMemory || count < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
@@ -70,7 +75,15 @@ namespace HyperMsg
                 return Memory;
             }
 
-            return Memory.Slice(position, length);
+            var freeMemPos = position + length;
+
+            if (sizeHint > AvailableMemory - freeMemPos)
+            {
+                CommitedMemory.CopyTo(Memory);
+                position = 0;
+            }
+
+            return Memory.Slice(position);
         }
 
         Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)
@@ -79,9 +92,17 @@ namespace HyperMsg
             return writer.GetMemory(sizeHint).Span;
         }
 
-        public void Clear() => throw new NotImplementedException();
+        public void Clear() => position = length = 0;
 
-        public Task FlushAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+        public async Task FlushAsync(CancellationToken cancellationToken)
+        {
+            if (FlushRequested == null)
+            {
+                return;
+            }
+
+            await FlushRequested.Invoke(this, cancellationToken);
+        }
 
         public void Dispose() => memoryOwner.Dispose();
 

@@ -61,7 +61,18 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Writer_FlushAsync_Rises_Flushed_Event()
+        public async Task Clear_Removes_All_Data_From_Buffer()
+        {
+            WriteBytes(Guid.NewGuid().ToByteArray());
+
+            buffer.Clear();
+            var bytes = await buffer.Reader.ReadAsync(default);
+
+            Assert.Equal(0, bytes.Length);
+        }
+
+        [Fact]
+        public async Task FlushAsync_Rises_Flushed_Event()
         {
             var wasRised = false;
             buffer.FlushRequested += (b, t) =>
@@ -70,6 +81,8 @@ namespace HyperMsg
                 Assert.Same(buffer, b);
                 return Task.CompletedTask;
             };
+
+            await buffer.FlushAsync(default);
 
             Assert.True(wasRised);
         }
@@ -80,6 +93,20 @@ namespace HyperMsg
             buffer.Dispose();
 
             A.CallTo(() => memoryOwner.Dispose()).MustHaveHappened();
+        }
+
+        [Fact]
+        public void GetMemory_Defrags_Buffer()
+        {
+            var dataSize = MemorySize - (MemorySize / 4);
+            var bytes = Enumerable.Range(0, dataSize).Select(i => Guid.NewGuid().ToByteArray()[0]).ToArray();            
+            WriteBytes(bytes);
+            buffer.Writer.Advance(MemorySize / 4);
+            var sizeHint = MemorySize / 2;            
+
+            var memory = buffer.Writer.GetMemory(sizeHint);
+
+            Assert.True(memory.Length >= sizeHint);
         }
 
         private void WriteBytes(byte[] bytes)
