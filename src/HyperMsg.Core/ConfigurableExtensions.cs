@@ -42,11 +42,10 @@ namespace HyperMsg
         {
             configurable.RegisterService(new[] { typeof(IMessageSender<T>), typeof(IMessageBuffer<T>) }, (p, s) =>
             {
+                var sendingBuffer = (ISendingBuffer)p.GetService(typeof(ISendingBuffer));
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
-                var bufferWriter = (IBufferWriter<byte>)p.GetService(typeof(IBufferWriter<byte>));
-                var flushHandler = (InternalDelegates)p.GetService(typeof(InternalDelegates));
-
-                return new MessageBuffer<T>(bufferWriter, serializer.Serialize, new AsyncAction(flushHandler));
+                
+                return new MessageBuffer<T>(sendingBuffer.Writer, serializer.Serialize, sendingBuffer.FlushAsync);
             });
         }
 

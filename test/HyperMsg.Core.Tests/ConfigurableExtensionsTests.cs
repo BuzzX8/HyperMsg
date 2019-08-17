@@ -29,5 +29,19 @@ namespace HyperMsg
             Assert.NotNull(receivingBuffer);
             Assert.NotNull(sendingBuffer);
         }
+
+        [Fact]
+        public void UseMessageBuffer_Register_MessageBuffer_And_MessageSender()
+        {
+            serviceProvider.RegisterService(typeof(ISendingBuffer), (p, s) => A.Fake<ISendingBuffer>());
+            serviceProvider.RegisterService(typeof(ISerializer<string>), (p, s) => A.Fake<ISerializer<string>>());
+            serviceProvider.UseMessageBuffer<string>();
+
+            var messageSender = serviceProvider.GetService<IMessageSender<string>>();
+            var messageBuffer = serviceProvider.GetService<IMessageBuffer<string>>();
+
+            Assert.NotNull(messageSender);
+            Assert.NotNull(messageBuffer);
+        }
     }
 }
