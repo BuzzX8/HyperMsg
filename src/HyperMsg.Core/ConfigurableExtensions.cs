@@ -5,15 +5,37 @@ namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
-        public static void UseCoreServices<T>(this IConfigurable configurable, int inputBufferSize, int outputBufferSize)
+        public static void UseCoreServices<T>(this IConfigurable configurable, int receivingBufferSize, int sendingBufferSize)
         {
-            configurable.UseMessageHandlerAggregate<T>();
-            configurable.UseBackgrounReceiver<T>();
             configurable.UseSharedMemoryPool();
-
-            configurable.UseBufferReader(inputBufferSize);
-            configurable.UseBufferWriter(outputBufferSize);
+            configurable.UseBuffers(receivingBufferSize, sendingBufferSize);
+            
             configurable.UseMessageBuffer<T>();
+        }
+
+        public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(typeof(MemoryPool<byte>), (p, s) => MemoryPool<byte>.Shared);
+
+        public static void UseBuffers(this IConfigurable configurable, int receivingBufferSize, int sendingBufferSize)
+        {
+            const string ReceivingBufferSetting = "ReceivingBufferSize";
+            const string SendingBufferSetting = "SendingBufferSize";
+
+            configurable.AddSetting(ReceivingBufferSetting, receivingBufferSize);
+            configurable.AddSetting(SendingBufferSetting, sendingBufferSize);
+            configurable.RegisterService(typeof(IReceivingBuffer), (p, s) =>
+            {
+                var bufferSize = (int)s[ReceivingBufferSetting];
+                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
+
+                return new Buffer(memoryPool.Rent(bufferSize));
+            });
+            configurable.RegisterService(typeof(ISendingBuffer), (p, s) =>
+            {
+                var bufferSize = (int)s[SendingBufferSetting];
+                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
+
+                return new Buffer(memoryPool.Rent(bufferSize));
+            });
         }
 
         public static void UseMessageBuffer<T>(this IConfigurable configurable)
@@ -25,45 +47,6 @@ namespace HyperMsg
                 var flushHandler = (InternalDelegates)p.GetService(typeof(InternalDelegates));
 
                 return new MessageBuffer<T>(bufferWriter, serializer.Serialize, new AsyncAction(flushHandler));
-
-            });
-        }
-
-        public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(typeof(MemoryPool<byte>), (p, s) => MemoryPool<byte>.Shared);
-
-        public static void UseBufferReader(this IConfigurable configurable, int bufferSize)
-        {
-            const string SettingName = "BufferReader.BufferSize";
-
-            configurable.AddSetting(SettingName, bufferSize);
-            configurable.RegisterService(typeof(IBufferReader<byte>), (p, s) =>
-            {
-                var buffSize = (int)s[SettingName];
-                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
-                var transport = (ITransport)p.GetService(typeof(ITransport));
-
-                return null;// new BufferReader(memoryPool.Rent(buffSize), stream.ReadAsync);
-            });
-        }
-
-        public static void UseBufferWriter(this IConfigurable configurable, int bufferSize)
-        {
-            const string SettingName = "MessageBuffer.BufferSize";
-
-            configurable.AddSetting(SettingName, bufferSize);
-            configurable.RegisterService(typeof(IBufferWriter<byte>), (p, s) =>
-            {
-                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
-                var transport = (ITransport)p.GetService(typeof(ITransport));                
-                var buffSize = (int)s[SettingName];
-
-                return null;// new ByteBufferWriter(memoryPool.Rent(buffSize), stream.WriteAsync);
-            });
-            configurable.RegisterService(typeof(InternalDelegates), (p, s) =>
-            {
-                //var writer = (ByteBufferWriter)p.GetService(typeof(IBufferWriter<byte>));
-                //return new InternalDelegates(writer.FlushAsync);
-                return null;
             });
         }
 
@@ -91,10 +74,10 @@ namespace HyperMsg
                 var messageHandler = (MessageHandler<T>)p.GetService(typeof(MessageHandler<T>));
                 var observer = new MessageBufferObserver<T>(serializer.Deserialize, bufferReader);
                 observer.MessageDeserialized += new AsyncAction<T>(messageHandler);
-                var bgReceiver = new TransportWorker(observer.CheckBufferAsync);
+                //var bgReceiver = new TransportWorker(observer.CheckBufferAsync);
 
-                var transport = (ITransport)p.GetService(typeof(ITransport));
-                transport.TransportEvent += bgReceiver.HandleTransportEventAsync;
+                //var transport = (ITransport)p.GetService(typeof(ITransport));
+                //transport.TransportEvent += bgReceiver.HandleTransportEventAsync;
             });
         }
     }
