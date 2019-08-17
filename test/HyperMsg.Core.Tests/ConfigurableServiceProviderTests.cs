@@ -57,8 +57,7 @@ namespace HyperMsg
             var actual = Guid.Empty;
 
             provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
-            provider.UseSharedMemoryPool();
-            provider.UseBufferReader(100);
+            provider.RegisterService(typeof(IBufferReader<byte>), (p, s) => A.Fake<IBufferReader<byte>>());
 
             var reader = provider.GetService<IBufferReader<byte>>();
 
@@ -71,9 +70,8 @@ namespace HyperMsg
             var expected = Guid.NewGuid();
             var actual = Guid.Empty;
 
+            provider.RegisterService(typeof(IBufferReader<byte>), (p, s) => A.Fake<IBufferReader<byte>>());
             provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
-            provider.UseSharedMemoryPool();
-            provider.UseBufferReader(100);            
 
             var reader = provider.GetService<IBufferReader<byte>>();
 
@@ -83,13 +81,13 @@ namespace HyperMsg
         [Fact]
         public void GetService_Resolves_Complex_Dependencies()
         {
-            var expected = Guid.NewGuid().ToString();
-            provider.UseCoreServices<Guid>(100, 100);
+            var expected = Guid.NewGuid().ToString();            
             provider.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
             provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
             provider.RegisterService(typeof(string), (p, s) =>
             {
-                var sender = (IMessageSender<Guid>)p.GetService(typeof(IMessageSender<Guid>));
+                Assert.NotNull(p.GetService(typeof(ISerializer<Guid>)) as ISerializer<Guid>);
+                Assert.NotNull(p.GetService(typeof(ITransport)) as ITransport);
                 return expected;
             });
 

@@ -33,12 +33,15 @@ namespace HyperMsg.Sockets
 
         public async Task HandleFlushRequestAsync(IBufferReader<byte> bufferReader, CancellationToken cancellationToken)
         {
-            var bytes = bufferReader.Read();
+            var ros = bufferReader.Read();
+            var enumerator = ros.GetEnumerator();
 
-            if (bytes.IsSingleSegment)
+            while (enumerator.MoveNext())
             {
-                await WriteAsync(bytes.First, cancellationToken);
+                await socket.WriteAsync(enumerator.Current, cancellationToken);
             }
+
+            bufferReader.Advance((int)ros.Length);
         }
 
         private async Task OpenAsync(CancellationToken cancellationToken)
@@ -74,14 +77,6 @@ namespace HyperMsg.Sockets
 
             tls.SetTls();
         }
-
-        public int Read(Memory<byte> buffer) => socket.Read(buffer);
-
-        public Task<int> ReadAsync(Memory<byte> buffer, CancellationToken token = default) => socket.ReadAsync(buffer, token);
-
-        public void Write(Memory<byte> buffer) => socket.Write(buffer);
-
-        public Task WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken token = default) => socket.WriteAsync(buffer, token);
 
         public event AsyncAction<TransportEventArgs> TransportEvent;
     }
