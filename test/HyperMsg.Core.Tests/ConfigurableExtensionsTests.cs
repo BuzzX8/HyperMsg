@@ -21,6 +21,7 @@ namespace HyperMsg
         public void UseBuffers_Registers_Sending_And_Receiving_Buffer()
         {
             serviceProvider.RegisterService(typeof(MemoryPool<byte>), (p, s) => A.Fake<MemoryPool<byte>>());
+
             serviceProvider.UseBuffers(1024, 1024);
 
             var receivingBuffer = serviceProvider.GetService<IReceivingBuffer>();
@@ -35,6 +36,7 @@ namespace HyperMsg
         {
             serviceProvider.RegisterService(typeof(ISendingBuffer), (p, s) => A.Fake<ISendingBuffer>());
             serviceProvider.RegisterService(typeof(ISerializer<string>), (p, s) => A.Fake<ISerializer<string>>());
+
             serviceProvider.UseMessageBuffer<string>();
 
             var messageSender = serviceProvider.GetService<IMessageSender<string>>();
@@ -42,6 +44,19 @@ namespace HyperMsg
 
             Assert.NotNull(messageSender);
             Assert.NotNull(messageBuffer);
+        }
+
+        [Fact]
+        public void UseMessageHandlerRegistry_Registers_MessageHandlerRegistry()
+        {
+            serviceProvider.RegisterService(typeof(IReceivingBuffer), (p, s) => A.Fake<IReceivingBuffer>());
+            serviceProvider.RegisterService(typeof(ISerializer<string>), (p, s) => A.Fake<ISerializer<string>>());
+
+            serviceProvider.UseMessageHandlerRegistry<string>();
+
+            var registry = serviceProvider.GetService<IMessageHandlerRegistry<string>>();
+
+            Assert.NotNull(registry);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 
 namespace HyperMsg
 {
@@ -11,6 +10,7 @@ namespace HyperMsg
             configurable.UseBuffers(receivingBufferSize, sendingBufferSize);
             
             configurable.UseMessageBuffer<T>();
+            configurable.UseMessageHandlerRegistry<T>();
         }
 
         public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(typeof(MemoryPool<byte>), (p, s) => MemoryPool<byte>.Shared);
@@ -49,34 +49,18 @@ namespace HyperMsg
             });
         }
 
-        public static void UseMessageHandlerAggregate<T>(this IConfigurable configurable)
+        public static void UseMessageHandlerRegistry<T>(this IConfigurable configurable)
         {
             configurable.RegisterService(typeof(IMessageHandlerRegistry<T>), (p, s) =>
             {
-                return new MessageHandlerRegistry<T>();
-            });
-
-            configurable.RegisterService(typeof(MessageHandler<T>), (p, s) =>
-            {
-                var aggregate = (MessageHandlerRegistry<T>)p.GetService(typeof(IMessageHandlerRegistry<T>));
-
-                return (MessageHandler<T>)aggregate.HandleAsync;
-            });
-        }
-
-        public static void UseBackgrounReceiver<T>(this IConfigurable configurable)
-        {
-            configurable.RegisterConfigurator((p, s) =>
-            {
+                var receivingBuffer = (IReceivingBuffer)p.GetService(typeof(IReceivingBuffer));
                 var serializer = (ISerializer<T>)p.GetService(typeof(ISerializer<T>));
-                var bufferReader = (IBufferReader<byte>)p.GetService(typeof(IBufferReader<byte>));
-                var messageHandler = (MessageHandler<T>)p.GetService(typeof(MessageHandler<T>));
-                var observer = new MessageBufferObserver<T>(serializer.Deserialize, bufferReader);
-                observer.MessageDeserialized += new AsyncAction<T>(messageHandler);
-                //var bgReceiver = new TransportWorker(observer.CheckBufferAsync);
+                var bufferObserver = new MessageBufferObserver<T>(serializer.Deserialize);
+                var registry = new MessageHandlerRegistry<T>();
 
-                //var transport = (ITransport)p.GetService(typeof(ITransport));
-                //transport.TransportEvent += bgReceiver.HandleTransportEventAsync;
+                receivingBuffer.FlushRequested += bufferObserver.CheckBufferAsync;
+                bufferObserver.MessageDeserialized += registry.HandleAsync;
+                return registry;
             });
         }
     }
