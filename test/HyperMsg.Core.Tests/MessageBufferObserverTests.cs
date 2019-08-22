@@ -12,7 +12,7 @@ namespace HyperMsg
     public class MessageBufferObserverTests
     {
         private readonly DeserializeFunc<Guid> deserializeFunc;
-        private readonly IBufferReader bufferReader;
+        private readonly IBufferReader<byte> bufferReader;
         private readonly MessageBufferObserver<Guid> observer;
                 
         private readonly Stack<DeserializationResult<Guid>> deserializationResults;
@@ -21,14 +21,14 @@ namespace HyperMsg
         public MessageBufferObserverTests()
         {
             deserializeFunc = A.Fake<DeserializeFunc<Guid>>();
-            bufferReader = A.Fake<IBufferReader>();
-            observer = new MessageBufferObserver<Guid>(deserializeFunc, bufferReader);
+            bufferReader = A.Fake<IBufferReader<byte>>();
+            observer = new MessageBufferObserver<Guid>(deserializeFunc);
 
             deserializationResults = new Stack<DeserializationResult<Guid>>();
             buffer = new ReadOnlySequence<byte>(Enumerable.Range(0, 100).Select(i => (byte)i).ToArray());
 
             PushEmptyDeserializationResult();
-            A.CallTo(() => bufferReader.ReadAsync(A<CancellationToken>._)).Returns(buffer);
+            A.CallTo(() => bufferReader.Read()).Returns(buffer);
             A.CallTo(() => deserializeFunc.Invoke(A<ReadOnlySequence<byte>>._)).ReturnsLazily(foc => deserializationResults.Pop());
         }
 
@@ -37,9 +37,9 @@ namespace HyperMsg
         {
             var buffer = new ReadOnlySequence<byte>(Guid.NewGuid().ToByteArray());
             var token = new CancellationToken();
-            A.CallTo(() => bufferReader.ReadAsync(token)).Returns(Task.FromResult(buffer));
+            A.CallTo(() => bufferReader.Read()).Returns(buffer);
 
-            await observer.CheckBufferAsync(token);
+            await observer.CheckBufferAsync(bufferReader, token);
 
             A.CallTo(() => deserializeFunc.Invoke(buffer)).MustHaveHappened();
         }
@@ -50,7 +50,7 @@ namespace HyperMsg
             var messageSize = 100;            
             PushDeserializationResult(messageSize, Guid.Empty);
 
-            await observer.CheckBufferAsync(CancellationToken.None);
+            await observer.CheckBufferAsync(bufferReader, CancellationToken.None);
 
             A.CallTo(() => bufferReader.Advance(messageSize)).MustHaveHappened();
         }
@@ -61,7 +61,7 @@ namespace HyperMsg
             bool eventRaised = false;
             observer.MessageDeserialized += (m, t) => { eventRaised = true; return Task.CompletedTask; };
 
-            await observer.CheckBufferAsync(CancellationToken.None);
+            await observer.CheckBufferAsync(bufferReader, CancellationToken.None);
 
             Assert.False(eventRaised);
         }
@@ -74,7 +74,7 @@ namespace HyperMsg
             observer.MessageDeserialized += (m, t) => { actualMessage = m; return Task.CompletedTask; };
             PushDeserializationResult(16, expectedMessage);
 
-            await observer.CheckBufferAsync(CancellationToken.None);
+            await observer.CheckBufferAsync(bufferReader, CancellationToken.None);
 
             Assert.Equal(expectedMessage, actualMessage);
         }
@@ -88,7 +88,7 @@ namespace HyperMsg
             var actualMessages = new List<Guid>();
             observer.MessageDeserialized += (m, t) => { actualMessages.Add(m); return Task.CompletedTask; };
 
-            await observer.CheckBufferAsync(CancellationToken.None);
+            await observer.CheckBufferAsync(bufferReader, CancellationToken.None);
 
             Assert.Equal(expectedMessages, actualMessages);
         }
@@ -99,7 +99,7 @@ namespace HyperMsg
             var messageSize = 20;
             PushDeserializationResult(messageSize, Guid.Empty);
 
-            await observer.CheckBufferAsync(CancellationToken.None);
+            await observer.CheckBufferAsync(bufferReader, CancellationToken.None);
 
             A.CallTo(() => deserializeFunc.Invoke(buffer.Slice(messageSize))).MustHaveHappened();
         }
@@ -109,7 +109,7 @@ namespace HyperMsg
         {
             PushDeserializationResult((int)buffer.Length + 1, Guid.Empty);
 
-            await Assert.ThrowsAsync<DeserializationException>(() => observer.CheckBufferAsync(CancellationToken.None));
+            await Assert.ThrowsAsync<DeserializationException>(() => observer.CheckBufferAsync(bufferReader, CancellationToken.None));
         }
 
         private void PushDeserializationResult(int messageSize, Guid message) => deserializationResults.Push(new DeserializationResult<Guid>(messageSize, message));

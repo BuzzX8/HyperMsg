@@ -7,21 +7,19 @@ namespace HyperMsg
     public class MessageBufferObserver<T>
     {
         private readonly DeserializeFunc<T> deserialize;
-        private readonly IBufferReader bufferReader;
         private readonly int deserializeInvokeCount;
 
         private const int DefaultDeserializeInvokeCount = 10;
 
-        public MessageBufferObserver(DeserializeFunc<T> deserialize, IBufferReader bufferReader, int deserializeInvokeCount = DefaultDeserializeInvokeCount)
+        public MessageBufferObserver(DeserializeFunc<T> deserialize, int deserializeInvokeCount = DefaultDeserializeInvokeCount)
         {
             this.deserialize = deserialize ?? throw new ArgumentNullException(nameof(deserialize));
-            this.bufferReader = bufferReader ?? throw new ArgumentNullException(nameof(bufferReader));
             this.deserializeInvokeCount = deserializeInvokeCount;
         }
 
-        public async Task CheckBufferAsync(CancellationToken cancellationToken)
+        public async Task CheckBufferAsync(IBufferReader<byte> bufferReader, CancellationToken cancellationToken)
         {
-            var buffer = await bufferReader.ReadAsync(cancellationToken);
+            var buffer = bufferReader.Read();
             var result = default(DeserializationResult<T>);
             var deserializeSize = 0;
 
