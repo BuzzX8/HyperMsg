@@ -9,8 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HyperMsg.Core" Version="0.10.1-alpha" />
-    <PackageReference Include="HyperMsg.Sockets" Version="0.10.0-alpha" />
+    <ProjectReference Include="..\HyperMsg.Core\HyperMsg.Core.csproj" />
   </ItemGroup>
 
 </Project>
