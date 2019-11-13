@@ -25,10 +25,22 @@ namespace HyperMsg
             serviceProvider.UseBuffers(1024, 1024);
 
             var receivingBuffer = serviceProvider.GetService<IReceivingBuffer>();
-            var sendingBuffer = serviceProvider.GetService<ISendingBuffer>();
+            var sendingBuffer = serviceProvider.GetService<ITransmittingBuffer>();
 
             Assert.NotNull(receivingBuffer);
             Assert.NotNull(sendingBuffer);
+        }
+
+        [Fact]
+        public void UseMessageBroker_Registers_MessageSender_And_MessageHandlerRegistry()
+        {
+            serviceProvider.UseMessageBroker();
+
+            var messageSender = serviceProvider.GetService<IMessageSender>();
+            var handlerRegistry = serviceProvider.GetService<IMessageHandlerRegistry>();
+
+            Assert.NotNull(messageSender);
+            Assert.NotNull(handlerRegistry);
         }
     }
 }

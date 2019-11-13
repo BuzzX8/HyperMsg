@@ -17,7 +17,7 @@ namespace HyperMsg
         event AsyncAction<IBufferReader<byte>> FlushRequested;
     }
 
-    public interface ISendingBuffer : IBuffer
+    public interface ITransmittingBuffer : IBuffer
     { }
 
     public interface IReceivingBuffer : IBuffer

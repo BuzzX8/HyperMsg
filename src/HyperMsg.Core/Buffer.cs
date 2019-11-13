@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class Buffer : IReceivingBuffer, ISendingBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
+    public class Buffer : IReceivingBuffer, ITransmittingBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
     {
         private readonly IMemoryOwner<byte> memoryOwner;
 
