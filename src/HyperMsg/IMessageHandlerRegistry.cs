@@ -2,10 +2,10 @@
 
 namespace HyperMsg
 {
-    public interface IMessageHandlerRegistry<T>
+    public interface IMessageHandlerRegistry
     {
-        void Register(Action<T> handler);
+        void Register<T>(Action<T> handler);
 
-        void Register(AsyncAction<T> handler);
+        void Register<T>(AsyncAction<T> handler);
     }
 }
