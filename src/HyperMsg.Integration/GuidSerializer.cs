@@ -3,20 +3,20 @@ using System.Buffers;
 
 namespace HyperMsg.Integration
 {
-    public class GuidSerializer : ISerializer<Guid>
+    public class GuidSerializer
     {
-        public DeserializationResult<Guid> Deserialize(ReadOnlySequence<byte> buffer)
+        public Guid Deserialize(ReadOnlySequence<byte> buffer)
         {
             const int GuidSize = 16;
 
             if (buffer.Length < GuidSize)
             {
-                return new DeserializationResult<Guid>(0, Guid.Empty);
+                throw new InvalidOperationException();
             }
 
             var slice = buffer.First.Slice(0, GuidSize);
 
-            return new DeserializationResult<Guid>(GuidSize, new Guid(slice.ToArray()));
+            return new Guid(slice.ToArray());
         }
 
         public void Serialize(IBufferWriter<byte> writer, Guid message)

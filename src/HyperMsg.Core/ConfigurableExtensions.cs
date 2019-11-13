@@ -4,10 +4,11 @@ namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
-        public static void UseCoreServices<T>(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
+        public static void UseCoreServices(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
         {
             configurable.UseSharedMemoryPool();
             configurable.UseBuffers(receivingBufferSize, transmittingBufferSize);
+            configurable.UseMessageBroker();
         }
 
         public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(typeof(MemoryPool<byte>), (p, s) => MemoryPool<byte>.Shared);
