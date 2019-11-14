@@ -51,43 +51,15 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void GetService_Resolves_Direct_Dependency_Registered_Before_Service()
-        {
-            var expected = Guid.NewGuid();
-            var actual = Guid.Empty;
-
-            provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
-            provider.RegisterService(typeof(IBufferReader<byte>), (p, s) => A.Fake<IBufferReader<byte>>());
-
-            var reader = provider.GetService<IBufferReader<byte>>();
-
-            Assert.NotNull(reader);
-        }
-
-        [Fact]
-        public void GetService_Resolves_Direct_Dependency_Registered_After_Service()
-        {
-            var expected = Guid.NewGuid();
-            var actual = Guid.Empty;
-
-            provider.RegisterService(typeof(IBufferReader<byte>), (p, s) => A.Fake<IBufferReader<byte>>());
-            provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
-
-            var reader = provider.GetService<IBufferReader<byte>>();
-
-            Assert.NotNull(reader);
-        }
-
-        [Fact]
         public void GetService_Resolves_Complex_Dependencies()
         {
             var expected = Guid.NewGuid().ToString();            
-            provider.RegisterService(typeof(ISerializer<Guid>), (p, s) => A.Fake<ISerializer<Guid>>());
-            provider.RegisterService(typeof(ITransport), (p, s) => A.Fake<ITransport>());
+            provider.RegisterService(typeof(IMessageSender), (p, s) => A.Fake<IMessageSender>());
+            provider.RegisterService(typeof(IMessageHandlerRegistry), (p, s) => A.Fake<IMessageHandlerRegistry>());
             provider.RegisterService(typeof(string), (p, s) =>
             {
-                Assert.NotNull(p.GetService(typeof(ISerializer<Guid>)) as ISerializer<Guid>);
-                Assert.NotNull(p.GetService(typeof(ITransport)) as ITransport);
+                Assert.NotNull(p.GetService(typeof(IMessageSender)) as IMessageSender);
+                Assert.NotNull(p.GetService(typeof(IMessageHandlerRegistry)) as IMessageHandlerRegistry);
                 return expected;
             });
 
@@ -100,7 +72,7 @@ namespace HyperMsg
         public void GetService_Throws_Exception_If_No_Registered_Dependencies()
         {
             var expected = Guid.NewGuid().ToString();
-            provider.UseCoreServices<Guid>(100, 100);
+            provider.UseCoreServices(100, 100);
 
             Assert.Throws<InvalidOperationException>(() => provider.GetService<string>());
         }
