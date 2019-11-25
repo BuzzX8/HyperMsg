@@ -6,7 +6,13 @@ namespace HyperMsg.Integration
 {
     public abstract class IntegrationFixtureBase
     {
-        private readonly ConfigurableServiceProvider serviceProvider = new ConfigurableServiceProvider();
+        private readonly ConfigurableServiceProvider serviceProvider;
+
+        protected IntegrationFixtureBase(int receivingBufferSize, int transmittingBufferSize)
+        {
+            serviceProvider = new ConfigurableServiceProvider();
+            serviceProvider.UseCoreServices(receivingBufferSize, transmittingBufferSize);
+        }
 
         protected IConfigurable Configurable => serviceProvider;
 
@@ -15,10 +21,6 @@ namespace HyperMsg.Integration
         protected IMessageHandlerRegistry HandlerRegistry => serviceProvider.GetService<IMessageHandlerRegistry>();
 
         protected TService GetService<TService>() => serviceProvider.GetService<TService>();
-
-        protected abstract void ConfigureSerializer(IConfigurable configurable);
-
-        protected abstract void ConfigureTransport(IConfigurable configurable);
 
         protected virtual Task OpenTransportAsync(CancellationToken cancellationToken = default) => MessageSender.SendAsync(TransportCommand.Open, cancellationToken);
 
