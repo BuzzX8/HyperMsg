@@ -12,3 +12,8 @@ steps:
     inputs:
       command: test
       projects: test/**/*.csproj
+  - task: PublishPipelineArtifact@1
+    inputs:
+    targetPath: '$(Pipeline.Workspace)'
+    artifact: 'HyperMsg.Core'
+    publishLocation: 'pipeline'
