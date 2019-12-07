@@ -17,8 +17,7 @@ steps:
     inputs:
       command: 'publish'
       publishWebProjects: false
-      zipAfterPublish: false
-      packDirectory: '$(Pipeline.Workspace)'
+      zipAfterPublish: false      
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: '$(Pipeline.Workspace)'
