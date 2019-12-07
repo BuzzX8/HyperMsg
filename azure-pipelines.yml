@@ -14,8 +14,8 @@ steps:
       projects: test/**/*.csproj
   - task: DotNetCoreCLI@2
     name: publish
-    inputs:      
-      command: 'publish'      
+    inputs:
+      command: 'publish'
       publishWebProjects: false
       zipAfterPublish: false
       packDirectory: '$(Pipeline.Workspace)'
