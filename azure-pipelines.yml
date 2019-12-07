@@ -13,7 +13,8 @@ steps:
       command: test
       projects: test/**/*.csproj
   - task: DotNetCoreCLI@2
-    inputs:
+    name: publish
+    inputs:      
       command: 'publish'      
       publishWebProjects: false
       zipAfterPublish: false
