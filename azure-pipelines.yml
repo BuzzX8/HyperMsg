@@ -12,6 +12,12 @@ steps:
     inputs:
       command: test
       projects: test/**/*.csproj
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'publish'      
+      publishWebProjects: false
+      zipAfterPublish: false
+      packDirectory: '$(Pipeline.Workspace)'
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: '$(Pipeline.Workspace)'
