@@ -12,14 +12,3 @@ steps:
     inputs:
       command: test
       projects: test/**/*.csproj
-  - task: DotNetCoreCLI@2
-    name: publish
-    inputs:
-      command: 'publish'
-      publishWebProjects: false
-      zipAfterPublish: false      
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: '$(Pipeline.Workspace)'
-      artifact: 'HyperMsg.Core'
-      publishLocation: 'pipeline'
