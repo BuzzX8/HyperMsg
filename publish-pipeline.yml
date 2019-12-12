@@ -5,20 +5,19 @@ steps:
     displayName: Build
     inputs:
       command: build
-      projects: src/**/*.csproj  
+      projects: src/**/*.csproj
   - task: DotNetCoreCLI@2
     name: pack
     displayName: Pack
-    inputs:      
+    inputs:
       command: 'pack'
       packagesToPack: 'src/**/*.csproj'
-      nobuild: true
-      projects: 
+      nobuild: true      
       versioningScheme: 'byEnvVar'
       versionEnvVar: 'Version'
   - task: DotNetCoreCLI@2
-    name: publish
-    displayName: Publish
+    name: push
+    displayName: Nuget push
     inputs:
       command: 'push'      
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
