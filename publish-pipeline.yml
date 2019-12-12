@@ -7,15 +7,18 @@ steps:
       command: build
       projects: src/**/*.csproj  
   - task: DotNetCoreCLI@2
-    inputs:
+    name: pack
+    displayName: Pack
+    inputs:      
       command: 'pack'
-      packagesToPack: '**/*.csproj'
+      packagesToPack: '**/HyperMsg.csproj'
       nobuild: true
+      projects: 
       versioningScheme: 'byEnvVar'
       versionEnvVar: 'Version'
   - task: DotNetCoreCLI@2
     inputs:
-      command: 'push'
+      command: 'push'      
       packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
       nuGetFeedType: 'internal'
       publishVstsFeed: '0f7658ee-3fbc-4cb5-9169-e2d0903fd495'
