@@ -1,0 +1,26 @@
+name: HyperMsg.Publish
+trigger: none
+steps:
+  - task: DotNetCoreCLI@2
+    name: build
+    displayName: Build
+    inputs:
+      command: build
+      projects: src/**/*.csproj
+  - task: DotNetCoreCLI@2
+    name: pack
+    displayName: Pack
+    inputs:
+      command: 'pack'
+      packagesToPack: 'src/**/*.csproj'
+      nobuild: true      
+      versioningScheme: 'byEnvVar'
+      versionEnvVar: 'Version'
+  - task: DotNetCoreCLI@2
+    name: push
+    displayName: Nuget push
+    inputs:
+      command: 'push'      
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '0f7658ee-3fbc-4cb5-9169-e2d0903fd495'
