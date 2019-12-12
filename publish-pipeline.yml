@@ -1,4 +1,5 @@
 name: HyperMsg.Publish
+trigger: none
 steps:
   - task: DotNetCoreCLI@2
     name: build
