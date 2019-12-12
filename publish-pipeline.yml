@@ -11,7 +11,7 @@ steps:
     displayName: Pack
     inputs:      
       command: 'pack'
-      packagesToPack: '**/HyperMsg.csproj'
+      packagesToPack: 'src/**/*.csproj'
       nobuild: true
       projects: 
       versioningScheme: 'byEnvVar'
