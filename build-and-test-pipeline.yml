@@ -1,4 +1,4 @@
-name: HyperMsg.Core
+name: HyperMsg.BuildAndTest
 steps:
   - task: DotNetCoreCLI@2
     name: build
