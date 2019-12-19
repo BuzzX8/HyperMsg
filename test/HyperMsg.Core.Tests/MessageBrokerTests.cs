@@ -58,5 +58,16 @@ namespace HyperMsg
 
             A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
         }
+
+        [Fact]
+        public void Send_Does_Not_Throw_Exception_When_New_Handler_Registred()
+        {
+            broker.Register<Guid>(m =>
+            {
+                broker.Register<string>(s => { });
+            });
+
+            broker.Send(Guid.NewGuid());
+        }
     }
 }

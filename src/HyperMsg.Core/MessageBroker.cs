@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,25 +7,55 @@ namespace HyperMsg
 {
     public class MessageBroker : IMessageSender, IMessageHandlerRegistry
     {
-        private readonly List<object> handlers = new List<object>();
-        private readonly List<object> asyncHandlers = new List<object>();
+        private readonly ConcurrentDictionary<Type, object> handlers = new ConcurrentDictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, object> asyncHandlers = new ConcurrentDictionary<Type, object>();
 
-        public void Register<T>(Action<T> handler) => handlers.Add(handler);
+        public void Register<T>(Action<T> handler)
+        {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
 
-        public void Register<T>(AsyncAction<T> handler) => asyncHandlers.Add(handler);
+            if (handlers.ContainsKey(typeof(T)))
+            {
+                var h = (Action<T>)handlers[typeof(T)];
+                h += handler;
+                return;
+            }
+
+            handlers.TryAdd(typeof(T), handler);
+        }
+
+        public void Register<T>(AsyncAction<T> handler)
+        {
+            if (handler == null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
+            if (asyncHandlers.ContainsKey(typeof(T)))
+            {
+                var h = (AsyncAction<T>)asyncHandlers[typeof(T)];
+                h += handler;
+                return;
+            }
+
+            asyncHandlers.TryAdd(typeof(T), handler);
+        }
 
         public void Send<T>(T message) => SendAsync(message, CancellationToken.None).GetAwaiter().GetResult();
 
         public async Task SendAsync<T>(T message, CancellationToken cancellationToken)
         {
-            foreach (var handler in handlers.OfType<Action<T>>())
+            if (handlers.TryGetValue(typeof(T), out var h))
             {
-                handler.Invoke(message);
+                ((Action<T>)h).Invoke(message);
             }
 
-            foreach(var handler in asyncHandlers.OfType<AsyncAction<T>>())
+            if (asyncHandlers.TryGetValue(typeof(T), out var ah))
             {
-                await handler.Invoke(message, cancellationToken);
+                await ((AsyncAction<T>)ah).Invoke(message, cancellationToken);
             }
         }
     }
