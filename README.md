@@ -1,0 +1,1 @@
+[![Build Status](https://dev.azure.com/HyperComm/HyperMsg/_apis/build/status/Core/Build%20and%20Test?branchName=master)](https://dev.azure.com/HyperComm/HyperMsg/_build/latest?definitionId=6&branchName=master)
