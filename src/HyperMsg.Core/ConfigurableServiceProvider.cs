@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace HyperMsg
 {
+    /// <summary>
+    /// Provides implementation for IConfigurable and IServiceProvider
+    /// </summary>
     public class ConfigurableServiceProvider : IConfigurable, IServiceProvider, IDisposable
     {
         private readonly Dictionary<string, object> settings;
@@ -37,6 +40,14 @@ namespace HyperMsg
             multiInterfaceServices.Add((serviceInterfaces, serviceFactory));
         }
 
+        /// <summary>
+        /// Returns previously registered service.
+        /// </summary>
+        /// <typeparam name="T">Type of service.</typeparam>
+        /// <exception cref="InvalidOperationException">
+        /// Rises when requested service type was not previously registred.
+        /// </exception>
+        /// <returns>Implementation for service.</returns>
         public T GetService<T>()
         {
             EnsureConfiguratorsRun();

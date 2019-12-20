@@ -4,6 +4,13 @@ namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
+        /// <summary>
+        /// Registers core services required for messaging and buffering infrastructure (MessageSender, MessageHandlerRegistry,
+        /// receiving and transmitting buffer).
+        /// </summary>
+        /// <param name="configurable"></param>
+        /// <param name="receivingBufferSize">Size of receiving buffer.</param>
+        /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
         public static void UseCoreServices(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
         {
             configurable.UseSharedMemoryPool();
@@ -11,8 +18,18 @@ namespace HyperMsg
             configurable.UseMessageBroker();
         }
 
+        /// <summary>
+        /// Registers shared MemoryPool<byte>.
+        /// </summary>
+        /// <param name="configurable"></param>
         public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(typeof(MemoryPool<byte>), (p, s) => MemoryPool<byte>.Shared);
 
+        /// <summary>
+        /// Registers implementations for ITransmittingBuffer and IReceivingBuffer. Depends on MemoryPool<byte>.
+        /// </summary>
+        /// <param name="configurable"></param>
+        /// <param name="receivingBufferSize">Size of receiving buffer.</param>
+        /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
         public static void UseBuffers(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
         {
             const string ReceivingBufferSetting = "ReceivingBufferSize";
@@ -36,6 +53,10 @@ namespace HyperMsg
             });
         }
 
+        /// <summary>
+        /// Register implementation for services IMessageSender and IMessageHandlerRegistry.
+        /// </summary>
+        /// <param name="configurable"></param>
         public static void UseMessageBroker(this IConfigurable configurable)
         {
             configurable.RegisterService(new[] { typeof(IMessageSender), typeof(IMessageHandlerRegistry) }, (p, s) =>

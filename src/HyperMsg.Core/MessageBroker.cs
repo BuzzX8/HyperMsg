@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
+    /// <summary>
+    /// Provides implementation for MessageSender and MessageHandlerRegistry
+    /// </summary>
     public class MessageBroker : IMessageSender, IMessageHandlerRegistry
     {
         private readonly ConcurrentDictionary<Type, object> handlers = new ConcurrentDictionary<Type, object>();
