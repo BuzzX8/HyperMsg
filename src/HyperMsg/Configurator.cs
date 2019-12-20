@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace HyperMsg
 {
     /// <summary>
-    /// 
+    /// Represents method which performs configuration.
     /// </summary>
-    /// <param name="serviceProvider"></param>
-    /// <param name="settings"></param>
+    /// <param name="serviceProvider">Provider for dependencies.</param>
+    /// <param name="settings">Dictionary for settings.</param>
     public delegate void Configurator(IServiceProvider serviceProvider, IReadOnlyDictionary<string, object> settings);
 }

@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
+    /// <summary>
+    /// Provides implementation for buffer interfaces
+    /// </summary>
     public class Buffer : IReceivingBuffer, ITransmittingBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
     {
         private readonly IMemoryOwner<byte> memoryOwner;
