@@ -27,7 +27,7 @@ namespace HyperMsg
             return Equals((Received<T>)obj);
         }
 
-        public bool Equals(Received<T> other) => Message.Equals(other);
+        public bool Equals(Received<T> other) => Message.Equals(other.Message);
 
         public override int GetHashCode() => Message.GetHashCode();
 
