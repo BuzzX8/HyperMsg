@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace HyperMsg
@@ -26,7 +27,7 @@ namespace HyperMsg
             var key = Guid.NewGuid().ToString();
             A.CallTo(() => settings[key]).Returns(Guid.NewGuid());
 
-            Assert.Throws<InvalidOperationException>(() => settings.Get<int>(key));
+            Assert.Throws<InvalidOperationException>(() => settings.Get<string>(key));
         }
     }
 }
