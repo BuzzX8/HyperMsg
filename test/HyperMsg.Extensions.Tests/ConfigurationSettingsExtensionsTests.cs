@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace HyperMsg
@@ -14,6 +13,7 @@ namespace HyperMsg
         {
             var expected = Guid.NewGuid();
             var key = expected.ToString();
+            A.CallTo(() => settings.ContainsKey(key)).Returns(true);
             A.CallTo(() => settings[key]).Returns(expected);
 
             var actual = settings.Get<Guid>(key);
@@ -25,6 +25,7 @@ namespace HyperMsg
         public void Get_Throws_Exception_If_Invalid_Value_Type_Provided()
         {
             var key = Guid.NewGuid().ToString();
+            A.CallTo(() => settings.ContainsKey(key)).Returns(true);
             A.CallTo(() => settings[key]).Returns(Guid.NewGuid());
 
             Assert.Throws<InvalidOperationException>(() => settings.Get<string>(key));

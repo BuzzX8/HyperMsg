@@ -7,12 +7,12 @@ namespace HyperMsg
     {
         public static T Get<T>(this IConfigurationSettings settings, string key)
         {
-            var value = settings[key];
-
             if (!settings.ContainsKey(key))
             {
                 throw new KeyNotFoundException();
             }
+
+            var value = settings[key];
 
             if (value.GetType() != typeof(T))
             {
