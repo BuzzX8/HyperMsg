@@ -1,7 +1,5 @@
 ﻿using FakeItEasy;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace HyperMsg
@@ -31,7 +29,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void GetService_Throws_Exception_()
+        public void GetService_Throws_Exception_If_Provider_Returns_Null()
         {
             A.CallTo(() => serviceProvider.GetService(A<Type>._)).Returns(null);
 
