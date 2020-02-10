@@ -22,7 +22,7 @@ namespace HyperMsg
         /// Registers shared MemoryPool<byte>.
         /// </summary>
         /// <param name="configurable"></param>
-        public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(typeof(MemoryPool<byte>), (p, s) => MemoryPool<byte>.Shared);
+        public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(MemoryPool<byte>.Shared);
 
         /// <summary>
         /// Registers implementations for ITransmittingBuffer and IReceivingBuffer. Depends on MemoryPool<byte>.
@@ -39,15 +39,15 @@ namespace HyperMsg
             configurable.AddSetting(SendingBufferSetting, transmittingBufferSize);
             configurable.RegisterService(typeof(IReceivingBuffer), (p, s) =>
             {
-                var bufferSize = (int)s[ReceivingBufferSetting];
-                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
+                var bufferSize = s.Get<int>(ReceivingBufferSetting);
+                var memoryPool = p.GetRequiredService<MemoryPool<byte>>();
 
                 return new Buffer(memoryPool.Rent(bufferSize));
             });
             configurable.RegisterService(typeof(ITransmittingBuffer), (p, s) =>
             {
-                var bufferSize = (int)s[SendingBufferSetting];
-                var memoryPool = (MemoryPool<byte>)p.GetService(typeof(MemoryPool<byte>));
+                var bufferSize = s.Get<int>(SendingBufferSetting);
+                var memoryPool = p.GetService<MemoryPool<byte>>();
 
                 return new Buffer(memoryPool.Rent(bufferSize));
             });
@@ -59,10 +59,7 @@ namespace HyperMsg
         /// <param name="configurable"></param>
         public static void UseMessageBroker(this IConfigurable configurable)
         {
-            configurable.RegisterService(new[] { typeof(IMessageSender), typeof(IMessageHandlerRegistry) }, (p, s) =>
-            {
-                return new MessageBroker();
-            });
+            configurable.RegisterService(new[] { typeof(IMessageSender), typeof(IMessageHandlerRegistry) }, (p, s) => new MessageBroker());            
         }
     }
 }

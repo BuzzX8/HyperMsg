@@ -9,7 +9,9 @@ namespace HyperMsg
     /// </summary>
     public class ConfigurableServiceProvider : IConfigurable, IServiceProvider, IDisposable
     {
-        private readonly Dictionary<string, object> settings;
+        class ConfigurationSettings : Dictionary<string, object>, IConfigurationSettings { }
+
+        private readonly ConfigurationSettings settings;
         private readonly Dictionary<Type, ServiceFactory> singleInterfaceServices;
         private readonly List<(IEnumerable<Type> interfaces, ServiceFactory factory)> multiInterfaceServices;
         private readonly List<Configurator> configurators;
@@ -21,7 +23,7 @@ namespace HyperMsg
 
         public ConfigurableServiceProvider()
         {            
-            settings = new Dictionary<string, object>();
+            settings = new ConfigurationSettings();
             singleInterfaceServices = new Dictionary<Type, ServiceFactory>();
             multiInterfaceServices = new List<(IEnumerable<Type> interfaces, ServiceFactory factory)>();
             configurators = new List<Configurator>();

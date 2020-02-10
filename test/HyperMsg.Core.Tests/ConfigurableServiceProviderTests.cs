@@ -17,7 +17,7 @@ namespace HyperMsg
 
             provider.GetService<string>();
 
-            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).MustNotHaveHappened();
+            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IConfigurationSettings>._)).MustNotHaveHappened();
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace HyperMsg
         {
             var expected = Guid.NewGuid().ToString();
             var factory = A.Fake<ServiceFactory>();
-            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IReadOnlyDictionary<string, object>>._)).Returns(expected);
+            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IConfigurationSettings>._)).Returns(expected);
             provider.RegisterService(typeof(string), factory);
 
             var actual = provider.GetService<string>();

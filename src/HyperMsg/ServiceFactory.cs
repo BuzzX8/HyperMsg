@@ -9,5 +9,5 @@ namespace HyperMsg
     /// <param name="serviceProvider">Provider for dependencies.</param>
     /// <param name="settings">Dictionary which contains named settings.</param>
     /// <returns></returns>
-    public delegate object ServiceFactory(IServiceProvider serviceProvider, IReadOnlyDictionary<string, object> settings);
+    public delegate object ServiceFactory(IServiceProvider serviceProvider, IConfigurationSettings settings);
 }

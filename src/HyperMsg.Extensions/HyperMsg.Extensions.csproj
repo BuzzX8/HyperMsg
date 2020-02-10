@@ -1,13 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>7.3</LangVersion>
     <RootNamespace>HyperMsg</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HyperMsg.Extensions\HyperMsg.Extensions.csproj" />
     <ProjectReference Include="..\HyperMsg\HyperMsg.csproj" />
   </ItemGroup>
 
