@@ -25,7 +25,7 @@ namespace HyperMsg
         public static void UseSharedMemoryPool(this IConfigurable configurable) => configurable.RegisterService(MemoryPool<byte>.Shared);
 
         /// <summary>
-        /// Registers implementations for ITransmittingBuffer and IReceivingBuffer. Depends on MemoryPool<byte>.
+        /// Registers implementations for IBufferContext. Depends on MemoryPool<byte>.
         /// </summary>
         /// <param name="configurable"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
@@ -47,6 +47,19 @@ namespace HyperMsg
                 var transmittingBuffer = new Buffer(memoryPool.Rent(outputBufferSize));
 
                 return new BufferContext(receivingBuffer, transmittingBuffer);
+            });
+        }
+
+        /// <summary>
+        /// Registers implementation for IBufferFactory. Depends on MemoryPool<byte>
+        /// </summary>
+        /// <param name="configurable"></param>
+        public static void UseBufferFactory(this IConfigurable configurable)
+        {
+            configurable.RegisterService(typeof(IBufferFactory), (p, s) =>
+            {
+                var memoryPool = p.GetRequiredService<MemoryPool<byte>>();
+                return new BufferFactory(memoryPool);
             });
         }
 
