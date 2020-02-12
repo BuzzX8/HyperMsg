@@ -37,16 +37,4 @@ namespace HyperMsg
         /// </summary>
         event AsyncAction<IBufferReader<byte>> FlushRequested;
     }
-
-    /// <summary>
-    /// Marker interface for buffer which intended for transmitting data.
-    /// </summary>
-    public interface ITransmittingBuffer : IBuffer
-    { }
-
-    /// <summary>
-    /// Marker interface for buffer which intended for receiving data.
-    /// </summary>
-    public interface IReceivingBuffer : IBuffer
-    { }
 }
