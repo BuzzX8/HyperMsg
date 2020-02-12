@@ -8,7 +8,7 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for buffer interfaces
     /// </summary>
-    public class Buffer : IReceivingBuffer, ITransmittingBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
+    public sealed class Buffer : IBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
     {
         private readonly IMemoryOwner<byte> memoryOwner;
 
@@ -20,7 +20,7 @@ namespace HyperMsg
             this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
         }
 
-        protected Memory<byte> Memory => memoryOwner.Memory;
+        private Memory<byte> Memory => memoryOwner.Memory;
 
         public IBufferReader<byte> Reader => this;
 

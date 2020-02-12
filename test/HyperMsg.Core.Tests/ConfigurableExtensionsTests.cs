@@ -18,17 +18,14 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void UseBuffers_Registers_Sending_And_Receiving_Buffer()
+        public void UseBufferContext_Registers_BufferContext()
         {
             serviceProvider.RegisterService(typeof(MemoryPool<byte>), (p, s) => A.Fake<MemoryPool<byte>>());
+            serviceProvider.UseBufferContext(1024, 1024);
 
-            serviceProvider.UseBuffers(1024, 1024);
+            var context = serviceProvider.GetService<IBufferContext>();
 
-            var receivingBuffer = serviceProvider.GetService<IReceivingBuffer>();
-            var sendingBuffer = serviceProvider.GetService<ITransmittingBuffer>();
-
-            Assert.NotNull(receivingBuffer);
-            Assert.NotNull(sendingBuffer);
+            Assert.NotNull(context);
         }
 
         [Fact]
