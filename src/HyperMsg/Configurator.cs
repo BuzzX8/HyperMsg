@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace HyperMsg
 {
@@ -8,5 +7,5 @@ namespace HyperMsg
     /// </summary>
     /// <param name="serviceProvider">Provider for dependencies.</param>
     /// <param name="settings">Dictionary for settings.</param>
-    public delegate void Configurator(IServiceProvider serviceProvider, IReadOnlyDictionary<string, object> settings);
+    public delegate void Configurator(IServiceProvider serviceProvider, IConfigurationSettings settings);
 }
