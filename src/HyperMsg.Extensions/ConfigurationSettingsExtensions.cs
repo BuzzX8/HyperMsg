@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HyperMsg.Properties;
+using System;
 using System.Collections.Generic;
 
 namespace HyperMsg
@@ -13,10 +14,13 @@ namespace HyperMsg
             }
 
             var value = settings[key];
+            var valueType = value.GetType();
+            var targetType = typeof(T);
 
-            if (value.GetType() != typeof(T))
+            if (!targetType.IsAssignableFrom(valueType))
             {
-                throw new InvalidOperationException();
+                var message = string.Format(Resources.HyperMsg_InvalidConfigurationSettingType, key, valueType, targetType);
+                throw new InvalidOperationException(message);
             }
 
             return (T)value;
