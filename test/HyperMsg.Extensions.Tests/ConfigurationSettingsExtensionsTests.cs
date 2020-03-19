@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using System;
+using System.Net;
 using Xunit;
 
 namespace HyperMsg
@@ -29,6 +30,19 @@ namespace HyperMsg
             A.CallTo(() => settings[key]).Returns(Guid.NewGuid());
 
             Assert.Throws<InvalidOperationException>(() => settings.Get<string>(key));
+        }
+
+        [Fact]
+        public void Get_Converts_Value_Into_Assignable_Type()
+        {
+            var settingName = nameof(IPEndPoint);
+            var expectedSetting = new IPEndPoint(0, 0);
+            A.CallTo(() => settings.ContainsKey(settingName)).Returns(true);
+            A.CallTo(() => settings[settingName]).Returns(expectedSetting);
+
+            var actualSetting = settings.Get<EndPoint>(settingName);
+
+            Assert.Same(expectedSetting, actualSetting);
         }
     }
 }
