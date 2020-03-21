@@ -104,5 +104,20 @@ namespace HyperMsg
 
             A.CallTo(() => ((IDisposable)service).Dispose()).MustHaveHappened();
         }
+
+        [Fact]
+        public void GetService_Invokes_All_Configurator_By_Other_Configurators()
+        {
+            var innerConfigurator = A.Fake<Configurator>();
+            provider.RegisterService(typeof(Guid), (p, s) => Guid.NewGuid());
+            provider.RegisterConfigurator((p, s) =>
+            {
+                provider.RegisterConfigurator(innerConfigurator);
+            });
+
+            provider.GetService<Guid>();
+
+            A.CallTo(() => innerConfigurator.Invoke(A<IServiceProvider>._, A<IConfigurationSettings>._)).MustHaveHappened();
+        }
     }
 }
