@@ -91,9 +91,14 @@ namespace HyperMsg
 
         private void RunConfigurators()
         {
-            foreach (var configurator in configurators)
+            while (configurators.Any())
             {
-                configurator.Invoke(this, settings);
+                var currentConfigurators = configurators.ToArray();
+                configurators.Clear();
+                foreach (var configurator in currentConfigurators)
+                {
+                    configurator.Invoke(this, settings);
+                }
             }
         }
 
