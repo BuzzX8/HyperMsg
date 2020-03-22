@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using ServiceFactory = System.Func<System.IServiceProvider, object>;
 
 namespace HyperMsg
 {
@@ -13,11 +14,11 @@ namespace HyperMsg
         public void GetService_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
         {
             var factory = A.Fake<ServiceFactory>();
-            provider.RegisterService(typeof(string), (p, s) => string.Empty);
+            provider.AddService(typeof(string), (p) => string.Empty);
 
             provider.GetService<string>();
 
-            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IConfigurationSettings>._)).MustNotHaveHappened();
+            A.CallTo(() => factory.Invoke(A<IServiceProvider>._)).MustNotHaveHappened();
         }
 
         [Fact]
@@ -25,27 +26,10 @@ namespace HyperMsg
         {
             var expected = Guid.NewGuid().ToString();
             var factory = A.Fake<ServiceFactory>();
-            A.CallTo(() => factory.Invoke(A<IServiceProvider>._, A<IConfigurationSettings>._)).Returns(expected);
-            provider.RegisterService(typeof(string), factory);
+            A.CallTo(() => factory.Invoke(A<IServiceProvider>._)).Returns(expected);
+            provider.AddService(typeof(string), factory);
 
             var actual = provider.GetService<string>();
-
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact]
-        public void ConfigurationContext_GetSetting_Returns_Previuosly_Added_Setting()
-        {
-            var expected = Guid.NewGuid();
-            var actual = Guid.Empty;
-            provider.AddSetting(nameof(Guid), expected);
-            provider.RegisterService(typeof(string), (p, s) =>
-            {
-                actual = (Guid)s[nameof(Guid)];
-                return string.Empty;
-            });
-
-            provider.GetService<string>();
 
             Assert.Equal(expected, actual);
         }
@@ -54,9 +38,9 @@ namespace HyperMsg
         public void GetService_Resolves_Complex_Dependencies()
         {
             var expected = Guid.NewGuid().ToString();            
-            provider.RegisterService(typeof(IMessageSender), (p, s) => A.Fake<IMessageSender>());
-            provider.RegisterService(typeof(IMessageHandlerRegistry), (p, s) => A.Fake<IMessageHandlerRegistry>());
-            provider.RegisterService(typeof(string), (p, s) =>
+            provider.AddService(typeof(IMessageSender), (p) => A.Fake<IMessageSender>());
+            provider.AddService(typeof(IMessageHandlerRegistry), (p) => A.Fake<IMessageHandlerRegistry>());
+            provider.AddService(typeof(string), (p) =>
             {
                 Assert.NotNull(p.GetService(typeof(IMessageSender)) as IMessageSender);
                 Assert.NotNull(p.GetService(typeof(IMessageHandlerRegistry)) as IMessageHandlerRegistry);
@@ -80,8 +64,8 @@ namespace HyperMsg
         [Fact]
         public void Builder_Rethrows_Exception_Thrown_By_Factory()
         {
-            provider.RegisterService(typeof(Guid), (p, s) => throw new ArgumentNullException());
-            provider.RegisterService(typeof(string), (p, s) =>
+            provider.AddService(typeof(Guid), (p) => throw new ArgumentNullException());
+            provider.AddService(typeof(string), (p) =>
             {
                 p.GetService(typeof(Guid));
                 return string.Empty;
@@ -97,7 +81,7 @@ namespace HyperMsg
             {
                 o.Implements<IDisposable>();
             });
-            provider.RegisterService(typeof(IBufferReader<byte>), (p, s) => service);
+            provider.AddService(typeof(IBufferReader<byte>), (p) => service);
             provider.GetService<IBufferReader<byte>>();
 
             provider.Dispose();
@@ -108,16 +92,16 @@ namespace HyperMsg
         [Fact]
         public void GetService_Invokes_All_Configurator_By_Other_Configurators()
         {
-            var innerConfigurator = A.Fake<Configurator>();
-            provider.RegisterService(typeof(Guid), (p, s) => Guid.NewGuid());
-            provider.RegisterConfigurator((p, s) =>
+            var innerConfigurator = A.Fake<Action<IServiceProvider>>();
+            provider.AddService(typeof(Guid), (p) => Guid.NewGuid());
+            provider.AddInitializer((p) =>
             {
-                provider.RegisterConfigurator(innerConfigurator);
+                provider.AddInitializer(innerConfigurator);
             });
 
             provider.GetService<Guid>();
 
-            A.CallTo(() => innerConfigurator.Invoke(A<IServiceProvider>._, A<IConfigurationSettings>._)).MustHaveHappened();
+            A.CallTo(() => innerConfigurator.Invoke(A<IServiceProvider>._)).MustHaveHappened();
         }
     }
 }

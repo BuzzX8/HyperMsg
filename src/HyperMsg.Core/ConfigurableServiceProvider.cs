@@ -8,38 +8,34 @@ namespace HyperMsg
     /// Provides implementation for IConfigurable and IServiceProvider
     /// </summary>
     public class ConfigurableServiceProvider : IConfigurable, IServiceProvider, IDisposable
-    {
-        class ConfigurationSettings : Dictionary<string, object>, IConfigurationSettings { }
-
-        private readonly ConfigurationSettings settings;
-        private readonly Dictionary<Type, ServiceFactory> singleInterfaceServices;
-        private readonly List<(IEnumerable<Type> interfaces, ServiceFactory factory)> multiInterfaceServices;
-        private readonly List<Configurator> configurators;
-
-        private readonly Dictionary<Type, object> createdServices;
+    {        
+        private readonly Dictionary<Type, Func<IServiceProvider, object>> serviceFactories;
+        private readonly Dictionary<Type, object> serviceInstances;
+        private readonly List<Action<IServiceProvider>> initializers;
+               
         private readonly List<IDisposable> disposables;
 
         private bool configuratorsInvoked = false;
 
         public ConfigurableServiceProvider()
-        {            
-            settings = new ConfigurationSettings();
-            singleInterfaceServices = new Dictionary<Type, ServiceFactory>();
-            multiInterfaceServices = new List<(IEnumerable<Type> interfaces, ServiceFactory factory)>();
-            configurators = new List<Configurator>();
-            createdServices = new Dictionary<Type, object>();
+        {
+            serviceFactories = new Dictionary<Type, Func<IServiceProvider, object>>();
+            serviceInstances = new Dictionary<Type, object>();
+            initializers = new List<Action<IServiceProvider>>();
             disposables = new List<IDisposable>();
         }
 
-        public void AddSetting(string settingName, object setting) => settings.Add(settingName, setting);
+        public void AddInitializer(Action<IServiceProvider> initializer) => initializers.Add(initializer);
 
-        public void RegisterService(Type serviceIterface, ServiceFactory serviceFactory) => singleInterfaceServices.Add(serviceIterface, serviceFactory);
-
-        public void RegisterConfigurator(Configurator configurator) => configurators.Add(configurator);
-
-        public void RegisterService(IEnumerable<Type> serviceInterfaces, ServiceFactory serviceFactory)
+        public void AddService(Type serviceType, object serviceInstance)
         {
-            multiInterfaceServices.Add((serviceInterfaces, serviceFactory));
+            serviceInstances.Add(serviceType, serviceInstance);
+            RegisterIfDisposable(serviceInstance);
+        }
+
+        public void AddService(Type serviceType, Func<IServiceProvider, object> serviceFactory)
+        {
+            serviceFactories.Add(serviceType, serviceFactory);
         }
 
         /// <summary>
@@ -59,22 +55,14 @@ namespace HyperMsg
 
         object IServiceProvider.GetService(Type serviceType)
         {
-            if (createdServices.ContainsKey(serviceType))
+            if (serviceInstances.ContainsKey(serviceType))
             {
-                return createdServices[serviceType];
+                return serviceInstances[serviceType];
             }
 
-            if (singleInterfaceServices.ContainsKey(serviceType))
+            if (serviceFactories.ContainsKey(serviceType))
             {
-                return CreateSingleInterfaceService(serviceType);
-            }
-
-            var itemToRemove = CreateMultiInterfaceService(serviceType);
-
-            if (itemToRemove != default)
-            {
-                multiInterfaceServices.Remove(itemToRemove);
-                return createdServices[serviceType];
+                return CreateService(serviceType);
             }
 
             throw new InvalidOperationException($"Can not resolve service for interface {serviceType}");
@@ -91,53 +79,25 @@ namespace HyperMsg
 
         private void RunConfigurators()
         {
-            while (configurators.Any())
+            while (initializers.Any())
             {
-                var currentConfigurators = configurators.ToArray();
-                configurators.Clear();
-                foreach (var configurator in currentConfigurators)
+                var currentinitializers = initializers.ToArray();
+                initializers.Clear();
+                foreach (var initializer in currentinitializers)
                 {
-                    configurator.Invoke(this, settings);
+                    initializer.Invoke(this);
                 }
             }
         }
 
-        private (IEnumerable<Type> interfaces, ServiceFactory factory) CreateMultiInterfaceService(Type serviceInterface)
+        private object CreateService(Type serviceType)
         {
-            var itemToRemove = default((IEnumerable<Type> interfaces, ServiceFactory factory));
-
-            foreach (var tuple in multiInterfaceServices)
-            {
-                (var interfaces, var factory) = tuple;
-
-                if (!interfaces.Contains(serviceInterface))
-                {
-                    continue;
-                }
-
-                var service = factory.Invoke(this, settings);
-                RegisterIfDisposable(service);
-
-                foreach (var @interface in interfaces)
-                {
-                    createdServices.Add(@interface, service);
-                }
-
-                itemToRemove = tuple;
-                break;
-            }
-
-            return itemToRemove;
-        }
-
-        private object CreateSingleInterfaceService(Type serviceInterface)
-        {
-            var factory = singleInterfaceServices[serviceInterface];
-            var service = factory.Invoke(this, settings);
+            var factory = serviceFactories[serviceType];
+            var service = factory.Invoke(this);
             RegisterIfDisposable(service);
 
-            singleInterfaceServices.Remove(serviceInterface);
-            createdServices.Add(serviceInterface, service);
+            serviceFactories.Remove(serviceType);
+            serviceInstances.Add(serviceType, service);
 
             return service;
         }

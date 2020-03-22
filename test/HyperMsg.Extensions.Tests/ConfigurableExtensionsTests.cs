@@ -8,18 +8,18 @@ namespace HyperMsg
         private readonly IConfigurable configurable = A.Fake<IConfigurable>();
 
         [Fact]
-        public void RegisterService_Registers_Service_Instance()
+        public void AddService_Registers_Service_Instance()
         {
-            var serviceFactory = default(ServiceFactory);
-            var serviceInstance = A.Fake<IMessageSender>();
-            A.CallTo(() => configurable.RegisterService(typeof(IMessageSender), A<ServiceFactory>._)).Invokes(foc =>
+            var actual = default(object);
+            var expected = A.Fake<IMessageSender>();
+            A.CallTo(() => configurable.AddService(typeof(IMessageSender), A<object>._)).Invokes(foc =>
             {
-                serviceFactory = foc.GetArgument<ServiceFactory>(1);
+                actual = foc.GetArgument<object>(1);
             });
 
-            configurable.RegisterService(serviceInstance);
+            configurable.AddService(expected);
 
-            Assert.NotNull(serviceFactory);
+            Assert.Same(expected, actual);
         }
     }
 }

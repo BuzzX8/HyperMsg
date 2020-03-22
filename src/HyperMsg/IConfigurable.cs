@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace HyperMsg
 {
@@ -9,30 +8,23 @@ namespace HyperMsg
     public interface IConfigurable
     {
         /// <summary>
-        /// Adds named setting.
+        /// Registers initialization method.
         /// </summary>
-        /// <param name="settingName">Name of setting.</param>
-        /// <param name="setting">Setting value.</param>
-        void AddSetting(string settingName, object setting);
-
-        /// <summary>
-        /// Registers configuration method.
-        /// </summary>
-        /// <param name="configurator">Configurator method which will be invoked during configuration.</param>
-        void RegisterConfigurator(Configurator configurator);
+        /// <param name="initializer">Initializer method which will be invoked during configuration.</param>
+        void AddInitializer(Action<IServiceProvider> initializer);
 
         /// <summary>
         /// Registers factory for specified type of service.
         /// </summary>
         /// <param name="serviceType">Interface implemented by service.</param>
-        /// <param name="serviceFactory">Factory method for specified service type.</param>
-        void RegisterService(Type serviceType, ServiceFactory serviceFactory);
+        /// <param name="serviceInstance">Factory method for specified service type.</param>
+        void AddService(Type serviceType, object serviceInstance);
 
         /// <summary>
         /// Registers factory for specified types of service.
         /// </summary>
-        /// <param name="serviceTypes">Interfaces implemented by service.</param>
+        /// <param name="serviceType">Interfaces implemented by service.</param>
         /// <param name="serviceFactory">Factory method for specified service type.</param>
-        void RegisterService(IEnumerable<Type> serviceTypes, ServiceFactory serviceFactory);
+        void AddService(Type serviceType, Func<IServiceProvider, object> serviceFactory);
     }
 }

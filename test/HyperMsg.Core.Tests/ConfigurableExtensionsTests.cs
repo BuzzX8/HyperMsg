@@ -11,7 +11,7 @@ namespace HyperMsg
         [Fact]
         public void UseSharedMemoryPool_Registers_Shared_MemoryPool()
         {
-            serviceProvider.UseSharedMemoryPool();
+            serviceProvider.AddSharedMemoryPool();
 
             var memoryPool = serviceProvider.GetService<MemoryPool<byte>>();
             Assert.Same(MemoryPool<byte>.Shared, memoryPool);
@@ -20,8 +20,8 @@ namespace HyperMsg
         [Fact]
         public void UseBufferContext_Registers_BufferContext()
         {
-            serviceProvider.RegisterService(typeof(MemoryPool<byte>), (p, s) => A.Fake<MemoryPool<byte>>());
-            serviceProvider.UseBufferContext(1024, 1024);
+            serviceProvider.AddService(typeof(MemoryPool<byte>), (p) => A.Fake<MemoryPool<byte>>());
+            serviceProvider.AddBufferContext(1024, 1024);
 
             var context = serviceProvider.GetService<IBufferContext>();
 
@@ -31,7 +31,7 @@ namespace HyperMsg
         [Fact]
         public void UseMessageBroker_Registers_MessageSender_And_MessageHandlerRegistry()
         {
-            serviceProvider.UseMessageBroker();
+            serviceProvider.AddMessageBroker();
 
             var messageSender = serviceProvider.GetService<IMessageSender>();
             var handlerRegistry = serviceProvider.GetService<IMessageHandlerRegistry>();
