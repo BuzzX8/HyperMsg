@@ -2,12 +2,12 @@
 {
     public abstract class IntegrationFixtureBase
     {
-        private readonly ConfigurableServiceProvider serviceProvider;
+        private readonly ServiceProvider serviceProvider;
 
         protected IntegrationFixtureBase(int receivingBufferSize, int transmittingBufferSize)
         {
-            serviceProvider = new ConfigurableServiceProvider();
-            serviceProvider.UseCoreServices(receivingBufferSize, transmittingBufferSize);
+            serviceProvider = new ServiceProvider();
+            serviceProvider.AddCoreServices(receivingBufferSize, transmittingBufferSize);
         }
 
         protected IConfigurable Configurable => serviceProvider;
