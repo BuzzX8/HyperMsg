@@ -1,14 +1,13 @@
 ﻿using FakeItEasy;
 using System;
-using System.Collections.Generic;
 using Xunit;
 using ServiceFactory = System.Func<System.IServiceProvider, object>;
 
 namespace HyperMsg
 {
-    public class ConfigurableServiceProviderTests
+    public class ServiceProviderTests
     {
-        private readonly ConfigurableServiceProvider provider = new ConfigurableServiceProvider();
+        private readonly ServiceProvider provider = new ServiceProvider();
 
         [Fact]
         public void GetService_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
@@ -56,7 +55,7 @@ namespace HyperMsg
         public void GetService_Throws_Exception_If_No_Registered_Dependencies()
         {
             var expected = Guid.NewGuid().ToString();
-            provider.UseCoreServices(100, 100);
+            provider.AddCoreServices(100, 100);
 
             Assert.Throws<InvalidOperationException>(() => provider.GetService<string>());
         }

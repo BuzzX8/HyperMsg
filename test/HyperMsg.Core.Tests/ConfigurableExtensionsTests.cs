@@ -6,7 +6,7 @@ namespace HyperMsg
 {
     public class ConfigurableExtensionsTests
     {
-        private readonly ConfigurableServiceProvider serviceProvider = new ConfigurableServiceProvider();
+        private readonly ServiceProvider serviceProvider = new ServiceProvider();
 
         [Fact]
         public void UseSharedMemoryPool_Registers_Shared_MemoryPool()

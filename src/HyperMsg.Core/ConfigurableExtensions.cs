@@ -28,13 +28,13 @@ namespace HyperMsg
         }
 
         /// <summary>
-        /// Registers core services required for messaging and buffering infrastructure (MessageSender, MessageHandlerRegistry,
+        /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageHandlerRegistry,
         /// receiving and transmitting buffer).
         /// </summary>
         /// <param name="configurable"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static void UseCoreServices(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
+        public static void AddCoreServices(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
         {
             configurable.AddSharedMemoryPool();
             configurable.AddBufferContext(receivingBufferSize, transmittingBufferSize);
@@ -42,13 +42,13 @@ namespace HyperMsg
         }
 
         /// <summary>
-        /// Registers shared MemoryPool<byte>.
+        /// Adds shared MemoryPool<byte> as service.
         /// </summary>
         /// <param name="configurable"></param>
         public static void AddSharedMemoryPool(this IConfigurable configurable) => configurable.AddService(MemoryPool<byte>.Shared);
 
         /// <summary>
-        /// Registers implementations for IBufferContext. Depends on MemoryPool<byte>.
+        /// Adds implementations for IBufferContext. Depends on MemoryPool<byte>.
         /// </summary>
         /// <param name="configurable"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
@@ -59,7 +59,7 @@ namespace HyperMsg
         }
 
         /// <summary>
-        /// Registers implementation for IBufferFactory. Depends on MemoryPool<byte>
+        /// Adds implementation for IBufferFactory. Depends on MemoryPool<byte>
         /// </summary>
         /// <param name="configurable"></param>
         public static void AddBufferFactory(this IConfigurable configurable)
@@ -72,7 +72,7 @@ namespace HyperMsg
         }
 
         /// <summary>
-        /// Register implementation for services IMessageSender and IMessageHandlerRegistry.
+        /// Adds implementation for services IMessageSender and IMessageHandlerRegistry.
         /// </summary>
         /// <param name="configurable"></param>
         public static void AddMessageBroker(this IConfigurable configurable)

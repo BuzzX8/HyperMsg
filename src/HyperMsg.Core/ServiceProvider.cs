@@ -7,7 +7,7 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for IConfigurable and IServiceProvider
     /// </summary>
-    public class ConfigurableServiceProvider : IConfigurable, IServiceProvider, IDisposable
+    public class ServiceProvider : IConfigurable, IServiceProvider, IDisposable
     {        
         private readonly Dictionary<Type, Func<IServiceProvider, object>> serviceFactories;
         private readonly Dictionary<Type, object> serviceInstances;
@@ -17,7 +17,7 @@ namespace HyperMsg
 
         private bool configuratorsInvoked = false;
 
-        public ConfigurableServiceProvider()
+        public ServiceProvider()
         {
             serviceFactories = new Dictionary<Type, Func<IServiceProvider, object>>();
             serviceInstances = new Dictionary<Type, object>();
