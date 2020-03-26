@@ -1,32 +1,9 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 
 namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
-        private class BufferContextFactory
-        {
-            private readonly int receivingBufferSize;
-            private readonly int transmittingBufferSize;
-
-            internal BufferContextFactory(int receivingBufferSize, int transmittingBufferSize)
-            {
-                this.receivingBufferSize = receivingBufferSize;
-                this.transmittingBufferSize = transmittingBufferSize;
-            }
-
-            internal IBufferContext Create(IServiceProvider serviceProvider)
-            {
-                var memoryPool = serviceProvider.GetRequiredService<MemoryPool<byte>>();
-
-                var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
-                var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
-
-                return new BufferContext(receivingBuffer, transmittingBuffer);
-            }
-        }
-
         /// <summary>
         /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageHandlerRegistry,
         /// receiving and transmitting buffer).
@@ -55,7 +32,15 @@ namespace HyperMsg
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
         public static void AddBufferContext(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
         {
-            configurable.AddService(typeof(IBufferContext), new BufferContextFactory(receivingBufferSize, transmittingBufferSize).Create);
+            configurable.AddService(provider =>
+            {
+                var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
+
+                var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
+                var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
+
+                return new BufferContext(receivingBuffer, transmittingBuffer) as IBufferContext;
+            });
         }
 
         /// <summary>
@@ -64,10 +49,10 @@ namespace HyperMsg
         /// <param name="configurable"></param>
         public static void AddBufferFactory(this IConfigurable configurable)
         {
-            configurable.AddService(typeof(IBufferFactory), (p) =>
+            configurable.AddService(provider =>
             {
-                var memoryPool = p.GetRequiredService<MemoryPool<byte>>();
-                return new BufferFactory(memoryPool);
+                var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
+                return new BufferFactory(memoryPool) as IBufferFactory;
             });
         }
 
@@ -78,8 +63,8 @@ namespace HyperMsg
         public static void AddMessageBroker(this IConfigurable configurable)
         {
             var broker = new MessageBroker();
-            configurable.AddService(typeof(IMessageSender), broker);
-            configurable.AddService(typeof(IMessageHandlerRegistry), broker);
+            configurable.AddService<IMessageSender>(broker);
+            configurable.AddService<IMessageHandlerRegistry>(broker);
         }
     }
 }
