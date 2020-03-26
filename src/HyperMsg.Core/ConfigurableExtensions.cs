@@ -5,26 +5,14 @@ namespace HyperMsg
 {
     public static class ConfigurableExtensions
     {
-        private class BufferContextFactory
+        private static IBufferContext CreateBufferContext(IServiceProvider serviceProvider, int receivingBufferSize, int transmittingBufferSize)
         {
-            private readonly int receivingBufferSize;
-            private readonly int transmittingBufferSize;
+            var memoryPool = serviceProvider.GetRequiredService<MemoryPool<byte>>();
 
-            internal BufferContextFactory(int receivingBufferSize, int transmittingBufferSize)
-            {
-                this.receivingBufferSize = receivingBufferSize;
-                this.transmittingBufferSize = transmittingBufferSize;
-            }
+            var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
+            var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
 
-            internal IBufferContext Create(IServiceProvider serviceProvider)
-            {
-                var memoryPool = serviceProvider.GetRequiredService<MemoryPool<byte>>();
-
-                var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
-                var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
-
-                return new BufferContext(receivingBuffer, transmittingBuffer);
-            }
+            return new BufferContext(receivingBuffer, transmittingBuffer);
         }
 
         /// <summary>
@@ -55,7 +43,7 @@ namespace HyperMsg
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
         public static void AddBufferContext(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
         {
-            configurable.AddService(typeof(IBufferContext), new BufferContextFactory(receivingBufferSize, transmittingBufferSize).Create);
+            configurable.AddService(provider => CreateBufferContext(provider, receivingBufferSize, transmittingBufferSize));
         }
 
         /// <summary>

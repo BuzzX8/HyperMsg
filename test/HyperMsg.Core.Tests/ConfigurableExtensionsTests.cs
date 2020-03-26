@@ -21,7 +21,7 @@ namespace HyperMsg
         public void UseBufferContext_Registers_BufferContext()
         {
             serviceProvider.AddService(typeof(MemoryPool<byte>), (p) => A.Fake<MemoryPool<byte>>());
-            serviceProvider.AddBufferContext(1024, 1024);
+            serviceProvider.AddBufferContext(100, 100);
 
             var context = serviceProvider.GetService<IBufferContext>();
 
