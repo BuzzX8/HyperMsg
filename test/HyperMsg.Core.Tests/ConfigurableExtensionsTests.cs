@@ -29,12 +29,12 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void UseMessageBroker_Registers_MessageSender_And_MessageHandlerRegistry()
+        public void UseMessageBroker_Registers_MessageSender_And_MessageObservable()
         {
             serviceProvider.AddMessageBroker();
 
             var messageSender = serviceProvider.GetService<IMessageSender>();
-            var handlerRegistry = serviceProvider.GetService<IMessageHandlerRegistry>();
+            var handlerRegistry = serviceProvider.GetService<IMessageObservable>();
 
             Assert.NotNull(messageSender);
             Assert.NotNull(handlerRegistry);

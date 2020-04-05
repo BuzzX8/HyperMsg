@@ -8,12 +8,12 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for MessageSender and MessageHandlerRegistry
     /// </summary>
-    public class MessageBroker : IMessageSender, IMessageHandlerRegistry
+    public class MessageBroker : IMessageSender, IMessageObservable
     {
         private readonly ConcurrentDictionary<Type, object> handlers = new ConcurrentDictionary<Type, object>();
         private readonly ConcurrentDictionary<Type, object> asyncHandlers = new ConcurrentDictionary<Type, object>();
 
-        public void Register<T>(Action<T> handler)
+        public void Subscribe<T>(Action<T> handler)
         {
             if (handler == null)
             {
@@ -30,7 +30,7 @@ namespace HyperMsg
             handlers.TryAdd(typeof(T), handler);
         }
 
-        public void Register<T>(AsyncAction<T> handler)
+        public void Subscribe<T>(AsyncAction<T> handler)
         {
             if (handler == null)
             {

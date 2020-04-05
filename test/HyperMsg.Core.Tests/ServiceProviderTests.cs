@@ -38,11 +38,11 @@ namespace HyperMsg
         {
             var expected = Guid.NewGuid().ToString();            
             provider.AddService(typeof(IMessageSender), (p) => A.Fake<IMessageSender>());
-            provider.AddService(typeof(IMessageHandlerRegistry), (p) => A.Fake<IMessageHandlerRegistry>());
+            provider.AddService(typeof(IMessageObservable), (p) => A.Fake<IMessageObservable>());
             provider.AddService(typeof(string), (p) =>
             {
                 Assert.NotNull(p.GetService(typeof(IMessageSender)) as IMessageSender);
-                Assert.NotNull(p.GetService(typeof(IMessageHandlerRegistry)) as IMessageHandlerRegistry);
+                Assert.NotNull(p.GetService(typeof(IMessageObservable)) as IMessageObservable);
                 return expected;
             });
 
@@ -61,7 +61,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Builder_Rethrows_Exception_Thrown_By_Factory()
+        public void GetService_Rethrows_Exception_Thrown_By_Factory()
         {
             provider.AddService(typeof(Guid), (p) => throw new ArgumentNullException());
             provider.AddService(typeof(string), (p) =>

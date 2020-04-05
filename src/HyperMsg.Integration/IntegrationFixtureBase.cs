@@ -14,7 +14,7 @@
 
         protected IMessageSender MessageSender => serviceProvider.GetService<IMessageSender>();
 
-        protected IMessageHandlerRegistry HandlerRegistry => serviceProvider.GetService<IMessageHandlerRegistry>();
+        protected IMessageObservable HandlerRegistry => serviceProvider.GetService<IMessageObservable>();
 
         protected TService GetService<TService>() => serviceProvider.GetService<TService>();
     }

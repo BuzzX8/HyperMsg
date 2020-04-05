@@ -16,7 +16,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<Action<Guid>>();
             var message = Guid.NewGuid();
-            broker.Register(handler);
+            broker.Subscribe(handler);
 
             broker.Send(message);
 
@@ -28,7 +28,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<Action<Guid>>();
             var message = Guid.NewGuid();
-            broker.Register(handler);
+            broker.Subscribe(handler);
 
             await broker.SendAsync(message, tokenSource.Token);
 
@@ -40,7 +40,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<AsyncAction<Guid>>();
             var message = Guid.NewGuid();
-            broker.Register(handler);
+            broker.Subscribe(handler);
 
             broker.Send(message);
 
@@ -52,7 +52,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<AsyncAction<Guid>>();
             var message = Guid.NewGuid();
-            broker.Register(handler);
+            broker.Subscribe(handler);
 
             await broker.SendAsync(message, tokenSource.Token);
 
@@ -62,9 +62,9 @@ namespace HyperMsg
         [Fact]
         public void Send_Does_Not_Throw_Exception_When_New_Handler_Registred()
         {
-            broker.Register<Guid>(m =>
+            broker.Subscribe<Guid>(m =>
             {
-                broker.Register<string>(s => { });
+                broker.Subscribe<string>(s => { });
             });
 
             broker.Send(Guid.NewGuid());

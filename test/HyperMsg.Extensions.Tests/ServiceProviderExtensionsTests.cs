@@ -22,7 +22,7 @@ namespace HyperMsg
         [Fact]
         public void GetService_Throws_Exception_If_Incorrect_Service_Type_Provided()
         {
-            var service = A.Fake<IMessageHandlerRegistry>();
+            var service = A.Fake<IMessageObservable>();
             A.CallTo(() => serviceProvider.GetService(typeof(IMessageSender))).Returns(service);
 
             Assert.Throws<InvalidOperationException>(() => serviceProvider.GetService<IMessageSender>());
