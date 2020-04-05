@@ -12,55 +12,31 @@ namespace HyperMsg
         private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         [Fact]
-        public void Send_Invokes_Handler()
+        public void Send_Invokes_Async_Observers()
         {
-            var handler = A.Fake<Action<Guid>>();
+            var observer = A.Fake<AsyncAction<Guid>>();
             var message = Guid.NewGuid();
-            broker.Subscribe(handler);
+            broker.Subscribe(observer);
 
             broker.Send(message);
 
-            A.CallTo(() => handler.Invoke(message)).MustHaveHappened();
+            A.CallTo(() => observer.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
         }
 
         [Fact]
-        public async Task SendAsync_Invokes_Handler()
+        public async Task SendAsync_Invokes_Async_Observers()
         {
-            var handler = A.Fake<Action<Guid>>();
+            var observer = A.Fake<AsyncAction<Guid>>();
             var message = Guid.NewGuid();
-            broker.Subscribe(handler);
+            broker.Subscribe(observer);
 
             await broker.SendAsync(message, tokenSource.Token);
 
-            A.CallTo(() => handler.Invoke(message)).MustHaveHappened();
+            A.CallTo(() => observer.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
         }
 
         [Fact]
-        public void Send_Invokes_Async_Handlers()
-        {
-            var handler = A.Fake<AsyncAction<Guid>>();
-            var message = Guid.NewGuid();
-            broker.Subscribe(handler);
-
-            broker.Send(message);
-
-            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public async Task SendAsync_Invokes_Async_Handlers()
-        {
-            var handler = A.Fake<AsyncAction<Guid>>();
-            var message = Guid.NewGuid();
-            broker.Subscribe(handler);
-
-            await broker.SendAsync(message, tokenSource.Token);
-
-            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void Send_Does_Not_Throw_Exception_When_New_Handler_Registred()
+        public void Send_Does_Not_Throw_Exception_When_New_Observer_Subscribed()
         {
             broker.Subscribe<Guid>(m =>
             {
