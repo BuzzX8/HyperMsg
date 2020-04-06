@@ -39,8 +39,8 @@ namespace HyperMsg
 
             if (asyncObservers.ContainsKey(typeof(T)))
             {
-                var h = (AsyncAction<T>)asyncObservers[typeof(T)];
-                h += messageObserver;
+                var asyncObservers = (AsyncAction<T>)this.asyncObservers[typeof(T)];
+                asyncObservers += messageObserver;
                 return;
             }
 
@@ -51,14 +51,14 @@ namespace HyperMsg
 
         public async Task SendAsync<T>(T message, CancellationToken cancellationToken)
         {
-            if (observers.TryGetValue(typeof(T), out var h))
+            if (this.observers.TryGetValue(typeof(T), out var observers))
             {
-                ((Action<T>)h).Invoke(message);
+                ((Action<T>)observers).Invoke(message);
             }
 
-            if (asyncObservers.TryGetValue(typeof(T), out var ah))
+            if (this.asyncObservers.TryGetValue(typeof(T), out var asyncObservers))
             {
-                await ((AsyncAction<T>)ah).Invoke(message, cancellationToken);
+                await ((AsyncAction<T>)asyncObservers).Invoke(message, cancellationToken);
             }
         }
     }
