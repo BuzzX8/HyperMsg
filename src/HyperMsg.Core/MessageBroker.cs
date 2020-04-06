@@ -8,57 +8,57 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for MessageSender and MessageHandlerRegistry
     /// </summary>
-    public class MessageBroker : IMessageSender, IMessageHandlerRegistry
+    public class MessageBroker : IMessageSender, IMessageObservable
     {
-        private readonly ConcurrentDictionary<Type, object> handlers = new ConcurrentDictionary<Type, object>();
-        private readonly ConcurrentDictionary<Type, object> asyncHandlers = new ConcurrentDictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, object> observers = new ConcurrentDictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, object> asyncObservers = new ConcurrentDictionary<Type, object>();
 
-        public void Register<T>(Action<T> handler)
+        public void Subscribe<T>(Action<T> messageObserver)
         {
-            if (handler == null)
+            if (messageObserver == null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                throw new ArgumentNullException(nameof(messageObserver));
             }
 
-            if (handlers.ContainsKey(typeof(T)))
+            if (observers.ContainsKey(typeof(T)))
             {
-                var h = (Action<T>)handlers[typeof(T)];
-                h += handler;
+                var observers = (Action<T>)this.observers[typeof(T)];
+                observers += messageObserver;
                 return;
             }
 
-            handlers.TryAdd(typeof(T), handler);
+            observers.TryAdd(typeof(T), messageObserver);
         }
 
-        public void Register<T>(AsyncAction<T> handler)
+        public void Subscribe<T>(AsyncAction<T> messageObserver)
         {
-            if (handler == null)
+            if (messageObserver == null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                throw new ArgumentNullException(nameof(messageObserver));
             }
 
-            if (asyncHandlers.ContainsKey(typeof(T)))
+            if (asyncObservers.ContainsKey(typeof(T)))
             {
-                var h = (AsyncAction<T>)asyncHandlers[typeof(T)];
-                h += handler;
+                var asyncObservers = (AsyncAction<T>)this.asyncObservers[typeof(T)];
+                asyncObservers += messageObserver;
                 return;
             }
 
-            asyncHandlers.TryAdd(typeof(T), handler);
+            asyncObservers.TryAdd(typeof(T), messageObserver);
         }
 
         public void Send<T>(T message) => SendAsync(message, CancellationToken.None).GetAwaiter().GetResult();
 
         public async Task SendAsync<T>(T message, CancellationToken cancellationToken)
         {
-            if (handlers.TryGetValue(typeof(T), out var h))
+            if (this.observers.TryGetValue(typeof(T), out var observers))
             {
-                ((Action<T>)h).Invoke(message);
+                ((Action<T>)observers).Invoke(message);
             }
 
-            if (asyncHandlers.TryGetValue(typeof(T), out var ah))
+            if (this.asyncObservers.TryGetValue(typeof(T), out var asyncObservers))
             {
-                await ((AsyncAction<T>)ah).Invoke(message, cancellationToken);
+                await ((AsyncAction<T>)asyncObservers).Invoke(message, cancellationToken);
             }
         }
     }

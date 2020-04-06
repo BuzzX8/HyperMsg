@@ -5,7 +5,7 @@ namespace HyperMsg
     public static class ConfigurableExtensions
     {
         /// <summary>
-        /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageHandlerRegistry,
+        /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageObservable,
         /// receiving and transmitting buffer).
         /// </summary>
         /// <param name="configurable"></param>
@@ -57,14 +57,14 @@ namespace HyperMsg
         }
 
         /// <summary>
-        /// Adds implementation for services IMessageSender and IMessageHandlerRegistry.
+        /// Adds implementation for services IMessageSender and IMessageObservable.
         /// </summary>
         /// <param name="configurable"></param>
         public static void AddMessageBroker(this IConfigurable configurable)
         {
             var broker = new MessageBroker();
             configurable.AddService<IMessageSender>(broker);
-            configurable.AddService<IMessageHandlerRegistry>(broker);
+            configurable.AddService<IMessageObservable>(broker);
         }
     }
 }
