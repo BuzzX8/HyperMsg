@@ -96,12 +96,23 @@ namespace HyperMsg
         }
 
         [Fact]
+        public void GetMemory_Returns_Correct_Memory_Segment_After_Advance()
+        {
+            var bytes = Guid.NewGuid().ToByteArray();
+            WriteBytes(bytes);
+
+            var memorySegment = buffer.Writer.GetMemory().Slice(0, bytes.Length).ToArray();
+
+            Assert.NotEqual(memorySegment, bytes);
+        }
+
+        [Fact]
         public void GetMemory_Defrags_Buffer()
         {
             var dataSize = MemorySize - (MemorySize / 4);
             var bytes = Enumerable.Range(0, dataSize).Select(i => Guid.NewGuid().ToByteArray()[0]).ToArray();            
             WriteBytes(bytes);
-            buffer.Writer.Advance(MemorySize / 4);
+            buffer.Reader.Advance(MemorySize / 4);
             var sizeHint = MemorySize / 2;            
 
             var memory = buffer.Writer.GetMemory(sizeHint);
