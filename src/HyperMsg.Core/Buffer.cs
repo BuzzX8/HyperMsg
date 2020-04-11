@@ -83,7 +83,7 @@ namespace HyperMsg
                 position = 0;
             }
 
-            return Memory.Slice(position);
+            return Memory.Slice(length);
         }
 
         Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)

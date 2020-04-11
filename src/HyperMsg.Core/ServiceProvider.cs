@@ -15,7 +15,7 @@ namespace HyperMsg
                
         private readonly List<IDisposable> disposables;
 
-        private bool configuratorsInvoked = false;
+        private bool initializersInvoked = false;
 
         public ServiceProvider()
         {
@@ -46,15 +46,11 @@ namespace HyperMsg
         /// Rises when requested service type was not previously registred.
         /// </exception>
         /// <returns>Implementation for service.</returns>
-        public T GetService<T>()
-        {
-            EnsureConfiguratorsRun();
-
-            return (T)((IServiceProvider)this).GetService(typeof(T));
-        }
+        public T GetService<T>() => (T)((IServiceProvider)this).GetService(typeof(T));
 
         object IServiceProvider.GetService(Type serviceType)
         {
+            EnsureInitializersRun();
             if (serviceInstances.ContainsKey(serviceType))
             {
                 return serviceInstances[serviceType];
@@ -68,12 +64,12 @@ namespace HyperMsg
             throw new InvalidOperationException($"Can not resolve service for interface {serviceType}");
         }
 
-        private void EnsureConfiguratorsRun()
+        private void EnsureInitializersRun()
         {
-            if (!configuratorsInvoked)
+            if (!initializersInvoked)
             {
                 RunConfigurators();
-                configuratorsInvoked = true;
+                initializersInvoked = true;
             }
         }
 
