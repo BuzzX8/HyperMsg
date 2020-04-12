@@ -12,13 +12,15 @@ namespace HyperMsg
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageObserver">Message observer.</param>
-        void Subscribe<T>(Action<T> messageObserver);
+        /// <returns></returns>
+        IDisposable Subscribe<T>(Action<T> messageObserver);
 
         /// <summary>
         /// Registers asynchronous message handler.
         /// </summary>
         /// <typeparam name="T">Typeof message.</typeparam>
         /// <param name="messageObserver">Message observer.</param>
-        void Subscribe<T>(AsyncAction<T> messageObserver);
+        /// <returns></returns>
+        IDisposable Subscribe<T>(AsyncAction<T> messageObserver);
     }
 }
