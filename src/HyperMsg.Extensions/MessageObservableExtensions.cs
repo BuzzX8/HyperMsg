@@ -4,24 +4,24 @@ namespace HyperMsg
 {
     public static class MessageObservableExtensions
     {
-        public static void SubscribeTransmitter<T>(this IMessageObservable messageObservable, Action<T> messageObserver)
+        public static IDisposable SubscribeTransmitter<T>(this IMessageObservable messageObservable, Action<T> messageObserver)
         {
-            messageObservable.Subscribe<Transmit<T>>(m => messageObserver.Invoke(m));
+            return messageObservable.Subscribe<Transmit<T>>(m => messageObserver.Invoke(m));
         }
 
-        public static void SubscribeTransmitter<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver)
+        public static IDisposable SubscribeTransmitter<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver)
         {
-            messageObservable.Subscribe<Transmit<T>>((m, t) => messageObserver.Invoke(m, t));
+            return messageObservable.Subscribe<Transmit<T>>((m, t) => messageObserver.Invoke(m, t));
         }
 
-        public static void SubscribeReceiver<T>(this IMessageObservable messageObservable, Action<T> messageObserver)
+        public static IDisposable SubscribeReceiver<T>(this IMessageObservable messageObservable, Action<T> messageObserver)
         {
-            messageObservable.Subscribe<Received<T>>(m => messageObserver.Invoke(m));
+            return messageObservable.Subscribe<Received<T>>(m => messageObserver.Invoke(m));
         }
 
-        public static void SubscribeReceiver<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver)
+        public static IDisposable SubscribeReceiver<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver)
         {
-            messageObservable.Subscribe<Received<T>>((m, t) => messageObserver.Invoke(m, t));
+            return messageObservable.Subscribe<Received<T>>((m, t) => messageObserver.Invoke(m, t));
         }
     }
 }
