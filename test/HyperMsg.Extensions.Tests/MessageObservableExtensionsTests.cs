@@ -22,7 +22,7 @@ namespace HyperMsg
                 actual = foc.GetArgument<Action<Transmit<Guid>>>(0);
             });
 
-            observable.SubscribeTransmitter(observer);
+            observable.OnTransmit(observer);
             Assert.NotNull(actual);
             
             actual.Invoke(new Transmit<Guid>(message));
@@ -40,7 +40,7 @@ namespace HyperMsg
                 actual = foc.GetArgument<AsyncAction<Transmit<Guid>>>(0);
             });
 
-            observable.SubscribeTransmitter(asyncObserver);
+            observable.OnTransmit(asyncObserver);
             Assert.NotNull(actual);
             
             actual.Invoke(new Transmit<Guid>(message), default);
@@ -58,7 +58,7 @@ namespace HyperMsg
                 actual = foc.GetArgument<Action<Received<Guid>>>(0);
             });
 
-            observable.SubscribeReceiver(observer);
+            observable.OnReceive(observer);
             Assert.NotNull(actual);
 
             actual.Invoke(new Received<Guid>(message));
@@ -76,7 +76,7 @@ namespace HyperMsg
                 actual = foc.GetArgument<AsyncAction<Received<Guid>>>(0);
             });
 
-            observable.SubscribeReceiver(asyncObserver);
+            observable.OnReceive(asyncObserver);
             Assert.NotNull(actual);
 
             actual.Invoke(new Received<Guid>(message), default);
