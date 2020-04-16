@@ -57,7 +57,7 @@ namespace HyperMsg
         }
 
         /// <summary>
-        /// Adds implementation for services IMessageSender and IMessageObservable.
+        /// Adds implementation for services IMessagingContext, IMessageSender and IMessageObservable.
         /// </summary>
         /// <param name="configurable"></param>
         public static void AddMessageBroker(this IConfigurable configurable)
@@ -65,6 +65,7 @@ namespace HyperMsg
             var broker = new MessageBroker();
             configurable.AddService<IMessageSender>(broker);
             configurable.AddService<IMessageObservable>(broker);
+            configurable.AddService<IMessagingContext>(broker);
         }
     }
 }
