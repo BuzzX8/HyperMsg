@@ -29,15 +29,17 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void UseMessageBroker_Registers_MessageSender_And_MessageObservable()
+        public void UseMessageBroker_Registers_MessagingContext_MessageSender_And_MessageObservable()
         {
             serviceProvider.AddMessageBroker();
 
             var messageSender = serviceProvider.GetService<IMessageSender>();
-            var handlerRegistry = serviceProvider.GetService<IMessageObservable>();
+            var observable = serviceProvider.GetService<IMessageObservable>();
+            var context = serviceProvider.GetService<IMessagingContext>();
 
             Assert.NotNull(messageSender);
-            Assert.NotNull(handlerRegistry);
+            Assert.NotNull(observable);
+            Assert.NotNull(context);
         }
     }
 }
