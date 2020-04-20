@@ -72,22 +72,6 @@ namespace HyperMsg
         }
 
         [Fact]
-        public async Task FlushAsync_Rises_Flushed_Event()
-        {
-            var wasRised = false;
-            buffer.FlushRequested += (b, t) =>
-            {
-                wasRised = true;
-                Assert.Same(buffer, b);
-                return Task.CompletedTask;
-            };
-
-            await buffer.FlushAsync(default);
-
-            Assert.True(wasRised);
-        }
-
-        [Fact]
         public void Dispose_Disposes_MemoryOwner()
         {
             buffer.Dispose();

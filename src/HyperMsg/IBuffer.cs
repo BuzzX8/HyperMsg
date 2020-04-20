@@ -1,6 +1,4 @@
 ﻿using System.Buffers;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -24,17 +22,5 @@ namespace HyperMsg
         /// Clears buffer data.
         /// </summary>
         void Clear();
-
-        /// <summary>
-        /// Initiates buffer flush operation.
-        /// </summary>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Task which completes when flush operation finished.</returns>
-        Task FlushAsync(CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Rises when buffer flush requested.
-        /// </summary>
-        event AsyncAction<IBufferReader<byte>> FlushRequested;
     }
 }
