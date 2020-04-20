@@ -8,12 +8,6 @@ namespace HyperMsg
     public interface IConfigurable
     {
         /// <summary>
-        /// Adds initialization method.
-        /// </summary>
-        /// <param name="initializer">Initializer method which will be invoked during configuration.</param>
-        void AddInitializer(Action<IServiceProvider> initializer);
-
-        /// <summary>
         /// Adds instance of specified service type.
         /// </summary>
         /// <param name="serviceType">Service type.</param>

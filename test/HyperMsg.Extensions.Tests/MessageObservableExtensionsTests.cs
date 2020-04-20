@@ -49,7 +49,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void OnReceive_Subscribes_Observer_For_Receiving()
+        public void OnReceived_Subscribes_Observer_For_Receiving()
         {
             var actual = default(Action<Received<Guid>>);
 
@@ -58,7 +58,7 @@ namespace HyperMsg
                 actual = foc.GetArgument<Action<Received<Guid>>>(0);
             });
 
-            observable.OnReceive(observer);
+            observable.OnReceived(observer);
             Assert.NotNull(actual);
 
             actual.Invoke(new Received<Guid>(message));
@@ -67,7 +67,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void OnReceive_Subscribes_Async_Observer_For_Receiving()
+        public void OnReceived_Subscribes_Async_Observer_For_Receiving()
         {
             var actual = default(AsyncAction<Received<Guid>>);
 
@@ -76,7 +76,7 @@ namespace HyperMsg
                 actual = foc.GetArgument<AsyncAction<Received<Guid>>>(0);
             });
 
-            observable.OnReceive(asyncObserver);
+            observable.OnReceived(asyncObserver);
             Assert.NotNull(actual);
 
             actual.Invoke(new Received<Guid>(message), default);
