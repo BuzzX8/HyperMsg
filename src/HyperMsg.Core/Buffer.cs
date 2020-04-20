@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Buffers;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -94,18 +92,6 @@ namespace HyperMsg
 
         public void Clear() => position = length = 0;
 
-        public async Task FlushAsync(CancellationToken cancellationToken)
-        {
-            if (FlushRequested == null)
-            {
-                return;
-            }
-
-            await FlushRequested.Invoke(this, cancellationToken);
-        }
-
         public void Dispose() => memoryOwner.Dispose();
-
-        public event AsyncAction<IBufferReader<byte>> FlushRequested;
     }
 }
