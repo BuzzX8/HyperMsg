@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace HyperMsg
 {
@@ -11,21 +10,15 @@ namespace HyperMsg
     {        
         private readonly Dictionary<Type, Func<IServiceProvider, object>> serviceFactories;
         private readonly Dictionary<Type, object> serviceInstances;
-        private readonly List<Action<IServiceProvider>> initializers;
                
         private readonly List<IDisposable> disposables;
-
-        private bool initializersInvoked = false;
 
         public ServiceProvider()
         {
             serviceFactories = new Dictionary<Type, Func<IServiceProvider, object>>();
             serviceInstances = new Dictionary<Type, object>();
-            initializers = new List<Action<IServiceProvider>>();
             disposables = new List<IDisposable>();
         }
-
-        public void AddInitializer(Action<IServiceProvider> initializer) => initializers.Add(initializer);
 
         public void AddService(Type serviceType, object serviceInstance)
         {
@@ -50,7 +43,6 @@ namespace HyperMsg
 
         object IServiceProvider.GetService(Type serviceType)
         {
-            EnsureInitializersRun();
             if (serviceInstances.ContainsKey(serviceType))
             {
                 return serviceInstances[serviceType];
@@ -62,29 +54,7 @@ namespace HyperMsg
             }
 
             throw new InvalidOperationException($"Can not resolve service for interface {serviceType}");
-        }
-
-        private void EnsureInitializersRun()
-        {
-            if (!initializersInvoked)
-            {
-                RunConfigurators();
-                initializersInvoked = true;
-            }
-        }
-
-        private void RunConfigurators()
-        {
-            while (initializers.Any())
-            {
-                var currentinitializers = initializers.ToArray();
-                initializers.Clear();
-                foreach (var initializer in currentinitializers)
-                {
-                    initializer.Invoke(this);
-                }
-            }
-        }
+        }        
 
         private object CreateService(Type serviceType)
         {
