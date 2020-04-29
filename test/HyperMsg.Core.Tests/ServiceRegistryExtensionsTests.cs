@@ -4,7 +4,7 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class ConfigurableExtensionsTests
+    public class ServiceRegistryExtensionsTests
     {
         private readonly ServiceProvider serviceProvider = new ServiceProvider();
 
@@ -20,7 +20,7 @@ namespace HyperMsg
         [Fact]
         public void UseBufferContext_Registers_BufferContext()
         {
-            serviceProvider.AddService(typeof(MemoryPool<byte>), (p) => A.Fake<MemoryPool<byte>>());
+            serviceProvider.Add(typeof(MemoryPool<byte>), (p) => A.Fake<MemoryPool<byte>>());
             serviceProvider.AddBufferContext(100, 100);
 
             var context = serviceProvider.GetService<IBufferContext>();

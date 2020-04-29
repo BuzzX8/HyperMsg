@@ -13,7 +13,7 @@ namespace HyperMsg
         public void GetService_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
         {
             var factory = A.Fake<ServiceFactory>();
-            provider.AddService(typeof(string), (p) => string.Empty);
+            provider.Add(typeof(string), (p) => string.Empty);
 
             provider.GetService<string>();
 
@@ -26,7 +26,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToString();
             var factory = A.Fake<ServiceFactory>();
             A.CallTo(() => factory.Invoke(A<IServiceProvider>._)).Returns(expected);
-            provider.AddService(typeof(string), factory);
+            provider.Add(typeof(string), factory);
 
             var actual = provider.GetService<string>();
 
@@ -37,9 +37,9 @@ namespace HyperMsg
         public void GetService_Resolves_Complex_Dependencies()
         {
             var expected = Guid.NewGuid().ToString();            
-            provider.AddService(typeof(IMessageSender), (p) => A.Fake<IMessageSender>());
-            provider.AddService(typeof(IMessageObservable), (p) => A.Fake<IMessageObservable>());
-            provider.AddService(typeof(string), (p) =>
+            provider.Add(typeof(IMessageSender), (p) => A.Fake<IMessageSender>());
+            provider.Add(typeof(IMessageObservable), (p) => A.Fake<IMessageObservable>());
+            provider.Add(typeof(string), (p) =>
             {
                 Assert.NotNull(p.GetService(typeof(IMessageSender)) as IMessageSender);
                 Assert.NotNull(p.GetService(typeof(IMessageObservable)) as IMessageObservable);
@@ -63,8 +63,8 @@ namespace HyperMsg
         [Fact]
         public void GetService_Rethrows_Exception_Thrown_By_Factory()
         {
-            provider.AddService(typeof(Guid), (p) => throw new ArgumentNullException());
-            provider.AddService(typeof(string), (p) =>
+            provider.Add(typeof(Guid), (p) => throw new ArgumentNullException());
+            provider.Add(typeof(string), (p) =>
             {
                 p.GetService(typeof(Guid));
                 return string.Empty;
@@ -80,7 +80,7 @@ namespace HyperMsg
             {
                 o.Implements<IDisposable>();
             });
-            provider.AddService(typeof(IBufferReader<byte>), (p) => service);
+            provider.Add(typeof(IBufferReader<byte>), (p) => service);
             provider.GetService<IBufferReader<byte>>();
 
             provider.Dispose();

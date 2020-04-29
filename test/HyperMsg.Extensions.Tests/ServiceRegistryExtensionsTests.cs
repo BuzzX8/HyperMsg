@@ -3,21 +3,21 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class ConfigurableExtensionsTests
+    public class ServiceRegistryExtensionsTests
     {
-        private readonly IConfigurable configurable = A.Fake<IConfigurable>();
+        private readonly IServiceRegistry serviceRegistry = A.Fake<IServiceRegistry>();
 
         [Fact]
         public void AddService_Registers_Service_Instance()
         {
             var actual = default(object);
             var expected = A.Fake<IMessageSender>();
-            A.CallTo(() => configurable.AddService(typeof(IMessageSender), A<object>._)).Invokes(foc =>
+            A.CallTo(() => serviceRegistry.Add(typeof(IMessageSender), A<object>._)).Invokes(foc =>
             {
                 actual = foc.GetArgument<object>(1);
             });
 
-            configurable.AddService(expected);
+            serviceRegistry.AddService(expected);
 
             Assert.Same(expected, actual);
         }
