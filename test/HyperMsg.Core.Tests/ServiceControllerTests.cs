@@ -5,9 +5,9 @@ using ServiceFactory = System.Func<System.IServiceProvider, object>;
 
 namespace HyperMsg
 {
-    public class ServiceProviderTests
+    public class ServiceControllerTests
     {
-        private readonly ServiceProvider provider = new ServiceProvider();
+        private readonly ServiceController provider = new ServiceController();
 
         [Fact]
         public void GetService_Does_Not_Invokes_ServiceFactory_If_It_Not_Required()
