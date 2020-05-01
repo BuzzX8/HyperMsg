@@ -2,37 +2,37 @@
 
 namespace HyperMsg
 {
-    public static class ConfigurableExtensions
+    public static class ServiceRegistryExtensions
     {
         /// <summary>
         /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageObservable,
         /// receiving and transmitting buffer).
         /// </summary>
-        /// <param name="configurable"></param>
+        /// <param name="serviceRegistry"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static void AddCoreServices(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
+        public static void AddCoreServices(this IServiceRegistry serviceRegistry, int receivingBufferSize, int transmittingBufferSize)
         {
-            configurable.AddSharedMemoryPool();
-            configurable.AddBufferContext(receivingBufferSize, transmittingBufferSize);
-            configurable.AddMessageBroker();
+            serviceRegistry.AddSharedMemoryPool();
+            serviceRegistry.AddBufferContext(receivingBufferSize, transmittingBufferSize);
+            serviceRegistry.AddMessageBroker();
         }
 
         /// <summary>
         /// Adds shared MemoryPool<byte> as service.
         /// </summary>
-        /// <param name="configurable"></param>
-        public static void AddSharedMemoryPool(this IConfigurable configurable) => configurable.AddService(MemoryPool<byte>.Shared);
+        /// <param name="serviceRegistry"></param>
+        public static void AddSharedMemoryPool(this IServiceRegistry serviceRegistry) => serviceRegistry.AddService(MemoryPool<byte>.Shared);
 
         /// <summary>
         /// Adds implementations for IBufferContext. Depends on MemoryPool<byte>.
         /// </summary>
-        /// <param name="configurable"></param>
+        /// <param name="serviceRegistry"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static void AddBufferContext(this IConfigurable configurable, int receivingBufferSize, int transmittingBufferSize)
+        public static void AddBufferContext(this IServiceRegistry serviceRegistry, int receivingBufferSize, int transmittingBufferSize)
         {
-            configurable.AddService(provider =>
+            serviceRegistry.AddService(provider =>
             {
                 var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
 
@@ -46,10 +46,10 @@ namespace HyperMsg
         /// <summary>
         /// Adds implementation for IBufferFactory. Depends on MemoryPool<byte>
         /// </summary>
-        /// <param name="configurable"></param>
-        public static void AddBufferFactory(this IConfigurable configurable)
+        /// <param name="serviceRegistry"></param>
+        public static void AddBufferFactory(this IServiceRegistry serviceRegistry)
         {
-            configurable.AddService(provider =>
+            serviceRegistry.AddService(provider =>
             {
                 var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
                 return new BufferFactory(memoryPool) as IBufferFactory;
@@ -59,13 +59,13 @@ namespace HyperMsg
         /// <summary>
         /// Adds implementation for services IMessagingContext, IMessageSender and IMessageObservable.
         /// </summary>
-        /// <param name="configurable"></param>
-        public static void AddMessageBroker(this IConfigurable configurable)
+        /// <param name="serviceRegistry"></param>
+        public static void AddMessageBroker(this IServiceRegistry serviceRegistry)
         {
             var broker = new MessageBroker();
-            configurable.AddService<IMessageSender>(broker);
-            configurable.AddService<IMessageObservable>(broker);
-            configurable.AddService<IMessagingContext>(broker);
+            serviceRegistry.AddService<IMessageSender>(broker);
+            serviceRegistry.AddService<IMessageObservable>(broker);
+            serviceRegistry.AddService<IMessagingContext>(broker);
         }
     }
 }

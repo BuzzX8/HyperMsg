@@ -4,29 +4,29 @@ using System.Collections.Generic;
 namespace HyperMsg
 {
     /// <summary>
-    /// Provides implementation for IConfigurable and IServiceProvider
+    /// Provides implementation for IServiceRegistry and IServiceProvider
     /// </summary>
-    public class ServiceProvider : IConfigurable, IServiceProvider, IDisposable
+    public class ServiceController : IServiceRegistry, IServiceProvider, IDisposable
     {        
         private readonly Dictionary<Type, Func<IServiceProvider, object>> serviceFactories;
         private readonly Dictionary<Type, object> serviceInstances;
                
         private readonly List<IDisposable> disposables;
 
-        public ServiceProvider()
+        public ServiceController()
         {
             serviceFactories = new Dictionary<Type, Func<IServiceProvider, object>>();
             serviceInstances = new Dictionary<Type, object>();
             disposables = new List<IDisposable>();
         }
 
-        public void AddService(Type serviceType, object serviceInstance)
+        public void Add(Type serviceType, object serviceInstance)
         {
             serviceInstances.Add(serviceType, serviceInstance);
             RegisterIfDisposable(serviceInstance);
         }
 
-        public void AddService(Type serviceType, Func<IServiceProvider, object> serviceFactory)
+        public void Add(Type serviceType, Func<IServiceProvider, object> serviceFactory)
         {
             serviceFactories.Add(serviceType, serviceFactory);
         }
