@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace HyperMsg
 {
     /// <summary>
     /// Provides implementation for IServiceRegistry and IServiceProvider
     /// </summary>
-    public class ServiceController : IServiceRegistry, IServiceProvider, IDisposable
+    public class ServiceContainer : IServiceRegistry, IServiceProvider, IDisposable
     {        
         private readonly Dictionary<Type, Func<IServiceProvider, object>> serviceFactories;
         private readonly Dictionary<Type, object> serviceInstances;
                
         private readonly List<IDisposable> disposables;
 
-        public ServiceController()
+        public ServiceContainer()
         {
             serviceFactories = new Dictionary<Type, Func<IServiceProvider, object>>();
             serviceInstances = new Dictionary<Type, object>();
@@ -43,20 +44,31 @@ namespace HyperMsg
 
         object IServiceProvider.GetService(Type serviceType)
         {
+            BuildServices();
             if (serviceInstances.ContainsKey(serviceType))
             {
                 return serviceInstances[serviceType];
             }
 
-            if (serviceFactories.ContainsKey(serviceType))
+            throw new InvalidOperationException($"Can not resolve service for interface {serviceType}");
+        }
+
+        private void BuildServices()
+        {
+            if (serviceFactories.Count == 0)
             {
-                return CreateService(serviceType);
+                return;
             }
 
-            throw new InvalidOperationException($"Can not resolve service for interface {serviceType}");
-        }        
+            var serviceTypes = serviceFactories.Keys.ToArray();
 
-        private object CreateService(Type serviceType)
+            for(int i = 0; i < serviceTypes.Length; i++)
+            {
+                CreateService(serviceTypes[i]);
+            }
+        }
+
+        private void CreateService(Type serviceType)
         {
             var factory = serviceFactories[serviceType];
             var service = factory.Invoke(this);
@@ -64,8 +76,6 @@ namespace HyperMsg
 
             serviceFactories.Remove(serviceType);
             serviceInstances.Add(serviceType, service);
-
-            return service;
         }
 
         private void RegisterIfDisposable(object service)
