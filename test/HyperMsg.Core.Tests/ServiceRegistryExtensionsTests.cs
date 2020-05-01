@@ -6,7 +6,7 @@ namespace HyperMsg
 {
     public class ServiceRegistryExtensionsTests
     {
-        private readonly ServiceController serviceProvider = new ServiceController();
+        private readonly ServiceContainer serviceProvider = new ServiceContainer();
 
         [Fact]
         public void UseSharedMemoryPool_Registers_Shared_MemoryPool()
