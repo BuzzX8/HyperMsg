@@ -13,6 +13,7 @@ namespace HyperMsg
         private readonly Dictionary<Type, object> serviceInstances;
                
         private readonly List<IDisposable> disposables;
+        private bool isBuildingServices = false;
 
         public ServiceContainer()
         {
@@ -44,21 +45,31 @@ namespace HyperMsg
 
         object IServiceProvider.GetService(Type serviceType)
         {
-            BuildServices();
+            BuildServicesIfRequired();
+
             if (serviceInstances.ContainsKey(serviceType))
             {
                 return serviceInstances[serviceType];
-            }
+            }            
 
             throw new InvalidOperationException($"Can not resolve service for interface {serviceType}");
         }
 
-        private void BuildServices()
+        
+
+        private void BuildServicesIfRequired()
         {
+            if (isBuildingServices)
+            {
+                return;
+            }           
+
             if (serviceFactories.Count == 0)
             {
                 return;
             }
+
+            isBuildingServices = true;
 
             var serviceTypes = serviceFactories.Keys.ToArray();
 
@@ -66,10 +77,17 @@ namespace HyperMsg
             {
                 CreateService(serviceTypes[i]);
             }
+
+            isBuildingServices = false;
         }
 
         private void CreateService(Type serviceType)
         {
+            if (!serviceFactories.ContainsKey(serviceType))
+            {
+                return;
+            }
+
             var factory = serviceFactories[serviceType];
             var service = factory.Invoke(this);
             RegisterIfDisposable(service);
