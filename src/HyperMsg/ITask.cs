@@ -1,16 +1,19 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public interface ITask : IDisposable
+    public interface ITask
     {
-        Task StartAsync(ITaskCompletionSource completionSource, CancellationToken cancellationToken);
+        Task InitializeAsync(ITaskCompletionSource completionSource, CancellationToken cancellationToken);
+
+        void Dispose();
     }
 
-    public interface ITask<T> : IDisposable
+    public interface ITask<T>
     {
-        Task StartAsync(ITaskCompletionSource<T> completionSource, CancellationToken cancellationToken);
+        Task InitializeAsync(ITaskCompletionSource<T> completionSource, CancellationToken cancellationToken);
+
+        void Dispose();
     }
 }
