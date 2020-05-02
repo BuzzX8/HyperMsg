@@ -63,8 +63,8 @@ namespace HyperMsg
         public static void AddMessageBroker(this IServiceRegistry serviceRegistry)
         {
             var broker = new MessageBroker();
-            serviceRegistry.AddService<IMessageSender>(broker);
-            serviceRegistry.AddService<IMessageObservable>(broker);
+            serviceRegistry.AddService<ISender>(broker);
+            serviceRegistry.AddService<IObservable>(broker);
             serviceRegistry.AddService<IMessagingContext>(broker);
         }
     }

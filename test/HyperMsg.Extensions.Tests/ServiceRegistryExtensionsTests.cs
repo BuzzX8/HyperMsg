@@ -11,8 +11,8 @@ namespace HyperMsg
         public void AddService_Registers_Service_Instance()
         {
             var actual = default(object);
-            var expected = A.Fake<IMessageSender>();
-            A.CallTo(() => serviceRegistry.Add(typeof(IMessageSender), A<object>._)).Invokes(foc =>
+            var expected = A.Fake<ISender>();
+            A.CallTo(() => serviceRegistry.Add(typeof(ISender), A<object>._)).Invokes(foc =>
             {
                 actual = foc.GetArgument<object>(1);
             });

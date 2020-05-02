@@ -5,7 +5,7 @@ namespace HyperMsg
 {
     internal class MessageSerializer<T> : IDisposable
     {
-        private readonly IMessageSender messageSender;
+        private readonly ISender messageSender;
         private readonly IBuffer transmittingBuffer;
         private readonly Action<IBufferWriter<byte>, T> serializer;
         private readonly IDisposable subscription;

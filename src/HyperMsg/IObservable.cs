@@ -5,7 +5,7 @@ namespace HyperMsg
     /// <summary>
     /// Defines methods for registering message observers.
     /// </summary>
-    public interface IMessageObservable
+    public interface IObservable
     {
         /// <summary>
         /// Registers synchronous message handler.

@@ -8,11 +8,11 @@
         /// <summary>
         /// Message sender.
         /// </summary>
-        IMessageSender Sender { get; }
+        ISender Sender { get; }
 
         /// <summary>
         /// Message observer.
         /// </summary>
-        IMessageObservable Observable { get; }
+        IObservable Observable { get; }
     }
 }

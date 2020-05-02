@@ -37,12 +37,12 @@ namespace HyperMsg
         public void GetService_Resolves_Complex_Dependencies()
         {
             var expected = Guid.NewGuid().ToString();            
-            container.Add(typeof(IMessageSender), (p) => A.Fake<IMessageSender>());
-            container.Add(typeof(IMessageObservable), (p) => A.Fake<IMessageObservable>());
+            container.Add(typeof(ISender), (p) => A.Fake<ISender>());
+            container.Add(typeof(IObservable), (p) => A.Fake<IObservable>());
             container.Add(typeof(string), (p) =>
             {
-                Assert.NotNull(p.GetService(typeof(IMessageSender)) as IMessageSender);
-                Assert.NotNull(p.GetService(typeof(IMessageObservable)) as IMessageObservable);
+                Assert.NotNull(p.GetService(typeof(ISender)) as ISender);
+                Assert.NotNull(p.GetService(typeof(IObservable)) as IObservable);
                 return expected;
             });
 

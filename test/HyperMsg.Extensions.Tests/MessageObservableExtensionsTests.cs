@@ -7,7 +7,7 @@ namespace HyperMsg
 {
     public class MessageObservableExtensionsTests
     {
-        private readonly IMessageObservable observable = A.Fake<IMessageObservable>();
+        private readonly IObservable observable = A.Fake<IObservable>();
         private readonly AsyncAction<Guid> asyncObserver = A.Fake<AsyncAction<Guid>>();
         private readonly Action<Guid> observer = A.Fake<Action<Guid>>();
         private readonly Guid message = Guid.NewGuid();

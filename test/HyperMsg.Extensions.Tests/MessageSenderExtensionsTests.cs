@@ -7,7 +7,7 @@ namespace HyperMsg
 {
     public class MessageSenderExtensionsTests
     {
-        private readonly IMessageSender messageSender = A.Fake<IMessageSender>();
+        private readonly ISender messageSender = A.Fake<ISender>();
         private readonly string message = Guid.NewGuid().ToString();
 
         [Fact]

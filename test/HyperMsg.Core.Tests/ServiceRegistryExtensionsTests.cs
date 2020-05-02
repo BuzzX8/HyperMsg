@@ -33,8 +33,8 @@ namespace HyperMsg
         {
             serviceProvider.AddMessageBroker();
 
-            var messageSender = serviceProvider.GetService<IMessageSender>();
-            var observable = serviceProvider.GetService<IMessageObservable>();
+            var messageSender = serviceProvider.GetService<ISender>();
+            var observable = serviceProvider.GetService<IObservable>();
             var context = serviceProvider.GetService<IMessagingContext>();
 
             Assert.NotNull(messageSender);

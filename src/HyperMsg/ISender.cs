@@ -6,7 +6,7 @@ namespace HyperMsg
     /// <summary>
     /// Defines methods for sending messages.
     /// </summary>
-    public interface IMessageSender
+    public interface ISender
     {
         /// <summary>
         /// Sends message.
