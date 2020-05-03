@@ -8,7 +8,7 @@ namespace HyperMsg
 
         void SetException(Exception exception);
 
-        void SetCancelled();
+        void SetCanceled();
     }
 
     public interface ITaskCompletionSource<T>
@@ -17,6 +17,6 @@ namespace HyperMsg
 
         void SetException(Exception exception);
 
-        void SetCancelled();
+        void SetCanceled();
     }
 }
