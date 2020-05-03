@@ -107,5 +107,14 @@ namespace HyperMsg
 
             A.CallTo(() => observer.Invoke(A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
         }
+
+        [Fact]
+        public void Send_Does_Not_Throw_Exception_If_Cancelling_Subscription_Inside_Observer()
+        {
+            var subscription = broker.Subscribe<Guid>(m => { });
+            broker.Subscribe<Guid>(m => subscription.Dispose());
+
+            broker.Send(Guid.NewGuid());
+        }
     }
 }
