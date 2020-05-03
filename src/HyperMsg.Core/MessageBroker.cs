@@ -65,7 +65,7 @@ namespace HyperMsg
         {            
             if (this.observers.TryGetValue(typeof(T), out var observers))
             {
-                foreach (var observer in observers.Cast<Action<T>>())
+                foreach (var observer in observers.Cast<Action<T>>().ToArray())
                 {
                     observer.Invoke(message);
                 }
@@ -73,7 +73,7 @@ namespace HyperMsg
 
             if (this.asyncObservers.TryGetValue(typeof(T), out var asyncObservers))
             {
-                foreach (var asyncObserver in asyncObservers.Cast<AsyncAction<T>>())
+                foreach (var asyncObserver in asyncObservers.Cast<AsyncAction<T>>().ToArray())
                 {
                     await asyncObserver.Invoke(message, cancellationToken);
                 }
