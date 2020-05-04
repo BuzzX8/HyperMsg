@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -10,7 +9,7 @@ namespace HyperMsg
     {
         private readonly TaskCompletionSource<T> tsc;
 
-        public MessagingTask(IMessageObservable messageObservable) : base(messageObservable)
+        public MessagingTask(IMessagingContext messagingContext, CancellationToken cancellationToken = default) : base(messagingContext, cancellationToken)
         {
             tsc = new TaskCompletionSource<T>();
         }
@@ -19,13 +18,10 @@ namespace HyperMsg
 
         public TaskAwaiter<T> GetAwaiter() => Completion.GetAwaiter();
 
-        protected void SetResult(T result)
-        { }
+        protected void SetResult(T result) => tsc.SetResult(result);
 
-        protected void SetCanceled()
-        { }
+        protected void SetCanceled() => tsc.SetCanceled();
 
-        protected void SetException(Exception exception)
-        { }
+        protected void SetException(Exception exception) => tsc.SetException(exception);
     }
 }
