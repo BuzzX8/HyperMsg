@@ -3,27 +3,22 @@ using System.Buffers;
 
 namespace HyperMsg
 {
-    internal class MessageSerializer<T> : IDisposable
+    internal class MessageSerializer<T> : MessagingObject
     {
-        private readonly IMessageSender messageSender;
         private readonly IBuffer transmittingBuffer;
         private readonly Action<IBufferWriter<byte>, T> serializer;
-        private readonly IDisposable subscription;
 
-        internal MessageSerializer(IMessagingContext context, IBuffer transmittingBuffer, Action<IBufferWriter<byte>, T> serializer)
-        {
-            messageSender = context.Sender;
+        internal MessageSerializer(IMessagingContext context, IBuffer transmittingBuffer, Action<IBufferWriter<byte>, T> serializer) : base(context)
+        {            
             this.transmittingBuffer = transmittingBuffer;
             this.serializer = serializer;
-            subscription = context.Observable.OnTransmit<T>(Handle);
+            RegisterTransmitHandler<T>(Handle);            
         }
 
         private void Handle(T message)
         {
             serializer.Invoke(transmittingBuffer.Writer, message);
-            messageSender.TransmitBufferData(transmittingBuffer);
+            Sender.TransmitBufferData(transmittingBuffer);
         }
-
-        public void Dispose() => subscription.Dispose();
     }
 }
