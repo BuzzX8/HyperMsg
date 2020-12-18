@@ -1,4 +1,5 @@
 ﻿using FakeItEasy;
+using HyperMsg.Extensions;
 using System;
 using Xunit;
 using ServiceFactory = System.Func<System.IServiceProvider, object>;

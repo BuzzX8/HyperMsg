@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace HyperMsg
+namespace HyperMsg.Extensions
 {
     public static class ServiceProviderExtensions
     {

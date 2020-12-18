@@ -1,6 +1,7 @@
-﻿using System.Buffers;
+﻿using HyperMsg.Extensions;
+using System.Buffers;
 
-namespace HyperMsg
+namespace HyperMsg.Extensions
 {
     public static class ServiceRegistryExtensions
     {
@@ -22,7 +23,7 @@ namespace HyperMsg
         /// Adds shared MemoryPool<byte> as service.
         /// </summary>
         /// <param name="serviceRegistry"></param>
-        public static void AddSharedMemoryPool(this IServiceRegistry serviceRegistry) => serviceRegistry.AddService(MemoryPool<byte>.Shared);
+        public static void AddSharedMemoryPool(this IServiceRegistry serviceRegistry)  {}// serviceRegistry.AddService(MemoryPool<byte>.Shared);
 
         /// <summary>
         /// Adds implementations for IBufferContext. Depends on MemoryPool<byte>.
@@ -32,15 +33,15 @@ namespace HyperMsg
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
         public static void AddBufferContext(this IServiceRegistry serviceRegistry, int receivingBufferSize, int transmittingBufferSize)
         {
-            serviceRegistry.AddService(provider =>
-            {
-                var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
+            //serviceRegistry.AddService(provider =>
+            //{
+            //    var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
 
-                var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
-                var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
+            //    var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
+            //    var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
 
-                return new BufferContext(receivingBuffer, transmittingBuffer) as IBufferContext;
-            });
+            //    return new BufferContext(receivingBuffer, transmittingBuffer) as IBufferContext;
+            //});
         }
 
         /// <summary>
@@ -49,11 +50,11 @@ namespace HyperMsg
         /// <param name="serviceRegistry"></param>
         public static void AddBufferFactory(this IServiceRegistry serviceRegistry)
         {
-            serviceRegistry.AddService(provider =>
-            {
-                var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
-                return new BufferFactory(memoryPool) as IBufferFactory;
-            });
+            ///*serviceRegistry*/.AddService(provider =>
+            //{
+            //    var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
+            //    return new BufferFactory(memoryPool) as IBufferFactory;
+            //});
         }
 
         /// <summary>
@@ -62,10 +63,10 @@ namespace HyperMsg
         /// <param name="serviceRegistry"></param>
         public static void AddMessageBroker(this IServiceRegistry serviceRegistry)
         {
-            var broker = new MessageBroker();
-            serviceRegistry.AddService<IMessageSender>(broker);
-            serviceRegistry.AddService<IMessageObservable>(broker);
-            serviceRegistry.AddService<IMessagingContext>(broker);
+            //var broker = new MessageBroker();
+            //serviceRegistry.AddService<IMessageSender>(broker);
+            //serviceRegistry.AddService<IMessageObservable>(broker);
+            //serviceRegistry.AddService<IMessagingContext>(broker);
         }
     }
 }

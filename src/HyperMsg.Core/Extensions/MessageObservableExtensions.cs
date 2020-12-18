@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HyperMsg
+namespace HyperMsg.Extensions
 {
     public static class MessageObservableExtensions
     {
