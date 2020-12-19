@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace HyperMsg
+namespace HyperMsg.Extensions
 {
     public static class MessageSenderExtensions
     {
