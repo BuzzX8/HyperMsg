@@ -4,7 +4,7 @@ using Xunit;
 
 namespace HyperMsg.Extensions
 {
-    public class ServiceRegistryExtensionsTests
+    public class ServiceCollectionExtensionsTests
     {
         private readonly ServiceCollection services = new ServiceCollection();
 

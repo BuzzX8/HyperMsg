@@ -1,10 +1,9 @@
-﻿using HyperMsg.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Buffers;
 
 namespace HyperMsg.Extensions
 {
-    public static class ServiceRegistryExtensions
+    public static class ServiceCollectionExtensions
     {
         /// <summary>
         /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageObservable,
