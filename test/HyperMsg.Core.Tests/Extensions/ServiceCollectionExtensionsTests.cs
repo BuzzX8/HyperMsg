@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
 using System.Buffers;
+using System.Threading;
 using Xunit;
 
 namespace HyperMsg.Extensions
@@ -7,6 +10,7 @@ namespace HyperMsg.Extensions
     public class ServiceCollectionExtensionsTests
     {
         private readonly ServiceCollection services = new ServiceCollection();
+        private readonly static TimeSpan waitTimeout = TimeSpan.FromSeconds(5);
 
         [Fact]
         public void AddMessageBroker_Adds_Sender_Observable_And_Context()
@@ -56,6 +60,50 @@ namespace HyperMsg.Extensions
             var factory = provider.GetService<IBufferFactory>();
 
             Assert.NotNull(factory);
+        }
+
+        [Fact]
+        public void AddObservers_Applies_Observer_Configurator()
+        {
+            var wasInvoked = false;
+            var waitEvent = new ManualResetEventSlim();
+            var builder = Host.CreateDefaultBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddCoreServices(100, 100);
+                    services.AddObservers((provider, observable) =>
+                    {
+                        wasInvoked = true;
+                        waitEvent.Set();
+                    });
+                });
+
+            var runTask = builder.Build().RunAsync();
+            waitEvent.Wait(waitTimeout);
+
+            Assert.True(wasInvoked);
+        }
+
+        [Fact]
+        public void AddObservers_Applies_ComponentObserver_Configurator()
+        {
+            var wasInvoked = false;
+            var waitEvent = new ManualResetEventSlim();
+            var builder = Host.CreateDefaultBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddCoreServices(100, 100);
+                    services.AddObservers<MessageBroker>((component, observable) =>
+                    {
+                        wasInvoked = true;
+                        waitEvent.Set();
+                    });
+                });
+
+            var runTask = builder.Build().RunAsync();
+            waitEvent.Wait(waitTimeout);
+
+            Assert.True(wasInvoked);
         }
     }
 }

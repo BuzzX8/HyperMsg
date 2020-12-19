@@ -1,5 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
 using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg.Extensions
 {
@@ -68,5 +74,58 @@ namespace HyperMsg.Extensions
             services.AddSingleton<IMessageObservable>(broker);
             services.AddSingleton<IMessagingContext>(broker);
         }
+
+        public static IServiceCollection AddObservers(this IServiceCollection services, Action<IServiceProvider, IMessageObservable> configurationDelegate)
+        {
+            if (!services.Any(s => s.ServiceType == typeof(ConfiguratorCollection)))
+            {
+                services.AddSingleton(new ConfiguratorCollection());
+            }
+
+            var configurators = services.Single(s => s.ServiceType == typeof(ConfiguratorCollection)).ImplementationInstance as ConfiguratorCollection;
+            configurators.Add(configurationDelegate);
+            return services.AddHostedService<HyperMsgBootstrapper>();
+        }
+
+        public static IServiceCollection AddObservers<T>(this IServiceCollection services, Action<T, IMessageObservable> configurationDelegate, bool addComponent = true) where T : class
+        {
+            if (addComponent)
+            {
+                services.AddSingleton<T>();
+            }
+
+            return services.AddObservers((provider, observable) =>
+            {
+                var component = provider.GetRequiredService<T>();
+                configurationDelegate.Invoke(component, observable);
+            });
+        }
     }
+
+    internal class HyperMsgBootstrapper : IHostedService
+    {
+        private readonly IServiceProvider provider;
+        private readonly ConfiguratorCollection configurators;
+
+        public HyperMsgBootstrapper(IServiceProvider provider, ConfiguratorCollection configurators)
+        {
+            this.provider = provider;
+            this.configurators = configurators;
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            var observable = provider.GetRequiredService<IMessageObservable>();
+            foreach (var configurator in configurators)
+            {
+                configurator.Invoke(provider, observable);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
+    internal class ConfiguratorCollection : List<Action<IServiceProvider, IMessageObservable>> { }
 }
