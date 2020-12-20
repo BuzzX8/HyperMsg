@@ -85,6 +85,28 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
+        public void AddObservers_Applies_MessageObserver_Configurator()
+        {
+            var wasInvoked = false;
+            var waitEvent = new ManualResetEventSlim();
+            var builder = Host.CreateDefaultBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddCoreServices(100, 100);
+                    services.AddObservers(observable =>
+                    {
+                        wasInvoked = true;
+                        waitEvent.Set();
+                    });
+                });
+
+            var runTask = builder.Build().RunAsync();
+            waitEvent.Wait(waitTimeout);
+
+            Assert.True(wasInvoked);
+        }
+
+        [Fact]
         public void AddObservers_Applies_ComponentObserver_Configurator()
         {
             var wasInvoked = false;

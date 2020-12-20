@@ -18,18 +18,18 @@ namespace HyperMsg.Extensions
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static void AddCoreServices(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
+        public static IServiceCollection AddCoreServices(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
         {
-            services.AddSharedMemoryPool();
-            services.AddBufferContext(receivingBufferSize, transmittingBufferSize);
-            services.AddMessageBroker();            
+            return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
+                .AddSharedMemoryPool()                
+                .AddMessageBroker();            
         }
 
         /// <summary>
         /// Adds shared MemoryPool<byte> as service.
         /// </summary>
         /// <param name="services"></param>
-        public static void AddSharedMemoryPool(this IServiceCollection services) => services.AddSingleton(MemoryPool<byte>.Shared);
+        public static IServiceCollection AddSharedMemoryPool(this IServiceCollection services) => services.AddSingleton(MemoryPool<byte>.Shared);
 
         /// <summary>
         /// Adds implementations for IBufferContext. Depends on MemoryPool<byte>.
@@ -37,9 +37,9 @@ namespace HyperMsg.Extensions
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static void AddBufferContext(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
+        public static IServiceCollection AddBufferContext(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
         {
-            services.AddSingleton(provider =>
+            return services.AddSingleton(provider =>
             {
                 var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
 
@@ -54,25 +54,22 @@ namespace HyperMsg.Extensions
         /// Adds implementation for IBufferFactory. Depends on MemoryPool<byte>
         /// </summary>
         /// <param name="services"></param>
-        public static void AddBufferFactory(this IServiceCollection services)
+        public static IServiceCollection AddBufferFactory(this IServiceCollection services) => services.AddSingleton(provider =>
         {
-            services.AddSingleton(provider =>
-            {
-                var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
-                return new BufferFactory(memoryPool) as IBufferFactory;
-            });
-        }
+            var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
+            return new BufferFactory(memoryPool) as IBufferFactory;
+        });
 
         /// <summary>
         /// Adds implementation for services IMessagingContext, IMessageSender and IMessageObservable.
         /// </summary>
         /// <param name="serviceRegistry"></param>
-        public static void AddMessageBroker(this IServiceCollection services)
+        public static IServiceCollection AddMessageBroker(this IServiceCollection services)
         {
             var broker = new MessageBroker();
-            services.AddSingleton<IMessageSender>(broker);
-            services.AddSingleton<IMessageObservable>(broker);
-            services.AddSingleton<IMessagingContext>(broker);
+            return services.AddSingleton<IMessageSender>(broker)
+                .AddSingleton<IMessageObservable>(broker)
+                .AddSingleton<IMessagingContext>(broker);
         }
 
         public static IServiceCollection AddObservers(this IServiceCollection services, Action<IServiceProvider, IMessageObservable> configurationDelegate)
@@ -87,18 +84,28 @@ namespace HyperMsg.Extensions
             return services.AddHostedService<HyperMsgBootstrapper>();
         }
 
-        public static IServiceCollection AddObservers<T>(this IServiceCollection services, Action<T, IMessageObservable> configurationDelegate, bool addComponent = true) where T : class
+        public static IServiceCollection AddObservers(this IServiceCollection services, Action<IMessageObservable> configurationDelegate)
+        {
+            return services.AddObservers((provider, observable) => configurationDelegate.Invoke(observable));
+        }
+
+        public static IServiceCollection AddObservers<TComponent>(this IServiceCollection services, Action<TComponent, IMessageObservable> configurationDelegate, bool addComponent = true) where TComponent : class
         {
             if (addComponent)
             {
-                services.AddSingleton<T>();
+                services.AddSingleton<TComponent>();
             }
 
             return services.AddObservers((provider, observable) =>
             {
-                var component = provider.GetRequiredService<T>();
+                var component = provider.GetRequiredService<TComponent>();
                 configurationDelegate.Invoke(component, observable);
             });
+        }
+
+        public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, Func<Action<TMessage>> configurationFunc)
+        {
+            return services.AddObservers(observable => observable.Subscribe(configurationFunc.Invoke()));
         }
 
         public static IServiceCollection AddObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, Action<TMessage>> configurationDelegate) where TComponent : class
@@ -106,9 +113,19 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.Subscribe(configurationDelegate.Invoke(component)));
         }
 
+        public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, Func<AsyncAction<TMessage>> configurationFunc)
+        {
+            return services.AddObservers(observable => observable.Subscribe(configurationFunc.Invoke()));
+        }
+
         public static IServiceCollection AddObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, AsyncAction<TMessage>> configurationDelegate) where TComponent : class
         {
             return services.AddObservers<TComponent>((component, observable) => observable.Subscribe(configurationDelegate.Invoke(component)));
+        }
+
+        public static IServiceCollection AddTransmitObserver<TMessage>(this IServiceCollection services, Func<Action<TMessage>> configurationDelegate)
+        {
+            return services.AddObservers(observable => observable.OnTransmit(configurationDelegate.Invoke()));
         }
 
         public static IServiceCollection AddTransmitObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, Action<TMessage>> configurationDelegate) where TComponent : class
@@ -116,14 +133,49 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.OnTransmit(configurationDelegate.Invoke(component)));
         }
 
+        public static IServiceCollection AddTransmitObserver<TMessage>(this IServiceCollection services, Func<AsyncAction<TMessage>> configurationDelegate)
+        {
+            return services.AddObservers(observable => observable.OnTransmit(configurationDelegate.Invoke()));
+        }
+
         public static IServiceCollection AddTransmitObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, AsyncAction<TMessage>> configurationDelegate) where TComponent : class
         {
             return services.AddObservers<TComponent>((component, observable) => observable.OnTransmit(configurationDelegate.Invoke(component)));
         }
 
+        public static IServiceCollection AddReceiveObserver<TMessage>(this IServiceCollection services, Func<Action<TMessage>> configurationFunc)
+        {
+            return services.AddObservers(observable => observable.OnReceived(configurationFunc.Invoke()));
+        }
+
+        public static IServiceCollection AddReceiveObserver<TMessage>(this IServiceCollection services, Func<AsyncAction<TMessage>> configurationFunc)
+        {
+            return services.AddObservers(observable => observable.OnReceived(configurationFunc.Invoke()));
+        }
+
+        public static IServiceCollection AddReceiveObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, Action<TMessage>> configurationFunc) where TComponent : class
+        {
+            return services.AddObservers<TComponent>((component, observable) => observable.OnReceived(configurationFunc.Invoke(component)));
+        }
+
+        public static IServiceCollection AddReceiveObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, AsyncAction<TMessage>> configurationFunc) where TComponent : class
+        {
+            return services.AddObservers<TComponent>((component, observable) => observable.OnReceived(configurationFunc.Invoke(component)));
+        }
+
+        public static IServiceCollection AddBufferDataTransmitObserver(this IServiceCollection services, Func<Action<IBuffer>> configurationDelegate)
+        {
+            return services.AddObservers(observable => observable.OnBufferDataTransmit(configurationDelegate.Invoke()));
+        }
+
         public static IServiceCollection AddBufferDataTransmitObserver<TComponent>(this IServiceCollection services, Func<TComponent, Action<IBuffer>> configurationDelegate) where TComponent : class
         {
             return services.AddObservers<TComponent>((component, observable) => observable.OnBufferDataTransmit(configurationDelegate.Invoke(component)));
+        }
+
+        public static IServiceCollection AddBufferDataTransmitObserver(this IServiceCollection services, Func<AsyncAction<IBuffer>> configurationDelegate)
+        {
+            return services.AddObservers(observable => observable.OnBufferDataTransmit(configurationDelegate.Invoke()));
         }
 
         public static IServiceCollection AddBufferDataTransmitObserver<TComponent>(this IServiceCollection services, Func<TComponent, AsyncAction<IBuffer>> configurationDelegate) where TComponent : class
