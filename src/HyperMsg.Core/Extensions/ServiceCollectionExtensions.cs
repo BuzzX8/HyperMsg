@@ -103,9 +103,9 @@ namespace HyperMsg.Extensions
             });
         }
 
-        public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, Func<Action<TMessage>> configurationFunc)
+        public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, Action<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.Subscribe(configurationFunc.Invoke()));
+            return services.AddObservers(observable => observable.Subscribe(handler));
         }
 
         public static IServiceCollection AddObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, Action<TMessage>> configurationDelegate) where TComponent : class
@@ -113,9 +113,9 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.Subscribe(configurationDelegate.Invoke(component)));
         }
 
-        public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, Func<AsyncAction<TMessage>> configurationFunc)
+        public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, AsyncAction<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.Subscribe(configurationFunc.Invoke()));
+            return services.AddObservers(observable => observable.Subscribe(handler));
         }
 
         public static IServiceCollection AddObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, AsyncAction<TMessage>> configurationDelegate) where TComponent : class
@@ -123,9 +123,9 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.Subscribe(configurationDelegate.Invoke(component)));
         }
 
-        public static IServiceCollection AddTransmitObserver<TMessage>(this IServiceCollection services, Func<Action<TMessage>> configurationDelegate)
+        public static IServiceCollection AddTransmitObserver<TMessage>(this IServiceCollection services, Action<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.OnTransmit(configurationDelegate.Invoke()));
+            return services.AddObservers(observable => observable.OnTransmit(handler));
         }
 
         public static IServiceCollection AddTransmitObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, Action<TMessage>> configurationDelegate) where TComponent : class
@@ -133,9 +133,9 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.OnTransmit(configurationDelegate.Invoke(component)));
         }
 
-        public static IServiceCollection AddTransmitObserver<TMessage>(this IServiceCollection services, Func<AsyncAction<TMessage>> configurationDelegate)
+        public static IServiceCollection AddTransmitObserver<TMessage>(this IServiceCollection services, AsyncAction<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.OnTransmit(configurationDelegate.Invoke()));
+            return services.AddObservers(observable => observable.OnTransmit(handler));
         }
 
         public static IServiceCollection AddTransmitObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, AsyncAction<TMessage>> configurationDelegate) where TComponent : class
@@ -143,14 +143,14 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.OnTransmit(configurationDelegate.Invoke(component)));
         }
 
-        public static IServiceCollection AddReceiveObserver<TMessage>(this IServiceCollection services, Func<Action<TMessage>> configurationFunc)
+        public static IServiceCollection AddReceiveObserver<TMessage>(this IServiceCollection services, Action<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.OnReceived(configurationFunc.Invoke()));
+            return services.AddObservers(observable => observable.OnReceived(handler));
         }
 
-        public static IServiceCollection AddReceiveObserver<TMessage>(this IServiceCollection services, Func<AsyncAction<TMessage>> configurationFunc)
+        public static IServiceCollection AddReceiveObserver<TMessage>(this IServiceCollection services, AsyncAction<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.OnReceived(configurationFunc.Invoke()));
+            return services.AddObservers(observable => observable.OnReceived(handler));
         }
 
         public static IServiceCollection AddReceiveObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, Action<TMessage>> configurationFunc) where TComponent : class
@@ -163,9 +163,9 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.OnReceived(configurationFunc.Invoke(component)));
         }
 
-        public static IServiceCollection AddBufferDataTransmitObserver(this IServiceCollection services, Func<Action<IBuffer>> configurationDelegate)
+        public static IServiceCollection AddBufferDataTransmitObserver(this IServiceCollection services, Action<IBuffer> handler)
         {
-            return services.AddObservers(observable => observable.OnBufferDataTransmit(configurationDelegate.Invoke()));
+            return services.AddObservers(observable => observable.OnBufferDataTransmit(handler));
         }
 
         public static IServiceCollection AddBufferDataTransmitObserver<TComponent>(this IServiceCollection services, Func<TComponent, Action<IBuffer>> configurationDelegate) where TComponent : class
@@ -173,9 +173,9 @@ namespace HyperMsg.Extensions
             return services.AddObservers<TComponent>((component, observable) => observable.OnBufferDataTransmit(configurationDelegate.Invoke(component)));
         }
 
-        public static IServiceCollection AddBufferDataTransmitObserver(this IServiceCollection services, Func<AsyncAction<IBuffer>> configurationDelegate)
+        public static IServiceCollection AddBufferDataTransmitObserver(this IServiceCollection services, AsyncAction<IBuffer> handler)
         {
-            return services.AddObservers(observable => observable.OnBufferDataTransmit(configurationDelegate.Invoke()));
+            return services.AddObservers(observable => observable.OnBufferDataTransmit(handler));
         }
 
         public static IServiceCollection AddBufferDataTransmitObserver<TComponent>(this IServiceCollection services, Func<TComponent, AsyncAction<IBuffer>> configurationDelegate) where TComponent : class
