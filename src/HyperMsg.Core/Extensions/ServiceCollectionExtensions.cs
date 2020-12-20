@@ -18,7 +18,7 @@ namespace HyperMsg.Extensions
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static IServiceCollection AddCoreServices(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
+        public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
         {
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
                 .AddSharedMemoryPool()                

@@ -70,7 +70,7 @@ namespace HyperMsg.Extensions
             var builder = Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddCoreServices(100, 100);
+                    services.AddMessagingServices(100, 100);
                     services.AddObservers((provider, observable) =>
                     {
                         wasInvoked = true;
@@ -92,7 +92,7 @@ namespace HyperMsg.Extensions
             var builder = Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddCoreServices(100, 100);
+                    services.AddMessagingServices(100, 100);
                     services.AddObservers(observable =>
                     {
                         wasInvoked = true;
@@ -114,7 +114,7 @@ namespace HyperMsg.Extensions
             var builder = Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
-                    services.AddCoreServices(100, 100);
+                    services.AddMessagingServices(100, 100);
                     services.AddObservers<MessageBroker>((component, observable) =>
                     {
                         wasInvoked = true;
