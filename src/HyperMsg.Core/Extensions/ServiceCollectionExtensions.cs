@@ -202,6 +202,22 @@ namespace HyperMsg.Extensions
         {
             return services.AddObservers<TComponent>((component, observable) => observable.OnBufferReceivedData(configurationDelegate.Invoke(component)));
         }
+
+        public static IServiceCollection AddSerializationComponent<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
+        {
+            return services.AddObservers((provider, observable) =>
+            {
+                var bufferContext = provider.GetRequiredService<IBufferContext>();
+                var bufferWriter = bufferContext.TransmittingBuffer.Writer;
+                var messageSender = provider.GetRequiredService<IMessageSender>();
+
+                observable.OnTransmit<TMessage>(async (message, token) =>
+                {
+                    serializer.Invoke(bufferWriter, message);
+                    await messageSender.TransmitBufferDataAsync(bufferContext.TransmittingBuffer, token);
+                });
+            });
+        }
     }
 
     internal class HyperMsgBootstrapper : IHostedService
