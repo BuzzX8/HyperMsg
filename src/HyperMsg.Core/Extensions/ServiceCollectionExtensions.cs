@@ -182,6 +182,26 @@ namespace HyperMsg.Extensions
         {
             return services.AddObservers<TComponent>((component, observable) => observable.OnBufferDataTransmit(configurationDelegate.Invoke(component)));
         }
+
+        public static IServiceCollection AddBufferDataReceiveObserver(this IServiceCollection services, Action<IBuffer> handler)
+        {
+            return services.AddObservers(observable => observable.OnBufferReceivedData(handler));
+        }
+
+        public static IServiceCollection AddBufferDataReceiveObserver<TComponent>(this IServiceCollection services, Func<TComponent, Action<IBuffer>> configurationDelegate) where TComponent : class
+        {
+            return services.AddObservers<TComponent>((component, observable) => observable.OnBufferReceivedData(configurationDelegate.Invoke(component)));
+        }
+
+        public static IServiceCollection AddBufferDataReceiveObserver(this IServiceCollection services, AsyncAction<IBuffer> handler)
+        {
+            return services.AddObservers(observable => observable.OnBufferReceivedData(handler));
+        }
+
+        public static IServiceCollection AddBufferDataReceiveObserver<TComponent>(this IServiceCollection services, Func<TComponent, AsyncAction<IBuffer>> configurationDelegate) where TComponent : class
+        {
+            return services.AddObservers<TComponent>((component, observable) => observable.OnBufferReceivedData(configurationDelegate.Invoke(component)));
+        }
     }
 
     internal class HyperMsgBootstrapper : IHostedService

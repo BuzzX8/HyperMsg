@@ -26,8 +26,8 @@ namespace HyperMsg
             };
             services.AddHostedService(provider => hostedService1);
             services.AddHostedService(provider => hostedService2);
-            host = new Host(services);
-            tokenSource = new CancellationTokenSource();
+            host = new(services);
+            tokenSource = new();
         }
 
         [Fact]
