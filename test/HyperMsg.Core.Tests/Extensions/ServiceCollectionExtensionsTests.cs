@@ -96,5 +96,25 @@ namespace HyperMsg.Extensions
 
             A.CallTo(() => configurationDelegate.Invoke(A<MessageBroker>._, A<IMessageObservable>._)).MustHaveHappened();
         }
+
+        [Fact]
+        public void AddSerializationComponent_Invokes_BufferObserver_And_BufferTransmitter()
+        {
+            var serializer = A.Fake<Action<IBufferWriter<byte>, Guid>>();
+            var bufferTransmitter = A.Fake<Action<IBuffer>>();
+
+            services.AddMessagingServices(1000, 1000);
+            services.AddBufferDataTransmitObserver(bufferTransmitter);
+            services.AddSerializationComponent(serializer);
+            var host = new Host(services);
+            var data = Guid.NewGuid();            
+            host.Start();
+
+            var sender = host.Services.GetRequiredService<IMessageSender>();
+            sender.Transmit(data);
+
+            A.CallTo(() => serializer.Invoke(A<IBufferWriter<byte>>._, data)).MustHaveHappened();
+            A.CallTo(() => bufferTransmitter.Invoke(A<IBuffer>._)).MustHaveHappened();
+        }
     }
 }
