@@ -1,16 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FakeItEasy;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
-using System.Threading;
 using Xunit;
 
 namespace HyperMsg.Extensions
 {
     public class ServiceCollectionExtensionsTests
     {
-        private readonly ServiceCollection services = new ServiceCollection();
-        private readonly static TimeSpan waitTimeout = TimeSpan.FromSeconds(5);
+        private readonly ServiceCollection services = new();
 
         [Fact]
         public void AddMessageBroker_Adds_Sender_Observable_And_Context()
@@ -42,7 +41,7 @@ namespace HyperMsg.Extensions
         public void AddBufferContext_Adds_BufferContext()
         {
             services.AddSharedMemoryPool();
-            services.AddBufferContext(100, 100);
+            services.AddBufferContext();
             var provider = services.BuildServiceProvider();
 
             var context = provider.GetService<IBufferContext>();
@@ -63,69 +62,84 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public void AddObservers_Applies_Observer_Configurator()
+        public void AddObservers_Invokes_Configuration_Delegate()
         {
-            var wasInvoked = false;
-            var waitEvent = new ManualResetEventSlim();
-            var builder = Host.CreateDefaultBuilder()
-                .ConfigureServices(services =>
-                {
-                    services.AddMessagingServices(100, 100);
-                    services.AddObservers((provider, observable) =>
-                    {
-                        wasInvoked = true;
-                        waitEvent.Set();
-                    });
-                });
+            var configurationDelegate = A.Fake<Action<IServiceProvider, IMessageObservable>>();
+            services.AddMessageBroker();            
+            services.AddObservers(configurationDelegate);
+            var host = new Host(services);
+            host.Start();
 
-            var runTask = builder.Build().RunAsync();
-            waitEvent.Wait(waitTimeout);
-
-            Assert.True(wasInvoked);
+            A.CallTo(() => configurationDelegate.Invoke(A<IServiceProvider>._, A<IMessageObservable>._)).MustHaveHappened();
         }
 
         [Fact]
-        public void AddObservers_Applies_MessageObserver_Configurator()
+        public void AddObservers_Invokes_Configuration_Delegate2()
         {
-            var wasInvoked = false;
-            var waitEvent = new ManualResetEventSlim();
-            var builder = Host.CreateDefaultBuilder()
-                .ConfigureServices(services =>
-                {
-                    services.AddMessagingServices(100, 100);
-                    services.AddObservers(observable =>
-                    {
-                        wasInvoked = true;
-                        waitEvent.Set();
-                    });
-                });
+            var configurationDelegate = A.Fake<Action<IMessageObservable>>();
+            services.AddMessageBroker();
+            services.AddObservers(configurationDelegate);
+            var host = new Host(services);
+            host.Start();
 
-            var runTask = builder.Build().RunAsync();
-            waitEvent.Wait(waitTimeout);
-
-            Assert.True(wasInvoked);
+            A.CallTo(() => configurationDelegate.Invoke(A<IMessageObservable>._)).MustHaveHappened();
         }
 
         [Fact]
-        public void AddObservers_Applies_ComponentObserver_Configurator()
+        public void AddObservers_Invokes_Configuration_Delegate3()
         {
-            var wasInvoked = false;
-            var waitEvent = new ManualResetEventSlim();
-            var builder = Host.CreateDefaultBuilder()
-                .ConfigureServices(services =>
-                {
-                    services.AddMessagingServices(100, 100);
-                    services.AddObservers<MessageBroker>((component, observable) =>
-                    {
-                        wasInvoked = true;
-                        waitEvent.Set();
-                    });
-                });
+            var configurationDelegate = A.Fake<Action<MessageBroker, IMessageObservable>>();
+            services.AddMessageBroker();
+            services.AddObservers(configurationDelegate);
+            var host = new Host(services);
+            host.Start();
 
-            var runTask = builder.Build().RunAsync();
-            waitEvent.Wait(waitTimeout);
+            A.CallTo(() => configurationDelegate.Invoke(A<MessageBroker>._, A<IMessageObservable>._)).MustHaveHappened();
+        }
 
-            Assert.True(wasInvoked);
+        [Fact]
+        public void AddSerializationComponent_Invokes_BufferObserver_And_BufferTransmitter()
+        {
+            var serializer = A.Fake<Action<IBufferWriter<byte>, Guid>>();
+            var bufferTransmitter = A.Fake<Action<IBuffer>>();
+
+            services.AddMessagingServices();
+            services.AddBufferDataTransmitObserver(bufferTransmitter);
+            services.AddSerializationComponent(serializer);
+            var host = new Host(services);
+            var data = Guid.NewGuid();            
+            host.Start();
+
+            var sender = host.Services.GetRequiredService<IMessageSender>();
+            sender.Transmit(data);
+
+            A.CallTo(() => serializer.Invoke(A<IBufferWriter<byte>>._, data)).MustHaveHappened();
+            A.CallTo(() => bufferTransmitter.Invoke(A<IBuffer>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void AddDeserializationComponent_()
+        {
+            var actualData = Guid.Empty;
+            services.AddMessagingServices();
+            services.AddDeserializationComponent(buffer =>
+            {
+                var bytes = buffer.ToArray();
+                return (bytes.Length, new Guid(bytes));
+            });
+            services.AddReceiveObserver<Guid>(data => actualData = data);
+            var host = new Host(services);
+            var data = Guid.NewGuid();
+            host.Start();
+
+            var sender = host.Services.GetRequiredService<IMessageSender>();
+            var bufferContext = host.Services.GetRequiredService<IBufferContext>();
+            var buffer = bufferContext.ReceivingBuffer;
+            buffer.Writer.Write(data.ToByteArray());
+
+            sender.BufferReceivedData(buffer);
+
+            Assert.Equal(data, actualData);
         }
     }
 }

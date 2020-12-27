@@ -11,6 +11,8 @@ namespace HyperMsg.Extensions
 {
     public static class ServiceCollectionExtensions
     {
+        const int DefaultBufferSize = -1;
+
         /// <summary>
         /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageObservable,
         /// receiving and transmitting buffer).
@@ -18,7 +20,7 @@ namespace HyperMsg.Extensions
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
+        public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
                 .AddSharedMemoryPool()                
@@ -37,7 +39,7 @@ namespace HyperMsg.Extensions
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static IServiceCollection AddBufferContext(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
+        public static IServiceCollection AddBufferContext(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
             return services.AddSingleton(provider =>
             {
@@ -181,6 +183,69 @@ namespace HyperMsg.Extensions
         public static IServiceCollection AddBufferDataTransmitObserver<TComponent>(this IServiceCollection services, Func<TComponent, AsyncAction<IBuffer>> configurationDelegate) where TComponent : class
         {
             return services.AddObservers<TComponent>((component, observable) => observable.OnBufferDataTransmit(configurationDelegate.Invoke(component)));
+        }
+
+        public static IServiceCollection AddBufferDataReceiveObserver(this IServiceCollection services, Action<IBuffer> handler)
+        {
+            return services.AddObservers(observable => observable.OnBufferReceivedData(handler));
+        }
+
+        public static IServiceCollection AddBufferDataReceiveObserver<TComponent>(this IServiceCollection services, Func<TComponent, Action<IBuffer>> configurationDelegate) where TComponent : class
+        {
+            return services.AddObservers<TComponent>((component, observable) => observable.OnBufferReceivedData(configurationDelegate.Invoke(component)));
+        }
+
+        public static IServiceCollection AddBufferDataReceiveObserver(this IServiceCollection services, AsyncAction<IBuffer> handler)
+        {
+            return services.AddObservers(observable => observable.OnBufferReceivedData(handler));
+        }
+
+        public static IServiceCollection AddBufferDataReceiveObserver<TComponent>(this IServiceCollection services, Func<TComponent, AsyncAction<IBuffer>> configurationDelegate) where TComponent : class
+        {
+            return services.AddObservers<TComponent>((component, observable) => observable.OnBufferReceivedData(configurationDelegate.Invoke(component)));
+        }
+
+        public static IServiceCollection AddSerializationComponent<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
+        {
+            return services.AddObservers((provider, observable) =>
+            {
+                var bufferContext = provider.GetRequiredService<IBufferContext>();
+                var bufferWriter = bufferContext.TransmittingBuffer.Writer;
+                var messageSender = provider.GetRequiredService<IMessageSender>();
+
+                observable.OnTransmit<TMessage>(async (message, token) =>
+                {
+                    serializer.Invoke(bufferWriter, message);
+                    await messageSender.TransmitBufferDataAsync(bufferContext.TransmittingBuffer, token);
+                });
+            });
+        }
+
+        public static IServiceCollection AddDeserializationComponent<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
+        {
+            return services.AddObservers((provider, observable) =>
+            {
+                var bufferContext = provider.GetRequiredService<IBufferContext>();
+                var messageSender = provider.GetRequiredService<IMessageSender>();
+
+                observable.OnBufferReceivedData(buffer =>
+                {
+                    var reading = buffer.Reader.Read();
+                    if (reading.Length == 0)
+                    {
+                        return;
+                    }
+
+                    var deserializationResult = deserializer.Invoke(reading);
+
+                    if (deserializationResult.BytesRead == 0)
+                    {
+                        return;
+                    }
+
+                    messageSender.Received(deserializationResult.Message);
+                });
+            });
         }
     }
 
