@@ -14,10 +14,10 @@ namespace HyperMsg
     {
         private class Subscription : IDisposable
         {
-            private readonly object observer;
-            private readonly List<object> list;
+            private readonly Delegate observer;
+            private readonly List<Delegate> list;
 
-            public Subscription(object observer, List<object> list)
+            public Subscription(Delegate observer, List<Delegate> list)
             {
                 this.observer = observer;
                 this.list = list;
@@ -29,8 +29,8 @@ namespace HyperMsg
             }
         }
 
-        private readonly ConcurrentDictionary<Type, List<object>> observers = new ConcurrentDictionary<Type, List<object>>();
-        private readonly ConcurrentDictionary<Type, List<object>> asyncObservers = new ConcurrentDictionary<Type, List<object>>();
+        private readonly ConcurrentDictionary<Type, List<Delegate>> observers = new();
+        private readonly ConcurrentDictionary<Type, List<Delegate>> asyncObservers = new();
 
         public IMessageSender Sender => this;
 
@@ -40,7 +40,7 @@ namespace HyperMsg
 
         public IDisposable Subscribe<T>(AsyncAction<T> messageObserver) => AddObserver<T>(asyncObservers, messageObserver);
 
-        private IDisposable AddObserver<T>(ConcurrentDictionary<Type, List<object>> observers, object messageObserver)
+        private IDisposable AddObserver<T>(ConcurrentDictionary<Type, List<Delegate>> observers, Delegate messageObserver)
         {
             if (messageObserver == null)
             {
@@ -53,7 +53,7 @@ namespace HyperMsg
             }
             else
             {
-                observers.TryAdd(typeof(T), new List<object> { messageObserver });
+                observers.TryAdd(typeof(T), new List<Delegate> { messageObserver });
             }
 
             return new Subscription(messageObserver, observers[typeof(T)]);
@@ -63,21 +63,25 @@ namespace HyperMsg
 
         public async Task SendAsync<T>(T message, CancellationToken cancellationToken)
         {            
-            if (this.observers.TryGetValue(typeof(T), out var observers))
+            var handlers = GetHandlers(observers, message.GetType());
+            
+            foreach(var handler in handlers)
             {
-                foreach (var observer in observers.Cast<Action<T>>().ToArray())
-                {
-                    observer.Invoke(message);
-                }
+                handler.DynamicInvoke(message);
             }
 
-            if (this.asyncObservers.TryGetValue(typeof(T), out var asyncObservers))
-            {
-                foreach (var asyncObserver in asyncObservers.Cast<AsyncAction<T>>().ToArray())
-                {
-                    await asyncObserver.Invoke(message, cancellationToken);
-                }
-            }
+            handlers = GetHandlers(asyncObservers, message.GetType());
+
+            var tasks = handlers.Select(h => h.DynamicInvoke(message, cancellationToken)).Cast<Task>();
+            await Task.WhenAll(tasks);
+        }
+
+        private IEnumerable<Delegate> GetHandlers(ConcurrentDictionary<Type, List<Delegate>> observers, Type messageType)
+        {
+            var keys = observers.Keys.Where(k => k.IsAssignableFrom(messageType));
+            return observers.Where(kvp => keys.Contains(kvp.Key))
+                .SelectMany(kvp => kvp.Value)
+                .ToArray();
         }
     }
 }
