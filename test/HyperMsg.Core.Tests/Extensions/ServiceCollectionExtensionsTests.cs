@@ -41,7 +41,7 @@ namespace HyperMsg.Extensions
         public void AddBufferContext_Adds_BufferContext()
         {
             services.AddSharedMemoryPool();
-            services.AddBufferContext(100, 100);
+            services.AddBufferContext();
             var provider = services.BuildServiceProvider();
 
             var context = provider.GetService<IBufferContext>();
@@ -103,7 +103,7 @@ namespace HyperMsg.Extensions
             var serializer = A.Fake<Action<IBufferWriter<byte>, Guid>>();
             var bufferTransmitter = A.Fake<Action<IBuffer>>();
 
-            services.AddMessagingServices(1000, 1000);
+            services.AddMessagingServices();
             services.AddBufferDataTransmitObserver(bufferTransmitter);
             services.AddSerializationComponent(serializer);
             var host = new Host(services);
@@ -115,6 +115,31 @@ namespace HyperMsg.Extensions
 
             A.CallTo(() => serializer.Invoke(A<IBufferWriter<byte>>._, data)).MustHaveHappened();
             A.CallTo(() => bufferTransmitter.Invoke(A<IBuffer>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void AddDeserializationComponent_()
+        {
+            var actualData = Guid.Empty;
+            services.AddMessagingServices();
+            services.AddDeserializationComponent(buffer =>
+            {
+                var bytes = buffer.ToArray();
+                return (bytes.Length, new Guid(bytes));
+            });
+            services.AddReceiveObserver<Guid>(data => actualData = data);
+            var host = new Host(services);
+            var data = Guid.NewGuid();
+            host.Start();
+
+            var sender = host.Services.GetRequiredService<IMessageSender>();
+            var bufferContext = host.Services.GetRequiredService<IBufferContext>();
+            var buffer = bufferContext.ReceivingBuffer;
+            buffer.Writer.Write(data.ToByteArray());
+
+            sender.BufferReceivedData(buffer);
+
+            Assert.Equal(data, actualData);
         }
     }
 }

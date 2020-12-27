@@ -11,6 +11,8 @@ namespace HyperMsg.Extensions
 {
     public static class ServiceCollectionExtensions
     {
+        const int DefaultBufferSize = -1;
+
         /// <summary>
         /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageObservable,
         /// receiving and transmitting buffer).
@@ -18,7 +20,7 @@ namespace HyperMsg.Extensions
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
+        public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
                 .AddSharedMemoryPool()                
@@ -37,7 +39,7 @@ namespace HyperMsg.Extensions
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
-        public static IServiceCollection AddBufferContext(this IServiceCollection services, int receivingBufferSize, int transmittingBufferSize)
+        public static IServiceCollection AddBufferContext(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
             return services.AddSingleton(provider =>
             {
@@ -215,6 +217,33 @@ namespace HyperMsg.Extensions
                 {
                     serializer.Invoke(bufferWriter, message);
                     await messageSender.TransmitBufferDataAsync(bufferContext.TransmittingBuffer, token);
+                });
+            });
+        }
+
+        public static IServiceCollection AddDeserializationComponent<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
+        {
+            return services.AddObservers((provider, observable) =>
+            {
+                var bufferContext = provider.GetRequiredService<IBufferContext>();
+                var messageSender = provider.GetRequiredService<IMessageSender>();
+
+                observable.OnBufferReceivedData(buffer =>
+                {
+                    var reading = buffer.Reader.Read();
+                    if (reading.Length == 0)
+                    {
+                        return;
+                    }
+
+                    var deserializationResult = deserializer.Invoke(reading);
+
+                    if (deserializationResult.BytesRead == 0)
+                    {
+                        return;
+                    }
+
+                    messageSender.Received(deserializationResult.Message);
                 });
             });
         }
