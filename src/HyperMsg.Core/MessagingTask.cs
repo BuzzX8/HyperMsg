@@ -25,6 +25,8 @@ namespace HyperMsg
 
         public TaskAwaiter<TResult> GetAwaiter() => completionSource.Task.GetAwaiter();
 
+        public Task<TResult> AsTask() => completionSource.Task;
+
         protected CancellationToken CancellationToken { get; }
 
         public TResult Result => completionSource.Task.Result;
