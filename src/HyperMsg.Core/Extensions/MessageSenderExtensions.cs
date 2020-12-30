@@ -11,7 +11,7 @@ namespace HyperMsg.Extensions
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="message">Message to send.</param>
-        public static void Received<T>(this IMessageSender messageSender, T message) => messageSender.Send(new Received<T>(message));
+        public static void Received<T>(this IMessageSender messageSender, T message) => messageSender.Send(new Received(message));
 
         /// <summary>
         /// Wraps message into Received<typeparamref name="T"/> decorator and sends.
@@ -21,7 +21,7 @@ namespace HyperMsg.Extensions
         /// <param name="message">Message to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task ReceivedAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new Received<T>(message), cancellationToken);
+        public static Task ReceivedAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new Received(message), cancellationToken);
 
         public static void BufferReceivedData(this IMessageSender messageSender, IBuffer receivingBuffer) => messageSender.Received(receivingBuffer);
 
@@ -33,7 +33,7 @@ namespace HyperMsg.Extensions
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="message">Message to send.</param>
-        public static void Transmit<T>(this IMessageSender messageSender, T message) => messageSender.Send(new Transmit<T>(message));
+        public static void Transmit<T>(this IMessageSender messageSender, T message) => messageSender.Send(new Transmit(message));
 
         /// <summary>
         /// Wraps message into Transmit<typeparamref name="T"/> decorator and sends.
@@ -43,7 +43,7 @@ namespace HyperMsg.Extensions
         /// <param name="message">Message to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task TransmitAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new Transmit<T>(message), cancellationToken);
+        public static Task TransmitAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new Transmit(message), cancellationToken);
 
         public static void TransmitBufferData(this IMessageSender messageSender, IBuffer transmittingBuffer) => messageSender.Transmit(transmittingBuffer);
 
