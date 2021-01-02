@@ -131,12 +131,12 @@ namespace HyperMsg
         }
 
         [Fact]
-        public async Task SendAsync_Invokes_HHandler_If_Type_Compatible()
+        public async Task SendAsync_Invokes_Handler_If_Type_Compatible()
         {
             var message = Guid.NewGuid();
             var actualMessage = Guid.Empty;
 
-            broker.Subscribe<Guid>(async (m, token) => actualMessage = m);
+            broker.Subscribe<Guid>(m => actualMessage = m);
 
             await broker.SendAsync<object>(message, tokenSource.Token);
 

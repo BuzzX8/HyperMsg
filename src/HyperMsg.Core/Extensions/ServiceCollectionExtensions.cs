@@ -243,6 +243,7 @@ namespace HyperMsg.Extensions
                         return;
                     }
 
+                    buffer.Reader.Advance(deserializationResult.BytesRead);
                     messageSender.Received(deserializationResult.Message);
                 });
             });

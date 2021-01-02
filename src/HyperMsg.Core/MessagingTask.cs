@@ -9,14 +9,13 @@ namespace HyperMsg
 {
     public abstract class MessagingTask<TResult> : IDisposable
     {
-        private readonly IMessagingContext context;
         private readonly List<IDisposable> subscriptions;
         private readonly TaskCompletionSource<TResult> completionSource;
 
-        protected MessagingTask(IMessagingContext context, CancellationToken cancellationToken = default)
+        protected MessagingTask(IMessagingContext messagingContext, CancellationToken cancellationToken = default)
         {
             CancellationToken = cancellationToken;
-            this.context = context;
+            MessagingContext = messagingContext ?? throw new ArgumentNullException(nameof(messagingContext));
             completionSource = new TaskCompletionSource<TResult>();
             subscriptions = new List<IDisposable>();
         }
@@ -27,25 +26,31 @@ namespace HyperMsg
 
         public Task<TResult> AsTask() => completionSource.Task;
 
-        protected CancellationToken CancellationToken { get; }
+        protected CancellationToken CancellationToken { get; }        
+
+        protected IMessagingContext MessagingContext { get; }
+
+        protected IMessageObservable Observable => MessagingContext.Observable;
+
+        protected IMessageSender Sender => MessagingContext.Sender;
 
         public TResult Result => completionSource.Task.Result;
 
-        protected void AddHandler<TMessage>(Action<TMessage> handler) => subscriptions.Add(context.Observable.Subscribe(handler));
+        protected void AddHandler<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.Subscribe(handler));
 
-        protected void AddHandler<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(context.Observable.Subscribe(handler));
+        protected void AddHandler<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.Subscribe(handler));
 
-        protected void AddReceiver<TMessage>(Action<TMessage> handler) => subscriptions.Add(context.Observable.OnReceived(handler));
+        protected void AddReceiver<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.OnReceived(handler));
 
-        protected void AddReceiver<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(context.Observable.OnReceived(handler));
+        protected void AddReceiver<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.OnReceived(handler));
 
-        protected void Send<TMessage>(TMessage message) => context.Sender.Send(message);
+        protected void Send<TMessage>(TMessage message) => Sender.Send(message);
 
-        protected Task SendAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => context.Sender.SendAsync(message, cancellationToken);
+        protected Task SendAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.SendAsync(message, cancellationToken);
 
-        protected void Transmit<TMessage>(TMessage message) => context.Sender.Transmit(message);
+        protected void Transmit<TMessage>(TMessage message) => Sender.Transmit(message);
 
-        protected Task TransmitAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => context.Sender.TransmitAsync(message, cancellationToken);
+        protected Task TransmitAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.TransmitAsync(message, cancellationToken);
 
         protected void Complete(TResult result)
         {
