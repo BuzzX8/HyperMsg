@@ -17,5 +17,5 @@ namespace HyperMsg
     /// <param name="obj">Parameter.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task that represents async action.</returns>
-    public delegate Task AsyncAction<T>(T obj, CancellationToken cancellationToken);
+    public delegate Task AsyncAction<in T>(T obj, CancellationToken cancellationToken);
 }

@@ -107,22 +107,22 @@ namespace HyperMsg.Extensions
 
         public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, Action<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.Subscribe(handler));
+            return services.AddObservers(observable => observable.AddObserver(handler));
         }
 
         public static IServiceCollection AddObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, Action<TMessage>> configurationDelegate) where TComponent : class
         {
-            return services.AddObservers<TComponent>((component, observable) => observable.Subscribe(configurationDelegate.Invoke(component)));
+            return services.AddObservers<TComponent>((component, observable) => observable.AddObserver(configurationDelegate.Invoke(component)));
         }
 
         public static IServiceCollection AddObserver<TMessage>(this IServiceCollection services, AsyncAction<TMessage> handler)
         {
-            return services.AddObservers(observable => observable.Subscribe(handler));
+            return services.AddObservers(observable => observable.AddObserver(handler));
         }
 
         public static IServiceCollection AddObserver<TComponent, TMessage>(this IServiceCollection services, Func<TComponent, AsyncAction<TMessage>> configurationDelegate) where TComponent : class
         {
-            return services.AddObservers<TComponent>((component, observable) => observable.Subscribe(configurationDelegate.Invoke(component)));
+            return services.AddObservers<TComponent>((component, observable) => observable.AddObserver(configurationDelegate.Invoke(component)));
         }
 
         public static IServiceCollection AddTransmitObserver<TMessage>(this IServiceCollection services, Action<TMessage> handler)

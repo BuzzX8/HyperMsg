@@ -36,9 +36,9 @@ namespace HyperMsg
 
         public TResult Result => completionSource.Task.Result;
 
-        protected void AddHandler<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.Subscribe(handler));
+        protected void AddHandler<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.AddObserver(handler));
 
-        protected void AddHandler<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.Subscribe(handler));
+        protected void AddHandler<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.AddObserver(handler));
 
         protected void AddReceiver<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.OnReceived(handler));
 
