@@ -5,7 +5,7 @@ namespace HyperMsg.Extensions
 {
     public static class MessageObservableExtensions
     {
-        public static IDisposable OnTransmit<T>(this IMessageObservable messageObservable, Action<T> messageObserver) => messageObservable.Subscribe<Transmit>(m =>
+        public static IDisposable OnTransmit<T>(this IMessageObservable messageObservable, Action<T> messageObserver) => messageObservable.AddObserver<Transmit>(m =>
         {
             if (typeof(T).IsAssignableFrom(m.Message.GetType()))
             {
@@ -13,7 +13,7 @@ namespace HyperMsg.Extensions
             }
         });
 
-        public static IDisposable OnTransmit<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver) => messageObservable.Subscribe<Transmit>((m, t) =>
+        public static IDisposable OnTransmit<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver) => messageObservable.AddObserver<Transmit>((m, t) =>
         {
             if (typeof(T).IsAssignableFrom(m.Message.GetType()))
             {
@@ -27,7 +27,7 @@ namespace HyperMsg.Extensions
 
         public static IDisposable OnBufferDataTransmit(this IMessageObservable messageObservable, AsyncAction<IBuffer> messageObserver) => messageObservable.OnTransmit(messageObserver);
 
-        public static IDisposable OnReceived<T>(this IMessageObservable messageObservable, Action<T> messageObserver) => messageObservable.Subscribe<Received>(m =>
+        public static IDisposable OnReceived<T>(this IMessageObservable messageObservable, Action<T> messageObserver) => messageObservable.AddObserver<Received>(m =>
         {
             if (typeof(T).IsAssignableFrom(m.Message.GetType()))
             {
@@ -35,7 +35,7 @@ namespace HyperMsg.Extensions
             }                
         });
 
-        public static IDisposable OnReceived<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver) => messageObservable.Subscribe<Received>((m, t) =>
+        public static IDisposable OnReceived<T>(this IMessageObservable messageObservable, AsyncAction<T> messageObserver) => messageObservable.AddObserver<Received>((m, t) =>
         {                
             if (typeof(T).IsAssignableFrom(m.Message.GetType()))
             {
