@@ -17,6 +17,7 @@ namespace HyperMsg
             private readonly Delegate observer;
             private readonly Type messageType;
             private readonly Action<Type, Delegate> disposeAction;
+                        
             private bool isDisposed;
 
             public Subscription(Type messageType, Delegate observer, Action<Type, Delegate> disposeAction)
@@ -40,6 +41,7 @@ namespace HyperMsg
         }
 
         private readonly Dictionary<Type, Delegate> observers = new();
+        private readonly List<Delegate> handlers = new();
         private readonly object sync = new();
 
         public IMessageSender Sender => this;
@@ -83,7 +85,7 @@ namespace HyperMsg
         {            
             var handlers = GetHandlers(message.GetType());
             
-            for(int i = 0; i < handlers.Length; i++)
+            for(int i = 0; i < handlers.Count; i++)
             {
                 try
                 {
@@ -94,16 +96,23 @@ namespace HyperMsg
                     throw e.InnerException;
                 }
             }
-        }
+        }        
 
-        private Delegate[] GetHandlers(Type messageType)
+        private List<Delegate> GetHandlers(Type messageType)
         {
             lock (sync)
             {
-                var keys = observers.Keys.Where(k => k.IsAssignableFrom(messageType));
-                return observers.Where(kvp => keys.Contains(kvp.Key))
-                    .Select(kvp => kvp.Value)
-                    .ToArray();
+                handlers.Clear();
+
+                foreach(var key in observers.Keys)
+                {
+                    if (key.IsAssignableFrom(messageType))
+                    {
+                        handlers.Add(observers[key]);
+                    }
+                }
+
+                return handlers;
             }
         }
 
