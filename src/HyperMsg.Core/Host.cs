@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using HyperMsg.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
@@ -6,13 +7,15 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class Host : IHost
+    public class Host : IHost, IServiceProvider
     {
         private readonly ServiceProvider serviceProvider;
 
         public Host(IServiceCollection services) => serviceProvider = services.BuildServiceProvider();
 
         public IServiceProvider Services => serviceProvider;
+
+        public object GetService(Type serviceType) => Services.GetService(serviceType);
 
         public void Dispose() => serviceProvider.Dispose();
 
@@ -34,6 +37,15 @@ namespace HyperMsg
             {
                 await service.StopAsync(cancellationToken);
             }
+        }
+
+        public static Host CreateDefault(Action<IServiceCollection> serviceConfigurator = null)
+        {
+            var services = new ServiceCollection();
+            services.AddMessagingServices();
+            serviceConfigurator?.Invoke(services);
+            
+            return new Host(services);
         }
     }
 }
