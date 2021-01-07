@@ -1,6 +1,7 @@
 ﻿using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,6 +45,26 @@ namespace HyperMsg
             await host.StopAsync(tokenSource.Token);
 
             hostedServices.ForEach(s => A.CallTo(() => s.StopAsync(tokenSource.Token)).MustHaveHappened());
+        }
+
+        [Fact]
+        public void CreateDefault_Invokes_Provided_Configurator()
+        {
+            var configurator = A.Fake<Action<IServiceCollection>>();
+
+            Host.CreateDefault(configurator);
+
+            A.CallTo(() => configurator.Invoke(A<IServiceCollection>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void CreateDefault_Adds_MessagingServices()
+        {
+            var host = Host.CreateDefault();
+
+            var sender = host.GetRequiredService<IMessageSender>();
+
+            Assert.NotNull(sender);
         }
 
         public abstract class HostedService1 : IHostedService
