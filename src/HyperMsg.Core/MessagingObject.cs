@@ -38,6 +38,10 @@ namespace HyperMsg
 
         protected Task TransmitAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.TransmitAsync(message, cancellationToken);
 
+        protected void Received<TMessage>(TMessage message) => Sender.Received(message);
+
+        protected Task ReceivedAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.ReceivedAsync(message, cancellationToken);
+
         public virtual void Dispose() => subscriptions.ForEach(s => s.Dispose());
     }
 }

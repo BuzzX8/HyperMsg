@@ -21,11 +21,7 @@ namespace HyperMsg.Extensions
             }
 
             return Task.CompletedTask;
-        });
-
-        public static IDisposable OnBufferDataTransmit(this IMessageObservable messageObservable, Action<IBuffer> messageObserver) => messageObservable.OnTransmit(messageObserver);
-
-        public static IDisposable OnBufferDataTransmit(this IMessageObservable messageObservable, AsyncAction<IBuffer> messageObserver) => messageObservable.OnTransmit(messageObserver);
+        });        
 
         public static IDisposable OnReceived<T>(this IMessageObservable messageObservable, Action<T> messageObserver) => messageObservable.AddObserver<Received>(m =>
         {
@@ -44,10 +40,5 @@ namespace HyperMsg.Extensions
 
             return Task.CompletedTask;
         });
-
-
-        public static IDisposable OnBufferReceivedData(this IMessageObservable messageObservable, Action<IBuffer> messageObserver) => messageObservable.OnReceived(messageObserver);
-
-        public static IDisposable OnBufferReceivedData(this IMessageObservable messageObservable, AsyncAction<IBuffer> messageObserver) => messageObservable.OnReceived(messageObserver);
     }
 }

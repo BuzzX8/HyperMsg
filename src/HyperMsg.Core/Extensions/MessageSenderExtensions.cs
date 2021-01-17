@@ -23,10 +23,6 @@ namespace HyperMsg.Extensions
         /// <returns></returns>
         public static Task ReceivedAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new Received(message), cancellationToken);
 
-        public static void BufferReceivedData(this IMessageSender messageSender, IBuffer receivingBuffer) => messageSender.Received(receivingBuffer);
-
-        public static Task BufferReceivedDataAsync(this IMessageSender messageSender, IBuffer receivingBuffer, CancellationToken cancellationToken) => messageSender.ReceivedAsync(receivingBuffer, cancellationToken);
-
         /// <summary>
         /// Wraps message into Transmit<typeparamref name="T"/> decorator and sends.
         /// </summary>
@@ -44,9 +40,5 @@ namespace HyperMsg.Extensions
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
         public static Task TransmitAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new Transmit(message), cancellationToken);
-
-        public static void TransmitBufferData(this IMessageSender messageSender, IBuffer transmittingBuffer) => messageSender.Transmit(transmittingBuffer);
-
-        public static Task TransmitBufferDataAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken) => messageSender.TransmitAsync(transmittingBuffer, cancellationToken);
     }
 }
