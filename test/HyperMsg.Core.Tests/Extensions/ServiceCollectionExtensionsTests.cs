@@ -62,84 +62,33 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public void AddObservers_Invokes_Configuration_Delegate()
+        public void AddSerializer_Adds_Serializer()
         {
-            var configurationDelegate = A.Fake<Action<IServiceProvider, IMessageObservable>>();
-            services.AddMessageBroker();            
-            services.AddObservers(configurationDelegate);
-            var host = new Host(services);
-            host.Start();
-
-            A.CallTo(() => configurationDelegate.Invoke(A<IServiceProvider>._, A<IMessageObservable>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void AddObservers_Invokes_Configuration_Delegate2()
-        {
-            var configurationDelegate = A.Fake<Action<IMessageObservable>>();
-            services.AddMessageBroker();
-            services.AddObservers(configurationDelegate);
-            var host = new Host(services);
-            host.Start();
-
-            A.CallTo(() => configurationDelegate.Invoke(A<IMessageObservable>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void AddObservers_Invokes_Configuration_Delegate3()
-        {
-            var configurationDelegate = A.Fake<Action<MessageBroker, IMessageObservable>>();
-            services.AddMessageBroker();
-            services.AddObservers(configurationDelegate);
-            var host = new Host(services);
-            host.Start();
-
-            A.CallTo(() => configurationDelegate.Invoke(A<MessageBroker>._, A<IMessageObservable>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void AddSerializationComponent_Invokes_BufferObserver_And_BufferTransmitter()
-        {
+            var message = Guid.NewGuid();
             var serializer = A.Fake<Action<IBufferWriter<byte>, Guid>>();
-            var bufferTransmitter = A.Fake<Action<IBuffer>>();
+            var host = Host.CreateDefault(services => services.AddSerializer(serializer));
+            host.StartAsync().Wait();
 
-            services.AddMessagingServices();
-            services.AddBufferDataTransmitObserver(bufferTransmitter);
-            services.AddSerializationComponent(serializer);
-            var host = new Host(services);
-            var data = Guid.NewGuid();            
-            host.Start();
+            var sender = host.GetRequiredService<IMessageSender>();
+            sender.Transmit(message);
 
-            var sender = host.Services.GetRequiredService<IMessageSender>();
-            sender.Transmit(data);
-
-            A.CallTo(() => serializer.Invoke(A<IBufferWriter<byte>>._, data)).MustHaveHappened();
-            A.CallTo(() => bufferTransmitter.Invoke(A<IBuffer>._)).MustHaveHappened();
+            A.CallTo(() => serializer.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
         }
 
         [Fact]
-        public void AddDeserializationComponent_()
+        public void AddDeserializer_Adds_Deserializer()
         {
-            var actualData = Guid.Empty;
-            services.AddMessagingServices();
-            services.AddDeserializationComponent(buffer =>
-            {
-                var bytes = buffer.ToArray();
-                return (bytes.Length, new Guid(bytes));
-            });
-            services.AddReceiveObserver<Guid>(data => actualData = data);
-            var host = new Host(services);
-            var data = Guid.NewGuid();
-            host.Start();
+            var message = Guid.NewGuid().ToByteArray();
+            var deserializer = A.Fake<Func<ReadOnlySequence<byte>, (int, Guid)>>();
+            var host = Host.CreateDefault(services => services.AddDeserializer(deserializer));
+            host.StartAsync().Wait();
 
-            var sender = host.Services.GetRequiredService<IMessageSender>();
-            var bufferContext = host.Services.GetRequiredService<IBufferContext>();
-            var buffer = bufferContext.ReceivingBuffer;
-            buffer.Writer.Write(data.ToByteArray());
+            var sender = host.GetRequiredService<IMessageSender>();
+            var buffers = host.GetRequiredService<IBufferContext>();
+            buffers.ReceivingBuffer.Writer.Write(message);
+            sender.Received(buffers.ReceivingBuffer);
 
-            sender.BufferReceivedData(buffer);
-
-            Assert.Equal(data, actualData);
+            A.CallTo(() => deserializer.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
         }
     }
 }
