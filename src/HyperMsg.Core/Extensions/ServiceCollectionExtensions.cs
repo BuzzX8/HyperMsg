@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace HyperMsg.Extensions
@@ -71,41 +71,54 @@ namespace HyperMsg.Extensions
                 .AddSingleton<IMessagingContext>(broker);
         }
 
+        public static IServiceCollection AddConfigurator(this IServiceCollection services, Action<IServiceProvider> configurator)
+        {
+            services.AddHostedService<ConfigurationService>(provider =>
+            {
+                var configurators = provider.GetRequiredService<ConfiguratorCollection>();
+                return new (configurators, provider);
+            });
+
+
+            if (services.SingleOrDefault(s => s.ServiceType == typeof(ConfiguratorCollection))?.ImplementationInstance is not ConfiguratorCollection configurators)
+            {
+                configurators = new ConfiguratorCollection();
+                services.AddSingleton(configurators);
+            }
+
+            configurators.Add(configurator);
+
+            return services;
+        }
+
         public static IServiceCollection AddSerializer<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
         {
-            var initializers = services.AddSerializationService();
-            initializers.Add(service => service.AddSerializer(serializer));
-            return services;
+            services.AddSerializationService();
+            return services.AddConfigurator(provider =>
+            {
+                var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
+                service.AddSerializer(serializer);
+            });
         }
 
         public static IServiceCollection AddDeserializer<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
         {
-            var initializers = services.AddSerializationService();
-            initializers.Add(service => service.AddDeserializer(deserializer));
-            return services;
+            services.AddSerializationService();
+            return services.AddConfigurator(provider =>
+            {
+                var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
+                service.AddDeserializer(deserializer);
+            });
         }
 
-        private static SerializationServiceInitializers AddSerializationService(this IServiceCollection services)
+        private static IServiceCollection AddSerializationService(this IServiceCollection services)
         {
             return services.AddHostedService(provider =>
-            {
-                var initializers = provider.GetRequiredService<SerializationServiceInitializers>();
+            {                
                 var messagingContext = provider.GetRequiredService<IMessagingContext>();
                 var bufferContext = provider.GetRequiredService<IBufferContext>();
-                return new SerializationService(initializers, messagingContext, bufferContext.TransmittingBuffer);
-            }).AddSerializationServiceInitializers();
-        }
-
-        private static SerializationServiceInitializers AddSerializationServiceInitializers(this IServiceCollection services)
-        {
-            if (services.Any(s => s.ServiceType == typeof(SerializationServiceInitializers)))
-            {
-                return (SerializationServiceInitializers)services.Single(s => s.ServiceType == typeof(SerializationServiceInitializers)).ImplementationInstance;
-            }
-
-            var initializers = new SerializationServiceInitializers();
-            services.AddSingleton(initializers);
-            return initializers;
+                return new SerializationService(messagingContext, bufferContext.TransmittingBuffer);
+            });
         }
     }
 }

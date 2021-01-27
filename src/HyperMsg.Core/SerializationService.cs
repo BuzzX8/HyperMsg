@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,13 +9,8 @@ namespace HyperMsg
     internal class SerializationService : MessagingObject, IHostedService
     {
         private readonly IBuffer transmittingBuffer;
-        private readonly SerializationServiceInitializers initializers;
 
-        internal SerializationService(SerializationServiceInitializers initializers, IMessagingContext messagingContext, IBuffer transmittingBuffer) : base(messagingContext)
-        {
-            this.initializers = initializers;
-            this.transmittingBuffer = transmittingBuffer;
-        }
+        internal SerializationService(IMessagingContext messagingContext, IBuffer transmittingBuffer) : base(messagingContext) => this.transmittingBuffer = transmittingBuffer;
 
         public void AddSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
         {
@@ -27,10 +21,7 @@ namespace HyperMsg
             });
         }
 
-        public void AddDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
-        {
-            AddReceiver<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
-        }
+        public void AddDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => AddReceiver<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
 
         private Task DeserializeAsync<TMessage>(IBuffer buffer, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer, CancellationToken cancellationToken)
         {
@@ -52,18 +43,8 @@ namespace HyperMsg
             return ReceivedAsync(message, cancellationToken);
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            foreach(var initializer in initializers)
-            {
-                initializer.Invoke(this);
-            }
-
-            return Task.CompletedTask;
-        }
+        public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
-
-    internal class SerializationServiceInitializers : List<Action<SerializationService>> { }
 }
