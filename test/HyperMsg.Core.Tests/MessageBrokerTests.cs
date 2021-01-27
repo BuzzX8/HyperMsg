@@ -16,7 +16,7 @@ namespace HyperMsg
         {
             var observer = A.Fake<AsyncAction<Guid>>();
             var message = Guid.NewGuid();
-            broker.AddObserver(observer);
+            broker.RegisterHandler(observer);
 
             broker.Send(message);
 
@@ -31,7 +31,7 @@ namespace HyperMsg
 
             foreach (var observer in observers)
             {
-                broker.AddObserver(observer);
+                broker.RegisterHandler(observer);
             }
 
             broker.Send(message);
@@ -50,7 +50,7 @@ namespace HyperMsg
             
             foreach(var observer in observers)
             {
-                broker.AddObserver(observer);
+                broker.RegisterHandler(observer);
             }
 
             broker.Send(message);
@@ -66,7 +66,7 @@ namespace HyperMsg
         {
             var observer = A.Fake<AsyncAction<Guid>>();
             var message = Guid.NewGuid();
-            broker.AddObserver(observer);
+            broker.RegisterHandler(observer);
 
             await broker.SendAsync(message, tokenSource.Token);
 
@@ -76,9 +76,9 @@ namespace HyperMsg
         [Fact]
         public void Send_Does_Not_Throw_Exception_When_New_Observer_Subscribed()
         {
-            broker.AddObserver<Guid>(m =>
+            broker.RegisterHandler<Guid>(m =>
             {
-                broker.AddObserver<string>(s => { });
+                broker.RegisterHandler<string>(s => { });
             });
 
             broker.Send(Guid.NewGuid());
@@ -88,7 +88,7 @@ namespace HyperMsg
         public void Send_Does_Not_Invokes_Unsubscribed_Observers()
         {
             var observer = A.Fake<Action<Guid>>();
-            var subscription = broker.AddObserver(observer);
+            var subscription = broker.RegisterHandler(observer);
 
             subscription.Dispose();
             broker.Send(Guid.NewGuid());
@@ -100,7 +100,7 @@ namespace HyperMsg
         public void Send_Does_Not_Invokes_Unsubscribed_Async_Observers()
         {
             var observer = A.Fake<AsyncAction<Guid>>();
-            var subscription = broker.AddObserver(observer);
+            var subscription = broker.RegisterHandler(observer);
 
             subscription.Dispose();
             broker.Send(Guid.NewGuid());
@@ -111,8 +111,8 @@ namespace HyperMsg
         [Fact]
         public void Send_Does_Not_Throw_Exception_If_Cancelling_Subscription_Inside_Observer()
         {
-            var subscription = broker.AddObserver<Guid>(m => { });
-            broker.AddObserver<Guid>(m => subscription.Dispose());
+            var subscription = broker.RegisterHandler<Guid>(m => { });
+            broker.RegisterHandler<Guid>(m => subscription.Dispose());
 
             broker.Send(Guid.NewGuid());
         }
@@ -123,7 +123,7 @@ namespace HyperMsg
             var message = Guid.NewGuid();
             var actualMessage = Guid.Empty;
 
-            broker.AddObserver<Guid>(m => actualMessage = m);
+            broker.RegisterHandler<Guid>(m => actualMessage = m);
 
             broker.Send<object>(message);
 
@@ -136,7 +136,7 @@ namespace HyperMsg
             var message = Guid.NewGuid();
             var actualMessage = Guid.Empty;
 
-            broker.AddObserver<Guid>(m => actualMessage = m);
+            broker.RegisterHandler<Guid>(m => actualMessage = m);
 
             await broker.SendAsync<object>(message, tokenSource.Token);
 

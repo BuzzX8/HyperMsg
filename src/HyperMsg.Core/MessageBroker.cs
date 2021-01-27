@@ -10,7 +10,7 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for MessageSender and MessageHandlerRegistry
     /// </summary>
-    public class MessageBroker : IMessageSender, IMessageObservable, IMessagingContext
+    public class MessageBroker : IMessageSender, IMessageHandlersRegistry, IMessagingContext
     {
         private class Subscription : IDisposable
         {
@@ -46,15 +46,15 @@ namespace HyperMsg
 
         public IMessageSender Sender => this;
 
-        public IMessageObservable Observable => this;
+        public IMessageHandlersRegistry HandlersRegistry => this;
 
-        public IDisposable AddObserver<T>(Action<T> messageObserver) => AddObserver<T>((m, t) =>
+        public IDisposable RegisterHandler<T>(Action<T> messageObserver) => RegisterHandler<T>((m, t) =>
         {
             messageObserver.Invoke(m);
             return Task.CompletedTask;
         });
 
-        public IDisposable AddObserver<T>(AsyncAction<T> messageObserver) => AddObserver<T>((Delegate)messageObserver);
+        public IDisposable RegisterHandler<T>(AsyncAction<T> messageObserver) => AddObserver<T>((Delegate)messageObserver);
 
         private IDisposable AddObserver<T>(Delegate messageObserver)
         {

@@ -14,21 +14,21 @@ namespace HyperMsg
 
         protected IMessagingContext MessagingContext { get; }
 
-        protected IMessageObservable Observable => MessagingContext.Observable;
+        protected IMessageHandlersRegistry Observable => MessagingContext.HandlersRegistry;
 
         protected IMessageSender Sender => MessagingContext.Sender;
 
-        protected void AddHandler<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.AddObserver(handler));
+        protected void AddHandler<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.RegisterHandler(handler));
 
-        protected void AddHandler<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.AddObserver(handler));
+        protected void AddHandler<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.RegisterHandler(handler));
 
-        protected void AddReceiver<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.OnReceived(handler));
+        protected void AddReceiver<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.RegisterReceiveHandler(handler));
 
-        protected void AddReceiver<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.OnReceived(handler));
+        protected void AddReceiver<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.RegisterReceiveHandler(handler));
 
-        protected void AddTransmitter<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.OnTransmit(handler));
+        protected void AddTransmitter<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.RegisterTransmitHandler(handler));
 
-        protected void AddTransmitter<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.OnTransmit(handler));
+        protected void AddTransmitter<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.RegisterTransmitHandler(handler));
 
         protected void Send<TMessage>(TMessage message) => Sender.Send(message);
 
@@ -38,9 +38,9 @@ namespace HyperMsg
 
         protected Task TransmitAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.TransmitAsync(message, cancellationToken);
 
-        protected void Received<TMessage>(TMessage message) => Sender.Received(message);
+        protected void Received<TMessage>(TMessage message) => Sender.Receive(message);
 
-        protected Task ReceivedAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.ReceivedAsync(message, cancellationToken);
+        protected Task ReceivedAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.ReceiveAsync(message, cancellationToken);
 
         public virtual void Dispose() => subscriptions.ForEach(s => s.Dispose());
     }
