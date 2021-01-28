@@ -49,7 +49,7 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public void Received_Sends_Message_To_Transmit_Handlers()
+        public void Receive_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterReceiveHandler(handler);
             broker.RegisterReceiveHandler(asyncHandler);
@@ -61,7 +61,7 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public async Task ReceivedAsync_Sends_Message_To_Transmit_Handlers()
+        public async Task ReceiveAsync_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterReceiveHandler(handler);
             broker.RegisterReceiveHandler(asyncHandler);

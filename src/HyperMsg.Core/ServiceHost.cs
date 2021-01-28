@@ -39,13 +39,21 @@ namespace HyperMsg
             }
         }
 
+        public static ServiceHost Create(Action<IServiceCollection> serviceConfigurator)
+        {
+            var services = new ServiceCollection();            
+            serviceConfigurator.Invoke(services);
+
+            return new ServiceHost(services);
+        }
+
         public static ServiceHost CreateDefault(Action<IServiceCollection> serviceConfigurator = null)
         {
-            var services = new ServiceCollection();
-            services.AddMessagingServices();
-            serviceConfigurator?.Invoke(services);
-            
-            return new ServiceHost(services);
+            return Create(services =>
+            {
+                services.AddMessagingServices();
+                serviceConfigurator?.Invoke(services);
+            });
         }
     }
 }
