@@ -17,7 +17,7 @@ namespace HyperMsg.Extensions
             var provider = services.BuildServiceProvider();
 
             var sender = provider.GetService<IMessageSender>();
-            var observable = provider.GetService<IMessageObservable>();
+            var observable = provider.GetService<IMessageHandlersRegistry>();
             var context = provider.GetService<IMessagingContext>();
 
             Assert.NotNull(sender);
@@ -65,7 +65,7 @@ namespace HyperMsg.Extensions
         {
             var message = Guid.NewGuid();
             var serializer = A.Fake<Action<IBufferWriter<byte>, Guid>>();
-            var host = Host.CreateDefault(services => services.AddSerializer(serializer));
+            var host = ServiceHost.CreateDefault(services => services.AddSerializer(serializer));
             host.StartAsync().Wait();
 
             var sender = host.GetRequiredService<IMessageSender>();
@@ -79,13 +79,13 @@ namespace HyperMsg.Extensions
         {
             var message = Guid.NewGuid().ToByteArray();
             var deserializer = A.Fake<Func<ReadOnlySequence<byte>, (int, Guid)>>();
-            var host = Host.CreateDefault(services => services.AddDeserializer(deserializer));
+            var host = ServiceHost.CreateDefault(services => services.AddDeserializer(deserializer));
             host.StartAsync().Wait();
 
             var sender = host.GetRequiredService<IMessageSender>();
             var buffers = host.GetRequiredService<IBufferContext>();
             buffers.ReceivingBuffer.Writer.Write(message);
-            sender.Received(buffers.ReceivingBuffer);
+            sender.Receive(buffers.ReceivingBuffer);
 
             A.CallTo(() => deserializer.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
         }

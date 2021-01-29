@@ -11,8 +11,8 @@
         IMessageSender Sender { get; }
 
         /// <summary>
-        /// Message observer.
+        /// Message handlers registry.
         /// </summary>
-        IMessageObservable Observable { get; }
+        IMessageHandlersRegistry HandlersRegistry { get; }
     }
 }

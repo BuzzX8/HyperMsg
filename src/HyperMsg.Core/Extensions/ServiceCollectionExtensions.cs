@@ -67,7 +67,7 @@ namespace HyperMsg.Extensions
         {
             var broker = new MessageBroker();
             return services.AddSingleton<IMessageSender>(broker)
-                .AddSingleton<IMessageObservable>(broker)
+                .AddSingleton<IMessageHandlersRegistry>(broker)
                 .AddSingleton<IMessagingContext>(broker);
         }
 

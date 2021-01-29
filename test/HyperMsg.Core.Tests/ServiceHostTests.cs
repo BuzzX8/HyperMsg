@@ -9,13 +9,13 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class HostTests
+    public class ServiceHostTests
     {
         private readonly CancellationTokenSource tokenSource;
-        private readonly Host host;
+        private readonly ServiceHost host;
         private readonly List<IHostedService> hostedServices;
 
-        public HostTests()
+        public ServiceHostTests()
         {
             var services = new ServiceCollection();
             var hostedService1 = A.Fake<HostedService1>();
@@ -52,7 +52,7 @@ namespace HyperMsg
         {
             var configurator = A.Fake<Action<IServiceCollection>>();
 
-            Host.CreateDefault(configurator);
+            ServiceHost.CreateDefault(configurator);
 
             A.CallTo(() => configurator.Invoke(A<IServiceCollection>._)).MustHaveHappened();
         }
@@ -60,7 +60,7 @@ namespace HyperMsg
         [Fact]
         public void CreateDefault_Adds_MessagingServices()
         {
-            var host = Host.CreateDefault();
+            var host = ServiceHost.CreateDefault();
 
             var sender = host.GetRequiredService<IMessageSender>();
 

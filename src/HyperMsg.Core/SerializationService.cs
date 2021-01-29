@@ -14,14 +14,14 @@ namespace HyperMsg
 
         public void AddSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
         {
-            AddTransmitter<TMessage>(async (message, token) =>
+            RegisterTransmitHandler<TMessage>(async (message, token) =>
             {
                 serializer.Invoke(transmittingBuffer.Writer, message);
                 await TransmitAsync(transmittingBuffer, token);
             });
         }
 
-        public void AddDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => AddReceiver<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
+        public void AddDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => RegisterReceiveHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
 
         private Task DeserializeAsync<TMessage>(IBuffer buffer, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer, CancellationToken cancellationToken)
         {

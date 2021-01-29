@@ -14,21 +14,23 @@ namespace HyperMsg
 
         protected IMessagingContext MessagingContext { get; }
 
-        protected IMessageObservable Observable => MessagingContext.Observable;
+        protected IMessageHandlersRegistry HandlerRegistry => MessagingContext.HandlersRegistry;
 
         protected IMessageSender Sender => MessagingContext.Sender;
 
-        protected void AddHandler<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.AddObserver(handler));
+        protected void RegisterDisposable(IDisposable disposable) => subscriptions.Add(disposable);
 
-        protected void AddHandler<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.AddObserver(handler));
+        protected void RegisterHandler<TMessage>(Action<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterHandler(handler));
 
-        protected void AddReceiver<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.OnReceived(handler));
+        protected void RegisterHandler<TMessage>(AsyncAction<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterHandler(handler));
 
-        protected void AddReceiver<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.OnReceived(handler));
+        protected void RegisterReceiveHandler<TMessage>(Action<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterReceiveHandler(handler));
 
-        protected void AddTransmitter<TMessage>(Action<TMessage> handler) => subscriptions.Add(Observable.OnTransmit(handler));
+        protected void RegisterReceiveHandler<TMessage>(AsyncAction<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterReceiveHandler(handler));
 
-        protected void AddTransmitter<TMessage>(AsyncAction<TMessage> handler) => subscriptions.Add(Observable.OnTransmit(handler));
+        protected void RegisterTransmitHandler<TMessage>(Action<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterTransmitHandler(handler));
+
+        protected void RegisterTransmitHandler<TMessage>(AsyncAction<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterTransmitHandler(handler));
 
         protected void Send<TMessage>(TMessage message) => Sender.Send(message);
 
@@ -38,9 +40,9 @@ namespace HyperMsg
 
         protected Task TransmitAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.TransmitAsync(message, cancellationToken);
 
-        protected void Received<TMessage>(TMessage message) => Sender.Received(message);
+        protected void Received<TMessage>(TMessage message) => Sender.Receive(message);
 
-        protected Task ReceivedAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.ReceivedAsync(message, cancellationToken);
+        protected Task ReceivedAsync<TMessage>(TMessage message, CancellationToken cancellationToken) => Sender.ReceiveAsync(message, cancellationToken);
 
         public virtual void Dispose() => subscriptions.ForEach(s => s.Dispose());
     }
