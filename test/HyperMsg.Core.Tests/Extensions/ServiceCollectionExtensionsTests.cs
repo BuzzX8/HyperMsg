@@ -89,5 +89,35 @@ namespace HyperMsg.Extensions
 
             A.CallTo(() => deserializer.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
         }
+
+        [Fact]
+        public void AddMessageHandler_Registers_Message_Handler()
+        {
+            var message = Guid.NewGuid();
+            var handler = A.Fake<Action<Guid>>();
+            var host = ServiceHost.CreateDefault(services => services.AddMessageHandler(handler));
+            host.StartAsync().Wait();
+
+            var sender = host.GetRequiredService<IMessageSender>();
+            sender.Send(message);
+
+            A.CallTo(() => handler.Invoke(message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void AddMessageHandler_Disposes_Message_Handler_Registration()
+        {
+            var message = Guid.NewGuid();
+            var handler = A.Fake<Action<Guid>>();
+            var host = ServiceHost.CreateDefault(services => services.AddMessageHandler(handler));
+            host.StartAsync().Wait();
+
+            var sender = host.GetRequiredService<IMessageSender>();
+            host.StopAsync().Wait();
+            host.Dispose();
+            sender.Send(message);
+
+            A.CallTo(() => handler.Invoke(message)).MustNotHaveHappened();
+        }
     }
 }

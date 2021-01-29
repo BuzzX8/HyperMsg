@@ -120,5 +120,29 @@ namespace HyperMsg.Extensions
                 return new SerializationService(messagingContext, bufferContext.TransmittingBuffer);
             });
         }
+
+        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, Action<T> messageHandler)
+        {
+            return services.AddSingleton<DisposalService>()
+                .AddConfigurator(provider =>
+                {
+                    var registry = provider.GetRequiredService<IMessageHandlersRegistry>();
+                    var disService = provider.GetRequiredService<DisposalService>();
+
+                    disService.AddDisposable(registry.RegisterHandler(messageHandler));
+                });            
+        }
+
+        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, AsyncAction<T> messageHandler)
+        {
+            return services.AddSingleton<DisposalService>()
+                .AddConfigurator(provider =>
+                {
+                    var registry = provider.GetRequiredService<IMessageHandlersRegistry>();
+                    var disService = provider.GetRequiredService<DisposalService>();
+
+                    disService.AddDisposable(registry.RegisterHandler(messageHandler));
+                });
+        }
     }
 }
