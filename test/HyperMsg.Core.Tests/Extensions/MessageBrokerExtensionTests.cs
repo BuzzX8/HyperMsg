@@ -71,5 +71,27 @@ namespace HyperMsg.Extensions
             A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
             A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
         }
+
+        [Fact]
+        public void RegisterHandler_()
+        {            
+            var handler = A.Fake<Action<Guid>>();
+            broker.RegisterHandler(_ => true, handler);
+
+            broker.Send(Guid.NewGuid());
+
+            A.CallTo(() => handler.Invoke(A<Guid>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void RegisterHandler__()
+        {
+            var handler = A.Fake<Action<Guid>>();
+            broker.RegisterHandler(_ => false, handler);
+
+            broker.Send(Guid.NewGuid());
+
+            A.CallTo(() => handler.Invoke(A<Guid>._)).MustNotHaveHappened();
+        }
     }
 }

@@ -40,5 +40,36 @@ namespace HyperMsg.Extensions
 
             return Task.CompletedTask;
         });
+
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> predicate, Action<T> messageHandler) =>
+            handlersRegistry.RegisterHandler<T>(m =>
+            {
+                if (predicate.Invoke(m))
+                {
+                    messageHandler.Invoke(m);
+                }
+            });
+
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> predicate, AsyncAction<T> messageHandler) =>
+            handlersRegistry.RegisterHandler<T>((m, t) =>
+            {
+                if (predicate.Invoke(m))
+                {
+                    return messageHandler.Invoke(m, t);
+                }
+
+                return Task.CompletedTask;
+            });
+
+
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action<T> messageHandler) where T : IEquatable<T>
+        {
+            return handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+        }
+
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) where T : IEquatable<T>
+        {
+            return handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+        }
     }
 }
