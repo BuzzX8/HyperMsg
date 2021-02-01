@@ -40,5 +40,31 @@ namespace HyperMsg.Extensions
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
         public static Task TransmitAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new Transmit(message), cancellationToken);
+
+        public static async Task TransmitAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken)
+        {
+            var reader = transmittingBuffer.Reader;
+            var buffer = reader.Read();
+
+            if (buffer.Length == 0)
+            {
+                return;
+            }
+
+            if (buffer.IsSingleSegment)
+            {
+                await messageSender.TransmitAsync(buffer.First, cancellationToken);
+                reader.Advance((int)buffer.Length);
+                return;
+            }
+
+            var enumerator = buffer.GetEnumerator();
+
+            while (enumerator.MoveNext())
+            {
+                await messageSender.TransmitAsync(enumerator.Current, cancellationToken);
+            }
+
+        }
     }
 }
