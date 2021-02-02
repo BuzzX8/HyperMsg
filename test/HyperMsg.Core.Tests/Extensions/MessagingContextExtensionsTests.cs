@@ -1,6 +1,7 @@
 ﻿using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -24,24 +25,48 @@ namespace HyperMsg.Extensions
         [Fact]
         public void SetTimeout_Invokes_Callback()
         {
-            var callback = A.Fake<Action>();
+            var @event = new ManualResetEventSlim();
 
-            context.SetTimeout(TimeSpan.Zero, callback);            
+            context.SetTimeout(TimeSpan.Zero, () => @event.Set());
+            @event.Wait(TimeSpan.FromSeconds(1));
 
-            A.CallTo(() => callback.Invoke()).MustHaveHappened();
+            Assert.True(@event.IsSet);
         }
 
         [Fact]
-        public async Task SetTimeout_Does_Not_Invokes_Callback_If_Disposing_Registration()
+        public void SetTimeout_Does_Not_Invokes_Callback_If_Disposing_Registration()
         {
-            var callback = A.Fake<Action>();
+            var @event = new ManualResetEventSlim();
             var timeout = TimeSpan.FromSeconds(0.1);
-            var registration = context.SetTimeout(timeout, callback);
+            var registration = context.SetTimeout(timeout, () => @event.Set());
 
             registration.Dispose();
-            await Task.Delay(timeout);
+            @event.Wait(timeout * 2);
 
-            A.CallTo(() => callback.Invoke()).MustNotHaveHappened();
+            Assert.False(@event.IsSet);
+        }
+
+        [Fact]
+        public void SetInterval_Periodically_Invokes_Handler()
+        {
+            var @event = new ManualResetEventSlim();
+            var timeout = TimeSpan.FromSeconds(0.1);
+            var expected = 4;
+            var actual = 0;
+
+            var registration = context.SetInterval(timeout, () =>
+            {
+                actual++;
+                if (actual == expected)
+                {
+                    @event.Set();
+                }
+            });
+            @event.Wait(timeout * 10);
+            registration.Dispose();
+
+            Assert.True(@event.IsSet);
+            Assert.Equal(expected, actual);
         }
 
         public void Dispose() => host.Dispose();

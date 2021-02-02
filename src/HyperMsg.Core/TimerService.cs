@@ -84,14 +84,14 @@ namespace HyperMsg
 
     internal class TimerMessages
     {
-        internal class DisposeTimer
+        internal struct DisposeTimer
         {
             internal DisposeTimer(Guid id) => Id = id;
 
             internal Guid Id { get; }
         }
 
-        internal class SetTimeout
+        internal struct SetTimeout
         {
             internal SetTimeout(Guid id, TimeSpan timeout) => (Id, Timeout) = (id, timeout);
 
@@ -100,14 +100,14 @@ namespace HyperMsg
             internal TimeSpan Timeout { get; }
         }
 
-        internal class Timeout
+        internal struct Timeout
         {
             internal Timeout(Guid id) => Id = id;
 
             internal Guid Id { get; }
         }
 
-        internal class SetInterval
+        internal struct SetInterval
         {
             internal SetInterval(Guid id, TimeSpan interval) => (Id, Interval) = (id, interval);
 
@@ -116,7 +116,7 @@ namespace HyperMsg
             internal TimeSpan Interval { get; }
         }
 
-        internal class Interval
+        internal struct Interval
         {
             internal Interval(Guid id) => Id = id;
 
