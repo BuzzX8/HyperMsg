@@ -122,6 +122,8 @@ namespace HyperMsg.Extensions
             });
         }
 
+        public static IServiceCollection AddTimerService(this IServiceCollection services) => services.AddHostedService<TimerService>();
+
         public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, Action<T> messageHandler)
         {
             return services.AddSingleton<DisposalService>()
