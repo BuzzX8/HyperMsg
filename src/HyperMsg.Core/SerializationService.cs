@@ -40,7 +40,7 @@ namespace HyperMsg
 
             buffer.Reader.Advance(bytesConsumed);
 
-            return ReceivedAsync(message, cancellationToken);
+            return ReceiveAsync(message, cancellationToken);
         }
 
         public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
