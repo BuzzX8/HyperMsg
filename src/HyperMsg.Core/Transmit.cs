@@ -1,9 +1,9 @@
 ﻿namespace HyperMsg
 {
-    internal class Transmit
+    internal struct Transmit<T>
     {
-        public Transmit(object message) => Message = message;
+        public Transmit(T message) => Message = message;
 
-        internal object Message { get; }
+        internal T Message { get; }
     }
 }

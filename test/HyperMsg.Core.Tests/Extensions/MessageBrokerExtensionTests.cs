@@ -25,18 +25,6 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public void Transmit_Sends_Message_To_Transmit_Handlers1()
-        {
-            broker.RegisterTransmitHandler(handler);
-            broker.RegisterTransmitHandler(asyncHandler);
-
-            broker.Transmit<object>(data);
-
-            A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
-            A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
-        }
-
-        [Fact]
         public async Task TransmitAsync_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterTransmitHandler(handler);
