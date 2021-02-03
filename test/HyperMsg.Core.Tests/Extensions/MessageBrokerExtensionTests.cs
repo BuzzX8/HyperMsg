@@ -61,7 +61,7 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public void RegisterHandler_()
+        public void RegisterHandler_Invokes_Handler_If_Predicate_Returns_True()
         {            
             var handler = A.Fake<Action<Guid>>();
             broker.RegisterHandler(_ => true, handler);
@@ -72,7 +72,7 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public void RegisterHandler__()
+        public void RegisterHandler_Does_Not_Invokes_Handler_If_Predicate_Returns_False()
         {
             var handler = A.Fake<Action<Guid>>();
             broker.RegisterHandler(_ => false, handler);

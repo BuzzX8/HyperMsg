@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,16 +13,16 @@ namespace HyperMsg
     {
         private class Subscription : IDisposable
         {
-            private readonly Delegate observer;
+            private readonly Delegate messageHandler;
             private readonly Type messageType;
             private readonly Action<Type, Delegate> disposeAction;
                         
             private bool isDisposed;
 
-            public Subscription(Type messageType, Delegate observer, Action<Type, Delegate> disposeAction)
+            public Subscription(Type messageType, Delegate messageHandler, Action<Type, Delegate> disposeAction)
             {
                 this.messageType = messageType;
-                this.observer = observer;
+                this.messageHandler = messageHandler;
                 this.disposeAction = disposeAction;
                 isDisposed = false;
             }
@@ -35,100 +34,86 @@ namespace HyperMsg
                     return;
                 }
 
-                disposeAction.Invoke(messageType, observer);
+                disposeAction.Invoke(messageType, messageHandler);
                 isDisposed = true;
             }
         }
 
-        private readonly Dictionary<Type, Delegate> observers = new();
-        private readonly List<Delegate> handlers = new();
+        private readonly ConcurrentDictionary<Type, Delegate> messageHandlers = new();        
         private readonly object sync = new();
 
         public IMessageSender Sender => this;
 
         public IMessageHandlersRegistry HandlersRegistry => this;
 
-        public IDisposable RegisterHandler<T>(Action<T> messageObserver) => RegisterHandler<T>((m, t) =>
+        public IDisposable RegisterHandler<T>(Action<T> messageHandler) => RegisterHandler<T>((m, t) =>
         {
-            messageObserver.Invoke(m);
+            messageHandler.Invoke(m);
             return Task.CompletedTask;
         });
 
-        public IDisposable RegisterHandler<T>(AsyncAction<T> messageObserver) => AddObserver<T>((Delegate)messageObserver);
+        public IDisposable RegisterHandler<T>(AsyncAction<T> messageHandler) => AddHandler<T>(messageHandler);
 
-        private IDisposable AddObserver<T>(Delegate messageObserver)
+        private IDisposable AddHandler<T>(Delegate messageHandler)
         {
-            if (messageObserver == null)
+            if (messageHandler == null)
             {
-                throw new ArgumentNullException(nameof(messageObserver));
+                throw new ArgumentNullException(nameof(messageHandler));
             }
 
             lock (sync)
             {
-                if (observers.ContainsKey(typeof(T)))
-                {
-                    var observer = observers[typeof(T)];
-                    observers[typeof(T)] = Delegate.Combine(messageObserver, observer);
+                if (messageHandlers.TryGetValue(typeof(T), out var handler))
+                {                    
+                    messageHandlers[typeof(T)] = Delegate.Combine(messageHandler, handler);
                 }
                 else
                 {
-                    observers[typeof(T)] = messageObserver;
+                    messageHandlers[typeof(T)] = messageHandler;
                 }
             }
 
-            return new Subscription(typeof(T), messageObserver, RemoveObserver);
+            return new Subscription(typeof(T), messageHandler, RemoveHandler);
         }
 
         public void Send<T>(T message) => SendAsync(message, CancellationToken.None).GetAwaiter().GetResult();
 
         public async Task SendAsync<T>(T message, CancellationToken cancellationToken)
-        {            
-            var handlers = GetHandlers(message.GetType());
-            
-            for(int i = 0; i < handlers.Count; i++)
+        {   
+            if (!messageHandlers.ContainsKey(typeof(T)))
             {
-                try
-                {
-                    await (Task)handlers[i].DynamicInvoke(message, cancellationToken);
-                }
-                catch(TargetInvocationException e)
-                {
-                    throw e.InnerException;
-                }
+                return;
             }
-        }        
 
-        private List<Delegate> GetHandlers(Type messageType)
-        {
-            lock (sync)
+            if (!messageHandlers.TryGetValue(typeof(T), out var handler))
             {
-                handlers.Clear();
-
-                foreach(var key in observers.Keys)
-                {
-                    if (key.IsAssignableFrom(messageType))
-                    {
-                        handlers.Add(observers[key]);
-                    }
-                }
-
-                return handlers;
+                return;
             }
+
+            try
+            {
+                await (Task)handler.DynamicInvoke(message, cancellationToken);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw e.InnerException;
+            }            
         }
 
-        private void RemoveObserver(Type messageType, Delegate observer)
+        private void RemoveHandler(Type messageType, Delegate handler)
         {
             lock (sync)
             {
-                var source = Delegate.Remove(observers[messageType], observer);
+                var source = Delegate.Remove(messageHandlers[messageType], handler);
 
                 if (source == null)
                 {
-                    observers.Remove(messageType);
+                    messageHandlers.TryRemove(messageType, out var value);
+                    return;
                 }
                 else
                 {
-                    observers[messageType] = source;
+                    messageHandlers[messageType] = source;
                 }
             }
         }
