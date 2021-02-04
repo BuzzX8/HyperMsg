@@ -75,11 +75,11 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public void AddDeserializer_Adds_Deserializer()
+        public void AddDeserializationService_Adds_Deserializer()
         {
             var message = Guid.NewGuid().ToByteArray();
             var deserializer = A.Fake<Func<ReadOnlySequence<byte>, (int, Guid)>>();
-            var host = ServiceHost.CreateDefault(services => services.AddDeserializer(deserializer));
+            var host = ServiceHost.CreateDefault(services => services.AddDeserializationService(deserializer));
             host.StartAsync().Wait();
 
             var sender = host.GetRequiredService<IMessageSender>();
