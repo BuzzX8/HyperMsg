@@ -23,6 +23,46 @@ namespace HyperMsg
 
         public void AddDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => RegisterReceiveHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
 
+        public void AddBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => RegisterReceiveHandler<IBuffer>(b => ReadBuffer(b, bufferReader));
+
+        public void AddBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => RegisterReceiveHandler<IBuffer>((b, t) => ReadBufferAsync(b, bufferReader, t));
+
+        private void ReadBuffer(IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader)
+        {
+            var reading = buffer.Reader.Read();
+            if (reading.Length == 0)
+            {
+                return;
+            }
+
+            var bytesRead = bufferReader.Invoke(reading);
+
+            if (bytesRead == 0)
+            {
+                return;
+            }
+
+            buffer.Reader.Advance(bytesRead);
+        }
+
+        private async Task ReadBufferAsync(IBuffer buffer, Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader, CancellationToken cancellationToken)
+        {
+            var reading = buffer.Reader.Read();
+            if (reading.Length == 0)
+            {
+                return;
+            }
+
+            var bytesRead = await bufferReader.Invoke(reading, cancellationToken);
+
+            if (bytesRead == 0)
+            {
+                return;
+            }
+
+            buffer.Reader.Advance(bytesRead);
+        }
+
         private Task DeserializeAsync<TMessage>(IBuffer buffer, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer, CancellationToken cancellationToken)
         {
             var reading = buffer.Reader.Read();

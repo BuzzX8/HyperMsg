@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg.Extensions
@@ -92,7 +93,7 @@ namespace HyperMsg.Extensions
             return services;
         }
 
-        public static IServiceCollection AddSerializer<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
+        public static IServiceCollection AddTransmittingBufferSerializer<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
         {
             services.AddSerializationService();
             return services.AddConfigurator(provider =>
@@ -102,7 +103,7 @@ namespace HyperMsg.Extensions
             });
         }
 
-        public static IServiceCollection AddDeserializationService<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
+        public static IServiceCollection AddReceivingBufferDeserializer<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
         {
             services.AddSerializationService();
             return services.AddConfigurator(provider =>
@@ -110,6 +111,26 @@ namespace HyperMsg.Extensions
                 var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
                 service.AddDeserializer(deserializer);
             });
+        }
+
+        public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, int> reader)
+        {
+            return services.AddSerializationService()
+                .AddConfigurator(provider =>
+                {
+                    var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
+                    service.AddBufferReader(reader);
+                });
+        }
+
+        public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> reader)
+        {
+            return services.AddSerializationService()
+                .AddConfigurator(provider =>
+                {
+                    var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
+                    service.AddBufferReader(reader);
+                });
         }
 
         private static IServiceCollection AddSerializationService(this IServiceCollection services)
