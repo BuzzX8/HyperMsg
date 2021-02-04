@@ -102,7 +102,7 @@ namespace HyperMsg.Extensions
             });
         }
 
-        public static IServiceCollection AddDeserializer<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
+        public static IServiceCollection AddDeserializationService<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
         {
             services.AddSerializationService();
             return services.AddConfigurator(provider =>

@@ -116,31 +116,5 @@ namespace HyperMsg
 
             broker.Send(Guid.NewGuid());
         }
-
-        [Fact]
-        public void Send_Invokes_Handler_If_Type_Compatible()
-        {
-            var message = Guid.NewGuid();
-            var actualMessage = Guid.Empty;
-
-            broker.RegisterHandler<Guid>(m => actualMessage = m);
-
-            broker.Send<object>(message);
-
-            Assert.Equal(message, actualMessage);
-        }
-
-        [Fact]
-        public async Task SendAsync_Invokes_Handler_If_Type_Compatible()
-        {
-            var message = Guid.NewGuid();
-            var actualMessage = Guid.Empty;
-
-            broker.RegisterHandler<Guid>(m => actualMessage = m);
-
-            await broker.SendAsync<object>(message, tokenSource.Token);
-
-            Assert.Equal(message, actualMessage);
-        }
     }
 }
