@@ -98,8 +98,8 @@ namespace HyperMsg.Extensions
             services.AddSerializationService();
             return services.AddConfigurator(provider =>
             {
-                var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
-                service.AddSerializer(serializer);
+                var service = provider.GetRequiredService<SerializationService>();
+                service.AddTransmittingBufferSerializer(serializer);
             });
         }
 
@@ -108,8 +108,8 @@ namespace HyperMsg.Extensions
             services.AddSerializationService();
             return services.AddConfigurator(provider =>
             {
-                var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
-                service.AddDeserializer(deserializer);
+                var service = provider.GetRequiredService<SerializationService>();
+                service.AddReceivingBufferDeserializer(deserializer);
             });
         }
 
@@ -118,8 +118,8 @@ namespace HyperMsg.Extensions
             return services.AddSerializationService()
                 .AddConfigurator(provider =>
                 {
-                    var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
-                    service.AddBufferReader(reader);
+                    var service = provider.GetRequiredService<SerializationService>();
+                    service.AddReceivingBufferReader(reader);
                 });
         }
 
@@ -128,8 +128,8 @@ namespace HyperMsg.Extensions
             return services.AddSerializationService()
                 .AddConfigurator(provider =>
                 {
-                    var service = (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService);
-                    service.AddBufferReader(reader);
+                    var service = provider.GetRequiredService<SerializationService>();
+                    service.AddReceivingBufferReader(reader);
                 });
         }
 
@@ -140,7 +140,7 @@ namespace HyperMsg.Extensions
                 var messagingContext = provider.GetRequiredService<IMessagingContext>();
                 var bufferContext = provider.GetRequiredService<IBufferContext>();
                 return new SerializationService(messagingContext, bufferContext.TransmittingBuffer);
-            });
+            }).AddSingleton(provider => (SerializationService)provider.GetServices<IHostedService>().Single(s => s is SerializationService));
         }
 
         public static IServiceCollection AddTimerService(this IServiceCollection services) => services.AddHostedService<TimerService>();

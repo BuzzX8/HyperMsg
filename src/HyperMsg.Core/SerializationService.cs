@@ -12,7 +12,7 @@ namespace HyperMsg
 
         internal SerializationService(IMessagingContext messagingContext, IBuffer transmittingBuffer) : base(messagingContext) => this.transmittingBuffer = transmittingBuffer;
 
-        public void AddSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
+        public void AddTransmittingBufferSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
         {
             RegisterTransmitHandler<TMessage>(async (message, token) =>
             {
@@ -21,11 +21,11 @@ namespace HyperMsg
             });
         }
 
-        public void AddDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => RegisterReceiveHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
+        public void AddReceivingBufferDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => RegisterReceiveHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
 
-        public void AddBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => RegisterReceiveHandler<IBuffer>(b => ReadBuffer(b, bufferReader));
+        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => RegisterReceiveHandler<IBuffer>(b => ReadBuffer(b, bufferReader));
 
-        public void AddBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => RegisterReceiveHandler<IBuffer>((b, t) => ReadBufferAsync(b, bufferReader, t));
+        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => RegisterReceiveHandler<IBuffer>((b, t) => ReadBufferAsync(b, bufferReader, t));
 
         private void ReadBuffer(IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
