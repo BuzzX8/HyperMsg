@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    internal class SerializationService : MessagingObject, IHostedService
+    public class BufferTransferingService : MessagingObject, IHostedService
     {
         private readonly IBuffer transmittingBuffer;
 
-        internal SerializationService(IMessagingContext messagingContext, IBuffer transmittingBuffer) : base(messagingContext) => this.transmittingBuffer = transmittingBuffer;
+        internal BufferTransferingService(IMessagingContext messagingContext, IBuffer transmittingBuffer) : base(messagingContext) => this.transmittingBuffer = transmittingBuffer;
 
         public void AddTransmittingBufferSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
         {
