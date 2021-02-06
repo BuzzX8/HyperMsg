@@ -22,6 +22,7 @@ namespace HyperMsg.Extensions
         public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
+                .AddBufferTransferingService()
                 .AddSharedMemoryPool()                
                 .AddMessageBroker();            
         }
@@ -49,6 +50,16 @@ namespace HyperMsg.Extensions
 
                 return new BufferContext(receivingBuffer, transmittingBuffer) as IBufferContext;
             });
+        }
+
+        public static IServiceCollection AddBufferTransferingService(this IServiceCollection services)
+        {
+            return services.AddHostedService(provider =>
+            {
+                var messagingContext = provider.GetRequiredService<IMessagingContext>();
+                var bufferContext = provider.GetRequiredService<IBufferContext>();
+                return new BufferTransferingService(messagingContext, bufferContext.TransmittingBuffer);
+            }).AddSingleton(provider => (BufferTransferingService)provider.GetServices<IHostedService>().Single(s => s is BufferTransferingService));
         }
 
         /// <summary>
@@ -95,7 +106,7 @@ namespace HyperMsg.Extensions
 
         public static IServiceCollection AddTransmittingBufferSerializer<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
         {
-            services.AddSerializationService();
+            services.AddBufferTransferingService();
             return services.AddConfigurator(provider =>
             {
                 var service = provider.GetRequiredService<BufferTransferingService>();
@@ -105,7 +116,7 @@ namespace HyperMsg.Extensions
 
         public static IServiceCollection AddReceivingBufferDeserializer<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
         {
-            services.AddSerializationService();
+            services.AddBufferTransferingService();
             return services.AddConfigurator(provider =>
             {
                 var service = provider.GetRequiredService<BufferTransferingService>();
@@ -115,7 +126,7 @@ namespace HyperMsg.Extensions
 
         public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, int> reader)
         {
-            return services.AddSerializationService()
+            return services.AddBufferTransferingService()
                 .AddConfigurator(provider =>
                 {
                     var service = provider.GetRequiredService<BufferTransferingService>();
@@ -125,22 +136,12 @@ namespace HyperMsg.Extensions
 
         public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> reader)
         {
-            return services.AddSerializationService()
+            return services.AddBufferTransferingService()
                 .AddConfigurator(provider =>
                 {
                     var service = provider.GetRequiredService<BufferTransferingService>();
                     service.AddReceivingBufferReader(reader);
                 });
-        }
-
-        public static IServiceCollection AddSerializationService(this IServiceCollection services)
-        {
-            return services.AddHostedService(provider =>
-            {                
-                var messagingContext = provider.GetRequiredService<IMessagingContext>();
-                var bufferContext = provider.GetRequiredService<IBufferContext>();
-                return new BufferTransferingService(messagingContext, bufferContext.TransmittingBuffer);
-            }).AddSingleton(provider => (BufferTransferingService)provider.GetServices<IHostedService>().Single(s => s is BufferTransferingService));
         }
 
         public static IServiceCollection AddTimerService(this IServiceCollection services) => services.AddHostedService<TimerService>();
