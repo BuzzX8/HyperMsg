@@ -1,5 +1,4 @@
 ﻿using HyperMsg.Extensions;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
 using System.Threading;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BufferTransferingService : MessagingObject, IHostedService
+    public class BufferTransferingService : MessagingService
     {
         private readonly IBuffer transmittingBuffer;
 
@@ -86,9 +85,5 @@ namespace HyperMsg
 
             return this.ReceiveAsync(message, cancellationToken);
         }
-
-        public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     }
 }
