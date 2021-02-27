@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using HyperMsg.Extensions;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
 using System.Threading;
@@ -14,18 +15,21 @@ namespace HyperMsg
 
         public void AddTransmittingBufferSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
         {
-            RegisterTransmitHandler<TMessage>(async (message, token) =>
+            RegisterDisposable(this.RegisterTransmitHandler<TMessage>(async (message, token) =>
             {
                 serializer.Invoke(transmittingBuffer.Writer, message);
-                await TransmitAsync(transmittingBuffer, token);
-            });
+                await this.TransmitAsync(transmittingBuffer, token);
+            }));
         }
 
-        public void AddReceivingBufferDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => RegisterReceiveHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token));
+        public void AddReceivingBufferDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => 
+            RegisterDisposable(this.RegisterReceiveHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token)));
 
-        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => RegisterReceiveHandler<IBuffer>(b => ReadBuffer(b, bufferReader));
+        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => 
+            RegisterDisposable(this.RegisterReceiveHandler<IBuffer>(b => ReadBuffer(b, bufferReader)));
 
-        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => RegisterReceiveHandler<IBuffer>((b, t) => ReadBufferAsync(b, bufferReader, t));
+        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => 
+            RegisterDisposable(this.RegisterReceiveHandler<IBuffer>((b, t) => ReadBufferAsync(b, bufferReader, t)));
 
         private void ReadBuffer(IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
@@ -80,7 +84,7 @@ namespace HyperMsg
 
             buffer.Reader.Advance(bytesConsumed);
 
-            return ReceiveAsync(message, cancellationToken);
+            return this.ReceiveAsync(message, cancellationToken);
         }
 
         public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;

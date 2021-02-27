@@ -1,12 +1,13 @@
 ﻿using HyperMsg.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public abstract class MessagingObject : IDisposable
+    public abstract class MessagingObject : IMessageSender, IMessageHandlersRegistry, IDisposable
     {
         private readonly List<IDisposable> subscriptions;
 
@@ -14,53 +15,29 @@ namespace HyperMsg
 
         protected IMessagingContext MessagingContext { get; }
 
-        protected IMessageHandlersRegistry HandlerRegistry => MessagingContext.HandlersRegistry;
+        protected IMessageHandlersRegistry HandlersRegistry => MessagingContext.HandlersRegistry;
 
         protected IMessageSender Sender => MessagingContext.Sender;
 
         protected void RegisterDisposable(IDisposable disposable) => subscriptions.Add(disposable);
 
-        protected void RegisterHandler<TMessage>(Action<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterHandler(handler));
+        protected void RegisterDefaultDisposables()
+        {
+            foreach(var handle in GetDefaultDisposables())
+            {
+                RegisterDisposable(handle);
+            }
+        }
 
-        protected void RegisterHandler<TMessage>(AsyncAction<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterHandler(handler));
+        protected virtual IEnumerable<IDisposable> GetDefaultDisposables() => Enumerable.Empty<IDisposable>();
 
-        protected void RegisterReceiveHandler<TMessage>(Action<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterReceiveHandler(handler));
+        public IDisposable RegisterHandler<TMessage>(Action<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);
 
-        protected void RegisterReceiveHandler<TMessage>(AsyncAction<TMessage> handler) => RegisterDisposable(HandlerRegistry.RegisterReceiveHandler(handler));
+        public IDisposable RegisterHandler<TMessage>(AsyncAction<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);        
 
-        protected void RegisterHandler<T>(Func<T, bool> predicate, Action messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(predicate, messageHandler));
+        public void Send<T>(T message) => Sender.Send(message);
 
-        protected void RegisterHandler<T>(Func<T, bool> predicate, Action<T> messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(predicate, messageHandler));
-
-        protected void RegisterHandler<T>(Func<T, bool> predicate, AsyncAction messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(predicate, messageHandler));
-
-        protected void RegisterHandler<T>(Func<T, bool> predicate, AsyncAction<T> messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(predicate, messageHandler));
-
-        protected void RegisterHandler<T>(T message, Action messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(message, messageHandler));
-
-        protected void RegisterHandler<T>(T message, Action<T> messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(message, messageHandler));
-
-        protected void RegisterHandler<T>(T message, AsyncAction messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(message, messageHandler));
-
-        protected void RegisterHandler<T>(T message, AsyncAction<T> messageHandler) => RegisterDisposable(HandlerRegistry.RegisterHandler(message, messageHandler));
-
-        protected void RegisterTransmitHandler<T>(Action<T> messageHandler) => RegisterDisposable(HandlerRegistry.RegisterTransmitHandler(messageHandler));
-
-        protected void RegisterTransmitHandler<T>(AsyncAction<T> messageHandler) => RegisterDisposable(HandlerRegistry.RegisterTransmitHandler(messageHandler));
-
-        protected void Send<T>(T message) => Sender.Send(message);
-
-        protected Task SendAsync<T>(T message, CancellationToken cancellationToken) => Sender.SendAsync(message, cancellationToken);
-
-        protected void Transmit<T>(T message) => Sender.Transmit(message);
-
-        protected Task TransmitAsync<T>(T message, CancellationToken cancellationToken) => Sender.TransmitAsync(message, cancellationToken);
-
-        protected Task TransmitAsync(IBuffer transmittingBuffer, CancellationToken cancellationToken) => Sender.TransmitAsync(transmittingBuffer, cancellationToken);
-
-        protected void Receive<T>(T message) => Sender.Receive(message);
-
-        protected Task ReceiveAsync<T>(T message, CancellationToken cancellationToken) => Sender.ReceiveAsync(message, cancellationToken);
+        public Task SendAsync<T>(T message, CancellationToken cancellationToken) => Sender.SendAsync(message, cancellationToken);        
 
         public virtual void Dispose() => subscriptions.ForEach(s => s.Dispose());
     }
