@@ -1,26 +1,23 @@
-﻿using Microsoft.Extensions.Hosting;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class TimerService : MessagingObject, IHostedService
+    public class TimerService : MessagingService
     {
         private readonly ConcurrentDictionary<Guid, Timer> timers = new();
 
         public TimerService(IMessagingContext messagingContext) : base(messagingContext)
+        { }
+
+        protected override IEnumerable<IDisposable> GetDefaultDisposables()
         {
-            RegisterHandler<TimerMessages.SetInterval>(SetInterval);
-            RegisterHandler<TimerMessages.SetTimeout>(SetTimeout);
-            RegisterHandler<TimerMessages.DisposeTimer>(DisposeTimer);
+            yield return RegisterHandler<TimerMessages.SetInterval>(SetInterval);
+            yield return RegisterHandler<TimerMessages.SetTimeout>(SetTimeout);
+            yield return RegisterHandler<TimerMessages.DisposeTimer>(DisposeTimer);
         }
-
-        public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         private void DisposeTimer(TimerMessages.DisposeTimer message)
         {
