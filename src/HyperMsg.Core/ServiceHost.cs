@@ -19,6 +19,8 @@ namespace HyperMsg
 
         public void Dispose() => serviceProvider.Dispose();
 
+        public void Start() => StartAsync().GetAwaiter().GetResult();
+
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             var hostedServices = serviceProvider.GetServices<IHostedService>();
@@ -28,6 +30,8 @@ namespace HyperMsg
                 await service.StartAsync(cancellationToken);
             }
         }
+
+        public void Stop() => StopAsync().GetAwaiter().GetResult();
 
         public async Task StopAsync(CancellationToken cancellationToken = default)
         {
