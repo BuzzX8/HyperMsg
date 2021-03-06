@@ -1,7 +1,9 @@
 ﻿using HyperMsg.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +33,18 @@ namespace HyperMsg
 
         protected virtual IEnumerable<IDisposable> GetDefaultDisposables() => Enumerable.Empty<IDisposable>();
 
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (Equals(storage, value))
+                return false;
+
+            storage = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
         public IDisposable RegisterHandler<TMessage>(Action<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);
 
         public IDisposable RegisterHandler<TMessage>(AsyncAction<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);        
@@ -40,5 +54,7 @@ namespace HyperMsg
         public Task SendAsync<T>(T message, CancellationToken cancellationToken) => Sender.SendAsync(message, cancellationToken);        
 
         public virtual void Dispose() => subscriptions.ForEach(s => s.Dispose());
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
