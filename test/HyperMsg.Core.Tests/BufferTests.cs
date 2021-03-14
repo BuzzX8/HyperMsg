@@ -104,6 +104,18 @@ namespace HyperMsg
             Assert.True(memory.Length >= sizeHint);
         }
 
+        [Fact]
+        public void Correctly_Advances_Reader()
+        {
+            var data = Guid.NewGuid().ToByteArray();
+            WriteBytes(data);
+            buffer.Reader.Advance(data.Length);
+
+            WriteBytes(data);
+
+            Assert.Equal(data, buffer.Reader.Read().ToArray());
+        }
+
         private void WriteBytes(byte[] bytes)
         {
             var memory = buffer.Writer.GetMemory(bytes.Length);

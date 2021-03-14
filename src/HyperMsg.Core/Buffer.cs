@@ -44,7 +44,7 @@ namespace HyperMsg
             length -= count;
         }
 
-        ReadOnlySequence<byte> IBufferReader<byte>.Read() => new ReadOnlySequence<byte>(CommitedMemory);
+        ReadOnlySequence<byte> IBufferReader<byte>.Read() => new(CommitedMemory);
 
         void IBufferWriter<byte>.Advance(int count)
         {
@@ -70,7 +70,7 @@ namespace HyperMsg
 
             if (length == 0)
             {
-                return Memory;
+                return Memory.Slice(position);
             }
 
             var freeMemPos = position + length;
