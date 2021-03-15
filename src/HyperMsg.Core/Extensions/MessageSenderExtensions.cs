@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,12 +68,20 @@ namespace HyperMsg.Extensions
             }
         }
 
-        public static IDisposable CreateServiceScope(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
+        public static IServiceScope CreateServiceScope(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {
             var command = new StartServiceScope { ServiceConfigurator = serviceConfigurator };
             messageSender.Send(command);
+            
+            return command.ServiceScope;
+        }
 
-            return command.DisposeHandle;
+        public static async Task<IServiceScope> CreateServiceScopeAsync(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator, CancellationToken cancellationToken = default)
+        {
+            var command = new StartServiceScope { ServiceConfigurator = serviceConfigurator };
+            await messageSender.SendAsync(command, cancellationToken);
+
+            return command.ServiceScope;
         }
     }
 }
