@@ -54,24 +54,16 @@ namespace HyperMsg.Extensions
             });
 
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action messageHandler)
-        {
-            return handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
-        }
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action messageHandler) =>
+            handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action<T> messageHandler)
-        {
-            return handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
-        }
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action<T> messageHandler) =>
+            handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction messageHandler)
-        {
-            return handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
-        }
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction messageHandler) =>
+            handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler)
-        {
-            return handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
-        }
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
+            handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
     }
 }

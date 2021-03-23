@@ -23,8 +23,9 @@ namespace HyperMsg.Extensions
         {
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
                 .AddBufferTransferingService()
-                .AddSharedMemoryPool()                
-                .AddMessageBroker();            
+                .AddSharedMemoryPool()
+                .AddMessageBroker()
+                .AddHostedService<ServiceScopeService>();
         }
 
         /// <summary>

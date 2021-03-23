@@ -43,7 +43,7 @@ namespace HyperMsg.Extensions
         /// <returns></returns>
         public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new TransmitMessageCommand<T>(message), cancellationToken);
 
-        public static async Task SendTransmitBufferCommandAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken)
+        public static async Task SendTransmitBufferDataCommandAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken)
         {
             var reader = transmittingBuffer.Reader;
             var buffer = reader.Read();
@@ -68,17 +68,17 @@ namespace HyperMsg.Extensions
             }
         }
 
-        public static IServiceScope CreateServiceScope(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
+        public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {
-            var command = new StartServiceScope { ServiceConfigurator = serviceConfigurator };
+            var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };
             messageSender.Send(command);
             
             return command.ServiceScope;
         }
 
-        public static async Task<IServiceScope> CreateServiceScopeAsync(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator, CancellationToken cancellationToken = default)
+        public static async Task<IServiceScope> SendCreateServiceScopeRequestAsync(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator, CancellationToken cancellationToken = default)
         {
-            var command = new StartServiceScope { ServiceConfigurator = serviceConfigurator };
+            var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };
             await messageSender.SendAsync(command, cancellationToken);
 
             return command.ServiceScope;

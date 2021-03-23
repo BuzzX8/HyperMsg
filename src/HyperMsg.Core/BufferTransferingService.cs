@@ -17,7 +17,7 @@ namespace HyperMsg
             RegisterDisposable(this.RegisterTransmitMessageCommandHandler<TMessage>(async (message, token) =>
             {
                 serializer.Invoke(transmittingBuffer.Writer, message);
-                await this.SendTransmitBufferCommandAsync(transmittingBuffer, token);
+                await this.SendTransmitBufferDataCommandAsync(transmittingBuffer, token);
             }));
         }
 

@@ -13,7 +13,7 @@ namespace HyperMsg.Extensions
         private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
 
         [Fact]
-        public void Transmit_Sends_Message_To_Transmit_Handlers()
+        public void SendTransmitMessageCommand_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterTransmitMessageCommandHandler(handler);
             broker.RegisterTransmitMessageCommandHandler(asyncHandler);
@@ -25,7 +25,7 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public async Task TransmitAsync_Sends_Message_To_Transmit_Handlers()
+        public async Task SendTransmitMessageCommandAsync_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterTransmitMessageCommandHandler(handler);
             broker.RegisterTransmitMessageCommandHandler(asyncHandler);
@@ -49,7 +49,7 @@ namespace HyperMsg.Extensions
         }
 
         [Fact]
-        public async Task ReceiveAsync_Sends_Message_To_Transmit_Handlers()
+        public async Task SendMessageReceivedEventAsync_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterMessageReceivedEventHandler(handler);
             broker.RegisterMessageReceivedEventHandler(asyncHandler);
