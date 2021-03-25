@@ -53,7 +53,6 @@ namespace HyperMsg.Extensions
                 return Task.CompletedTask;
             });
 
-
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action messageHandler) =>
             handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
 
@@ -65,5 +64,11 @@ namespace HyperMsg.Extensions
 
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
             handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+
+        public static IDisposable RegisterReceivingBufferUpdatedEventHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBuffer> messageHandler) =>
+            handlersRegistry.RegisterMessageReceivedEventHandler(messageHandler);
+
+        public static IDisposable RegisterReceivingBufferUpdatedEventHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBuffer> messageHandler) =>
+            handlersRegistry.RegisterMessageReceivedEventHandler(messageHandler);
     }
 }

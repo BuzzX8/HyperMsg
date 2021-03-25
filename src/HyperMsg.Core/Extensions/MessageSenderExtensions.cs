@@ -23,7 +23,7 @@ namespace HyperMsg.Extensions
         /// <param name="message">Message to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendMessageReceivedEventAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new MessageReceivedEvent<T>(message), cancellationToken);
+        public static Task SendMessageReceivedEventAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => messageSender.SendAsync(new MessageReceivedEvent<T>(message), cancellationToken);
 
         /// <summary>
         /// 
@@ -41,9 +41,9 @@ namespace HyperMsg.Extensions
         /// <param name="message">Message to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken) => messageSender.SendAsync(new TransmitMessageCommand<T>(message), cancellationToken);
+        public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => messageSender.SendAsync(new TransmitMessageCommand<T>(message), cancellationToken);
 
-        public static async Task SendTransmitBufferDataCommandAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken)
+        public static async Task SendTransmitBufferDataCommandAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken = default)
         {
             var reader = transmittingBuffer.Reader;
             var buffer = reader.Read();
@@ -67,6 +67,9 @@ namespace HyperMsg.Extensions
                 await messageSender.SendTransmitMessageCommandAsync(enumerator.Current, cancellationToken);
             }
         }
+
+        public static Task SendReceivingBufferUpdatedEventAsync(this IMessageSender messageSender, IBuffer receivingBuffer, CancellationToken cancellationToken = default) =>
+            messageSender.SendMessageReceivedEventAsync(receivingBuffer, cancellationToken);
 
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {

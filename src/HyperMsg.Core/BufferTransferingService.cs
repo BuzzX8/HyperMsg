@@ -22,13 +22,13 @@ namespace HyperMsg
         }
 
         public void AddReceivingBufferDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => 
-            RegisterDisposable(this.RegisterMessageReceivedEventHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token)));
+            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((buffer, token) => DeserializeAsync(buffer, deserializer, token)));
 
         public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => 
-            RegisterDisposable(this.RegisterMessageReceivedEventHandler<IBuffer>(b => ReadBuffer(b, bufferReader)));
+            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler(b => ReadBuffer(b, bufferReader)));
 
         public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => 
-            RegisterDisposable(this.RegisterMessageReceivedEventHandler<IBuffer>((b, t) => ReadBufferAsync(b, bufferReader, t)));
+            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((b, t) => ReadBufferAsync(b, bufferReader, t)));
 
         private void ReadBuffer(IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
