@@ -71,7 +71,7 @@ namespace HyperMsg.Extensions
             host.StartAsync().Wait();
 
             var sender = host.GetRequiredService<IMessageSender>();
-            sender.Transmit(message);
+            sender.SendTransmitMessageCommand(message);
 
             A.CallTo(() => serializer.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
         }
@@ -87,7 +87,7 @@ namespace HyperMsg.Extensions
             var sender = host.GetRequiredService<IMessageSender>();
             var buffers = host.GetRequiredService<IBufferContext>();
             buffers.ReceivingBuffer.Writer.Write(message);
-            sender.Receive(buffers.ReceivingBuffer);
+            sender.SendMessageReceivedEvent(buffers.ReceivingBuffer);
 
             A.CallTo(() => deserializer.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
         }
@@ -105,7 +105,7 @@ namespace HyperMsg.Extensions
             var sender = host.GetRequiredService<IMessageSender>();
             var buffers = host.GetRequiredService<IBufferContext>();
             buffers.ReceivingBuffer.Writer.Write(message);
-            sender.Receive(buffers.ReceivingBuffer);
+            sender.SendMessageReceivedEvent(buffers.ReceivingBuffer);
 
             var remainedData = buffers.ReceivingBuffer.Reader.Read().ToArray();
 
@@ -125,7 +125,7 @@ namespace HyperMsg.Extensions
             var sender = host.GetRequiredService<IMessageSender>();
             var buffers = host.GetRequiredService<IBufferContext>();
             buffers.ReceivingBuffer.Writer.Write(message);
-            sender.Receive(buffers.ReceivingBuffer);
+            sender.SendMessageReceivedEvent(buffers.ReceivingBuffer);
 
             var remainedData = buffers.ReceivingBuffer.Reader.Read().ToArray();
 

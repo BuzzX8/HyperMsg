@@ -13,24 +13,24 @@ namespace HyperMsg.Extensions
         private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
 
         [Fact]
-        public void Transmit_Sends_Message_To_Transmit_Handlers()
+        public void SendTransmitMessageCommand_Sends_Message_To_Transmit_Handlers()
         {
-            broker.RegisterTransmitHandler(handler);
-            broker.RegisterTransmitHandler(asyncHandler);
+            broker.RegisterTransmitMessageCommandHandler(handler);
+            broker.RegisterTransmitMessageCommandHandler(asyncHandler);
 
-            broker.Transmit(data);
+            broker.SendTransmitMessageCommand(data);
 
             A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
             A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
         }
 
         [Fact]
-        public async Task TransmitAsync_Sends_Message_To_Transmit_Handlers()
+        public async Task SendTransmitMessageCommandAsync_Sends_Message_To_Transmit_Handlers()
         {
-            broker.RegisterTransmitHandler(handler);
-            broker.RegisterTransmitHandler(asyncHandler);
+            broker.RegisterTransmitMessageCommandHandler(handler);
+            broker.RegisterTransmitMessageCommandHandler(asyncHandler);
 
-            await broker.TransmitAsync(data, default);
+            await broker.SendTransmitMessageCommandAsync(data, default);
 
             A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
             A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
@@ -39,22 +39,22 @@ namespace HyperMsg.Extensions
         [Fact]
         public void Receive_Sends_Message_To_Transmit_Handlers()
         {
-            broker.RegisterReceiveHandler(handler);
-            broker.RegisterReceiveHandler(asyncHandler);
+            broker.RegisterMessageReceivedEventHandler(handler);
+            broker.RegisterMessageReceivedEventHandler(asyncHandler);
 
-            broker.Receive(data);
+            broker.SendMessageReceivedEvent(data);
 
             A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
             A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
         }
 
         [Fact]
-        public async Task ReceiveAsync_Sends_Message_To_Transmit_Handlers()
+        public async Task SendMessageReceivedEventAsync_Sends_Message_To_Transmit_Handlers()
         {
-            broker.RegisterReceiveHandler(handler);
-            broker.RegisterReceiveHandler(asyncHandler);
+            broker.RegisterMessageReceivedEventHandler(handler);
+            broker.RegisterMessageReceivedEventHandler(asyncHandler);
 
-            await broker.ReceiveAsync(data, default);
+            await broker.SendMessageReceivedEventAsync(data, default);
 
             A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
             A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();

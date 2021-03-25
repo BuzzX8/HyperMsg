@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class ServiceScopeService : MessagingService
+    internal class ServiceScopeService : MessagingService
     {
         internal readonly List<ServiceHost> serviceHosts;
         internal readonly object sync;
@@ -19,7 +19,7 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetDefaultDisposables()
         {
-            yield return RegisterHandler<StartServiceScope>(async (command, token) =>
+            yield return RegisterHandler<StartServiceScopeRequest>(async (command, token) =>
             {
                 var serviceHost = ServiceHost.CreateDefault(services =>
                 {
@@ -73,7 +73,7 @@ namespace HyperMsg
         }
     }
 
-    internal class StartServiceScope
+    internal class StartServiceScopeRequest
     {
         internal IServiceScope ServiceScope { get; set; }
 

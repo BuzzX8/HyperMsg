@@ -14,21 +14,21 @@ namespace HyperMsg
 
         public void AddTransmittingBufferSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
         {
-            RegisterDisposable(this.RegisterTransmitHandler<TMessage>(async (message, token) =>
+            RegisterDisposable(this.RegisterTransmitMessageCommandHandler<TMessage>(async (message, token) =>
             {
                 serializer.Invoke(transmittingBuffer.Writer, message);
-                await this.TransmitAsync(transmittingBuffer, token);
+                await this.SendTransmitBufferDataCommandAsync(transmittingBuffer, token);
             }));
         }
 
         public void AddReceivingBufferDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => 
-            RegisterDisposable(this.RegisterReceiveHandler<IBuffer>((buffer, token) => DeserializeAsync(buffer, deserializer, token)));
+            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((buffer, token) => DeserializeAsync(buffer, deserializer, token)));
 
         public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => 
-            RegisterDisposable(this.RegisterReceiveHandler<IBuffer>(b => ReadBuffer(b, bufferReader)));
+            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler(b => ReadBuffer(b, bufferReader)));
 
         public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => 
-            RegisterDisposable(this.RegisterReceiveHandler<IBuffer>((b, t) => ReadBufferAsync(b, bufferReader, t)));
+            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((b, t) => ReadBufferAsync(b, bufferReader, t)));
 
         private void ReadBuffer(IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
@@ -83,7 +83,7 @@ namespace HyperMsg
 
             buffer.Reader.Advance(bytesConsumed);
 
-            return this.ReceiveAsync(message, cancellationToken);
+            return this.SendMessageReceivedEventAsync(message, cancellationToken);
         }
     }
 }

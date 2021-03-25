@@ -5,13 +5,13 @@ namespace HyperMsg.Extensions
 {
     public static class MessageHandlersRegistryExtensions
     {
-        public static IDisposable RegisterTransmitHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> messageHandler) => handlersRegistry.RegisterHandler<Transmit<T>>(m => messageHandler.Invoke(m.Message));
+        public static IDisposable RegisterTransmitMessageCommandHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> messageHandler) => handlersRegistry.RegisterHandler<TransmitMessageCommand<T>>(m => messageHandler.Invoke(m.Message));
 
-        public static IDisposable RegisterTransmitHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> messageHandler) => handlersRegistry.RegisterHandler<Transmit<T>>((m, t) => messageHandler.Invoke(m.Message, t));
+        public static IDisposable RegisterTransmitMessageCommandHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> messageHandler) => handlersRegistry.RegisterHandler<TransmitMessageCommand<T>>((m, t) => messageHandler.Invoke(m.Message, t));
 
-        public static IDisposable RegisterReceiveHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> messageHandler) => handlersRegistry.RegisterHandler<Receive<T>>(m => messageHandler.Invoke(m.Message));
+        public static IDisposable RegisterMessageReceivedEventHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> messageHandler) => handlersRegistry.RegisterHandler<MessageReceivedEvent<T>>(m => messageHandler.Invoke(m.Message));
 
-        public static IDisposable RegisterReceiveHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> messageHandler) => handlersRegistry.RegisterHandler<Receive<T>>((m, t) => messageHandler.Invoke(m.Message, t));
+        public static IDisposable RegisterMessageReceivedEventHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> messageHandler) => handlersRegistry.RegisterHandler<MessageReceivedEvent<T>>((m, t) => messageHandler.Invoke(m.Message, t));
 
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> predicate, Action messageHandler) =>
             handlersRegistry.RegisterHandler<T>(m =>
@@ -53,25 +53,57 @@ namespace HyperMsg.Extensions
                 return Task.CompletedTask;
             });
 
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action messageHandler) =>
+            handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action messageHandler)
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action<T> messageHandler) =>
+            handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction messageHandler) =>
+            handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
+
+        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
+            handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+
+        public static IDisposable RegisterTransmitBufferDataCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<ReadOnlyMemory<byte>> bufferDataHandler)
         {
-            return handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
+            return new CompositeDisposable(new[] 
+            { 
+                handlersRegistry.RegisterTransmitMessageCommandHandler(bufferDataHandler),
+                handlersRegistry.RegisterTransmitMessageCommandHandler<byte[]>(data => bufferDataHandler.Invoke(new ReadOnlyMemory<byte>(data))),
+                handlersRegistry.RegisterTransmitMessageCommandHandler<ArraySegment<byte>>(data => bufferDataHandler.Invoke(data.AsMemory())) 
+            });
         }
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, Action<T> messageHandler)
+        public static IDisposable RegisterTransmitBufferDataCommandHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<ReadOnlyMemory<byte>> bufferDataHandler)
         {
-            return handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+            return new CompositeDisposable(new[]
+            {
+                handlersRegistry.RegisterTransmitMessageCommandHandler(bufferDataHandler),
+                handlersRegistry.RegisterTransmitMessageCommandHandler<byte[]>((data, token) => bufferDataHandler.Invoke(new ReadOnlyMemory<byte>(data), token)),
+                handlersRegistry.RegisterTransmitMessageCommandHandler<ArraySegment<byte>>((data, token) => bufferDataHandler.Invoke(data.AsMemory(), token))
+            });
         }
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction messageHandler)
-        {
-            return handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
-        }
+        public static IDisposable RegisterReceivingBufferUpdatedEventHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBuffer> messageHandler) =>
+            handlersRegistry.RegisterMessageReceivedEventHandler(messageHandler);
 
-        public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler)
+        public static IDisposable RegisterReceivingBufferUpdatedEventHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBuffer> messageHandler) =>
+            handlersRegistry.RegisterMessageReceivedEventHandler(messageHandler);
+    }
+
+    internal class CompositeDisposable : IDisposable
+    {
+        private readonly IDisposable[] disposables;
+
+        internal CompositeDisposable(IDisposable[] disposables) => this.disposables = disposables;
+
+        public void Dispose()
         {
-            return handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+            foreach(var disposable in disposables)
+            {
+                disposable.Dispose();
+            }
         }
     }
 }
