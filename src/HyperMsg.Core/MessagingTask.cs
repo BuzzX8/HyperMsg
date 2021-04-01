@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,11 +24,39 @@ namespace HyperMsg
         protected CancellationToken CancellationToken { get; }
 
         public TResult Result => completionSource.Task.Result;
+
+        protected void Start()
+        {
+            RegisterDefaultDisposables();
+            BeginAsync().ContinueWith(OnBeginAsyncCompleted);
+        }
+
+        protected virtual Task BeginAsync() => Task.CompletedTask;
         
-        protected void Complete(TResult result)
+        protected void SetCanceled()
+        {
+            completionSource.SetCanceled();
+            Dispose();
+        }
+
+        protected void SetResult(TResult result)
         {
             completionSource.SetResult(result);
             Dispose();
+        }
+
+        protected void SetException(Exception exception)
+        {
+            completionSource.SetException(exception);
+            Dispose();
+        }
+
+        private void OnBeginAsyncCompleted(Task beginAsync)
+        {
+            if (beginAsync.Exception != null)
+            {
+                SetException(beginAsync.Exception);
+            }
         }
     }
 }
