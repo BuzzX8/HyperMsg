@@ -3,7 +3,7 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace HyperMsg.Extensions
+namespace HyperMsg
 {
     public class MessageBrokerExtensionTests
     {

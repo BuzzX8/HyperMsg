@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace HyperMsg.Extensions
+namespace HyperMsg
 {
     public class ServiceCollectionExtensionsTests
     {
