@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HyperMsg.Extensions
+namespace HyperMsg
 {
     public static class MessagingContextExtensions
     {

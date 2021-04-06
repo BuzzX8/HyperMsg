@@ -1,11 +1,9 @@
-﻿using FakeItEasy;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
-namespace HyperMsg.Extensions
+namespace HyperMsg
 {
     public class MessagingContextExtensionsTests : IDisposable
     {

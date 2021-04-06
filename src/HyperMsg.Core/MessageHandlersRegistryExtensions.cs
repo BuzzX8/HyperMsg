@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace HyperMsg.Extensions
+namespace HyperMsg
 {
     public static class MessageHandlersRegistryExtensions
     {
@@ -67,11 +67,11 @@ namespace HyperMsg.Extensions
 
         public static IDisposable RegisterTransmitBufferDataCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<ReadOnlyMemory<byte>> bufferDataHandler)
         {
-            return new CompositeDisposable(new[] 
-            { 
+            return new CompositeDisposable(new[]
+            {
                 handlersRegistry.RegisterTransmitMessageCommandHandler(bufferDataHandler),
                 handlersRegistry.RegisterTransmitMessageCommandHandler<byte[]>(data => bufferDataHandler.Invoke(new ReadOnlyMemory<byte>(data))),
-                handlersRegistry.RegisterTransmitMessageCommandHandler<ArraySegment<byte>>(data => bufferDataHandler.Invoke(data.AsMemory())) 
+                handlersRegistry.RegisterTransmitMessageCommandHandler<ArraySegment<byte>>(data => bufferDataHandler.Invoke(data.AsMemory()))
             });
         }
 
@@ -100,7 +100,7 @@ namespace HyperMsg.Extensions
 
         public void Dispose()
         {
-            foreach(var disposable in disposables)
+            foreach (var disposable in disposables)
             {
                 disposable.Dispose();
             }
