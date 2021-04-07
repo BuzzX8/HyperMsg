@@ -12,7 +12,6 @@ steps:
     command: 'pack'
     packagesToPack: '**/HyperMsg.Core.csproj'
     nobuild: true
-    includesymbols: true
     includesource: true
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'PackageVersion'
