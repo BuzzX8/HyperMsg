@@ -3,9 +3,11 @@ pool:
 
 steps:
 - task: DotNetCoreCLI@2
+  name: Build
   inputs:
     command: 'build'
 - task: DotNetCoreCLI@2
+  name: Pack
   inputs:
     command: 'pack'
     packagesToPack: '**/HyperMsg.Core.csproj'
@@ -15,7 +17,8 @@ steps:
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'PackageVersion'
 - task: DotNetCoreCLI@2
-  inputs:
+  name: Publish
+  inputs:    
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/HyperMsg.Core*.nupkg'
     nuGetFeedType: 'internal'
