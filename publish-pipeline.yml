@@ -10,7 +10,7 @@ steps:
   name: Pack
   inputs:
     command: 'pack'
-    packagesToPack: 'src/HyperMsg*.csproj'
+    packagesToPack: '**/HyperMsg*.csproj'
     nobuild: true
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'PackageVersion'
