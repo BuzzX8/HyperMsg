@@ -10,7 +10,7 @@ steps:
   name: Pack
   inputs:
     command: 'pack'
-    packagesToPack: '**/HyperMsg.Core.csproj'
+    packagesToPack: 'src/HyperMsg*.csproj'
     nobuild: true
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'PackageVersion'
@@ -18,6 +18,6 @@ steps:
   name: Publish
   inputs:
     command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/HyperMsg.Core*.nupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/HyperMsg*.nupkg'
     nuGetFeedType: 'internal'
     publishVstsFeed: 'e9963e23-1943-4341-aee1-8f18b46c64ed/919c2584-ea9a-45f0-b907-a26b4797a760'
