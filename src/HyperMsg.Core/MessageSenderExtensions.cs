@@ -80,6 +80,12 @@ namespace HyperMsg
         public static Task SendSerializationCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new SerializationCommand<T>(bufferWriter, message), cancellationToken);
 
+        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, T message, BufferType bufferType) => 
+            messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.Handle(message, bufferType));
+
+        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, T message, BufferType bufferType, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.HandleAsync(message, bufferType, cancellationToken), cancellationToken);
+
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {
             var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };
