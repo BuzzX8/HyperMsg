@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using System;
+using System.Buffers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -80,6 +81,19 @@ namespace HyperMsg
             broker.Send(Guid.NewGuid());
 
             A.CallTo(() => handler.Invoke(A<Guid>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void SendSerializationCommand_Invokes_Handler_Registtered_By_RegisterSerializationHandler()
+        {
+            var handler = A.Fake<Action<IBufferWriter<byte>, Guid>>();
+            var bufferWriter = A.Fake<IBufferWriter<byte>>();
+            var message = Guid.NewGuid();
+
+            broker.RegisterSerializationHandler(handler);
+            broker.SendSerializationCommand(bufferWriter, message);
+
+            A.CallTo(() => handler.Invoke(bufferWriter, message)).MustHaveHappened();
         }
     }
 }
