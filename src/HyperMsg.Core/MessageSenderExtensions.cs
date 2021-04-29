@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,8 +69,16 @@ namespace HyperMsg
             }
         }
 
+        public static void SendReceivingBufferUpdatedEvent(this IMessageSender messageSender, IBuffer receivingBuffer) => messageSender.SendMessageReceivedEvent(receivingBuffer);
+
         public static Task SendReceivingBufferUpdatedEventAsync(this IMessageSender messageSender, IBuffer receivingBuffer, CancellationToken cancellationToken = default) =>
             messageSender.SendMessageReceivedEventAsync(receivingBuffer, cancellationToken);
+
+        public static void SendSerializationCommand<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message) =>
+            messageSender.Send(new SerializationCommand<T>(bufferWriter, message));
+
+        public static Task SendSerializationCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendAsync(new SerializationCommand<T>(bufferWriter, message), cancellationToken);
 
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {

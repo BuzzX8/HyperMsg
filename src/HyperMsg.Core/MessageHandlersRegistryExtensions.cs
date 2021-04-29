@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -64,6 +65,12 @@ namespace HyperMsg
 
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
             handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+
+        public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter<byte>, T> serializationHandler) => 
+            handlersRegistry.RegisterHandler<SerializationCommand<T>>(command => serializationHandler.Invoke(command.BufferWriter, command.Message));
+
+        public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter<byte>, T> serializationHandler) =>
+            handlersRegistry.RegisterHandler<SerializationCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
 
         public static IDisposable RegisterTransmitBufferDataCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<ReadOnlyMemory<byte>> bufferDataHandler)
         {
