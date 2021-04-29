@@ -1,6 +1,7 @@
 ﻿using FakeItEasy;
 using System;
 using System.Buffers;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -94,6 +95,30 @@ namespace HyperMsg
             broker.SendSerializationCommand(bufferWriter, message);
 
             A.CallTo(() => handler.Invoke(bufferWriter, message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendWriteToBufferCommand_Invokes_Handle_Method_Of_Registered_Handler()
+        {
+            var handler = A.Fake<IWriteToBufferCommandHandler>();
+            var message = Guid.NewGuid();
+
+            broker.RegisterWriteToBufferCommandHandler(handler);
+            broker.SendWriteToBufferCommand(message, BufferType.None);
+
+            A.CallTo(() => handler.Handle(message, BufferType.None)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendWriteToBufferCommand_Invokes_HandleAsync_Method_Of_Registered_Handler()
+        {
+            var handler = A.Fake<IWriteToBufferCommandHandler>();
+            var message = Guid.NewGuid();
+
+            broker.RegisterWriteToBufferCommandHandler(handler);
+            broker.SendWriteToBufferCommandAsync(message, BufferType.None);
+
+            A.CallTo(() => handler.HandleAsync(message, BufferType.None, A<CancellationToken>._)).MustHaveHappened();
         }
     }
 }
