@@ -91,10 +91,10 @@ namespace HyperMsg
         }
 
         public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, T message, BufferType bufferType) => 
-            messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.Handle(message, bufferType));
+            messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(message, bufferType));
 
         public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, T message, BufferType bufferType, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.HandleAsync(message, bufferType, cancellationToken), cancellationToken);
+            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBufferAsync(message, bufferType, cancellationToken), cancellationToken);
 
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {

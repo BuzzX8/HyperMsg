@@ -5,18 +5,28 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BufferTransferingService : MessagingService
+    public class BufferService : MessagingService, IWriteToBufferCommandHandler
     {
-        private readonly IBuffer transmittingBuffer;
+        private readonly IBufferContext bufferContext;
 
-        internal BufferTransferingService(IMessagingContext messagingContext, IBuffer transmittingBuffer) : base(messagingContext) => this.transmittingBuffer = transmittingBuffer;
+        internal BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext) => this.bufferContext = bufferContext;
+
+        public void WriteToBuffer<T>(T message, BufferType bufferType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task WriteToBufferAsync<T>(T message, BufferType bufferType, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
 
         public void AddTransmittingBufferSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
         {
             RegisterDisposable(this.RegisterTransmitMessageCommandHandler<TMessage>(async (message, token) =>
             {
-                serializer.Invoke(transmittingBuffer.Writer, message);
-                await this.SendTransmitBufferDataCommandAsync(transmittingBuffer, token);
+                //serializer.Invoke(transmittingBuffer.Writer, message);
+                //await this.SendTransmitBufferDataCommandAsync(transmittingBuffer, token);
             }));
         }
 

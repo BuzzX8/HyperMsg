@@ -106,7 +106,7 @@ namespace HyperMsg
             broker.RegisterWriteToBufferCommandHandler(handler);
             broker.SendWriteToBufferCommand(message, BufferType.None);
 
-            A.CallTo(() => handler.Handle(message, BufferType.None)).MustHaveHappened();
+            A.CallTo(() => handler.WriteToBuffer(message, BufferType.None)).MustHaveHappened();
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace HyperMsg
             broker.RegisterWriteToBufferCommandHandler(handler);
             broker.SendWriteToBufferCommandAsync(message, BufferType.None);
 
-            A.CallTo(() => handler.HandleAsync(message, BufferType.None, A<CancellationToken>._)).MustHaveHappened();
+            A.CallTo(() => handler.WriteToBufferAsync(message, BufferType.None, A<CancellationToken>._)).MustHaveHappened();
         }
     }
 }

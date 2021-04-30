@@ -22,7 +22,7 @@ namespace HyperMsg
         public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
-                .AddBufferTransferingService()
+                .AddBufferService()
                 .AddSharedMemoryPool()
                 .AddMessageBroker()
                 .AddHostedService<ServiceScopeService>();
@@ -53,15 +53,7 @@ namespace HyperMsg
             });
         }
 
-        public static IServiceCollection AddBufferTransferingService(this IServiceCollection services)
-        {
-            return services.AddHostedService(provider =>
-            {
-                var messagingContext = provider.GetRequiredService<IMessagingContext>();
-                var bufferContext = provider.GetRequiredService<IBufferContext>();
-                return new BufferTransferingService(messagingContext, bufferContext.TransmittingBuffer);
-            }).AddSingleton(provider => (BufferTransferingService)provider.GetServices<IHostedService>().Single(s => s is BufferTransferingService));
-        }
+        public static IServiceCollection AddBufferService(this IServiceCollection services) => services.AddHostedService<BufferService>();
 
         /// <summary>
         /// Adds implementation for IBufferFactory. Depends on MemoryPool<byte>
@@ -107,40 +99,40 @@ namespace HyperMsg
 
         public static IServiceCollection AddTransmittingBufferSerializer<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
         {
-            services.AddBufferTransferingService();
+            services.AddBufferService();
             return services.AddConfigurator(provider =>
             {
-                var service = provider.GetRequiredService<BufferTransferingService>();
+                var service = provider.GetRequiredService<BufferService>();
                 service.AddTransmittingBufferSerializer(serializer);
             });
         }
 
         public static IServiceCollection AddReceivingBufferDeserializer<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
         {
-            services.AddBufferTransferingService();
+            services.AddBufferService();
             return services.AddConfigurator(provider =>
             {
-                var service = provider.GetRequiredService<BufferTransferingService>();
+                var service = provider.GetRequiredService<BufferService>();
                 service.AddReceivingBufferDeserializer(deserializer);
             });
         }
 
         public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, int> reader)
         {
-            return services.AddBufferTransferingService()
+            return services.AddBufferService()
                 .AddConfigurator(provider =>
                 {
-                    var service = provider.GetRequiredService<BufferTransferingService>();
+                    var service = provider.GetRequiredService<BufferService>();
                     service.AddReceivingBufferReader(reader);
                 });
         }
 
         public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> reader)
         {
-            return services.AddBufferTransferingService()
+            return services.AddBufferService()
                 .AddConfigurator(provider =>
                 {
-                    var service = provider.GetRequiredService<BufferTransferingService>();
+                    var service = provider.GetRequiredService<BufferService>();
                     service.AddReceivingBufferReader(reader);
                 });
         }
