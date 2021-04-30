@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,7 +59,30 @@ namespace HyperMsg
 
         private void WriteToBuffer<T>(T message, IBuffer buffer)
         {
-            this.SendSerializationCommand(buffer.Writer, message);
+            var writer = buffer.Writer;
+
+            switch (message)
+            {
+                case Memory<byte> memory:
+                    writer.Write(memory.Span);
+                    break;
+
+                case ReadOnlyMemory<byte> memory:
+                    writer.Write(memory.Span);
+                    break;
+
+                case byte[] array:
+                    writer.Write(array);
+                    break;
+
+                case Stream stream:
+                    throw new NotSupportedException();
+                    break;
+
+                default:
+                    this.SendSerializationCommand(writer, message);
+                    break;
+            }
         }
 
         public Task WriteToBufferAsync<T>(T message, BufferType bufferType, CancellationToken _)
