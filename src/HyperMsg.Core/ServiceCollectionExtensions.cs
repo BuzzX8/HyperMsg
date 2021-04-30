@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
 using System.Linq;
@@ -45,7 +44,6 @@ namespace HyperMsg
             return services.AddSingleton(provider =>
             {
                 var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
-
                 var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
                 var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
 

@@ -72,14 +72,14 @@ namespace HyperMsg
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter<byte>, T> serializationHandler) =>
             handlersRegistry.RegisterHandler<SerializationCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
 
-        public static IDisposable RegisterBufferActionRequestHandler(Action<Action<IBuffer>, BufferType> requestHandler)
+        public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, Action<Action<IBuffer>, BufferType> requestHandler)
         {
-            throw new NotImplementedException();
+            return handlersRegistry.RegisterHandler<BufferActionRequest>(request => requestHandler.Invoke(request.BufferAction, request.BufferType));
         }
 
-        public static IDisposable RegisterBufferActionRequestHandler(AsyncAction<Action<IBuffer>, BufferType> requestHandler)
+        public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<Action<IBuffer>, BufferType> requestHandler)
         {
-            throw new NotImplementedException();
+            return handlersRegistry.RegisterHandler<BufferActionRequest>((request, token) => requestHandler.Invoke(request.BufferAction, request.BufferType, token));
         }
 
         public static IDisposable RegisterWriteToBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, IWriteToBufferCommandHandler commandHandler) => 

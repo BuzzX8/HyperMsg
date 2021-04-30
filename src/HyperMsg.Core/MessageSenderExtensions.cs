@@ -80,15 +80,10 @@ namespace HyperMsg
         public static Task SendSerializationCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new SerializationCommand<T>(bufferWriter, message), cancellationToken);
 
-        public static void SendBufferActionRequest(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType)
-        {
-            throw new NotImplementedException();
-        }
+        public static void SendBufferActionRequest(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType) => messageSender.Send(new BufferActionRequest(action, bufferType));
 
-        public static Task SendBufferActionRequestAsync(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
+        public static Task SendBufferActionRequestAsync(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync(new BufferActionRequest(action, bufferType), cancellationToken);
 
         public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, T message, BufferType bufferType) => 
             messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(message, bufferType));

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,17 +9,62 @@ namespace HyperMsg
     public class BufferService : MessagingService, IWriteToBufferCommandHandler
     {
         private readonly IBufferContext bufferContext;
+        private readonly object transmittingBufferLock = new();
+        private readonly object receivingBufferLock = new();
 
-        internal BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext) => this.bufferContext = bufferContext;
+        public BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext) => this.bufferContext = bufferContext;
+
+        protected override IEnumerable<IDisposable> GetDefaultDisposables()
+        {
+            yield return this.RegisterWriteToBufferCommandHandler(this);
+            yield return this.RegisterBufferActionRequestHandler(HandleBufferActionRequest);
+        }
+
+        private void HandleBufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
+        {
+            switch(bufferType)
+            {
+                case BufferType.Transmitting:
+                    HandleBufferActionRequest(bufferAction, bufferContext.TransmittingBuffer, transmittingBufferLock);
+                    break;
+
+                case BufferType.Receiving:
+                    HandleBufferActionRequest(bufferAction, bufferContext.ReceivingBuffer, receivingBufferLock);
+                    break;
+            }
+        }
+
+        private void HandleBufferActionRequest(Action<IBuffer> bufferAction, IBuffer buffer, object bufferLock)
+        {
+            lock (bufferLock)
+            {
+                bufferAction.Invoke(buffer);
+            }
+        }
 
         public void WriteToBuffer<T>(T message, BufferType bufferType)
         {
-            throw new NotImplementedException();
+            switch (bufferType)
+            {
+                case BufferType.Transmitting:
+                    WriteToBuffer(message, bufferContext.TransmittingBuffer);
+                    break;
+
+                case BufferType.Receiving:
+                    WriteToBuffer(message, bufferContext.ReceivingBuffer);
+                    break;
+            }
         }
 
-        public Task WriteToBufferAsync<T>(T message, BufferType bufferType, CancellationToken cancellationToken)
+        private void WriteToBuffer<T>(T message, IBuffer buffer)
         {
-            throw new NotImplementedException();
+            this.SendSerializationCommand(buffer.Writer, message);
+        }
+
+        public Task WriteToBufferAsync<T>(T message, BufferType bufferType, CancellationToken _)
+        {
+            WriteToBuffer(message, bufferType);
+            return Task.CompletedTask;
         }
 
         public void AddTransmittingBufferSerializer<TMessage>(Action<IBufferWriter<byte>, TMessage> serializer)
@@ -94,5 +140,18 @@ namespace HyperMsg
 
             return this.SendMessageReceivedEventAsync(message, cancellationToken);
         }
+    }
+
+    internal struct BufferActionRequest
+    {
+        public BufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
+        {
+            BufferAction = bufferAction;
+            BufferType = bufferType;
+        }
+
+        public Action<IBuffer> BufferAction { get; }
+
+        public BufferType BufferType { get; }
     }
 }
