@@ -48,40 +48,53 @@ namespace HyperMsg
             switch (bufferType)
             {
                 case BufferType.Transmitting:
-                    WriteToBuffer(message, bufferContext.TransmittingBuffer);
+                    WriteToBuffer(message, bufferType, bufferContext.TransmittingBuffer, transmittingBufferLock);
                     break;
 
                 case BufferType.Receiving:
-                    WriteToBuffer(message, bufferContext.ReceivingBuffer);
+                    WriteToBuffer(message, bufferType, bufferContext.ReceivingBuffer, receivingBufferLock);
                     break;
             }
         }
 
-        private void WriteToBuffer<T>(T message, IBuffer buffer)
+        private void WriteToBuffer<T>(T message, BufferType bufferType, IBuffer buffer, object bufferLock)
         {
             var writer = buffer.Writer;
 
-            switch (message)
+            lock (bufferLock)
             {
-                case Memory<byte> memory:
-                    writer.Write(memory.Span);
-                    break;
+                switch (message)
+                {
+                    case Memory<byte> memory:
+                        writer.Write(memory.Span);
+                        break;
 
-                case ReadOnlyMemory<byte> memory:
-                    writer.Write(memory.Span);
-                    break;
+                    case ReadOnlyMemory<byte> memory:
+                        writer.Write(memory.Span);
+                        break;
 
-                case byte[] array:
-                    writer.Write(array);
-                    break;
+                    case ReadOnlySequence<byte> ros:
+                        throw new NotSupportedException();
+                        break;
 
-                case Stream stream:
-                    throw new NotSupportedException();
-                    break;
+                    case ArraySegment<byte> arraySegment:
+                        writer.Write(arraySegment.AsSpan());
+                        break;
 
-                default:
-                    this.SendSerializationCommand(writer, message);
-                    break;
+                    case byte[] array:
+                        writer.Write(array);
+                        break;
+
+                    case Stream stream:
+                        throw new NotSupportedException();
+                        break;
+
+                    default:
+                        this.SendSerializationCommand(writer, message);
+                        break;
+                }
+
+                this.SendBufferUpdatedEvent(bufferType, buffer);
             }
         }
 
@@ -177,5 +190,18 @@ namespace HyperMsg
         public Action<IBuffer> BufferAction { get; }
 
         public BufferType BufferType { get; }
+    }
+
+    internal struct BufferUpdatedEvent
+    {
+        public BufferUpdatedEvent(BufferType bufferType, IBuffer buffer)
+        {
+            BufferType = bufferType;
+            Buffer = buffer;
+        }
+
+        public BufferType BufferType { get; }
+
+        public IBuffer Buffer { get; }
     }
 }

@@ -32,5 +32,18 @@ namespace HyperMsg
             Assert.NotNull(actualMessage);
             Assert.Equal(expectedMessage, actualMessage);
         }
+
+        [Fact]
+        public void Invokes_Handler_Registered_By_RegisterBufferUpdateEventHandler()
+        {
+            var expectedMessage = Guid.NewGuid().ToByteArray();
+            var actualMessage = default(byte[]);
+
+            HandlersRegistry.RegisterBufferUpdateEventHandler(BufferType.Transmitting, buffer => actualMessage = buffer.Reader.Read().ToArray());
+            MessageSender.SendWriteToBufferCommand(expectedMessage, BufferType.Transmitting);
+
+            Assert.NotNull(actualMessage);
+            Assert.Equal(expectedMessage, actualMessage);
+        }
     }
 }
