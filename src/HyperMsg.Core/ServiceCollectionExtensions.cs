@@ -2,7 +2,6 @@
 using System;
 using System.Buffers;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -93,46 +92,6 @@ namespace HyperMsg
             configurators.Add(configurator);
 
             return services;
-        }
-
-        public static IServiceCollection AddTransmittingBufferSerializer<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
-        {
-            services.AddBufferService();
-            return services.AddConfigurator(provider =>
-            {
-                var service = provider.GetRequiredService<BufferService>();
-                service.AddTransmittingBufferSerializer(serializer);
-            });
-        }
-
-        public static IServiceCollection AddReceivingBufferDeserializer<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
-        {
-            services.AddBufferService();
-            return services.AddConfigurator(provider =>
-            {
-                var service = provider.GetRequiredService<BufferService>();
-                service.AddReceivingBufferDeserializer(deserializer);
-            });
-        }
-
-        public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, int> reader)
-        {
-            return services.AddBufferService()
-                .AddConfigurator(provider =>
-                {
-                    var service = provider.GetRequiredService<BufferService>();
-                    service.AddReceivingBufferReader(reader);
-                });
-        }
-
-        public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> reader)
-        {
-            return services.AddBufferService()
-                .AddConfigurator(provider =>
-                {
-                    var service = provider.GetRequiredService<BufferService>();
-                    service.AddReceivingBufferReader(reader);
-                });
         }
 
         public static IServiceCollection AddTimerService(this IServiceCollection services) => services.AddHostedService<TimerService>();
