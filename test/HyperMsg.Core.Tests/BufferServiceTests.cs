@@ -53,14 +53,12 @@ namespace HyperMsg
         [Fact]
         public void SendWriteToBufferCommand_Invokes_Handler_Registered_By_RegisterBufferUpdateEventHandler()
         {
-            var expectedMessage = Guid.NewGuid().ToByteArray();
-            var actualMessage = default(byte[]);
+            var wasInvoked = false;
 
-            HandlersRegistry.RegisterBufferUpdateEventHandler(BufferType.Transmitting, buffer => actualMessage = buffer.Reader.Read().ToArray());
-            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, expectedMessage);
+            HandlersRegistry.RegisterBufferUpdateEventHandler(BufferType.Transmitting, () => wasInvoked = true);
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray());
 
-            Assert.NotNull(actualMessage);
-            Assert.Equal(expectedMessage, actualMessage);
+            Assert.True(wasInvoked);
         }
     }
 }

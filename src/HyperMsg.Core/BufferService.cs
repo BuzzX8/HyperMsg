@@ -129,7 +129,12 @@ namespace HyperMsg
                 }
             }
 
-            this.SendBufferUpdatedEvent(bufferType, buffer);
+            OnBufferUpdated(bufferType);
+        }
+
+        private void OnBufferUpdated(BufferType bufferType)
+        {
+            this.SendBufferUpdatedEvent(bufferType);
         }
     }
 
@@ -161,14 +166,11 @@ namespace HyperMsg
 
     internal struct BufferUpdatedEvent
     {
-        public BufferUpdatedEvent(BufferType bufferType, IBuffer buffer)
+        public BufferUpdatedEvent(BufferType bufferType)
         {
             BufferType = bufferType;
-            Buffer = buffer;
         }
 
         public BufferType BufferType { get; }
-
-        public IBuffer Buffer { get; }
     }
 }

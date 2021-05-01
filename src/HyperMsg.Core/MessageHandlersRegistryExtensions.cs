@@ -87,7 +87,7 @@ namespace HyperMsg
         public static IDisposable RegisterWriteToBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, IWriteToBufferCommandHandler commandHandler) => 
             handlersRegistry.RegisterHandler<Action<IWriteToBufferCommandHandler>>(action => action.Invoke(commandHandler));
 
-        public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action<IBuffer> handler)
+        public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action handler)
         {
             return handlersRegistry.RegisterHandler<BufferUpdatedEvent>(@event =>
             {
@@ -96,11 +96,11 @@ namespace HyperMsg
                     return;
                 }
 
-                handler.Invoke(@event.Buffer);
+                handler.Invoke();
             });
         }
 
-        public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<IBuffer> handler)
+        public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction handler)
         {
             return handlersRegistry.RegisterHandler<BufferUpdatedEvent>((@event, token) =>
             {
@@ -109,7 +109,7 @@ namespace HyperMsg
                     return Task.CompletedTask;
                 }
 
-                return handler.Invoke(@event.Buffer, token);
+                return handler.Invoke(token);
             });
         }
 
