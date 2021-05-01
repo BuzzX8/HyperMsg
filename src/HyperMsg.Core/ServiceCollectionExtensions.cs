@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.Buffers;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -22,7 +20,7 @@ namespace HyperMsg
         public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
-                .AddBufferTransferingService()
+                .AddBufferService()
                 .AddSharedMemoryPool()
                 .AddMessageBroker()
                 .AddHostedService<ServiceScopeService>();
@@ -45,7 +43,6 @@ namespace HyperMsg
             return services.AddSingleton(provider =>
             {
                 var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
-
                 var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
                 var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
 
@@ -53,15 +50,7 @@ namespace HyperMsg
             });
         }
 
-        public static IServiceCollection AddBufferTransferingService(this IServiceCollection services)
-        {
-            return services.AddHostedService(provider =>
-            {
-                var messagingContext = provider.GetRequiredService<IMessagingContext>();
-                var bufferContext = provider.GetRequiredService<IBufferContext>();
-                return new BufferTransferingService(messagingContext, bufferContext.TransmittingBuffer);
-            }).AddSingleton(provider => (BufferTransferingService)provider.GetServices<IHostedService>().Single(s => s is BufferTransferingService));
-        }
+        public static IServiceCollection AddBufferService(this IServiceCollection services) => services.AddHostedService<BufferService>();
 
         /// <summary>
         /// Adds implementation for IBufferFactory. Depends on MemoryPool<byte>
@@ -103,46 +92,6 @@ namespace HyperMsg
             configurators.Add(configurator);
 
             return services;
-        }
-
-        public static IServiceCollection AddTransmittingBufferSerializer<TMessage>(this IServiceCollection services, Action<IBufferWriter<byte>, TMessage> serializer)
-        {
-            services.AddBufferTransferingService();
-            return services.AddConfigurator(provider =>
-            {
-                var service = provider.GetRequiredService<BufferTransferingService>();
-                service.AddTransmittingBufferSerializer(serializer);
-            });
-        }
-
-        public static IServiceCollection AddReceivingBufferDeserializer<TMessage>(this IServiceCollection services, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer)
-        {
-            services.AddBufferTransferingService();
-            return services.AddConfigurator(provider =>
-            {
-                var service = provider.GetRequiredService<BufferTransferingService>();
-                service.AddReceivingBufferDeserializer(deserializer);
-            });
-        }
-
-        public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, int> reader)
-        {
-            return services.AddBufferTransferingService()
-                .AddConfigurator(provider =>
-                {
-                    var service = provider.GetRequiredService<BufferTransferingService>();
-                    service.AddReceivingBufferReader(reader);
-                });
-        }
-
-        public static IServiceCollection AddReceivingBufferReader(this IServiceCollection services, Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> reader)
-        {
-            return services.AddBufferTransferingService()
-                .AddConfigurator(provider =>
-                {
-                    var service = provider.GetRequiredService<BufferTransferingService>();
-                    service.AddReceivingBufferReader(reader);
-                });
         }
 
         public static IServiceCollection AddTimerService(this IServiceCollection services) => services.AddHostedService<TimerService>();

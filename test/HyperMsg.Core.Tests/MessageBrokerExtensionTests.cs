@@ -1,7 +1,6 @@
 ﻿using FakeItEasy;
 using System;
 using System.Buffers;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -9,7 +8,7 @@ namespace HyperMsg
 {
     public class MessageBrokerExtensionTests
     {
-        private readonly MessageBroker broker = new MessageBroker();
+        private readonly MessageBroker broker = new();
         private readonly Guid data = Guid.NewGuid();
         private readonly Action<Guid> handler = A.Fake<Action<Guid>>();
         private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
@@ -104,21 +103,9 @@ namespace HyperMsg
             var message = Guid.NewGuid();
 
             broker.RegisterWriteToBufferCommandHandler(handler);
-            broker.SendWriteToBufferCommand(message, BufferType.None);
+            broker.SendWriteToBufferCommand(BufferType.None, message);
 
-            A.CallTo(() => handler.Handle(message, BufferType.None)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void SendWriteToBufferCommand_Invokes_HandleAsync_Method_Of_Registered_Handler()
-        {
-            var handler = A.Fake<IWriteToBufferCommandHandler>();
-            var message = Guid.NewGuid();
-
-            broker.RegisterWriteToBufferCommandHandler(handler);
-            broker.SendWriteToBufferCommandAsync(message, BufferType.None);
-
-            A.CallTo(() => handler.HandleAsync(message, BufferType.None, A<CancellationToken>._)).MustHaveHappened();
+            A.CallTo(() => handler.WriteToBuffer(BufferType.None, message)).MustHaveHappened();
         }
     }
 }

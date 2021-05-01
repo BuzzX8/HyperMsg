@@ -1,13 +1,8 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace HyperMsg
+﻿namespace HyperMsg
 {
     public interface IWriteToBufferCommandHandler
     {
-        public void Handle<T>(T message, BufferType bufferType);
-
-        public Task HandleAsync<T>(T message, BufferType bufferType, CancellationToken cancellationToken);
+        public void WriteToBuffer<T>(BufferType bufferType, T message);
     }
 
     public enum BufferType

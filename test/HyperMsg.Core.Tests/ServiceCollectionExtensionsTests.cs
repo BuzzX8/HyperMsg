@@ -2,8 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Buffers;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace HyperMsg
@@ -60,76 +58,6 @@ namespace HyperMsg
             var factory = provider.GetService<IBufferFactory>();
 
             Assert.NotNull(factory);
-        }
-
-        [Fact]
-        public void AddTransmittingBufferSerializer_Adds_Serializer()
-        {
-            var message = Guid.NewGuid();
-            var serializer = A.Fake<Action<IBufferWriter<byte>, Guid>>();
-            var host = ServiceHost.CreateDefault(services => services.AddTransmittingBufferSerializer(serializer));
-            host.StartAsync().Wait();
-
-            var sender = host.GetRequiredService<IMessageSender>();
-            sender.SendTransmitMessageCommand(message);
-
-            A.CallTo(() => serializer.Invoke(A<IBufferWriter<byte>>._, message)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void AddReceivingBufferDeserializer_Adds_Deserializer()
-        {
-            var message = Guid.NewGuid().ToByteArray();
-            var deserializer = A.Fake<Func<ReadOnlySequence<byte>, (int, Guid)>>();
-            var host = ServiceHost.CreateDefault(services => services.AddReceivingBufferDeserializer(deserializer));
-            host.StartAsync().Wait();
-
-            var sender = host.GetRequiredService<IMessageSender>();
-            var buffers = host.GetRequiredService<IBufferContext>();
-            buffers.ReceivingBuffer.Writer.Write(message);
-            sender.SendMessageReceivedEvent(buffers.ReceivingBuffer);
-
-            A.CallTo(() => deserializer.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void AddReceivingBufferReader_Registers_Reader()
-        {
-            var message = Guid.NewGuid().ToByteArray();
-            var bytesToRead = message.Length / 2;
-            var bufferReader = A.Fake<Func<ReadOnlySequence<byte>, int>>();
-            A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).Returns(bytesToRead);
-            var host = ServiceHost.CreateDefault(services => services.AddReceivingBufferReader(bufferReader));
-            host.StartAsync().Wait();
-
-            var sender = host.GetRequiredService<IMessageSender>();
-            var buffers = host.GetRequiredService<IBufferContext>();
-            buffers.ReceivingBuffer.Writer.Write(message);
-            sender.SendMessageReceivedEvent(buffers.ReceivingBuffer);
-
-            var remainedData = buffers.ReceivingBuffer.Reader.Read().ToArray();
-
-            Assert.Equal(message.Length - bytesToRead, remainedData.Length);
-        }
-
-        [Fact]
-        public void AddReceivingBufferReader_Registers_Async_Reader()
-        {
-            var message = Guid.NewGuid().ToByteArray();
-            var bytesToRead = message.Length / 2;
-            var bufferReader = A.Fake<Func<ReadOnlySequence<byte>, CancellationToken, Task<int>>>();
-            A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._, A<CancellationToken>._)).Returns(bytesToRead);
-            var host = ServiceHost.CreateDefault(services => services.AddReceivingBufferReader(bufferReader));
-            host.StartAsync().Wait();
-
-            var sender = host.GetRequiredService<IMessageSender>();
-            var buffers = host.GetRequiredService<IBufferContext>();
-            buffers.ReceivingBuffer.Writer.Write(message);
-            sender.SendMessageReceivedEvent(buffers.ReceivingBuffer);
-
-            var remainedData = buffers.ReceivingBuffer.Reader.Read().ToArray();
-
-            Assert.Equal(message.Length - bytesToRead, remainedData.Length);
         }
 
         [Fact]
