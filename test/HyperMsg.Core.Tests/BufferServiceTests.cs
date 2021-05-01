@@ -7,7 +7,7 @@ namespace HyperMsg
     public class BufferServiceTests : ServiceHostFixture
     {
         [Fact]
-        public void SendReadFromBufferCommand_()
+        public void SendReadFromBufferCommand_Provides_Buffer_Data_To_BufferReader()
         {
             var expectedMessage = Guid.NewGuid().ToByteArray();
             var actualMessage = default(byte[]);
@@ -51,7 +51,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Invokes_Handler_Registered_By_RegisterBufferUpdateEventHandler()
+        public void SendWriteToBufferCommand_Invokes_Handler_Registered_By_RegisterBufferUpdateEventHandler()
         {
             var expectedMessage = Guid.NewGuid().ToByteArray();
             var actualMessage = default(byte[]);

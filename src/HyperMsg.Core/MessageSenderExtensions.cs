@@ -95,7 +95,7 @@ namespace HyperMsg
             messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(bufferType, message));
 
         public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBufferAsync(bufferType, message, cancellationToken), cancellationToken);
+            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(bufferType, message), cancellationToken);
 
         public static void SendBufferUpdatedEvent(this IMessageSender messageSender, BufferType bufferType, IBuffer buffer) => messageSender.Send(new BufferUpdatedEvent(bufferType, buffer));
 

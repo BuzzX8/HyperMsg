@@ -2,8 +2,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -132,12 +130,6 @@ namespace HyperMsg
             }
 
             this.SendBufferUpdatedEvent(bufferType, buffer);
-        }
-
-        public Task WriteToBufferAsync<T>(BufferType bufferType, T message, CancellationToken _)
-        {
-            WriteToBuffer(bufferType, message);
-            return Task.CompletedTask;
         }
     }
 

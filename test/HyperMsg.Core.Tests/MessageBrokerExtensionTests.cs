@@ -1,7 +1,6 @@
 ﻿using FakeItEasy;
 using System;
 using System.Buffers;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -107,18 +106,6 @@ namespace HyperMsg
             broker.SendWriteToBufferCommand(BufferType.None, message);
 
             A.CallTo(() => handler.WriteToBuffer(BufferType.None, message)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void SendWriteToBufferCommand_Invokes_HandleAsync_Method_Of_Registered_Handler()
-        {
-            var handler = A.Fake<IWriteToBufferCommandHandler>();
-            var message = Guid.NewGuid();
-
-            broker.RegisterWriteToBufferCommandHandler(handler);
-            broker.SendWriteToBufferCommandAsync(BufferType.None, message);
-
-            A.CallTo(() => handler.WriteToBufferAsync(BufferType.None, message, A<CancellationToken>._)).MustHaveHappened();
         }
     }
 }
