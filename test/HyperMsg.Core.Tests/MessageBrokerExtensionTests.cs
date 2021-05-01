@@ -9,7 +9,7 @@ namespace HyperMsg
 {
     public class MessageBrokerExtensionTests
     {
-        private readonly MessageBroker broker = new MessageBroker();
+        private readonly MessageBroker broker = new();
         private readonly Guid data = Guid.NewGuid();
         private readonly Action<Guid> handler = A.Fake<Action<Guid>>();
         private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
@@ -104,9 +104,9 @@ namespace HyperMsg
             var message = Guid.NewGuid();
 
             broker.RegisterWriteToBufferCommandHandler(handler);
-            broker.SendWriteToBufferCommand(message, BufferType.None);
+            broker.SendWriteToBufferCommand(BufferType.None, message);
 
-            A.CallTo(() => handler.WriteToBuffer(message, BufferType.None)).MustHaveHappened();
+            A.CallTo(() => handler.WriteToBuffer(BufferType.None, message)).MustHaveHappened();
         }
 
         [Fact]
@@ -116,9 +116,9 @@ namespace HyperMsg
             var message = Guid.NewGuid();
 
             broker.RegisterWriteToBufferCommandHandler(handler);
-            broker.SendWriteToBufferCommandAsync(message, BufferType.None);
+            broker.SendWriteToBufferCommandAsync(BufferType.None, message);
 
-            A.CallTo(() => handler.WriteToBufferAsync(message, BufferType.None, A<CancellationToken>._)).MustHaveHappened();
+            A.CallTo(() => handler.WriteToBufferAsync(BufferType.None, message, A<CancellationToken>._)).MustHaveHappened();
         }
     }
 }

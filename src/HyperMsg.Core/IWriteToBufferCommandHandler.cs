@@ -5,9 +5,9 @@ namespace HyperMsg
 {
     public interface IWriteToBufferCommandHandler
     {
-        public void WriteToBuffer<T>(T message, BufferType bufferType);
+        public void WriteToBuffer<T>(BufferType bufferType, T message);
 
-        public Task WriteToBufferAsync<T>(T message, BufferType bufferType, CancellationToken cancellationToken);
+        public Task WriteToBufferAsync<T>(BufferType bufferType, T message, CancellationToken cancellationToken);
     }
 
     public enum BufferType

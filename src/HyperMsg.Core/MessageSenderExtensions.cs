@@ -80,16 +80,22 @@ namespace HyperMsg
         public static Task SendSerializationCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new SerializationCommand<T>(bufferWriter, message), cancellationToken);
 
-        public static void SendBufferActionRequest(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType) => messageSender.Send(new BufferActionRequest(action, bufferType));
+        public static void SendBufferActionRequest(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType) => messageSender.Send(new BufferActionRequest(bufferType, action));
 
         public static Task SendBufferActionRequestAsync(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync(new BufferActionRequest(action, bufferType), cancellationToken);
+            messageSender.SendAsync(new BufferActionRequest(bufferType, action), cancellationToken);
 
-        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, T message, BufferType bufferType) => 
-            messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(message, bufferType));
+        public static void SendReadFromBufferCommand(this IMessageSender messageSender, BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader) => 
+            messageSender.Send(new ReadFromBufferCommand(bufferType, bufferReader));
 
-        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, T message, BufferType bufferType, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBufferAsync(message, bufferType, cancellationToken), cancellationToken);
+        public static Task SendReadFromBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync(new ReadFromBufferCommand(bufferType, bufferReader), cancellationToken);
+
+        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, BufferType bufferType, T message) => 
+            messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(bufferType, message));
+
+        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBufferAsync(bufferType, message, cancellationToken), cancellationToken);
 
         public static void SendBufferUpdatedEvent(this IMessageSender messageSender, BufferType bufferType, IBuffer buffer) => messageSender.Send(new BufferUpdatedEvent(bufferType, buffer));
 

@@ -17,13 +17,14 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetDefaultDisposables()
         {
+            yield return this.RegisterReadFromBufferCommandHandler(HandleReadFromBufferCommand);
             yield return this.RegisterWriteToBufferCommandHandler(this);
             yield return this.RegisterBufferActionRequestHandler(HandleBufferActionRequest);
         }
 
         private void HandleBufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
         {
-            switch(bufferType)
+            switch (bufferType)
             {
                 case BufferType.Transmitting:
                     HandleBufferActionRequest(bufferAction, bufferContext.TransmittingBuffer, transmittingBufferLock);
@@ -43,21 +44,56 @@ namespace HyperMsg
             }
         }
 
-        public void WriteToBuffer<T>(T message, BufferType bufferType)
+        private void HandleReadFromBufferCommand(BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader)
         {
             switch (bufferType)
             {
                 case BufferType.Transmitting:
-                    WriteToBuffer(message, bufferType, bufferContext.TransmittingBuffer, transmittingBufferLock);
+                    ReadFromBuffer(bufferContext.TransmittingBuffer, bufferReader, transmittingBufferLock);
                     break;
 
                 case BufferType.Receiving:
-                    WriteToBuffer(message, bufferType, bufferContext.ReceivingBuffer, receivingBufferLock);
+                    ReadFromBuffer(bufferContext.ReceivingBuffer, bufferReader, receivingBufferLock);
                     break;
             }
         }
 
-        private void WriteToBuffer<T>(T message, BufferType bufferType, IBuffer buffer, object bufferLock)
+        private void ReadFromBuffer(IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader, object bufferLock)
+        {
+            lock (bufferLock)
+            {
+                var reading = buffer.Reader.Read();
+                if (reading.Length == 0)
+                {
+                    return;
+                }
+
+                var bytesRead = bufferReader.Invoke(reading);
+
+                if (bytesRead == 0)
+                {
+                    return;
+                }
+
+                buffer.Reader.Advance(bytesRead);
+            }
+        }
+
+        public void WriteToBuffer<T>(BufferType bufferType, T message)
+        {
+            switch (bufferType)
+            {
+                case BufferType.Transmitting:
+                    WriteToBuffer(bufferType, message, bufferContext.TransmittingBuffer, transmittingBufferLock);
+                    break;
+
+                case BufferType.Receiving:
+                    WriteToBuffer(bufferType, message, bufferContext.ReceivingBuffer, receivingBufferLock);
+                    break;
+            }
+        }
+
+        private void WriteToBuffer<T>(BufferType bufferType, T message, IBuffer buffer, object bufferLock)
         {
             var writer = buffer.Writer;
 
@@ -93,14 +129,14 @@ namespace HyperMsg
                         this.SendSerializationCommand(writer, message);
                         break;
                 }
-
-                this.SendBufferUpdatedEvent(bufferType, buffer);
             }
+
+            this.SendBufferUpdatedEvent(bufferType, buffer);
         }
 
-        public Task WriteToBufferAsync<T>(T message, BufferType bufferType, CancellationToken _)
+        public Task WriteToBufferAsync<T>(BufferType bufferType, T message, CancellationToken _)
         {
-            WriteToBuffer(message, bufferType);
+            WriteToBuffer(bufferType, message);
             return Task.CompletedTask;
         }
 
@@ -113,50 +149,14 @@ namespace HyperMsg
             }));
         }
 
-        public void AddReceivingBufferDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) => 
-            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((buffer, token) => DeserializeAsync(buffer, deserializer, token)));
+        public void AddReceivingBufferDeserializer<TMessage>(Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer) { }
+            //RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((buffer, token) => DeserializeAsync(buffer, deserializer, token)));
 
-        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader) => 
-            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler(b => ReadBuffer(b, bufferReader)));
+        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, int> bufferReader)
+        { }// RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler(b => ReadBuffer(b, bufferReader)));
 
-        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) => 
-            RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((b, t) => ReadBufferAsync(b, bufferReader, t)));
-
-        private void ReadBuffer(IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader)
-        {
-            var reading = buffer.Reader.Read();
-            if (reading.Length == 0)
-            {
-                return;
-            }
-
-            var bytesRead = bufferReader.Invoke(reading);
-
-            if (bytesRead == 0)
-            {
-                return;
-            }
-
-            buffer.Reader.Advance(bytesRead);
-        }
-
-        private async Task ReadBufferAsync(IBuffer buffer, Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader, CancellationToken cancellationToken)
-        {
-            var reading = buffer.Reader.Read();
-            if (reading.Length == 0)
-            {
-                return;
-            }
-
-            var bytesRead = await bufferReader.Invoke(reading, cancellationToken);
-
-            if (bytesRead == 0)
-            {
-                return;
-            }
-
-            buffer.Reader.Advance(bytesRead);
-        }
+        public void AddReceivingBufferReader(Func<ReadOnlySequence<byte>, CancellationToken, Task<int>> bufferReader) { }
+            //RegisterDisposable(this.RegisterReceivingBufferUpdatedEventHandler((b, t) => ReadBufferAsync(b, bufferReader, t)));
 
         private Task DeserializeAsync<TMessage>(IBuffer buffer, Func<ReadOnlySequence<byte>, (int BytesRead, TMessage Message)> deserializer, CancellationToken cancellationToken)
         {
@@ -181,7 +181,7 @@ namespace HyperMsg
 
     internal struct BufferActionRequest
     {
-        public BufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
+        public BufferActionRequest(BufferType bufferType, Action<IBuffer> bufferAction)
         {
             BufferAction = bufferAction;
             BufferType = bufferType;
@@ -190,6 +190,19 @@ namespace HyperMsg
         public Action<IBuffer> BufferAction { get; }
 
         public BufferType BufferType { get; }
+    }
+
+    internal struct ReadFromBufferCommand
+    {
+        public ReadFromBufferCommand(BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader)
+        {
+            BufferType = bufferType;
+            BufferReader = bufferReader;
+        }
+
+        public BufferType BufferType { get; }
+
+        public Func<ReadOnlySequence<byte>, int> BufferReader { get; }
     }
 
     internal struct BufferUpdatedEvent
