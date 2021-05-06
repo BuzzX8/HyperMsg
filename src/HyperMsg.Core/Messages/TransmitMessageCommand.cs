@@ -1,4 +1,4 @@
-﻿namespace HyperMsg
+﻿namespace HyperMsg.Messages
 {
     internal struct TransmitMessageCommand<T>
     {

@@ -1,6 +1,6 @@
 ﻿using System.Buffers;
 
-namespace HyperMsg
+namespace HyperMsg.Messages
 {
     internal struct SerializationCommand<T>
     {
