@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using HyperMsg.Messages;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Buffers;
 using System.Threading;
