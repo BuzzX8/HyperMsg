@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HyperMsg.Messages;
+using System;
 
 namespace HyperMsg
 {

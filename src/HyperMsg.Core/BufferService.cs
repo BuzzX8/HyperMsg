@@ -136,40 +136,4 @@ namespace HyperMsg
 
         private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
     }
-
-    internal struct BufferActionRequest
-    {
-        public BufferActionRequest(BufferType bufferType, Action<IBuffer> bufferAction)
-        {
-            BufferAction = bufferAction;
-            BufferType = bufferType;
-        }
-
-        public Action<IBuffer> BufferAction { get; }
-
-        public BufferType BufferType { get; }
-    }
-
-    internal struct ReadFromBufferCommand
-    {
-        public ReadFromBufferCommand(BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader)
-        {
-            BufferType = bufferType;
-            BufferReader = bufferReader;
-        }
-
-        public BufferType BufferType { get; }
-
-        public Func<ReadOnlySequence<byte>, int> BufferReader { get; }
-    }
-
-    internal struct BufferUpdatedEvent
-    {
-        public BufferUpdatedEvent(BufferType bufferType)
-        {
-            BufferType = bufferType;
-        }
-
-        public BufferType BufferType { get; }
-    }
 }
