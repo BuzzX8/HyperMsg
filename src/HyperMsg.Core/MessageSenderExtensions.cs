@@ -86,10 +86,10 @@ namespace HyperMsg
         public static Task SendBufferActionRequestAsync(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new BufferActionRequest(bufferType, action), cancellationToken);
 
-        public static void SendReadFromBufferCommand(this IMessageSender messageSender, BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader) => 
+        public static void SendReadFromBufferCommand(this IMessageSender messageSender, BufferType bufferType, BufferReader bufferReader) => 
             messageSender.Send(new ReadFromBufferCommand(bufferType, bufferReader));
 
-        public static Task SendReadFromBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader, CancellationToken cancellationToken = default) => 
+        public static Task SendReadFromBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, BufferReader bufferReader, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new ReadFromBufferCommand(bufferType, bufferReader), cancellationToken);
 
         public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, BufferType bufferType, T message) => 

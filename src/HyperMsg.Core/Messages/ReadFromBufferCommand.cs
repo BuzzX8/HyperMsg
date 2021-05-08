@@ -1,11 +1,8 @@
-﻿using System;
-using System.Buffers;
-
-namespace HyperMsg.Messages
+﻿namespace HyperMsg.Messages
 {
     internal struct ReadFromBufferCommand
     {
-        public ReadFromBufferCommand(BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader)
+        public ReadFromBufferCommand(BufferType bufferType, BufferReader bufferReader)
         {
             BufferType = bufferType;
             BufferReader = bufferReader;
@@ -13,6 +10,6 @@ namespace HyperMsg.Messages
 
         public BufferType BufferType { get; }
 
-        public Func<ReadOnlySequence<byte>, int> BufferReader { get; }
+        public BufferReader BufferReader { get; }
     }
 }

@@ -42,7 +42,7 @@ namespace HyperMsg
             }
         }
 
-        private void HandleReadFromBufferCommand(BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader)
+        private void HandleReadFromBufferCommand(BufferType bufferType, BufferReader bufferReader)
         {
             switch (bufferType)
             {
@@ -56,7 +56,7 @@ namespace HyperMsg
             }
         }
 
-        private void ReadFromBuffer(BufferType bufferType, IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader, object bufferLock)
+        private void ReadFromBuffer(BufferType bufferType, IBuffer buffer, BufferReader bufferReader, object bufferLock)
         {
             lock (bufferLock)
             {
@@ -76,7 +76,7 @@ namespace HyperMsg
                 buffer.Reader.Advance(bytesRead);
             }
 
-            OnBufferUpdated(bufferType);
+            //OnBufferUpdated(bufferType);
         }
 
         public void WriteToBuffer<T>(BufferType bufferType, T message)
@@ -134,6 +134,24 @@ namespace HyperMsg
             OnBufferUpdated(bufferType);
         }
 
-        private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
+        private void OnBufferUpdated(BufferType bufferType)
+        {
+            this.SendBufferUpdatedEventAsync(bufferType);
+            this.Send(new ReadBufferUpdate 
+            {
+                BufferType = bufferType,
+                BufferReaderAction = reader =>
+                {
+                    HandleReadFromBufferCommand(bufferType, reader);
+                }
+            });
+        }
+    }
+
+    internal struct ReadBufferUpdate
+    {
+        public BufferType BufferType { get; set; }
+
+        public Action<BufferReader> BufferReaderAction { get; set; }
     }
 }
