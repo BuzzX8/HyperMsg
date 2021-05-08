@@ -62,20 +62,21 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void ReadBufferUpdate_()
+        public void SendFlushBufferCommand_Invokes_Handler_Registered_By_RegisterFlushBufferCommandHandler()
         {
-            var expectedMessage = Guid.NewGuid().ToByteArray();
-            var actualMessage = default(byte[]);
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
 
-            HandlersRegistry.RegisterBufferUpdateReader(BufferType.Receiving, buffer =>
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, buffer =>
             {
-                actualMessage = buffer.ToArray();
+                actual = buffer.ToArray();
                 return (int)buffer.Length;
             });
-            MessageSender.SendWriteToBufferCommand(BufferType.Receiving, expectedMessage);
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, expected);
+            MessageSender.SendFlushBufferCommand(BufferType.Transmitting);
 
-            Assert.NotNull(actualMessage);
-            Assert.Equal(expectedMessage, actualMessage);
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
         }
     }
 }

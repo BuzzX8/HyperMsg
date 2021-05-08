@@ -103,6 +103,11 @@ namespace HyperMsg
         public static Task SendBufferUpdatedEventAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new BufferUpdatedEvent(bufferType), cancellationToken);
 
+        public static void SendFlushBufferCommand(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new FlushBufferCommand(bufferType));
+
+        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync(new FlushBufferCommand(bufferType), cancellationToken);
+
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {
             var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };

@@ -18,6 +18,7 @@ namespace HyperMsg
             yield return this.RegisterReadFromBufferCommandHandler(ReadFromBuffer);
             yield return this.RegisterWriteToBufferCommandHandler(this);
             yield return this.RegisterBufferActionRequestHandler(HandleBufferActionRequest);
+            yield return RegisterHandler<FlushBufferCommand>(HandleFlushBufferCommand);
         }
 
         private void HandleBufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
@@ -132,11 +133,16 @@ namespace HyperMsg
             OnBufferUpdated(bufferType);
         }
 
-        private void OnBufferUpdated(BufferType bufferType)
-        {
-            this.SendAsync(new ReadBufferUpdate(bufferType, reader => ReadFromBuffer(bufferType, reader)), default);
-            this.SendBufferUpdatedEventAsync(bufferType);            
-        }
+        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new ReadBufferUpdate(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader)), default);
+
+        private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
+    }
+
+    internal struct FlushBufferCommand
+    {
+        public FlushBufferCommand(BufferType bufferType) => BufferType = bufferType;
+
+        public BufferType BufferType { get; }
     }
 
     internal struct ReadBufferUpdate

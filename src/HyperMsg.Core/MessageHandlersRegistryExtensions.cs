@@ -127,6 +127,19 @@ namespace HyperMsg
             });
         }
 
+        public static IDisposable RegisterFlushBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader flushHandler)
+        {
+            return handlersRegistry.RegisterHandler<ReadBufferUpdate>(message =>
+            {
+                if (message.BufferType != bufferType)
+                {
+                    return;
+                }
+
+                message.BufferReaderAction.Invoke(flushHandler);
+            });
+        }
+
         public static IDisposable RegisterTransmitBufferDataCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<ReadOnlyMemory<byte>> bufferDataHandler)
         {
             return new CompositeDisposable(new[]
