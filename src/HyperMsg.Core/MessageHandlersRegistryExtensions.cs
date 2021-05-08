@@ -101,35 +101,9 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction handler)
-        {
-            return handlersRegistry.RegisterHandler<BufferUpdatedEvent>((@event, token) =>
-            {
-                if (@event.BufferType != bufferType)
-                {
-                    return Task.CompletedTask;
-                }
-
-                return handler.Invoke(token);
-            });
-        }
-
-        public static IDisposable RegisterBufferUpdateReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
-        {
-            return handlersRegistry.RegisterHandler<ReadBufferUpdate>(message =>
-            {
-                if (message.BufferType != bufferType)
-                {
-                    return;
-                }
-
-                message.BufferReaderAction.Invoke(bufferReader);
-            });
-        }
-
         public static IDisposable RegisterFlushBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader flushHandler)
         {
-            return handlersRegistry.RegisterHandler<ReadBufferUpdate>(message =>
+            return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
             {
                 if (message.BufferType != bufferType)
                 {

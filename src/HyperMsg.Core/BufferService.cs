@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HyperMsg.Messages;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
@@ -133,28 +134,8 @@ namespace HyperMsg
             OnBufferUpdated(bufferType);
         }
 
-        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new ReadBufferUpdate(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader)), default);
+        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader)), default);
 
         private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
-    }
-
-    internal struct FlushBufferCommand
-    {
-        public FlushBufferCommand(BufferType bufferType) => BufferType = bufferType;
-
-        public BufferType BufferType { get; }
-    }
-
-    internal struct ReadBufferUpdate
-    {
-        public ReadBufferUpdate(BufferType bufferType, Action<BufferReader> bufferReaderAction)
-        {
-            BufferType = bufferType;
-            BufferReaderAction = bufferReaderAction;
-        }
-
-        public BufferType BufferType { get; }
-
-        public Action<BufferReader> BufferReaderAction { get; }
     }
 }

@@ -2,11 +2,7 @@
 {
     internal struct ReadFromBufferCommand
     {
-        public ReadFromBufferCommand(BufferType bufferType, BufferReader bufferReader)
-        {
-            BufferType = bufferType;
-            BufferReader = bufferReader;
-        }
+        public ReadFromBufferCommand(BufferType bufferType, BufferReader bufferReader) => (BufferType, BufferReader) = (bufferType, bufferReader);
 
         public BufferType BufferType { get; }
 
