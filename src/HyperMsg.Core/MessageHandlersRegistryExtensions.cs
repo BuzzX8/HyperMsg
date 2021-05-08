@@ -79,10 +79,10 @@ namespace HyperMsg
         public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<Action<IBuffer>, BufferType> requestHandler) => 
             handlersRegistry.RegisterHandler<BufferActionRequest>((request, token) => requestHandler.Invoke(request.BufferAction, request.BufferType, token));
 
-        public static IDisposable RegisterReadFromBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<BufferType, Func<ReadOnlySequence<byte>, int>> handler) =>
+        public static IDisposable RegisterReadFromBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<BufferType, BufferReader> handler) =>
             handlersRegistry.RegisterHandler<ReadFromBufferCommand>(command => handler.Invoke(command.BufferType, command.BufferReader));
 
-        public static IDisposable RegisterReadFromBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<BufferType, Func<ReadOnlySequence<byte>, int>> handler) =>
+        public static IDisposable RegisterReadFromBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<BufferType, BufferReader> handler) =>
             handlersRegistry.RegisterHandler<ReadFromBufferCommand>((command, token) => handler.Invoke(command.BufferType, command.BufferReader, token));
 
         public static IDisposable RegisterWriteToBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, IWriteToBufferCommandHandler commandHandler) => 
@@ -111,6 +111,19 @@ namespace HyperMsg
                 }
 
                 return handler.Invoke(token);
+            });
+        }
+
+        public static IDisposable RegisterBufferUpdateReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
+        {
+            return handlersRegistry.RegisterHandler<ReadBufferUpdate>(message =>
+            {
+                if (message.BufferType != bufferType)
+                {
+                    return;
+                }
+
+                message.BufferReaderAction.Invoke(bufferReader);
             });
         }
 

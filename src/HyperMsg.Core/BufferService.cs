@@ -15,7 +15,7 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetDefaultDisposables()
         {
-            yield return this.RegisterReadFromBufferCommandHandler(HandleReadFromBufferCommand);
+            yield return this.RegisterReadFromBufferCommandHandler(ReadFromBuffer);
             yield return this.RegisterWriteToBufferCommandHandler(this);
             yield return this.RegisterBufferActionRequestHandler(HandleBufferActionRequest);
         }
@@ -42,21 +42,21 @@ namespace HyperMsg
             }
         }
 
-        private void HandleReadFromBufferCommand(BufferType bufferType, Func<ReadOnlySequence<byte>, int> bufferReader)
+        private void ReadFromBuffer(BufferType bufferType, BufferReader bufferReader)
         {
             switch (bufferType)
             {
                 case BufferType.Transmitting:
-                    ReadFromBuffer(bufferType, bufferContext.TransmittingBuffer, bufferReader, transmittingBufferLock);
+                    ReadFromBuffer(bufferContext.TransmittingBuffer, bufferReader, transmittingBufferLock);
                     break;
 
                 case BufferType.Receiving:
-                    ReadFromBuffer(bufferType, bufferContext.ReceivingBuffer, bufferReader, receivingBufferLock);
+                    ReadFromBuffer(bufferContext.ReceivingBuffer, bufferReader, receivingBufferLock);
                     break;
             }
         }
 
-        private void ReadFromBuffer(BufferType bufferType, IBuffer buffer, Func<ReadOnlySequence<byte>, int> bufferReader, object bufferLock)
+        private void ReadFromBuffer(IBuffer buffer, BufferReader bufferReader, object bufferLock)
         {
             lock (bufferLock)
             {
@@ -75,8 +75,6 @@ namespace HyperMsg
 
                 buffer.Reader.Advance(bytesRead);
             }
-
-            OnBufferUpdated(bufferType);
         }
 
         public void WriteToBuffer<T>(BufferType bufferType, T message)
@@ -134,6 +132,23 @@ namespace HyperMsg
             OnBufferUpdated(bufferType);
         }
 
-        private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
+        private void OnBufferUpdated(BufferType bufferType)
+        {
+            this.SendAsync(new ReadBufferUpdate(bufferType, reader => ReadFromBuffer(bufferType, reader)), default);
+            this.SendBufferUpdatedEventAsync(bufferType);            
+        }
+    }
+
+    internal struct ReadBufferUpdate
+    {
+        public ReadBufferUpdate(BufferType bufferType, Action<BufferReader> bufferReaderAction)
+        {
+            BufferType = bufferType;
+            BufferReaderAction = bufferReaderAction;
+        }
+
+        public BufferType BufferType { get; }
+
+        public Action<BufferReader> BufferReaderAction { get; }
     }
 }
