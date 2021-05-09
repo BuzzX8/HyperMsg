@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HyperMsg.Messages;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +19,7 @@ namespace HyperMsg
             yield return this.RegisterReadFromBufferCommandHandler(ReadFromBuffer);
             yield return this.RegisterWriteToBufferCommandHandler(this);
             yield return this.RegisterBufferActionRequestHandler(HandleBufferActionRequest);
+            yield return RegisterHandler<FlushBufferCommand>(HandleFlushBufferCommand);
         }
 
         private void HandleBufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
@@ -77,21 +79,21 @@ namespace HyperMsg
             }
         }
 
-        public void WriteToBuffer<T>(BufferType bufferType, T message)
+        public void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
         {
             switch (bufferType)
             {
                 case BufferType.Transmitting:
-                    WriteToBuffer(bufferType, message, bufferContext.TransmittingBuffer, transmittingBufferLock);
+                    WriteToBuffer(bufferType, message, bufferContext.TransmittingBuffer, transmittingBufferLock, flushBuffer);
                     break;
 
                 case BufferType.Receiving:
-                    WriteToBuffer(bufferType, message, bufferContext.ReceivingBuffer, receivingBufferLock);
+                    WriteToBuffer(bufferType, message, bufferContext.ReceivingBuffer, receivingBufferLock, flushBuffer);
                     break;
             }
         }
 
-        private void WriteToBuffer<T>(BufferType bufferType, T message, IBuffer buffer, object bufferLock)
+        private void WriteToBuffer<T>(BufferType bufferType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
         {
             var writer = buffer.Writer;
 
@@ -129,26 +131,16 @@ namespace HyperMsg
                 }
             }
 
+            if (flushBuffer)
+            {
+                HandleFlushBufferCommand(new FlushBufferCommand(bufferType));
+            }
+
             OnBufferUpdated(bufferType);
         }
 
-        private void OnBufferUpdated(BufferType bufferType)
-        {
-            this.SendAsync(new ReadBufferUpdate(bufferType, reader => ReadFromBuffer(bufferType, reader)), default);
-            this.SendBufferUpdatedEventAsync(bufferType);            
-        }
-    }
+        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader)), default);
 
-    internal struct ReadBufferUpdate
-    {
-        public ReadBufferUpdate(BufferType bufferType, Action<BufferReader> bufferReaderAction)
-        {
-            BufferType = bufferType;
-            BufferReaderAction = bufferReaderAction;
-        }
-
-        public BufferType BufferType { get; }
-
-        public Action<BufferReader> BufferReaderAction { get; }
+        private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
     }
 }

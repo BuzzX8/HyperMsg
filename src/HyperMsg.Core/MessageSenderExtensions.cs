@@ -33,7 +33,7 @@ namespace HyperMsg
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="message">Message to send.</param>
-        public static void SendTransmitMessageCommand<T>(this IMessageSender messageSender, T message) => messageSender.Send(new TransmitMessageCommand<T>(message));
+        public static void SendTransmitMessageCommand<T>(this IMessageSender messageSender, T message) => messageSender.SendWriteToBufferCommand(BufferType.Transmitting, message);
 
         /// <summary>
         /// 
@@ -43,7 +43,8 @@ namespace HyperMsg
         /// <param name="message">Message to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => messageSender.SendAsync(new TransmitMessageCommand<T>(message), cancellationToken);
+        public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
+            messageSender.SendWriteToBufferCommandAsync(BufferType.Transmitting, message, true, cancellationToken);
 
         public static async Task SendTransmitBufferDataCommandAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken = default)
         {
@@ -92,16 +93,21 @@ namespace HyperMsg
         public static Task SendReadFromBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, BufferReader bufferReader, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new ReadFromBufferCommand(bufferType, bufferReader), cancellationToken);
 
-        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, BufferType bufferType, T message) => 
-            messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(bufferType, message));
+        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true) => 
+            messageSender.Send(new WriteToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)));
 
-        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(bufferType, message), cancellationToken);
+        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync(new WriteToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)), cancellationToken);
 
         public static void SendBufferUpdatedEvent(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new BufferUpdatedEvent(bufferType));
 
         public static Task SendBufferUpdatedEventAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new BufferUpdatedEvent(bufferType), cancellationToken);
+
+        public static void SendFlushBufferCommand(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new FlushBufferCommand(bufferType));
+
+        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync(new FlushBufferCommand(bufferType), cancellationToken);
 
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {

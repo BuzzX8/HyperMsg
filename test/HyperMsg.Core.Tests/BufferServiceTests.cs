@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FakeItEasy;
+using System;
 using System.Buffers;
 using Xunit;
 
@@ -62,20 +63,62 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void ReadBufferUpdate_()
+        public void SendWriteToBufferCommand_Invokes_FlushCommand_Handler()
         {
-            var expectedMessage = Guid.NewGuid().ToByteArray();
-            var actualMessage = default(byte[]);
+            var bufferReader = A.Fake<BufferReader>();
 
-            HandlersRegistry.RegisterBufferUpdateReader(BufferType.Receiving, buffer =>
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, bufferReader);
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), true);
+
+            A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendWriteToBufferCommand_Does_Not_Invokes_FlushCommand_Handler()
+        {
+            var bufferReader = A.Fake<BufferReader>();
+
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, bufferReader);
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), false);
+
+            A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void SendFlushBufferCommand_Invokes_Handler_Registered_By_RegisterFlushBufferCommandHandler()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, buffer =>
             {
-                actualMessage = buffer.ToArray();
+                actual = buffer.ToArray();
                 return (int)buffer.Length;
             });
-            MessageSender.SendWriteToBufferCommand(BufferType.Receiving, expectedMessage);
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, expected);
 
-            Assert.NotNull(actualMessage);
-            Assert.Equal(expectedMessage, actualMessage);
+            MessageSender.SendFlushBufferCommand(BufferType.Transmitting);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SendTransmitMessageCommand_Writes_Message_And_Flushes_Transmitting_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, buffer =>
+            {
+                actual = buffer.ToArray();
+                return (int)buffer.Length;
+            });
+
+            MessageSender.SendTransmitMessageCommand(expected);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
         }
     }
 }

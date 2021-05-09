@@ -14,30 +14,6 @@ namespace HyperMsg
         private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
 
         [Fact]
-        public void SendTransmitMessageCommand_Sends_Message_To_Transmit_Handlers()
-        {
-            broker.RegisterTransmitMessageCommandHandler(handler);
-            broker.RegisterTransmitMessageCommandHandler(asyncHandler);
-
-            broker.SendTransmitMessageCommand(data);
-
-            A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
-            A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
-        }
-
-        [Fact]
-        public async Task SendTransmitMessageCommandAsync_Sends_Message_To_Transmit_Handlers()
-        {
-            broker.RegisterTransmitMessageCommandHandler(handler);
-            broker.RegisterTransmitMessageCommandHandler(asyncHandler);
-
-            await broker.SendTransmitMessageCommandAsync(data, default);
-
-            A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
-            A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
-        }
-
-        [Fact]
         public void Receive_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterMessageReceivedEventHandler(handler);
@@ -105,7 +81,7 @@ namespace HyperMsg
             broker.RegisterWriteToBufferCommandHandler(handler);
             broker.SendWriteToBufferCommand(BufferType.None, message);
 
-            A.CallTo(() => handler.WriteToBuffer(BufferType.None, message)).MustHaveHappened();
+            A.CallTo(() => handler.WriteToBuffer(BufferType.None, message, true)).MustHaveHappened();
         }
     }
 }

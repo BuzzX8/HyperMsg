@@ -86,7 +86,7 @@ namespace HyperMsg
             handlersRegistry.RegisterHandler<ReadFromBufferCommand>((command, token) => handler.Invoke(command.BufferType, command.BufferReader, token));
 
         public static IDisposable RegisterWriteToBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, IWriteToBufferCommandHandler commandHandler) => 
-            handlersRegistry.RegisterHandler<Action<IWriteToBufferCommandHandler>>(action => action.Invoke(commandHandler));
+            handlersRegistry.RegisterHandler<WriteToBufferCommand>(command => command.WriteToBufferAction.Invoke(commandHandler));
 
         public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action handler)
         {
@@ -101,49 +101,16 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction handler)
+        public static IDisposable RegisterFlushBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader flushHandler)
         {
-            return handlersRegistry.RegisterHandler<BufferUpdatedEvent>((@event, token) =>
-            {
-                if (@event.BufferType != bufferType)
-                {
-                    return Task.CompletedTask;
-                }
-
-                return handler.Invoke(token);
-            });
-        }
-
-        public static IDisposable RegisterBufferUpdateReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
-        {
-            return handlersRegistry.RegisterHandler<ReadBufferUpdate>(message =>
+            return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
             {
                 if (message.BufferType != bufferType)
                 {
                     return;
                 }
 
-                message.BufferReaderAction.Invoke(bufferReader);
-            });
-        }
-
-        public static IDisposable RegisterTransmitBufferDataCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<ReadOnlyMemory<byte>> bufferDataHandler)
-        {
-            return new CompositeDisposable(new[]
-            {
-                handlersRegistry.RegisterTransmitMessageCommandHandler(bufferDataHandler),
-                handlersRegistry.RegisterTransmitMessageCommandHandler<byte[]>(data => bufferDataHandler.Invoke(new ReadOnlyMemory<byte>(data))),
-                handlersRegistry.RegisterTransmitMessageCommandHandler<ArraySegment<byte>>(data => bufferDataHandler.Invoke(data.AsMemory()))
-            });
-        }
-
-        public static IDisposable RegisterTransmitBufferDataCommandHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<ReadOnlyMemory<byte>> bufferDataHandler)
-        {
-            return new CompositeDisposable(new[]
-            {
-                handlersRegistry.RegisterTransmitMessageCommandHandler(bufferDataHandler),
-                handlersRegistry.RegisterTransmitMessageCommandHandler<byte[]>((data, token) => bufferDataHandler.Invoke(new ReadOnlyMemory<byte>(data), token)),
-                handlersRegistry.RegisterTransmitMessageCommandHandler<ArraySegment<byte>>((data, token) => bufferDataHandler.Invoke(data.AsMemory(), token))
+                message.BufferReaderAction.Invoke(flushHandler);
             });
         }
 
@@ -152,20 +119,5 @@ namespace HyperMsg
 
         public static IDisposable RegisterReceivingBufferUpdatedEventHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBuffer> messageHandler) =>
             handlersRegistry.RegisterMessageReceivedEventHandler(messageHandler);
-    }
-
-    internal class CompositeDisposable : IDisposable
-    {
-        private readonly IDisposable[] disposables;
-
-        internal CompositeDisposable(IDisposable[] disposables) => this.disposables = disposables;
-
-        public void Dispose()
-        {
-            foreach (var disposable in disposables)
-            {
-                disposable.Dispose();
-            }
-        }
     }
 }
