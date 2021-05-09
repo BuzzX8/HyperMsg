@@ -33,7 +33,7 @@ namespace HyperMsg
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="message">Message to send.</param>
-        public static void SendTransmitMessageCommand<T>(this IMessageSender messageSender, T message) => messageSender.Send(new TransmitMessageCommand<T>(message));
+        public static void SendTransmitMessageCommand<T>(this IMessageSender messageSender, T message) => messageSender.SendWriteToBufferCommand(BufferType.Transmitting, message);
 
         /// <summary>
         /// 
@@ -43,7 +43,8 @@ namespace HyperMsg
         /// <param name="message">Message to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => messageSender.SendAsync(new TransmitMessageCommand<T>(message), cancellationToken);
+        public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
+            messageSender.SendWriteToBufferCommandAsync(BufferType.Transmitting, message, true, cancellationToken);
 
         public static async Task SendTransmitBufferDataCommandAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken = default)
         {

@@ -96,7 +96,26 @@ namespace HyperMsg
                 return (int)buffer.Length;
             });
             MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, expected);
+
             MessageSender.SendFlushBufferCommand(BufferType.Transmitting);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SendTransmitMessageCommand_Writes_Message_And_Flushes_Transmitting_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, buffer =>
+            {
+                actual = buffer.ToArray();
+                return (int)buffer.Length;
+            });
+
+            MessageSender.SendTransmitMessageCommand(expected);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
