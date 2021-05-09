@@ -122,7 +122,7 @@ namespace HyperMsg
                         break;
 
                     case Stream stream:
-                        throw new NotSupportedException();
+                        WriteStream(writer, stream);
                         break;
 
                     default:
@@ -137,6 +137,14 @@ namespace HyperMsg
             }
 
             OnBufferUpdated(bufferType);
+        }
+
+        private void WriteStream(IBufferWriter<byte> writer, Stream stream)
+        {
+            var buffer = writer.GetMemory();
+            var bytesRead = stream.Read(buffer.Span);
+
+            writer.Advance(bytesRead);
         }
 
         private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader)), default);

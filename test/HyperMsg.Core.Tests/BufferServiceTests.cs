@@ -1,6 +1,7 @@
 ﻿using FakeItEasy;
 using System;
 using System.Buffers;
+using System.IO;
 using Xunit;
 
 namespace HyperMsg
@@ -82,6 +83,24 @@ namespace HyperMsg
             MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), false);
 
             A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void SendWriteToBufferCommand_Writes_Stream_Content_To_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Receiving, buffer =>
+            {
+                actual = buffer.ToArray();
+                return (int)buffer.Length;
+            });
+
+            MessageSender.SendWriteToBufferCommand(BufferType.Receiving, new MemoryStream(expected));
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
