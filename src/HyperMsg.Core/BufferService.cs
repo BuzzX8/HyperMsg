@@ -79,21 +79,21 @@ namespace HyperMsg
             }
         }
 
-        public void WriteToBuffer<T>(BufferType bufferType, T message)
+        public void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
         {
             switch (bufferType)
             {
                 case BufferType.Transmitting:
-                    WriteToBuffer(bufferType, message, bufferContext.TransmittingBuffer, transmittingBufferLock);
+                    WriteToBuffer(bufferType, message, bufferContext.TransmittingBuffer, transmittingBufferLock, flushBuffer);
                     break;
 
                 case BufferType.Receiving:
-                    WriteToBuffer(bufferType, message, bufferContext.ReceivingBuffer, receivingBufferLock);
+                    WriteToBuffer(bufferType, message, bufferContext.ReceivingBuffer, receivingBufferLock, flushBuffer);
                     break;
             }
         }
 
-        private void WriteToBuffer<T>(BufferType bufferType, T message, IBuffer buffer, object bufferLock)
+        private void WriteToBuffer<T>(BufferType bufferType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
         {
             var writer = buffer.Writer;
 
@@ -129,6 +129,11 @@ namespace HyperMsg
                         this.SendSerializationCommand(writer, message);
                         break;
                 }
+            }
+
+            if (flushBuffer)
+            {
+                HandleFlushBufferCommand(new FlushBufferCommand(bufferType));
             }
 
             OnBufferUpdated(bufferType);

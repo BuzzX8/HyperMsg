@@ -105,7 +105,7 @@ namespace HyperMsg
             broker.RegisterWriteToBufferCommandHandler(handler);
             broker.SendWriteToBufferCommand(BufferType.None, message);
 
-            A.CallTo(() => handler.WriteToBuffer(BufferType.None, message)).MustHaveHappened();
+            A.CallTo(() => handler.WriteToBuffer(BufferType.None, message, true)).MustHaveHappened();
         }
     }
 }

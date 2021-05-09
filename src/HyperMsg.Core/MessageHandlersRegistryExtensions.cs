@@ -86,7 +86,7 @@ namespace HyperMsg
             handlersRegistry.RegisterHandler<ReadFromBufferCommand>((command, token) => handler.Invoke(command.BufferType, command.BufferReader, token));
 
         public static IDisposable RegisterWriteToBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, IWriteToBufferCommandHandler commandHandler) => 
-            handlersRegistry.RegisterHandler<Action<IWriteToBufferCommandHandler>>(action => action.Invoke(commandHandler));
+            handlersRegistry.RegisterHandler<WriteToBufferCommand>(command => command.WriteToBufferAction.Invoke(commandHandler));
 
         public static IDisposable RegisterBufferUpdateEventHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action handler)
         {

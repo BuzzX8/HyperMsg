@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FakeItEasy;
+using System;
 using System.Buffers;
 using Xunit;
 
@@ -59,6 +60,28 @@ namespace HyperMsg
             MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray());
 
             Assert.True(wasInvoked);
+        }
+
+        [Fact]
+        public void SendWriteToBufferCommand_Invokes_FlushCommand_Handler()
+        {
+            var bufferReader = A.Fake<BufferReader>();
+
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, bufferReader);
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), true);
+
+            A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendWriteToBufferCommand_Does_Not_Invokes_FlushCommand_Handler()
+        {
+            var bufferReader = A.Fake<BufferReader>();
+
+            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, bufferReader);
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), false);
+
+            A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).MustNotHaveHappened();
         }
 
         [Fact]

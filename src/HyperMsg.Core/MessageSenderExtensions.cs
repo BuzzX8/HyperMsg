@@ -92,11 +92,11 @@ namespace HyperMsg
         public static Task SendReadFromBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, BufferReader bufferReader, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new ReadFromBufferCommand(bufferType, bufferReader), cancellationToken);
 
-        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, BufferType bufferType, T message) => 
-            messageSender.Send<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(bufferType, message));
+        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true) => 
+            messageSender.Send(new WriteToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)));
 
-        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync<Action<IWriteToBufferCommandHandler>>(handler => handler.WriteToBuffer(bufferType, message), cancellationToken);
+        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default) => 
+            messageSender.SendAsync(new WriteToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)), cancellationToken);
 
         public static void SendBufferUpdatedEvent(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new BufferUpdatedEvent(bufferType));
 
