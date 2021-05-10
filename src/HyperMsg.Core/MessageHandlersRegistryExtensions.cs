@@ -97,7 +97,7 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterFlushBufferReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
+        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
         {
             return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
             {
@@ -110,9 +110,9 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterFlushBufferSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlyMemory<byte>, int> segmentReader)
+        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlyMemory<byte>, int> segmentReader)
         {
-            return handlersRegistry.RegisterFlushBufferReader(bufferType, buffer =>
+            return handlersRegistry.RegisterBufferFlushReader(bufferType, buffer =>
             {
                 if (buffer.Length == 0)
                 {
