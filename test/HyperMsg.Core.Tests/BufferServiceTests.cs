@@ -68,7 +68,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<BufferReader>();
 
-            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, bufferReader);
+            HandlersRegistry.RegisterFlushBufferReader(BufferType.Transmitting, bufferReader);
             MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), true);
 
             A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).MustHaveHappened();
@@ -79,7 +79,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<BufferReader>();
 
-            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, bufferReader);
+            HandlersRegistry.RegisterFlushBufferReader(BufferType.Transmitting, bufferReader);
             MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), false);
 
             A.CallTo(() => bufferReader.Invoke(A<ReadOnlySequence<byte>>._)).MustNotHaveHappened();
@@ -91,7 +91,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Receiving, buffer =>
+            HandlersRegistry.RegisterFlushBufferSegmentReader(BufferType.Receiving, buffer =>
             {
                 actual = buffer.ToArray();
                 return (int)buffer.Length;
@@ -109,7 +109,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, buffer =>
+            HandlersRegistry.RegisterFlushBufferSegmentReader(BufferType.Transmitting, buffer =>
             {
                 actual = buffer.ToArray();
                 return (int)buffer.Length;
@@ -128,7 +128,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterFlushBufferCommandHandler(BufferType.Transmitting, buffer =>
+            HandlersRegistry.RegisterFlushBufferSegmentReader(BufferType.Transmitting, buffer =>
             {
                 actual = buffer.ToArray();
                 return (int)buffer.Length;

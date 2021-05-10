@@ -46,36 +46,6 @@ namespace HyperMsg
         public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
             messageSender.SendWriteToBufferCommandAsync(BufferType.Transmitting, message, true, cancellationToken);
 
-        public static async Task SendTransmitBufferDataCommandAsync(this IMessageSender messageSender, IBuffer transmittingBuffer, CancellationToken cancellationToken = default)
-        {
-            var reader = transmittingBuffer.Reader;
-            var buffer = reader.Read();
-
-            if (buffer.Length == 0)
-            {
-                return;
-            }
-
-            if (buffer.IsSingleSegment)
-            {
-                await messageSender.SendTransmitMessageCommandAsync(buffer.First, cancellationToken);
-                reader.Advance((int)buffer.Length);
-                return;
-            }
-
-            var enumerator = buffer.GetEnumerator();
-
-            while (enumerator.MoveNext())
-            {
-                await messageSender.SendTransmitMessageCommandAsync(enumerator.Current, cancellationToken);
-            }
-        }
-
-        public static void SendReceivingBufferUpdatedEvent(this IMessageSender messageSender, IBuffer receivingBuffer) => messageSender.SendMessageReceivedEvent(receivingBuffer);
-
-        public static Task SendReceivingBufferUpdatedEventAsync(this IMessageSender messageSender, IBuffer receivingBuffer, CancellationToken cancellationToken = default) =>
-            messageSender.SendMessageReceivedEventAsync(receivingBuffer, cancellationToken);
-
         public static void SendSerializationCommand<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message) =>
             messageSender.Send(new SerializationCommand<T>(bufferWriter, message));
 
