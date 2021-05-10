@@ -7,10 +7,6 @@ namespace HyperMsg
 {
     public static class MessageHandlersRegistryExtensions
     {
-        public static IDisposable RegisterTransmitMessageCommandHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> messageHandler) => handlersRegistry.RegisterHandler<TransmitMessageCommand<T>>(m => messageHandler.Invoke(m.Message));
-
-        public static IDisposable RegisterTransmitMessageCommandHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> messageHandler) => handlersRegistry.RegisterHandler<TransmitMessageCommand<T>>((m, t) => messageHandler.Invoke(m.Message, t));
-
         public static IDisposable RegisterMessageReceivedEventHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> messageHandler) => handlersRegistry.RegisterHandler<MessageReceivedEvent<T>>(m => messageHandler.Invoke(m.Message));
 
         public static IDisposable RegisterMessageReceivedEventHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> messageHandler) => handlersRegistry.RegisterHandler<MessageReceivedEvent<T>>((m, t) => messageHandler.Invoke(m.Message, t));
@@ -101,7 +97,7 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterFlushBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader flushHandler)
+        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
         {
             return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
             {
@@ -110,14 +106,34 @@ namespace HyperMsg
                     return;
                 }
 
-                message.BufferReaderAction.Invoke(flushHandler);
+                message.BufferReaderAction.Invoke(bufferReader);
             });
         }
 
-        public static IDisposable RegisterReceivingBufferUpdatedEventHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBuffer> messageHandler) =>
-            handlersRegistry.RegisterMessageReceivedEventHandler(messageHandler);
+        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlyMemory<byte>, int> segmentReader)
+        {
+            return handlersRegistry.RegisterBufferFlushReader(bufferType, buffer =>
+            {
+                if (buffer.Length == 0)
+                {
+                    return 0;
+                }
 
-        public static IDisposable RegisterReceivingBufferUpdatedEventHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBuffer> messageHandler) =>
-            handlersRegistry.RegisterMessageReceivedEventHandler(messageHandler);
+                if (buffer.IsSingleSegment)
+                {
+                    return segmentReader(buffer.First);
+                }
+
+                var enumerator = buffer.GetEnumerator();
+                var bytesRead = 0;
+
+                while (enumerator.MoveNext())
+                {
+                    bytesRead += segmentReader(enumerator.Current);
+                }
+
+                return bytesRead;
+            });
+        }
     }
 }
