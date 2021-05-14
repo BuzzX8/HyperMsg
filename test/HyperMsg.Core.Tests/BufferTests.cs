@@ -116,6 +116,18 @@ namespace HyperMsg
             Assert.Equal(data, buffer.Reader.Read().ToArray());
         }
 
+        [Fact]
+        public void Writer_Writes_Over_Buffer_Size()
+        {
+            var data = Guid.NewGuid().ToByteArray();
+
+            for (int i = 0; i < MemorySize; i++)
+            {                
+                buffer.Writer.Write(data);
+                buffer.Reader.Advance(data.Length);
+            }
+        }
+
         private void WriteBytes(byte[] bytes)
         {
             var memory = buffer.Writer.GetMemory(bytes.Length);
