@@ -122,8 +122,9 @@ namespace HyperMsg
             var data = Guid.NewGuid().ToByteArray();
 
             for (int i = 0; i < MemorySize; i++)
-            {                
+            {
                 buffer.Writer.Write(data);
+                //WriteBytes(data);
                 buffer.Reader.Advance(data.Length);
             }
         }

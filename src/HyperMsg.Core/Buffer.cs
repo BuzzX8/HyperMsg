@@ -63,14 +63,20 @@ namespace HyperMsg
 
         Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint)
         {
-            if (Memory.Length < sizeHint || sizeHint < 0)
+            if (AvailableMemory < sizeHint || sizeHint < 0)
             {
                 throw new ArgumentOutOfRangeException();
             }
 
             if (length == 0)
             {
-                return Memory.Slice(position);
+                if (AvailableMemory - position < sizeHint)
+                {
+                    CommitedMemory.CopyTo(Memory);
+                    position = 0;
+                }
+
+                return Memory[position..];
             }
 
             var freeMemPos = position + length;
@@ -81,7 +87,7 @@ namespace HyperMsg
                 position = 0;
             }
 
-            return Memory.Slice(length);
+            return Memory[length..];
         }
 
         Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)
