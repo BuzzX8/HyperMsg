@@ -55,12 +55,6 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void Writer_GetMemory_Throws_Exception_Greater_Then_Available_Memory()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Writer.GetMemory(memory.Length + 1));
-        }
-
-        [Fact]
         public void Clear_Removes_All_Data_From_Buffer()
         {
             WriteBytes(Guid.NewGuid().ToByteArray());
@@ -114,6 +108,31 @@ namespace HyperMsg
             WriteBytes(data);
 
             Assert.Equal(data, buffer.Reader.Read().ToArray());
+        }
+
+        [Fact]
+        public void Write_Extension_Writes_Over_Buffer_Size()
+        {
+            var data = Guid.NewGuid().ToByteArray();
+            var iterationCount = (MemorySize / data.Length) + 2;
+
+            for (int i = 0; i < iterationCount; i++)
+            {
+                buffer.Writer.Write(data);
+                buffer.Reader.Advance(data.Length);
+            }
+        }
+
+        [Fact]
+        public void Write_Writes_Over_Buffer_Size_()
+        {
+            var data = Guid.NewGuid().ToByteArray();
+
+            for (int i = 0; i < MemorySize; i++)
+            {                
+                WriteBytes(data);
+                buffer.Reader.Advance(data.Length);
+            }
         }
 
         private void WriteBytes(byte[] bytes)
