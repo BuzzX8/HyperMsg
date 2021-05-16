@@ -123,7 +123,7 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlyMemory<byte>, int> segmentReader)
+        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferSegmentReader segmentReader)
         {
             return handlersRegistry.RegisterBufferFlushReader(bufferType, buffer =>
             {
@@ -143,6 +143,32 @@ namespace HyperMsg
                 while (enumerator.MoveNext())
                 {
                     bytesRead += segmentReader(enumerator.Current);
+                }
+
+                return bytesRead;
+            });
+        }
+
+        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncBufferSegmentReader segmentReader)
+        {
+            return handlersRegistry.RegisterBufferFlushReader(bufferType, async (buffer, token) =>
+            {
+                if (buffer.Length == 0)
+                {
+                    return 0;
+                }
+
+                if (buffer.IsSingleSegment)
+                {
+                    return await segmentReader(buffer.First, token);
+                }
+
+                var enumerator = buffer.GetEnumerator();
+                var bytesRead = 0;
+
+                while (enumerator.MoveNext())
+                {
+                    bytesRead += await segmentReader(enumerator.Current, token);
                 }
 
                 return bytesRead;
