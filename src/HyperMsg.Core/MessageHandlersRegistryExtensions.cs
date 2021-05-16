@@ -110,6 +110,17 @@ namespace HyperMsg
             });
         }
 
+        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlySequence<byte>, Task<int>> bufferReader)
+        {
+            return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
+            {
+                if (message.BufferType != bufferType)
+                {
+                    return;
+                }
+            });
+        }
+
         public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlyMemory<byte>, int> segmentReader)
         {
             return handlersRegistry.RegisterBufferFlushReader(bufferType, buffer =>

@@ -2,6 +2,7 @@
 using System;
 using System.Buffers;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HyperMsg
@@ -94,7 +95,7 @@ namespace HyperMsg
             HandlersRegistry.RegisterBufferFlushSegmentReader(BufferType.Receiving, buffer =>
             {
                 actual = buffer.ToArray();
-                return (int)buffer.Length;
+                return buffer.Length;
             });
 
             MessageSender.SendWriteToBufferCommand(BufferType.Receiving, new MemoryStream(expected));
@@ -112,7 +113,26 @@ namespace HyperMsg
             HandlersRegistry.RegisterBufferFlushSegmentReader(BufferType.Transmitting, buffer =>
             {
                 actual = buffer.ToArray();
-                return (int)buffer.Length;
+                return buffer.Length;
+            });
+            MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, expected);
+
+            MessageSender.SendFlushBufferCommand(BufferType.Transmitting);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SendFlushBufferCommand_Invokes_Async_Handler_Registered_By_RegisterBufferFlushSegmentReader()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterBufferFlushReader(BufferType.Transmitting, buffer =>
+            {
+                actual = buffer.ToArray();
+                return Task.FromResult((int)buffer.Length);
             });
             MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, expected);
 
@@ -131,7 +151,7 @@ namespace HyperMsg
             HandlersRegistry.RegisterBufferFlushSegmentReader(BufferType.Transmitting, buffer =>
             {
                 actual = buffer.ToArray();
-                return (int)buffer.Length;
+                return buffer.Length;
             });
 
             MessageSender.SendTransmitMessageCommand(expected);
