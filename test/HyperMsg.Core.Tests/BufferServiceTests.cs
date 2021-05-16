@@ -129,7 +129,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterBufferFlushReader(BufferType.Transmitting, buffer =>
+            HandlersRegistry.RegisterBufferFlushReader(BufferType.Transmitting, (buffer, _) =>
             {
                 actual = buffer.ToArray();
                 return Task.FromResult((int)buffer.Length);

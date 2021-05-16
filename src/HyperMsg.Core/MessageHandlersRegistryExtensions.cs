@@ -110,7 +110,7 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlySequence<byte>, Task<int>> bufferReader)
+        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncBufferReader bufferReader)
         {
             return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
             {
@@ -118,6 +118,8 @@ namespace HyperMsg
                 {
                     return;
                 }
+
+                message.AsyncBufferReaderAction.Invoke(bufferReader);
             });
         }
 

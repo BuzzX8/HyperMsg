@@ -3,6 +3,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -79,6 +80,11 @@ namespace HyperMsg
             }
         }
 
+        private Task ReadFromBufferAsync(BufferType bufferType, AsyncBufferReader bufferReader)
+        {
+            return Task.CompletedTask;
+        }
+
         public void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
         {
             switch (bufferType)
@@ -147,7 +153,7 @@ namespace HyperMsg
             writer.Advance(bytesRead);
         }
 
-        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader)), default);
+        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader), reader => ReadFromBufferAsync(command.BufferType, reader)), default);
 
         private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
     }
