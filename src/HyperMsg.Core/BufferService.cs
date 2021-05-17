@@ -3,6 +3,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -22,18 +23,11 @@ namespace HyperMsg
             yield return RegisterHandler<FlushBufferCommand>(HandleFlushBufferCommand);
         }
 
-        private void HandleBufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
+        private void HandleBufferActionRequest(BufferType bufferType, Action<IBuffer> bufferAction)
         {
-            switch (bufferType)
-            {
-                case BufferType.Transmitting:
-                    HandleBufferActionRequest(bufferAction, bufferContext.TransmittingBuffer, transmittingBufferLock);
-                    break;
+            (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
-                case BufferType.Receiving:
-                    HandleBufferActionRequest(bufferAction, bufferContext.ReceivingBuffer, receivingBufferLock);
-                    break;
-            }
+            HandleBufferActionRequest(bufferAction, buffer, bufferLock);
         }
 
         private void HandleBufferActionRequest(Action<IBuffer> bufferAction, IBuffer buffer, object bufferLock)
@@ -46,16 +40,9 @@ namespace HyperMsg
 
         private void ReadFromBuffer(BufferType bufferType, BufferReader bufferReader)
         {
-            switch (bufferType)
-            {
-                case BufferType.Transmitting:
-                    ReadFromBuffer(bufferContext.TransmittingBuffer, bufferReader, transmittingBufferLock);
-                    break;
+            (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
-                case BufferType.Receiving:
-                    ReadFromBuffer(bufferContext.ReceivingBuffer, bufferReader, receivingBufferLock);
-                    break;
-            }
+            ReadFromBuffer(buffer, bufferReader, bufferLock);
         }
 
         private void ReadFromBuffer(IBuffer buffer, BufferReader bufferReader, object bufferLock)
@@ -79,18 +66,27 @@ namespace HyperMsg
             }
         }
 
+        private Task ReadFromBufferAsync(BufferType bufferType, AsyncBufferReader bufferReader)
+        {
+            ReadFromBuffer(bufferType, buffer => bufferReader.Invoke(buffer, default).Result);
+            return Task.CompletedTask;
+        }
+
         public void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
         {
-            switch (bufferType)
-            {
-                case BufferType.Transmitting:
-                    WriteToBuffer(bufferType, message, bufferContext.TransmittingBuffer, transmittingBufferLock, flushBuffer);
-                    break;
+            (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
-                case BufferType.Receiving:
-                    WriteToBuffer(bufferType, message, bufferContext.ReceivingBuffer, receivingBufferLock, flushBuffer);
-                    break;
-            }
+            WriteToBuffer(bufferType, message, buffer, bufferLock, flushBuffer);
+        }
+
+        private (IBuffer buffer, object bufferLock) GetBufferWithLock(BufferType bufferType)
+        {
+            return bufferType switch
+            {
+                BufferType.Receiving => (bufferContext.ReceivingBuffer, receivingBufferLock),
+                BufferType.Transmitting => (bufferContext.TransmittingBuffer, transmittingBufferLock),
+                _ => throw new NotSupportedException($"Buffer type {bufferType} does not supported"),
+            };
         }
 
         private void WriteToBuffer<T>(BufferType bufferType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
@@ -147,7 +143,7 @@ namespace HyperMsg
             writer.Advance(bytesRead);
         }
 
-        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader)), default);
+        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader), reader => ReadFromBufferAsync(command.BufferType, reader)), default);
 
         private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
     }

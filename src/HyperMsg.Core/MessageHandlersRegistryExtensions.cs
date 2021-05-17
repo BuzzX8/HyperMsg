@@ -69,11 +69,11 @@ namespace HyperMsg
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter<byte>, T> serializationHandler) =>
             handlersRegistry.RegisterHandler<SerializationCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
 
-        public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, Action<Action<IBuffer>, BufferType> requestHandler) => 
-            handlersRegistry.RegisterHandler<BufferActionRequest>(request => requestHandler.Invoke(request.BufferAction, request.BufferType));
+        public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, Action<BufferType, Action<IBuffer>> requestHandler) => 
+            handlersRegistry.RegisterHandler<BufferActionRequest>(request => requestHandler.Invoke(request.BufferType, request.BufferAction));
 
-        public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<Action<IBuffer>, BufferType> requestHandler) => 
-            handlersRegistry.RegisterHandler<BufferActionRequest>((request, token) => requestHandler.Invoke(request.BufferAction, request.BufferType, token));
+        public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<BufferType, Action<IBuffer>> requestHandler) => 
+            handlersRegistry.RegisterHandler<BufferActionRequest>((request, token) => requestHandler.Invoke(request.BufferType, request.BufferAction, token));
 
         public static IDisposable RegisterReadFromBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, Action<BufferType, BufferReader> handler) =>
             handlersRegistry.RegisterHandler<ReadFromBufferCommand>(command => handler.Invoke(command.BufferType, command.BufferReader));
@@ -110,7 +110,20 @@ namespace HyperMsg
             });
         }
 
-        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Func<ReadOnlyMemory<byte>, int> segmentReader)
+        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncBufferReader bufferReader)
+        {
+            return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
+            {
+                if (message.BufferType != bufferType)
+                {
+                    return;
+                }
+
+                message.AsyncBufferReaderAction.Invoke(bufferReader);
+            });
+        }
+
+        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferSegmentReader segmentReader)
         {
             return handlersRegistry.RegisterBufferFlushReader(bufferType, buffer =>
             {
@@ -130,6 +143,32 @@ namespace HyperMsg
                 while (enumerator.MoveNext())
                 {
                     bytesRead += segmentReader(enumerator.Current);
+                }
+
+                return bytesRead;
+            });
+        }
+
+        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncBufferSegmentReader segmentReader)
+        {
+            return handlersRegistry.RegisterBufferFlushReader(bufferType, async (buffer, token) =>
+            {
+                if (buffer.Length == 0)
+                {
+                    return 0;
+                }
+
+                if (buffer.IsSingleSegment)
+                {
+                    return await segmentReader(buffer.First, token);
+                }
+
+                var enumerator = buffer.GetEnumerator();
+                var bytesRead = 0;
+
+                while (enumerator.MoveNext())
+                {
+                    bytesRead += await segmentReader(enumerator.Current, token);
                 }
 
                 return bytesRead;

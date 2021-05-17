@@ -52,9 +52,9 @@ namespace HyperMsg
         public static Task SendSerializationCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new SerializationCommand<T>(bufferWriter, message), cancellationToken);
 
-        public static void SendBufferActionRequest(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType) => messageSender.Send(new BufferActionRequest(bufferType, action));
+        public static void SendBufferActionRequest(this IMessageSender messageSender, BufferType bufferType, Action<IBuffer> action) => messageSender.Send(new BufferActionRequest(bufferType, action));
 
-        public static Task SendBufferActionRequestAsync(this IMessageSender messageSender, Action<IBuffer> action, BufferType bufferType, CancellationToken cancellationToken = default) => 
+        public static Task SendBufferActionRequestAsync(this IMessageSender messageSender, BufferType bufferType, Action<IBuffer> action, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new BufferActionRequest(bufferType, action), cancellationToken);
 
         public static void SendReadFromBufferCommand(this IMessageSender messageSender, BufferType bufferType, BufferReader bufferReader) => 
