@@ -34,7 +34,7 @@ namespace HyperMsg
 
             HandlersRegistry.RegisterSerializationHandler<Guid>((buffer, m) => buffer.Write(m.ToByteArray()));
             MessageSender.SendWriteToBufferCommand(BufferType.Transmitting, expectedMessage);
-            MessageSender.SendBufferActionRequest(buffer => actualMessage = new Guid(buffer.Reader.Read().ToArray()), BufferType.Transmitting);
+            MessageSender.SendBufferActionRequest(BufferType.Transmitting, buffer => actualMessage = new Guid(buffer.Reader.Read().ToArray()));
 
             Assert.NotNull(actualMessage);
             Assert.Equal(expectedMessage, actualMessage);
@@ -47,7 +47,7 @@ namespace HyperMsg
             var actualMessage = default(byte[]);
                         
             MessageSender.SendWriteToBufferCommand(BufferType.Receiving, expectedMessage);
-            MessageSender.SendBufferActionRequest(buffer => actualMessage = buffer.Reader.Read().ToArray(), BufferType.Receiving);
+            MessageSender.SendBufferActionRequest(BufferType.Receiving, buffer => actualMessage = buffer.Reader.Read().ToArray());
 
             Assert.NotNull(actualMessage);
             Assert.Equal(expectedMessage, actualMessage);

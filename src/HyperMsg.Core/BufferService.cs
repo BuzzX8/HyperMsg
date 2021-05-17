@@ -23,7 +23,7 @@ namespace HyperMsg
             yield return RegisterHandler<FlushBufferCommand>(HandleFlushBufferCommand);
         }
 
-        private void HandleBufferActionRequest(Action<IBuffer> bufferAction, BufferType bufferType)
+        private void HandleBufferActionRequest(BufferType bufferType, Action<IBuffer> bufferAction)
         {
             (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
