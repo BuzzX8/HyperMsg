@@ -7,4 +7,9 @@ namespace HyperMsg
     {
         Task Completion { get; }
     }
+
+    public interface IMessagingTask<T> : IDisposable
+    {
+        Task<T> Completion { get; }
+    }
 }

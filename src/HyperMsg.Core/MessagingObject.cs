@@ -12,23 +12,23 @@ namespace HyperMsg
 
         protected MessagingObject(IMessagingContext messagingContext) => (MessagingContext, subscriptions) = (messagingContext ?? throw new ArgumentNullException(nameof(messagingContext)), new());
 
-        protected IMessagingContext MessagingContext { get; }
+        private IMessagingContext MessagingContext { get; }
 
-        protected IMessageHandlersRegistry HandlersRegistry => MessagingContext.HandlersRegistry;
+        private IMessageHandlersRegistry HandlersRegistry => MessagingContext.HandlersRegistry;
 
-        protected IMessageSender Sender => MessagingContext.Sender;
+        private IMessageSender Sender => MessagingContext.Sender;
 
-        protected void RegisterDisposable(IDisposable disposable) => subscriptions.Add(disposable);
+        private void RegisterDisposable(IDisposable disposable) => subscriptions.Add(disposable);
 
-        protected void RegisterDefaultDisposables()
+        protected void RegisterAutoDisposables()
         {
-            foreach(var handle in GetDefaultDisposables())
+            foreach(var handle in GetAutoDisposables())
             {
                 RegisterDisposable(handle);
             }
         }
 
-        protected virtual IEnumerable<IDisposable> GetDefaultDisposables() => Enumerable.Empty<IDisposable>();
+        protected virtual IEnumerable<IDisposable> GetAutoDisposables() => Enumerable.Empty<IDisposable>();
 
         public IDisposable RegisterHandler<TMessage>(Action<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);
 

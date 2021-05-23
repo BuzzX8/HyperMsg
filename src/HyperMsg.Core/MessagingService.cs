@@ -12,7 +12,7 @@ namespace HyperMsg
 
         public virtual Task StartAsync(CancellationToken cancellationToken)
         {
-            RegisterDefaultDisposables();
+            RegisterAutoDisposables();
             return Task.CompletedTask;
         }
 
