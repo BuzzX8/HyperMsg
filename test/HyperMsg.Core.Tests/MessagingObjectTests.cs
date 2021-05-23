@@ -1,5 +1,6 @@
 ﻿using FakeItEasy;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 
@@ -8,12 +9,37 @@ namespace HyperMsg
     public class MessagingObjectTests
     {
         private readonly IMessagingContext messagingContext;
+        private readonly IList<IDisposable> autoDisposables;
         private readonly MessagingObjectMock messagingObject;
 
         public MessagingObjectTests()
         {
             messagingContext = A.Fake<IMessagingContext>();
-            messagingObject = new MessagingObjectMock(messagingContext);
+            autoDisposables = A.CollectionOfFake<IDisposable>(10);
+            messagingObject = new MessagingObjectMock(autoDisposables, messagingContext);
+        }
+
+        [Fact]
+        public void RegisterAutoDisposables_Registeres_Disposables_For_Auto_Disposing()
+        {
+            messagingObject.InvokeRegisterAutoDisposables();
+            messagingObject.Dispose();
+
+            foreach(var disposable in autoDisposables)
+            {
+                A.CallTo(() => disposable.Dispose()).MustHaveHappened();
+            }
+        }
+
+        [Fact]
+        public void RegisterAutoDisposables_Does_Not_Registeres_Disposables_For_Auto_Disposing()
+        {
+            messagingObject.Dispose();
+
+            foreach (var disposable in autoDisposables)
+            {
+                A.CallTo(() => disposable.Dispose()).MustNotHaveHappened();
+            }
         }
 
         [Fact]
@@ -60,8 +86,12 @@ namespace HyperMsg
 
     public class MessagingObjectMock : MessagingObject
     {
-        public MessagingObjectMock(IMessagingContext messagingContext) : base(messagingContext)
-        {
-        }
+        private readonly IList<IDisposable> autoDisposables;
+
+        public MessagingObjectMock(IList<IDisposable> autoDisposables, IMessagingContext messagingContext) : base(messagingContext) => this.autoDisposables = autoDisposables;
+
+        protected override IEnumerable<IDisposable> GetAutoDisposables() => autoDisposables;
+
+        public void InvokeRegisterAutoDisposables() => RegisterAutoDisposables();
     }
 }
