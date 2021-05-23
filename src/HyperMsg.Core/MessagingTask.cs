@@ -28,13 +28,11 @@ namespace HyperMsg
         }
     }
 
-    public abstract class MessagingTask : MessagingTaskBase
+    public abstract class MessagingTask : MessagingTaskBase, IMessagingTask
     {
         private readonly TaskCompletionSource<bool> completionSource;
 
-        protected MessagingTask(IMessagingContext messagingContext) : base(messagingContext)
-        {
-        }
+        protected MessagingTask(IMessagingContext messagingContext) : base(messagingContext) => completionSource = new();
 
         public Task Completion => completionSource.Task;
 
@@ -55,10 +53,7 @@ namespace HyperMsg
     {
         private readonly TaskCompletionSource<TResult> completionSource;
 
-        protected MessagingTask(IMessagingContext messagingContext) : base(messagingContext)
-        {
-            completionSource = new TaskCompletionSource<TResult>();            
-        }
+        protected MessagingTask(IMessagingContext messagingContext) : base(messagingContext) => completionSource = new();
 
         public Task<TResult> Completion => completionSource.Task;
 
