@@ -31,13 +31,16 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SetException_()
+        public void SetException_Sets_Completion_Task_As_Fault()
         {
             var expectedException = new ArgumentNullException();
+            var completionTask = messagingTask.Completion;
 
             messagingTask.InvokeSetException(expectedException);
 
-            Assert.True(messagingTask.Completion.IsFaulted);
+            Assert.True(completionTask.IsFaulted);
+            var actualException = completionTask.Exception.InnerException;
+            Assert.Same(expectedException, actualException);
         }
     }
 
