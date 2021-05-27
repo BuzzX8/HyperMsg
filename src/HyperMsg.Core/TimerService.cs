@@ -13,7 +13,7 @@ namespace HyperMsg
         public TimerService(IMessagingContext messagingContext) : base(messagingContext)
         { }
 
-        protected override IEnumerable<IDisposable> GetDefaultDisposables()
+        protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
             yield return RegisterHandler<TimerMessages.SetInterval>(SetInterval);
             yield return RegisterHandler<TimerMessages.SetTimeout>(SetTimeout);

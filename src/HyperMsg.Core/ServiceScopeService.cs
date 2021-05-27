@@ -17,7 +17,7 @@ namespace HyperMsg
             sync = new();
         }
 
-        protected override IEnumerable<IDisposable> GetDefaultDisposables()
+        protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
             yield return RegisterHandler<StartServiceScopeRequest>(async (command, token) =>
             {

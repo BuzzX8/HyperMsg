@@ -1,55 +1,23 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public abstract class MessagingTask<TResult> : MessagingObject
+    public abstract class MessagingTaskBase : MessagingObject
     {
-        private readonly TaskCompletionSource<TResult> completionSource;
-
-        protected MessagingTask(IMessagingContext messagingContext, CancellationToken cancellationToken = default) : base(messagingContext)
+        protected MessagingTaskBase(IMessagingContext messagingContext) : base(messagingContext)
         {
-            CancellationToken = cancellationToken;            
-            completionSource = new TaskCompletionSource<TResult>();            
         }
-
-        public bool IsCompleted => completionSource.Task.IsCompleted;
-
-        public TaskAwaiter<TResult> GetAwaiter() => completionSource.Task.GetAwaiter();
-
-        public Task<TResult> AsTask() => completionSource.Task;
-
-        protected CancellationToken CancellationToken { get; }
-
-        public TResult Result => completionSource.Task.Result;
 
         protected void Start()
         {
-            RegisterDefaultDisposables();
+            RegisterAutoDisposables();
             BeginAsync().ContinueWith(OnBeginAsyncCompleted);
         }
 
         protected virtual Task BeginAsync() => Task.CompletedTask;
-        
-        protected void SetCanceled()
-        {
-            completionSource.SetCanceled();
-            Dispose();
-        }
 
-        protected void SetResult(TResult result)
-        {
-            completionSource.SetResult(result);
-            Dispose();
-        }
-
-        protected void SetException(Exception exception)
-        {
-            completionSource.SetException(exception);
-            Dispose();
-        }
+        protected abstract void SetException(Exception exception);
 
         private void OnBeginAsyncCompleted(Task beginAsync)
         {
@@ -57,6 +25,54 @@ namespace HyperMsg
             {
                 SetException(beginAsync.Exception);
             }
+        }
+    }
+
+    public abstract class MessagingTask : MessagingTaskBase, IMessagingTask
+    {
+        private readonly TaskCompletionSource<bool> completionSource;
+
+        protected MessagingTask(IMessagingContext messagingContext) : base(messagingContext) => completionSource = new();
+
+        public Task Completion => completionSource.Task;
+
+        protected void SetCompleted()
+        {
+            completionSource.SetResult(true);
+            Dispose();
+        }
+
+        protected override void SetException(Exception exception)
+        {
+            completionSource.SetException(exception);
+            Dispose();
+        }
+    }
+
+    public abstract class MessagingTask<TResult> : MessagingTaskBase, IMessagingTask<TResult>
+    {
+        private readonly TaskCompletionSource<TResult> completionSource;
+
+        protected MessagingTask(IMessagingContext messagingContext) : base(messagingContext) => completionSource = new();
+
+        public Task<TResult> Completion => completionSource.Task;
+
+        protected void SetResult(TResult result)
+        {
+            completionSource.SetResult(result);
+            Dispose();
+        }
+
+        protected override void SetException(Exception exception)
+        {
+            completionSource.SetException(exception);
+            Dispose();
+        }
+
+        public override void Dispose()
+        {
+            completionSource.TrySetCanceled();
+            base.Dispose();
         }
     }
 }

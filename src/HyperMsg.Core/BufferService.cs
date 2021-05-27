@@ -15,7 +15,7 @@ namespace HyperMsg
 
         public BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext) => this.bufferContext = bufferContext;
 
-        protected override IEnumerable<IDisposable> GetDefaultDisposables()
+        protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
             yield return this.RegisterReadFromBufferCommandHandler(ReadFromBuffer);
             yield return this.RegisterWriteToBufferCommandHandler(this);
