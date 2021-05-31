@@ -60,7 +60,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendSerializationCommand_Invokes_Handler_Registtered_By_RegisterSerializationHandler()
+        public void SendSerializeCommand_Invokes_Handler_Registtered_By_RegisterSerializationHandler()
         {
             var handler = A.Fake<Action<IBufferWriter<byte>, Guid>>();
             var bufferWriter = A.Fake<IBufferWriter<byte>>();
@@ -73,7 +73,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendWriteToBufferCommand_Invokes_Handle_Method_Of_Registered_Handler()
+        public void SendToBufferCommand_Invokes_Handle_Method_Of_Registered_Handler()
         {
             var handler = A.Fake<IWriteToBufferCommandHandler>();
             var message = Guid.NewGuid();

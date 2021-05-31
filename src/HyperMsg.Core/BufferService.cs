@@ -17,25 +17,8 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
-            yield return this.RegisterReadFromBufferCommandHandler(ReadFromBuffer);
             yield return this.RegisterWriteToBufferCommandHandler(this);
-            yield return this.RegisterBufferActionRequestHandler(HandleBufferActionRequest);
             yield return RegisterHandler<FlushBufferCommand>(HandleFlushBufferCommand);
-        }
-
-        private void HandleBufferActionRequest(BufferType bufferType, Action<IBuffer> bufferAction)
-        {
-            (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
-
-            HandleBufferActionRequest(bufferAction, buffer, bufferLock);
-        }
-
-        private void HandleBufferActionRequest(Action<IBuffer> bufferAction, IBuffer buffer, object bufferLock)
-        {
-            lock (bufferLock)
-            {
-                bufferAction.Invoke(buffer);
-            }
         }
 
         private void ReadFromBuffer(BufferType bufferType, BufferReader bufferReader)
@@ -131,8 +114,6 @@ namespace HyperMsg
             {
                 HandleFlushBufferCommand(new FlushBufferCommand(bufferType));
             }
-
-            OnBufferUpdated(bufferType);
         }
 
         private void WriteStream(IBufferWriter<byte> writer, Stream stream)
@@ -144,7 +125,5 @@ namespace HyperMsg
         }
 
         private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader), reader => ReadFromBufferAsync(command.BufferType, reader)), default);
-
-        private void OnBufferUpdated(BufferType bufferType) => this.SendBufferUpdatedEventAsync(bufferType);
     }
 }
