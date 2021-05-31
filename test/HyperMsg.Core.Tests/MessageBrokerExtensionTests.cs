@@ -71,17 +71,5 @@ namespace HyperMsg
 
             A.CallTo(() => handler.Invoke(bufferWriter, message)).MustHaveHappened();
         }
-
-        [Fact]
-        public void SendToBufferCommand_Invokes_Handle_Method_Of_Registered_Handler()
-        {
-            var handler = A.Fake<IWriteToBufferCommandHandler>();
-            var message = Guid.NewGuid();
-
-            broker.RegisterWriteToBufferCommandHandler(handler);
-            broker.SendToBuffer(BufferType.None, message);
-
-            A.CallTo(() => handler.WriteToBuffer(BufferType.None, message, true)).MustHaveHappened();
-        }
     }
 }

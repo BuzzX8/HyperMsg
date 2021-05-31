@@ -4,8 +4,8 @@ namespace HyperMsg.Messages
 {
     public struct SendToBufferCommand
     {
-        public SendToBufferCommand(Action<IWriteToBufferCommandHandler> writeToBufferAction) => WriteToBufferAction = writeToBufferAction;
+        public SendToBufferCommand(Action<BufferService> writeToBufferAction) => WriteToBufferAction = writeToBufferAction;
 
-        public Action<IWriteToBufferCommandHandler> WriteToBufferAction { get; }
+        public Action<BufferService> WriteToBufferAction { get; }
     }
 }

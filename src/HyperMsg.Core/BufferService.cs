@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BufferService : MessagingService, IWriteToBufferCommandHandler
+    public class BufferService : MessagingService
     {
         private readonly IBufferContext bufferContext;
         private readonly object transmittingBufferLock = new();
@@ -17,8 +17,8 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
-            yield return this.RegisterWriteToBufferCommandHandler(this);
             yield return RegisterHandler<FlushBufferCommand>(HandleFlushBufferCommand);
+            yield return RegisterHandler<SendToBufferCommand>(HandleSendToBuffer);
         }
 
         private void ReadFromBuffer(BufferType bufferType, BufferReader bufferReader)
@@ -55,7 +55,7 @@ namespace HyperMsg
             return Task.CompletedTask;
         }
 
-        public void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
+        internal void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
         {
             (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
@@ -125,5 +125,10 @@ namespace HyperMsg
         }
 
         private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader), reader => ReadFromBufferAsync(command.BufferType, reader)), default);
+
+        private void HandleSendToBuffer(SendToBufferCommand command)
+        {
+            command.WriteToBufferAction.Invoke(this);
+        }
     }
 }

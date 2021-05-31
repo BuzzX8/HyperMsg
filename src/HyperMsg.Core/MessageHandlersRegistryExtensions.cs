@@ -69,9 +69,6 @@ namespace HyperMsg
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter<byte>, T> serializationHandler) =>
             handlersRegistry.RegisterHandler<SerializeCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
 
-        public static IDisposable RegisterWriteToBufferCommandHandler(this IMessageHandlersRegistry handlersRegistry, IWriteToBufferCommandHandler commandHandler) => 
-            handlersRegistry.RegisterHandler<SendToBufferCommand>(command => command.WriteToBufferAction.Invoke(commandHandler));
-
         public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
         {
             return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
