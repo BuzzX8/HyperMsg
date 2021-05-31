@@ -14,24 +14,24 @@ namespace HyperMsg
         private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
 
         [Fact]
-        public void Receive_Sends_Message_To_Transmit_Handlers()
+        public void SendReceiveEvent_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterMessageReceivedEventHandler(handler);
             broker.RegisterMessageReceivedEventHandler(asyncHandler);
 
-            broker.SendMessageReceivedEvent(data);
+            broker.SendReceiveEvent(data);
 
             A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
             A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
         }
 
         [Fact]
-        public async Task SendMessageReceivedEventAsync_Sends_Message_To_Transmit_Handlers()
+        public async Task SendReceiveEventAsync_Sends_Message_To_Transmit_Handlers()
         {
             broker.RegisterMessageReceivedEventHandler(handler);
             broker.RegisterMessageReceivedEventHandler(asyncHandler);
 
-            await broker.SendMessageReceivedEventAsync(data, default);
+            await broker.SendReceiveEventAsync(data, default);
 
             A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
             A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
@@ -67,7 +67,7 @@ namespace HyperMsg
             var message = Guid.NewGuid();
 
             broker.RegisterSerializationHandler(handler);
-            broker.SendSerializationCommand(bufferWriter, message);
+            broker.SendSerializeCommand(bufferWriter, message);
 
             A.CallTo(() => handler.Invoke(bufferWriter, message)).MustHaveHappened();
         }

@@ -122,7 +122,7 @@ namespace HyperMsg
                         break;
 
                     default:
-                        this.SendSerializationCommand(writer, message);
+                        this.SendSerializeCommand(writer, message);
                         break;
                 }
             }

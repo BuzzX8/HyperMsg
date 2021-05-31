@@ -14,8 +14,26 @@ namespace HyperMsg
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        public static void SendMessageReceivedEvent<T>(this IMessageSender messageSender, T message) => messageSender.Send(new MessageReceivedEvent<T>(message));
+        /// <param name="message">Received message.</param>
+        public static void SendReceiveEvent<T>(this IMessageSender messageSender, T message) => messageSender.Send(new ReceiveEvent<T>(message));
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T">Type of message.</typeparam>
+        /// <param name="messageSender">Message sender.</param>
+        /// <param name="message">Received message.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns></returns>
+        public static Task SendReceiveEventAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => messageSender.SendAsync(new ReceiveEvent<T>(message), cancellationToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T">Type of message.</typeparam>
+        /// <param name="messageSender">Message sender.</param>
+        /// <param name="message">Message to transmit.</param>
+        public static void SendToTransmitBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendWriteToBufferCommand(BufferType.Transmitting, message);
 
         /// <summary>
         /// 
@@ -25,31 +43,13 @@ namespace HyperMsg
         /// <param name="message">Message to send.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendMessageReceivedEventAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => messageSender.SendAsync(new MessageReceivedEvent<T>(message), cancellationToken);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        public static void SendTransmitMessageCommand<T>(this IMessageSender messageSender, T message) => messageSender.SendWriteToBufferCommand(BufferType.Transmitting, message);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns></returns>
-        public static Task SendTransmitMessageCommandAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
+        public static Task SendToTransmitBufferAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
             messageSender.SendWriteToBufferCommandAsync(BufferType.Transmitting, message, true, cancellationToken);
 
-        public static void SendSerializationCommand<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message) =>
+        public static void SendSerializeCommand<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message) =>
             messageSender.Send(new SerializationCommand<T>(bufferWriter, message));
 
-        public static Task SendSerializationCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
+        public static Task SendSerializeCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new SerializationCommand<T>(bufferWriter, message), cancellationToken);
 
         public static void SendBufferActionRequest(this IMessageSender messageSender, BufferType bufferType, Action<IBuffer> action) => messageSender.Send(new BufferActionRequest(bufferType, action));

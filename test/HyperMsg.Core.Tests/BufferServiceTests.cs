@@ -154,7 +154,7 @@ namespace HyperMsg
                 return buffer.Length;
             });
 
-            MessageSender.SendTransmitMessageCommand(expected);
+            MessageSender.SendToTransmitBuffer(expected);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
