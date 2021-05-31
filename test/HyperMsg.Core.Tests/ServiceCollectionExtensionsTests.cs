@@ -1,6 +1,4 @@
-﻿using FakeItEasy;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Buffers;
 using Xunit;
 
