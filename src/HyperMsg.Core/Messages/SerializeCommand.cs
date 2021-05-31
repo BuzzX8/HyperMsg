@@ -2,9 +2,9 @@
 
 namespace HyperMsg.Messages
 {
-    internal struct SerializationCommand<T>
+    internal struct SerializeCommand<T>
     {
-        internal SerializationCommand(IBufferWriter<byte> bufferWriter, T message)
+        internal SerializeCommand(IBufferWriter<byte> bufferWriter, T message)
         {
             BufferWriter = bufferWriter;
             Message = message;

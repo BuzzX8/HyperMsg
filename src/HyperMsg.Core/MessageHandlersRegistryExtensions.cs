@@ -64,10 +64,10 @@ namespace HyperMsg
             handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
 
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter<byte>, T> serializationHandler) =>
-            handlersRegistry.RegisterHandler<SerializationCommand<T>>(command => serializationHandler.Invoke(command.BufferWriter, command.Message));
+            handlersRegistry.RegisterHandler<SerializeCommand<T>>(command => serializationHandler.Invoke(command.BufferWriter, command.Message));
 
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter<byte>, T> serializationHandler) =>
-            handlersRegistry.RegisterHandler<SerializationCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
+            handlersRegistry.RegisterHandler<SerializeCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
 
         public static IDisposable RegisterBufferActionRequestHandler(this IMessageHandlersRegistry handlersRegistry, Action<BufferType, Action<IBuffer>> requestHandler) => 
             handlersRegistry.RegisterHandler<BufferActionRequest>(request => requestHandler.Invoke(request.BufferType, request.BufferAction));
