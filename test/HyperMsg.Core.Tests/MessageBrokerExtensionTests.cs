@@ -16,8 +16,8 @@ namespace HyperMsg
         [Fact]
         public void SendReceiveEvent_Sends_Message_To_Transmit_Handlers()
         {
-            broker.RegisterMessageReceivedEventHandler(handler);
-            broker.RegisterMessageReceivedEventHandler(asyncHandler);
+            broker.RegisterReceiveEventHandler(handler);
+            broker.RegisterReceiveEventHandler(asyncHandler);
 
             broker.SendReceiveEvent(data);
 
@@ -28,8 +28,8 @@ namespace HyperMsg
         [Fact]
         public async Task SendReceiveEventAsync_Sends_Message_To_Transmit_Handlers()
         {
-            broker.RegisterMessageReceivedEventHandler(handler);
-            broker.RegisterMessageReceivedEventHandler(asyncHandler);
+            broker.RegisterReceiveEventHandler(handler);
+            broker.RegisterReceiveEventHandler(asyncHandler);
 
             await broker.SendReceiveEventAsync(data, default);
 
@@ -79,7 +79,7 @@ namespace HyperMsg
             var message = Guid.NewGuid();
 
             broker.RegisterWriteToBufferCommandHandler(handler);
-            broker.SendWriteToBufferCommand(BufferType.None, message);
+            broker.SendToBuffer(BufferType.None, message);
 
             A.CallTo(() => handler.WriteToBuffer(BufferType.None, message, true)).MustHaveHappened();
         }

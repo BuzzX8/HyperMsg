@@ -33,7 +33,7 @@ namespace HyperMsg
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="message">Message to transmit.</param>
-        public static void SendToTransmitBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendWriteToBufferCommand(BufferType.Transmitting, message);
+        public static void SendToTransmitBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendToBuffer(BufferType.Transmitting, message);
 
         /// <summary>
         /// Sends message to transmit buffer.
@@ -44,7 +44,7 @@ namespace HyperMsg
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
         public static Task SendToTransmitBufferAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
-            messageSender.SendWriteToBufferCommandAsync(BufferType.Transmitting, message, true, cancellationToken);
+            messageSender.SendToBufferAsync(BufferType.Transmitting, message, true, cancellationToken);
 
         /// <summary>
         /// Sends command for message serialization.
@@ -79,10 +79,28 @@ namespace HyperMsg
         public static Task SendReadFromBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, BufferReader bufferReader, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new ReadFromBufferCommand(bufferType, bufferReader), cancellationToken);
 
-        public static void SendWriteToBufferCommand<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true) => 
+        /// <summary>
+        /// Sends message to buffer.
+        /// </summary>
+        /// <typeparam name="T">Type of message.</typeparam>
+        /// <param name="messageSender">Message sender.</param>
+        /// <param name="bufferType">Buffer type.</param>
+        /// <param name="message">Message to send.</param>
+        /// <param name="flushBuffer"></param>
+        /// <returns></returns>
+        public static void SendToBuffer<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true) => 
             messageSender.Send(new WriteToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)));
 
-        public static Task SendWriteToBufferCommandAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default) => 
+        /// <summary>
+        /// Sends message to transmit buffer.
+        /// </summary>
+        /// <typeparam name="T">Type of message.</typeparam>
+        /// <param name="messageSender">Message sender.</param>
+        /// <param name="message">Message to send.</param>        
+        /// <param name="flushBuffer"></param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns></returns>
+        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new WriteToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)), cancellationToken);
 
         public static void SendBufferUpdatedEvent(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new BufferUpdatedEvent(bufferType));
