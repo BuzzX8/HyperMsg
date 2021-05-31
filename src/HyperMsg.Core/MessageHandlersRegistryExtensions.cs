@@ -69,7 +69,7 @@ namespace HyperMsg
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter<byte>, T> serializationHandler) =>
             handlersRegistry.RegisterHandler<SerializeCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
 
-        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferReader bufferReader)
+        public static IDisposable RegisterBufferFlushHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action<IBufferReader<byte>> handler)
         {
             return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
             {
@@ -78,72 +78,76 @@ namespace HyperMsg
                     return;
                 }
 
-                message.BufferReaderAction.Invoke(bufferReader);
+                handler.Invoke(message.BufferReader);
             });
         }
 
-        public static IDisposable RegisterBufferFlushReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncBufferReader bufferReader)
+        public static IDisposable RegisterBufferFlushHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<IBufferReader<byte>> handler)
         {
-            return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
+            return handlersRegistry.RegisterHandler<FlushBufferEvent>(async (message, token) =>
             {
                 if (message.BufferType != bufferType)
                 {
                     return;
                 }
 
-                message.AsyncBufferReaderAction.Invoke(bufferReader);
+                await handler.Invoke(message.BufferReader, token);
             });
         }
 
-        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, BufferSegmentReader segmentReader)
+        public static IDisposable RegisterBufferFlushDataHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action<ReadOnlyMemory<byte>> bufferDataHandler)
         {
-            return handlersRegistry.RegisterBufferFlushReader(bufferType, buffer =>
+            return handlersRegistry.RegisterBufferFlushHandler(bufferType, reader =>
             {
-                if (buffer.Length == 0)
+                var data = reader.Read();
+
+                if (data.Length == 0)
                 {
-                    return 0;
+                    return;
                 }
 
-                if (buffer.IsSingleSegment)
+                if (data.IsSingleSegment)
                 {
-                    return segmentReader(buffer.First);
+                    bufferDataHandler(data.First);
+                    return;
                 }
 
-                var enumerator = buffer.GetEnumerator();
-                var bytesRead = 0;
+                var enumerator = data.GetEnumerator();                
 
                 while (enumerator.MoveNext())
                 {
-                    bytesRead += segmentReader(enumerator.Current);
+                    bufferDataHandler(enumerator.Current);
                 }
 
-                return bytesRead;
+                reader.Advance((int)data.Length);
             });
         }
 
-        public static IDisposable RegisterBufferFlushSegmentReader(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncBufferSegmentReader segmentReader)
+        public static IDisposable RegisterBufferFlushDataHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<ReadOnlyMemory<byte>> bufferDataHandler)
         {
-            return handlersRegistry.RegisterBufferFlushReader(bufferType, async (buffer, token) =>
+            return handlersRegistry.RegisterBufferFlushHandler(bufferType, async (reader, token) =>
             {
-                if (buffer.Length == 0)
+                var data = reader.Read();
+
+                if (data.Length == 0)
                 {
-                    return 0;
+                    return;
                 }
 
-                if (buffer.IsSingleSegment)
+                if (data.IsSingleSegment)
                 {
-                    return await segmentReader(buffer.First, token);
+                    await bufferDataHandler(data.First, token);
+                    return;
                 }
 
-                var enumerator = buffer.GetEnumerator();
-                var bytesRead = 0;
+                var enumerator = data.GetEnumerator();
 
                 while (enumerator.MoveNext())
                 {
-                    bytesRead += await segmentReader(enumerator.Current, token);
+                    await bufferDataHandler(enumerator.Current, token);
                 }
 
-                return bytesRead;
+                reader.Advance((int)data.Length);
             });
         }
     }

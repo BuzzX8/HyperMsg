@@ -3,7 +3,6 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -19,40 +18,6 @@ namespace HyperMsg
         {
             yield return RegisterHandler<FlushBufferCommand>(HandleFlushBufferCommand);
             yield return RegisterHandler<SendToBufferCommand>(HandleSendToBuffer);
-        }
-
-        private void ReadFromBuffer(BufferType bufferType, BufferReader bufferReader)
-        {
-            (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
-
-            ReadFromBuffer(buffer, bufferReader, bufferLock);
-        }
-
-        private void ReadFromBuffer(IBuffer buffer, BufferReader bufferReader, object bufferLock)
-        {
-            lock (bufferLock)
-            {
-                var reading = buffer.Reader.Read();
-                if (reading.Length == 0)
-                {
-                    return;
-                }
-
-                var bytesRead = bufferReader.Invoke(reading);
-
-                if (bytesRead == 0)
-                {
-                    return;
-                }
-
-                buffer.Reader.Advance(bytesRead);
-            }
-        }
-
-        private Task ReadFromBufferAsync(BufferType bufferType, AsyncBufferReader bufferReader)
-        {
-            ReadFromBuffer(bufferType, buffer => bufferReader.Invoke(buffer, default).Result);
-            return Task.CompletedTask;
         }
 
         internal void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
@@ -124,11 +89,12 @@ namespace HyperMsg
             writer.Advance(bytesRead);
         }
 
-        private void HandleFlushBufferCommand(FlushBufferCommand command) => SendAsync(new FlushBufferEvent(command.BufferType, reader => ReadFromBuffer(command.BufferType, reader), reader => ReadFromBufferAsync(command.BufferType, reader)), default);
-
-        private void HandleSendToBuffer(SendToBufferCommand command)
+        private void HandleFlushBufferCommand(FlushBufferCommand command)
         {
-            command.WriteToBufferAction.Invoke(this);
+            (var buffer, _) = GetBufferWithLock(command.BufferType);
+            SendAsync(new FlushBufferEvent(command.BufferType, buffer.Reader), default);
         }
+
+        private void HandleSendToBuffer(SendToBufferCommand command) => command.WriteToBufferAction.Invoke(this);
     }
 }

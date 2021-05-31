@@ -1,16 +1,12 @@
-﻿using System;
-
-namespace HyperMsg.Messages
+﻿namespace HyperMsg.Messages
 {
     internal struct FlushBufferEvent
     {
-        public FlushBufferEvent(BufferType bufferType, Action<BufferReader> bufferReaderAction, Action<AsyncBufferReader> asyncBufferReaderAction) => 
-            (BufferType, BufferReaderAction, AsyncBufferReaderAction) = (bufferType, bufferReaderAction, asyncBufferReaderAction);
+        public FlushBufferEvent(BufferType bufferType, IBufferReader<byte> bufferReader) => 
+            (BufferType, BufferReader) = (bufferType, bufferReader);
 
         public BufferType BufferType { get; }
 
-        public Action<BufferReader> BufferReaderAction { get; }
-
-        public Action<AsyncBufferReader> AsyncBufferReaderAction { get; }
+        public IBufferReader<byte> BufferReader { get; }
     }
 }
