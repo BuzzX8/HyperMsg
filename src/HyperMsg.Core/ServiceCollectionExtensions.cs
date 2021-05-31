@@ -2,7 +2,6 @@
 using System;
 using System.Buffers;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -95,71 +94,5 @@ namespace HyperMsg
         }
 
         public static IServiceCollection AddTimerService(this IServiceCollection services) => services.AddHostedService<TimerService>();
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, Action<T> messageHandler)
-        {
-            return services.AddSingleton<DisposalService>()
-                .AddConfigurator(provider =>
-                {
-                    var registry = provider.GetRequiredService<IMessageHandlersRegistry>();
-                    var disService = provider.GetRequiredService<DisposalService>();
-
-                    disService.AddDisposable(registry.RegisterHandler(messageHandler));
-                });            
-        }
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, Func<T, bool> predicate, Action messageHandler)
-            => services.AddMessageHandler<T>(predicate, _ => messageHandler.Invoke());
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, Func<T, bool> predicate, Action<T> messageHandler)
-        {
-            return services.AddMessageHandler<T>(m =>
-            {
-                if (predicate.Invoke(m))
-                {
-                    messageHandler.Invoke(m);
-                }
-            });
-        }
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, T message, Action messageHandler)
-            => services.AddMessageHandler<T>(m => message.Equals(m), messageHandler);
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, T message, Action<T> messageHandler)
-            => services.AddMessageHandler(m => message.Equals(m), messageHandler);
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, AsyncAction<T> messageHandler)
-        {
-            return services.AddSingleton<DisposalService>()
-                .AddConfigurator(provider =>
-                {
-                    var registry = provider.GetRequiredService<IMessageHandlersRegistry>();
-                    var disService = provider.GetRequiredService<DisposalService>();
-
-                    disService.AddDisposable(registry.RegisterHandler(messageHandler));
-                });
-        }
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, Func<T, bool> predicate, AsyncAction messageHandler)
-            => services.AddMessageHandler<T>(predicate, (_, t) => messageHandler.Invoke(t));
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, Func<T, bool> predicate, AsyncAction<T> messageHandler)
-        {
-            return services.AddMessageHandler<T>((m, t) =>
-            {
-                if (predicate.Invoke(m))
-                {
-                    return messageHandler.Invoke(m, t);
-                }
-
-                return Task.CompletedTask;
-            });
-        }
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, T message, AsyncAction messageHandler)
-            => services.AddMessageHandler<T>(m => message.Equals(m), messageHandler);
-
-        public static IServiceCollection AddMessageHandler<T>(this IServiceCollection services, T message, AsyncAction<T> messageHandler)
-            => services.AddMessageHandler(m => message.Equals(m), messageHandler);
     }
 }

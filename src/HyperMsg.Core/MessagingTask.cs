@@ -28,7 +28,7 @@ namespace HyperMsg
         }
     }
 
-    public abstract class MessagingTask : MessagingTaskBase, IMessagingTask
+    public abstract class MessagingTask : MessagingTaskBase, IHyperTask
     {
         private readonly TaskCompletionSource<bool> completionSource;
 
@@ -49,7 +49,7 @@ namespace HyperMsg
         }
     }
 
-    public abstract class MessagingTask<TResult> : MessagingTaskBase, IMessagingTask<TResult>
+    public abstract class MessagingTask<TResult> : MessagingTaskBase, IHyperTask<TResult>
     {
         private readonly TaskCompletionSource<TResult> completionSource;
 
