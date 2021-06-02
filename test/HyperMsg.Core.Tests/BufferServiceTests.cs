@@ -2,6 +2,7 @@
 using System;
 using System.Buffers;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -77,6 +78,20 @@ namespace HyperMsg
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void RegisterBufferFlushDataHandler_Advances_Buffer_Reader()
+        {
+            var data = Guid.NewGuid().ToByteArray();
+            var bufferCapacity = GetRequiredService<IBufferContext>().TransmittingBuffer.Writer.GetMemory().Length;
+            var iterationCount = (bufferCapacity / data.Length) * 10;
+            HandlersRegistry.RegisterBufferFlushDataHandler(BufferType.Transmitting, data => { });
+
+            for (int i = 0; i < iterationCount; i++)
+            {
+                MessageSender.SendToTransmitBuffer(data);
+            }
         }
 
         [Fact]
