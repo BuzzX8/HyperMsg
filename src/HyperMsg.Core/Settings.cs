@@ -8,7 +8,7 @@ namespace HyperMsg
 
         public T Get<T>(string key)
         {
-            key += typeof(T).FullName;
+            key = $"{typeof(T).FullName}:{key}";
 
             if (!values.ContainsKey(key))
             {
@@ -20,7 +20,7 @@ namespace HyperMsg
 
         public void Set<T>(string key, T value)
         {
-            key += typeof(T).FullName;
+            key = $"{typeof(T).FullName}:{key}";
             values[key] = value;
         }
     }
