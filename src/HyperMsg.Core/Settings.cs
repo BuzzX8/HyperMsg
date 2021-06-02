@@ -1,17 +1,27 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace HyperMsg
 {
     internal class Settings : ISettings
     {
+        private readonly Dictionary<string, object> values = new();
+
         public T Get<T>(string key)
         {
-            throw new NotImplementedException();
+            key += typeof(T).FullName;
+
+            if (!values.ContainsKey(key))
+            {
+                return default;
+            }
+
+            return (T)values[key];
         }
 
         public void Set<T>(string key, T value)
         {
-            throw new NotImplementedException();
+            key += typeof(T).FullName;
+            values[key] = value;
         }
     }
 }
