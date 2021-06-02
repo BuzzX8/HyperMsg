@@ -109,14 +109,15 @@ namespace HyperMsg
                 if (data.IsSingleSegment)
                 {
                     bufferDataHandler(data.First);
-                    return;
                 }
-
-                var enumerator = data.GetEnumerator();                
-
-                while (enumerator.MoveNext())
+                else
                 {
-                    bufferDataHandler(enumerator.Current);
+                    var enumerator = data.GetEnumerator();
+
+                    while (enumerator.MoveNext())
+                    {
+                        bufferDataHandler(enumerator.Current);
+                    }
                 }
 
                 reader.Advance((int)data.Length);
@@ -137,14 +138,15 @@ namespace HyperMsg
                 if (data.IsSingleSegment)
                 {
                     await bufferDataHandler(data.First, token);
-                    return;
                 }
-
-                var enumerator = data.GetEnumerator();
-
-                while (enumerator.MoveNext())
+                else
                 {
-                    await bufferDataHandler(enumerator.Current, token);
+                    var enumerator = data.GetEnumerator();
+
+                    while (enumerator.MoveNext())
+                    {
+                        await bufferDataHandler(enumerator.Current, token);
+                    }
                 }
 
                 reader.Advance((int)data.Length);
