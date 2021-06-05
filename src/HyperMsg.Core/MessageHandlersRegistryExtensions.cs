@@ -1,6 +1,7 @@
 ﻿using HyperMsg.Messages;
 using System;
 using System.Buffers;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -152,5 +153,11 @@ namespace HyperMsg
                 reader.Advance((int)data.Length);
             });
         }
+
+        public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, TResponse> requestHandler) => 
+            handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(message => message.Response = requestHandler.Invoke(message.Request));
+
+        public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, CancellationToken, Task<TResponse>> requestHandler) =>
+            handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(message.Request, token));
     }
 }
