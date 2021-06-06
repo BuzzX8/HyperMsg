@@ -93,7 +93,5 @@ namespace HyperMsg
 
             return services;
         }
-
-        public static IServiceCollection AddTimerService(this IServiceCollection services) => services.AddHostedService<TimerService>();
     }
 }

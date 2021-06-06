@@ -97,6 +97,20 @@ namespace HyperMsg
         public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new FlushBufferCommand(bufferType), cancellationToken);
 
+        public static TResponse SendRequest<TRequest, TResponse>(this IMessageSender messageSender, TRequest request)
+        {
+            var message = new RequestResponseMessage<TRequest, TResponse>(request);
+            messageSender.Send(message);
+            return message.Response;
+        }
+
+        public static async Task<TResponse> SendRequestAsync<TRequest, TResponse>(this IMessageSender messageSender, TRequest request, CancellationToken cancellationToken = default)
+        {
+            var message = new RequestResponseMessage<TRequest, TResponse>(request);
+            await messageSender.SendAsync(message, cancellationToken);
+            return message.Response;
+        }
+
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {
             var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };
