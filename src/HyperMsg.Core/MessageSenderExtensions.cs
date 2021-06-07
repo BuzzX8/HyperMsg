@@ -111,6 +111,22 @@ namespace HyperMsg
             return message.Response;
         }
 
+        public static async Task<T> SendWaitForMessageRequest<T>(this IMessageSender messageSender, Func<T, bool> messagePredicate, CancellationToken cancellationToken)
+        {
+            var request = new WaitMessageRequest(message =>
+            {
+                if (message.GetType() != typeof(T))
+                {
+                    return false;
+                }
+
+                return messagePredicate.Invoke((T)message);
+            });
+            await messageSender.SendAsync(request, cancellationToken);
+
+            return (T)request.Message;
+        }
+
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
         {
             var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };

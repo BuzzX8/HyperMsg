@@ -116,5 +116,17 @@ namespace HyperMsg
 
             broker.Send(Guid.NewGuid());
         }
+
+        [Fact]
+        public void SendWaitForMessageRequest_()
+        {
+            var message = Guid.NewGuid();
+
+            var task = broker.SendWaitForMessageRequest<Guid>(m => m == message, default);
+            broker.Send(message);
+
+            Assert.True(task.IsCompleted);
+            Assert.Equal(message, task.Result);
+        }
     }
 }
