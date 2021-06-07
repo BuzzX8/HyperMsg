@@ -118,7 +118,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendWaitForMessageRequest_()
+        public void SendWaitForMessageRequest_Result()
         {
             var message = Guid.NewGuid();
 
@@ -127,6 +127,31 @@ namespace HyperMsg
 
             Assert.True(task.IsCompleted);
             Assert.Equal(message, task.Result);
+        }
+
+        [Fact]
+        public void SendWaitForMessageRequest_Exception()
+        {
+            var message = Guid.NewGuid();
+            var exception = new InvalidCastException();
+
+            var task = broker.SendWaitForMessageRequest<Guid>(m => throw exception, default);
+            broker.Send(Guid.NewGuid());
+                        
+            Assert.True(task.IsFaulted);
+        }
+
+        [Fact]
+        public void SendWaitForMessageRequest_Cancel()
+        {
+            var cancellation = new CancellationTokenSource();
+
+            var task = broker.SendWaitForMessageRequest<Guid>(m => false, cancellation.Token);
+            broker.Send(Guid.NewGuid());
+
+            cancellation.Cancel();
+
+            Assert.True(task.IsCanceled);
         }
     }
 }

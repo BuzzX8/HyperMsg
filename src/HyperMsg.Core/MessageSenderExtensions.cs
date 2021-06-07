@@ -111,20 +111,19 @@ namespace HyperMsg
             return message.Response;
         }
 
-        public static async Task<T> SendWaitForMessageRequest<T>(this IMessageSender messageSender, Func<T, bool> messagePredicate, CancellationToken cancellationToken)
+        public static async Task<T> SendWaitForMessageRequest<T>(this IMessagingContext context, Func<T, bool> messagePredicate, CancellationToken cancellationToken)
         {
-            var request = new WaitMessageRequest(message =>
+            var completionSource = new TaskCompletionSource<T>();
+            using var _ = cancellationToken.Register(() => completionSource.SetCanceled());
+            using var __ = context.HandlersRegistry.RegisterHandler<T>(message =>
             {
-                if (message.GetType() != typeof(T))
+                if (messagePredicate.Invoke(message))
                 {
-                    return false;
+                    completionSource.SetResult(message);
                 }
-
-                return messagePredicate.Invoke((T)message);
             });
-            await messageSender.SendAsync(request, cancellationToken);
 
-            return (T)request.Message;
+            return await completionSource.Task;
         }
 
         public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
