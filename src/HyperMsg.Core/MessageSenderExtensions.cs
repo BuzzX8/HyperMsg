@@ -115,12 +115,21 @@ namespace HyperMsg
         {
             var completionSource = new TaskCompletionSource<T>();
             using var _ = cancellationToken.Register(() => completionSource.SetCanceled());
-            using var __ = context.HandlersRegistry.RegisterHandler<T>(message =>
+            using var __ = context.HandlersRegistry.RegisterHandler<T>((message, token) =>
             {
-                if (messagePredicate.Invoke(message))
-                {
-                    completionSource.SetResult(message);
-                }
+                return Task.Run(() => Task.FromResult(messagePredicate.Invoke(message)))
+                    .ContinueWith(completed =>
+                    {
+                        if (completed.IsCompletedSuccessfully && completed.Result)
+                        {
+                            completionSource.SetResult(message);
+                        }
+
+                        if (completed.IsFaulted)
+                        {
+                            completionSource.SetException(completed.Exception);
+                        }
+                    });
             });
 
             return await completionSource.Task;

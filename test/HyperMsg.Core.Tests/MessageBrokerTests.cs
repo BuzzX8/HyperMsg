@@ -137,8 +137,8 @@ namespace HyperMsg
 
             var task = broker.SendWaitForMessageRequest<Guid>(m => throw exception, default);
             broker.Send(Guid.NewGuid());
-                        
-            Assert.True(task.IsFaulted);
+
+            var _ = Assert.Throws<AggregateException>(() => task.Wait(1000));            
         }
 
         [Fact]
