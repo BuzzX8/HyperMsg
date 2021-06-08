@@ -92,7 +92,7 @@ namespace HyperMsg
 
             try
             {
-                await (Task)handler.DynamicInvoke(message, cancellationToken);
+                await ((AsyncAction<T>)handler).Invoke(message, cancellationToken);
             }
             catch (TargetInvocationException e)
             {
