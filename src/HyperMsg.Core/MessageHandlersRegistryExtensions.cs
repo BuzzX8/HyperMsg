@@ -159,5 +159,32 @@ namespace HyperMsg
 
         public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, CancellationToken, Task<TResponse>> requestHandler) =>
             handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(message.Request, token));
+
+        public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, CancellationToken cancellationToken = default) => 
+            handlersRegistry.WaitMessage<T>(_ => true, cancellationToken);
+
+        public static async Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> messagePredicate, CancellationToken cancellationToken = default)
+        {
+            var completionSource = new TaskCompletionSource<T>();
+            using var _ = cancellationToken.Register(() => completionSource.SetCanceled());
+            using var __ = handlersRegistry.RegisterHandler<T>((message, token) =>
+            {
+                return Task.Run(() => Task.FromResult(messagePredicate.Invoke(message)))
+                    .ContinueWith(completed =>
+                    {
+                        if (completed.IsCompletedSuccessfully && completed.Result)
+                        {
+                            completionSource.SetResult(message);
+                        }
+
+                        if (completed.IsFaulted)
+                        {
+                            completionSource.SetException(completed.Exception);
+                        }
+                    });
+            });
+
+            return await completionSource.Task;
+        }
     }
 }

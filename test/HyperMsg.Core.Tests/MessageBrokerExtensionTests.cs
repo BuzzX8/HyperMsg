@@ -124,5 +124,48 @@ namespace HyperMsg
 
             Assert.Equal(response, actualResponse);
         }
+
+        [Fact]
+        public void WaitMessage_Result()
+        {
+            var message = Guid.NewGuid();
+
+            var task = broker.WaitMessage<Guid>(m => m == message, default);
+            broker.Send(message);
+
+            Assert.True(task.IsCompleted);
+            Assert.Equal(message, task.Result);
+        }
+
+        [Fact]
+        public void WaitMessage_Exception()
+        {
+            var message = Guid.NewGuid();
+            var exception = new InvalidCastException();
+
+            var task = broker.WaitMessage<Guid>(m => throw exception, default);
+            broker.Send(Guid.NewGuid());
+
+            var _ = Assert.Throws<AggregateException>(() => task.Wait(1000));
+        }
+
+        [Fact]
+        public void WaitMessage_Cancel()
+        {
+            var cancellation = new CancellationTokenSource();
+
+            var task = broker.WaitMessage<Guid>(m => false, cancellation.Token);
+            broker.Send(Guid.NewGuid());
+
+            cancellation.Cancel();
+
+            Assert.True(task.IsCanceled);
+        }
+
+        [Fact]
+        public void SendAndWaitMessage_()
+        {
+
+        }
     }
 }
