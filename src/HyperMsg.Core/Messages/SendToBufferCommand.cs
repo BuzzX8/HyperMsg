@@ -2,7 +2,7 @@
 
 namespace HyperMsg.Messages
 {
-    public struct SendToBufferCommand
+    internal struct SendToBufferCommand
     {
         public SendToBufferCommand(Action<BufferService> writeToBufferAction) => WriteToBufferAction = writeToBufferAction;
 
