@@ -10,33 +10,6 @@ namespace HyperMsg
     public class MessageBrokerExtensionTests
     {
         private readonly MessageBroker broker = new();
-        private readonly Guid data = Guid.NewGuid();
-        private readonly Action<Guid> handler = A.Fake<Action<Guid>>();
-        private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
-
-        [Fact]
-        public void SendReceiveEvent_Sends_Message_To_Transmit_Handlers()
-        {
-            broker.RegisterReceiveEventHandler(handler);
-            broker.RegisterReceiveEventHandler(asyncHandler);
-
-            broker.SendReceiveEvent(data);
-
-            A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
-            A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
-        }
-
-        [Fact]
-        public async Task SendReceiveEventAsync_Sends_Message_To_Transmit_Handlers()
-        {
-            broker.RegisterReceiveEventHandler(handler);
-            broker.RegisterReceiveEventHandler(asyncHandler);
-
-            await broker.SendReceiveEventAsync(data, default);
-
-            A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
-            A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
-        }
 
         [Fact]
         public void RegisterHandler_Invokes_Handler_If_Predicate_Returns_True()

@@ -1,6 +1,4 @@
 ﻿using HyperMsg.Messages;
-using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,24 +7,6 @@ namespace HyperMsg
 {
     public static class MessageSenderExtensions
     {
-        /// <summary>
-        /// Sends event for received message.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Received message.</param>
-        public static void SendReceiveEvent<T>(this IMessageSender messageSender, T message) => messageSender.Send(new ReceiveEvent<T>(message));
-
-        /// <summary>
-        /// Sends event for received message.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Received message.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns></returns>
-        public static Task SendReceiveEventAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => messageSender.SendAsync(new ReceiveEvent<T>(message), cancellationToken);
-
         /// <summary>
         /// Sends message to transmit buffer.
         /// </summary>
@@ -109,22 +89,6 @@ namespace HyperMsg
             var message = new RequestResponseMessage<TRequest, TResponse>(request);
             await messageSender.SendAsync(message, cancellationToken);
             return message.Response;
-        }
-
-        public static IServiceScope SendCreateServiceScopeRequest(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator)
-        {
-            var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };
-            messageSender.Send(command);
-            
-            return command.ServiceScope;
-        }
-
-        public static async Task<IServiceScope> SendCreateServiceScopeRequestAsync(this IMessageSender messageSender, Action<IServiceCollection> serviceConfigurator, CancellationToken cancellationToken = default)
-        {
-            var command = new StartServiceScopeRequest { ServiceConfigurator = serviceConfigurator };
-            await messageSender.SendAsync(command, cancellationToken);
-
-            return command.ServiceScope;
         }
     }
 }
