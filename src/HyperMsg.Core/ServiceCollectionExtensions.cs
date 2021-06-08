@@ -22,7 +22,6 @@ namespace HyperMsg
                 .AddBufferService()
                 .AddSharedMemoryPool()
                 .AddMessageBroker()
-                .AddHostedService<ServiceScopeService>()
                 .AddSingleton<ISettings, Settings>();
         }
 

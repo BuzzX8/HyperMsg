@@ -8,10 +8,6 @@ namespace HyperMsg
 {
     public static class MessageHandlersRegistryExtensions
     {
-        public static IDisposable RegisterReceiveEventHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> messageHandler) => handlersRegistry.RegisterHandler<ReceiveEvent<T>>(m => messageHandler.Invoke(m.Message));
-
-        public static IDisposable RegisterReceiveEventHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> messageHandler) => handlersRegistry.RegisterHandler<ReceiveEvent<T>>((m, t) => messageHandler.Invoke(m.Message, t));
-
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> predicate, Action messageHandler) =>
             handlersRegistry.RegisterHandler<T>(m =>
             {
@@ -159,5 +155,37 @@ namespace HyperMsg
 
         public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, CancellationToken, Task<TResponse>> requestHandler) =>
             handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(message.Request, token));
+
+        public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, CancellationToken cancellationToken = default) => 
+            handlersRegistry.WaitMessage<T>(_ => true, cancellationToken);
+
+        public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> messagePredicate, CancellationToken cancellationToken = default)
+        {
+            return WaitMessage<T>(completionSource => handlersRegistry.RegisterHandler<T>((message, token) =>
+            {
+                return Task.Run(() => Task.FromResult(messagePredicate.Invoke(message)))
+                    .ContinueWith(completed =>
+                    {
+                        if (completed.IsCompletedSuccessfully && completed.Result)
+                        {
+                            completionSource.SetResult(message);
+                        }
+
+                        if (completed.IsFaulted)
+                        {
+                            completionSource.SetException(completed.Exception);
+                        }
+                    });
+            }), cancellationToken);
+        }
+
+        internal static async Task<T> WaitMessage<T>(Func<TaskCompletionSource<T>, IDisposable> messageSubscriber, CancellationToken cancellationToken = default)
+        {
+            var completionSource = new TaskCompletionSource<T>();
+            using var _ = cancellationToken.Register(() => completionSource.SetCanceled());
+            using var __ = messageSubscriber.Invoke(completionSource);
+
+            return await completionSource.Task;
+        }
     }
 }

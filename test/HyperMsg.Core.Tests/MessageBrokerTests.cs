@@ -115,6 +115,6 @@ namespace HyperMsg
             broker.RegisterHandler<Guid>(m => subscription.Dispose());
 
             broker.Send(Guid.NewGuid());
-        }
+        }        
     }
 }

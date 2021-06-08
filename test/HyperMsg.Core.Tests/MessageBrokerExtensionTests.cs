@@ -10,33 +10,6 @@ namespace HyperMsg
     public class MessageBrokerExtensionTests
     {
         private readonly MessageBroker broker = new();
-        private readonly Guid data = Guid.NewGuid();
-        private readonly Action<Guid> handler = A.Fake<Action<Guid>>();
-        private readonly AsyncAction<Guid> asyncHandler = A.Fake<AsyncAction<Guid>>();
-
-        [Fact]
-        public void SendReceiveEvent_Sends_Message_To_Transmit_Handlers()
-        {
-            broker.RegisterReceiveEventHandler(handler);
-            broker.RegisterReceiveEventHandler(asyncHandler);
-
-            broker.SendReceiveEvent(data);
-
-            A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
-            A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
-        }
-
-        [Fact]
-        public async Task SendReceiveEventAsync_Sends_Message_To_Transmit_Handlers()
-        {
-            broker.RegisterReceiveEventHandler(handler);
-            broker.RegisterReceiveEventHandler(asyncHandler);
-
-            await broker.SendReceiveEventAsync(data, default);
-
-            A.CallTo(() => handler.Invoke(data)).MustHaveHappened();
-            A.CallTo(() => asyncHandler.Invoke(data, default)).MustHaveHappened();
-        }
 
         [Fact]
         public void RegisterHandler_Invokes_Handler_If_Predicate_Returns_True()
@@ -123,6 +96,54 @@ namespace HyperMsg
             var actualResponse = await broker.SendRequestAsync<string, Guid>(request);
 
             Assert.Equal(response, actualResponse);
+        }
+
+        [Fact]
+        public void WaitMessage_Completes_Task_With_Correct_Result()
+        {
+            var message = Guid.NewGuid();
+
+            var task = broker.WaitMessage<Guid>(m => m == message, default);
+            broker.Send(message);
+                        
+            Assert.Equal(message, task.Result);
+        }
+
+        [Fact]
+        public void WaitMessage_Fails_Task_If_Predicate_Throws_Exception()
+        {
+            var message = Guid.NewGuid();
+            var exception = new InvalidCastException();
+
+            var task = broker.WaitMessage<Guid>(m => throw exception, default);
+            broker.Send(Guid.NewGuid());
+
+            var _ = Assert.Throws<AggregateException>(() => task.Wait(1000));
+        }
+
+        [Fact]
+        public void WaitMessage_Cancels_Task_If_Canceled_With_CancellationToken()
+        {
+            var cancellation = new CancellationTokenSource();
+
+            var task = broker.WaitMessage<Guid>(m => false, cancellation.Token);
+            broker.Send(Guid.NewGuid());
+
+            cancellation.Cancel();
+
+            Assert.True(task.IsCanceled);
+        }
+
+        [Fact]
+        public void SendAndWaitMessage_Sends_Provided_Message()
+        {
+            var message = Guid.NewGuid();
+            var actualMessage = default(Guid);
+            broker.RegisterHandler<Guid>(m => actualMessage = m);
+
+            var task = broker.SendAndWaitMessage<Guid, string>(message);
+
+            Assert.Equal(message, actualMessage);
         }
     }
 }
