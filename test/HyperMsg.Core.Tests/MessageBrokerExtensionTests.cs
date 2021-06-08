@@ -99,7 +99,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void WaitMessage_Result()
+        public void WaitMessage_Completes_Task_With_Correct_Result()
         {
             var message = Guid.NewGuid();
 
@@ -110,7 +110,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void WaitMessage_Exception()
+        public void WaitMessage_Fails_Task_If_Predicate_Throws_Exception()
         {
             var message = Guid.NewGuid();
             var exception = new InvalidCastException();
@@ -122,7 +122,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void WaitMessage_Cancel()
+        public void WaitMessage_Cancels_Task_If_Canceled_With_CancellationToken()
         {
             var cancellation = new CancellationTokenSource();
 
@@ -135,9 +135,15 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendAndWaitMessage_()
+        public void SendAndWaitMessage_Sends_Provided_Message()
         {
+            var message = Guid.NewGuid();
+            var actualMessage = default(Guid);
+            broker.RegisterHandler<Guid>(m => actualMessage = m);
 
+            var task = broker.SendAndWaitMessage<Guid, string>(message);
+
+            Assert.Equal(message, actualMessage);
         }
     }
 }
