@@ -163,11 +163,9 @@ namespace HyperMsg
         public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, CancellationToken cancellationToken = default) => 
             handlersRegistry.WaitMessage<T>(_ => true, cancellationToken);
 
-        public static async Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> messagePredicate, CancellationToken cancellationToken = default)
+        public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> messagePredicate, CancellationToken cancellationToken = default)
         {
-            var completionSource = new TaskCompletionSource<T>();
-            using var _ = cancellationToken.Register(() => completionSource.SetCanceled());
-            using var __ = handlersRegistry.RegisterHandler<T>((message, token) =>
+            return WaitMessage<T>(completionSource => handlersRegistry.RegisterHandler<T>((message, token) =>
             {
                 return Task.Run(() => Task.FromResult(messagePredicate.Invoke(message)))
                     .ContinueWith(completed =>
@@ -182,7 +180,14 @@ namespace HyperMsg
                             completionSource.SetException(completed.Exception);
                         }
                     });
-            });
+            }), cancellationToken);
+        }
+
+        internal static async Task<T> WaitMessage<T>(Func<TaskCompletionSource<T>, IDisposable> messageSubscriber, CancellationToken cancellationToken = default)
+        {
+            var completionSource = new TaskCompletionSource<T>();
+            using var _ = cancellationToken.Register(() => completionSource.SetCanceled());
+            using var __ = messageSubscriber.Invoke(completionSource);
 
             return await completionSource.Task;
         }

@@ -132,8 +132,7 @@ namespace HyperMsg
 
             var task = broker.WaitMessage<Guid>(m => m == message, default);
             broker.Send(message);
-
-            Assert.True(task.IsCompleted);
+                        
             Assert.Equal(message, task.Result);
         }
 
