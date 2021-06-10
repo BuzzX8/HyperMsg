@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class MessagingService : MessagingObject, IHostedService
+    public class MessagingService : MessagingContextProxy, IHostedService
     {
         public MessagingService(IMessagingContext messagingContext) : base(messagingContext)
         {

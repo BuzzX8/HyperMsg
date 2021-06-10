@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public abstract class MessagingObject : IMessageSender, IMessageHandlersRegistry, IDisposable
+    public abstract class MessagingContextProxy : IMessageSender, IMessageHandlersRegistry, IDisposable
     {
         private readonly List<IDisposable> subscriptions;
 
-        protected MessagingObject(IMessagingContext messagingContext) => (MessagingContext, subscriptions) = (messagingContext ?? throw new ArgumentNullException(nameof(messagingContext)), new());
+        protected MessagingContextProxy(IMessagingContext messagingContext) => (MessagingContext, subscriptions) = (messagingContext ?? throw new ArgumentNullException(nameof(messagingContext)), new());
 
         private IMessagingContext MessagingContext { get; }
 

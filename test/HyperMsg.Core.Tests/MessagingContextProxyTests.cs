@@ -6,13 +6,13 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class MessagingObjectTests
+    public class MessagingContextProxyTests
     {
         private readonly IMessagingContext messagingContext;
         private readonly IList<IDisposable> autoDisposables;
         private readonly MessagingObjectMock messagingObject;
 
-        public MessagingObjectTests()
+        public MessagingContextProxyTests()
         {
             messagingContext = A.Fake<IMessagingContext>();
             autoDisposables = A.CollectionOfFake<IDisposable>(10);
@@ -84,7 +84,7 @@ namespace HyperMsg
         }
     }
 
-    public class MessagingObjectMock : MessagingObject
+    public class MessagingObjectMock : MessagingContextProxy
     {
         private readonly IList<IDisposable> autoDisposables;
 
