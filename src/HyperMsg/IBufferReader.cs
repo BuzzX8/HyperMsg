@@ -5,7 +5,7 @@ namespace HyperMsg
     /// <summary>
     /// Defines methods for reading data from buffer.
     /// </summary>
-    public interface IBufferReader<T>
+    public interface IBufferReader
     {
         /// <summary>
         /// Advances reading position on specified number of elements.
@@ -18,6 +18,6 @@ namespace HyperMsg
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>List of buffer chunks with data.</returns>
-        ReadOnlySequence<T> Read();
+        ReadOnlySequence<byte> Read();
     }
 }

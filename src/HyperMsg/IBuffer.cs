@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-
-namespace HyperMsg
+﻿namespace HyperMsg
 {
     /// <summary>
     /// Defines methods for basic operations with byte buffer and
@@ -11,12 +9,12 @@ namespace HyperMsg
         /// <summary>
         /// Returns reader for buffer.
         /// </summary>
-        IBufferReader<byte> Reader { get; }
+        IBufferReader Reader { get; }
 
         /// <summary>
         /// Returns writer for buffer.
         /// </summary>
-        IBufferWriter<byte> Writer { get; }
+        IBufferWriter Writer { get; }
 
         /// <summary>
         /// Clears buffer data.
