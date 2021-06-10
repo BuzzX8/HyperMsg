@@ -13,7 +13,7 @@ namespace HyperMsg
         public static void Advance(this IBufferWriter writer, long count)
         {
             VerifyCountParam(count);
-            writer.Advance(count);
+            writer.Advance((int)count);
         }
 
         private static void VerifyCountParam(long count)
