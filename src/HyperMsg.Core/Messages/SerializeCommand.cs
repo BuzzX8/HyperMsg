@@ -1,16 +1,11 @@
-﻿using System.Buffers;
-
-namespace HyperMsg.Messages
+﻿namespace HyperMsg.Messages
 {
     internal struct SerializeCommand<T>
     {
-        internal SerializeCommand(IBufferWriter<byte> bufferWriter, T message)
-        {
-            BufferWriter = bufferWriter;
-            Message = message;
-        }
+        internal SerializeCommand(IBufferWriter bufferWriter, T message)
+         => (BufferWriter, Message) = (bufferWriter, message);
 
-        public IBufferWriter<byte> BufferWriter { get; }
+        public IBufferWriter BufferWriter { get; }
 
         public T Message { get; }
     }

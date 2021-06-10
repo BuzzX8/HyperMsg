@@ -1,6 +1,5 @@
 ﻿using HyperMsg.Messages;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 
@@ -53,10 +52,6 @@ namespace HyperMsg
                         writer.Write(memory.Span);
                         break;
 
-                    case ReadOnlySequence<byte> ros:
-                        throw new NotSupportedException();
-                        break;
-
                     case ArraySegment<byte> arraySegment:
                         writer.Write(arraySegment.AsSpan());
                         break;
@@ -81,7 +76,7 @@ namespace HyperMsg
             }
         }
 
-        private void WriteStream(IBufferWriter<byte> writer, Stream stream)
+        private void WriteStream(IBufferWriter writer, Stream stream)
         {
             var buffer = writer.GetMemory();
             var bytesRead = stream.Read(buffer.Span);

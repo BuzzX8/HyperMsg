@@ -13,23 +13,23 @@ namespace HyperMsg
         [Fact]
         public void SendToBuffer_Invokes_FlushCommand_Handler()
         {
-            var bufferReader = A.Fake<Action<IBufferReader<byte>>>();
+            var bufferReader = A.Fake<Action<IBufferReader>>();
 
             HandlersRegistry.RegisterBufferFlushHandler(BufferType.Transmitting, bufferReader);
             MessageSender.SendToBuffer(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), true);
 
-            A.CallTo(() => bufferReader.Invoke(A<IBufferReader<byte>>._)).MustHaveHappened();
+            A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
         }
 
         [Fact]
         public void SendToBuffer_Does_Not_Invokes_FlushCommand_Handler()
         {
-            var bufferReader = A.Fake<Action<IBufferReader<byte>>>();
+            var bufferReader = A.Fake<Action<IBufferReader>>();
 
             HandlersRegistry.RegisterBufferFlushHandler(BufferType.Transmitting, bufferReader);
             MessageSender.SendToBuffer(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), false);
 
-            A.CallTo(() => bufferReader.Invoke(A<IBufferReader<byte>>._)).MustNotHaveHappened();
+            A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustNotHaveHappened();
         }
 
         [Fact]

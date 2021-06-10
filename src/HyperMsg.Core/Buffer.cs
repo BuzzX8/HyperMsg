@@ -6,7 +6,7 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for buffer interfaces
     /// </summary>
-    public sealed class Buffer : IBuffer, IBufferReader<byte>, IBufferWriter<byte>, IDisposable
+    public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
     {
         private readonly IMemoryOwner<byte> memoryOwner;
 
@@ -20,15 +20,15 @@ namespace HyperMsg
 
         private Memory<byte> Memory => memoryOwner.Memory;
 
-        public IBufferReader<byte> Reader => this;
+        public IBufferReader Reader => this;
 
-        public IBufferWriter<byte> Writer => this;
+        public IBufferWriter Writer => this;
 
         private Memory<byte> CommitedMemory => Memory.Slice(position, length);
 
-        private int AvailableMemory => Memory.Length - length;
+        private long AvailableMemory => Memory.Length - length;
 
-        void IBufferReader<byte>.Advance(int count)
+        void IBufferReader.Advance(int count)
         {
             if (count < 0)
             {
@@ -44,9 +44,9 @@ namespace HyperMsg
             length -= count;
         }
 
-        ReadOnlySequence<byte> IBufferReader<byte>.Read() => new(CommitedMemory);
+        ReadOnlySequence<byte> IBufferReader.Read() => new(CommitedMemory);
 
-        void IBufferWriter<byte>.Advance(int count)
+        void IBufferWriter.Advance(int count)
         {
             if (count < 0)
             {
@@ -61,7 +61,7 @@ namespace HyperMsg
             length += count;
         }
 
-        Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint)
+        Memory<byte> IBufferWriter.GetMemory(int sizeHint)
         {
             if (sizeHint < 0)
             {
@@ -85,9 +85,9 @@ namespace HyperMsg
             return Memory[freeMemPos..];
         }
 
-        Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)
+        Span<byte> IBufferWriter.GetSpan(int sizeHint)
         {
-            var writer = (IBufferWriter<byte>)this;
+            var writer = (IBufferWriter)this;
             return writer.GetMemory(sizeHint).Span;
         }
 

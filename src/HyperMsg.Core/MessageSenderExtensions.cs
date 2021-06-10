@@ -1,5 +1,4 @@
 ﻿using HyperMsg.Messages;
-using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +32,7 @@ namespace HyperMsg
         /// <param name="messageSender">Message sender.</param>
         /// <param name="bufferWriter">Writer for serialization.</param>
         /// <param name="message">Message to serialize.</param>
-        public static void SendSerializeCommand<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message) =>
+        public static void SendSerializeCommand<T>(this IMessageSender messageSender, IBufferWriter bufferWriter, T message) =>
             messageSender.Send(new SerializeCommand<T>(bufferWriter, message));
 
         /// <summary>
@@ -45,7 +44,7 @@ namespace HyperMsg
         /// <param name="message">Message to serialize.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendSerializeCommandAsync<T>(this IMessageSender messageSender, IBufferWriter<byte> bufferWriter, T message, CancellationToken cancellationToken = default) =>
+        public static Task SendSerializeCommandAsync<T>(this IMessageSender messageSender, IBufferWriter bufferWriter, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new SerializeCommand<T>(bufferWriter, message), cancellationToken);
 
         /// <summary>
