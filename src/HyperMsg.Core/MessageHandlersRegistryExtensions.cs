@@ -65,31 +65,11 @@ namespace HyperMsg
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter, T> serializationHandler) =>
             handlersRegistry.RegisterHandler<SerializeCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
 
-        public static IDisposable RegisterBufferFlushHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action<IBufferReader> handler)
-        {
-            return handlersRegistry.RegisterHandler<FlushBufferEvent>(message =>
-            {
-                if (message.BufferType != bufferType)
-                {
-                    return;
-                }
+        public static IDisposable RegisterBufferFlushHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action<IBufferReader> handler) => 
+            handlersRegistry.RegisterPipeHandler(bufferType, typeof(BufferService), handler);
 
-                handler.Invoke(message.BufferReader);
-            });
-        }
-
-        public static IDisposable RegisterBufferFlushHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<IBufferReader> handler)
-        {
-            return handlersRegistry.RegisterHandler<FlushBufferEvent>(async (message, token) =>
-            {
-                if (message.BufferType != bufferType)
-                {
-                    return;
-                }
-
-                await handler.Invoke(message.BufferReader, token);
-            });
-        }
+        public static IDisposable RegisterBufferFlushHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<IBufferReader> handler) => 
+            handlersRegistry.RegisterPipeHandler(bufferType, typeof(BufferService), handler);
 
         public static IDisposable RegisterBufferFlushDataHandler(this IMessageHandlersRegistry handlersRegistry, BufferType bufferType, Action<ReadOnlyMemory<byte>> bufferDataHandler)
         {

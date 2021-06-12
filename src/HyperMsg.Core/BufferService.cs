@@ -1,5 +1,4 @@
-﻿using HyperMsg.Messages;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -86,7 +85,7 @@ namespace HyperMsg
         internal void FlushBuffer(BufferType bufferType)
         {
             (var buffer, _) = GetBufferWithLock(bufferType);
-            SendAsync(new FlushBufferEvent(bufferType, buffer.Reader), default);
+            this.SendToPipeAsync(bufferType, typeof(BufferService), buffer.Reader);
         }
     }
 }
