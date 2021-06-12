@@ -17,24 +17,24 @@ namespace HyperMsg
             yield return this.RegisterRequestHandler(() => this);
         }
 
-        internal void WriteToBuffer<T>(BufferType bufferType, T message, bool flushBuffer)
+        internal void WriteToBuffer<T>(PipeType bufferType, T message, bool flushBuffer)
         {
             (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
             WriteToBuffer(bufferType, message, buffer, bufferLock, flushBuffer);
         }
 
-        private (IBuffer buffer, object bufferLock) GetBufferWithLock(BufferType bufferType)
+        private (IBuffer buffer, object bufferLock) GetBufferWithLock(PipeType bufferType)
         {
             return bufferType switch
             {
-                BufferType.Receiving => (bufferContext.ReceivingBuffer, receivingBufferLock),
-                BufferType.Transmitting => (bufferContext.TransmittingBuffer, transmittingBufferLock),
+                PipeType.Receiving => (bufferContext.ReceivingBuffer, receivingBufferLock),
+                PipeType.Transmitting => (bufferContext.TransmittingBuffer, transmittingBufferLock),
                 _ => throw new NotSupportedException($"Buffer type {bufferType} does not supported"),
             };
         }
 
-        private void WriteToBuffer<T>(BufferType bufferType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
+        private void WriteToBuffer<T>(PipeType bufferType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
         {
             var writer = buffer.Writer;
 
@@ -82,7 +82,7 @@ namespace HyperMsg
             writer.Advance(bytesRead);
         }
 
-        internal void FlushBuffer(BufferType bufferType)
+        internal void FlushBuffer(PipeType bufferType)
         {
             (var buffer, _) = GetBufferWithLock(bufferType);
             this.SendToPipeAsync(bufferType, buffer.Reader);

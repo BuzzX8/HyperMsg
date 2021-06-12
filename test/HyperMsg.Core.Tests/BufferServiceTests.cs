@@ -15,8 +15,8 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
-            HandlersRegistry.RegisterPipeHandler(BufferType.Transmitting, bufferReader);
-            MessageSender.SendToBuffer(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), true);
+            HandlersRegistry.RegisterPipeHandler(PipeType.Transmitting, bufferReader);
+            MessageSender.SendToBuffer(PipeType.Transmitting, Guid.NewGuid().ToByteArray(), true);
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
         }
@@ -26,8 +26,8 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
-            HandlersRegistry.RegisterPipeHandler(BufferType.Transmitting, bufferReader);
-            MessageSender.SendToBuffer(BufferType.Transmitting, Guid.NewGuid().ToByteArray(), false);
+            HandlersRegistry.RegisterPipeHandler(PipeType.Transmitting, bufferReader);
+            MessageSender.SendToBuffer(PipeType.Transmitting, Guid.NewGuid().ToByteArray(), false);
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustNotHaveHappened();
         }
@@ -38,9 +38,9 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterPipeHandler<IBufferReader>(BufferType.Receiving, reader => actual = reader.Read().ToArray());
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Receiving, reader => actual = reader.Read().ToArray());
 
-            MessageSender.SendToBuffer(BufferType.Receiving, new MemoryStream(expected));
+            MessageSender.SendToBuffer(PipeType.Receiving, new MemoryStream(expected));
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
@@ -52,10 +52,10 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterPipeHandler<IBufferReader>(BufferType.Transmitting, reader => actual = reader.Read().ToArray());
-            MessageSender.SendToBuffer(BufferType.Transmitting, expected);
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmitting, reader => actual = reader.Read().ToArray());
+            MessageSender.SendToBuffer(PipeType.Transmitting, expected);
 
-            MessageSender.SendFlushBufferCommand(BufferType.Transmitting);
+            MessageSender.SendFlushBufferCommand(PipeType.Transmitting);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
@@ -67,14 +67,14 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterPipeHandler<IBufferReader>(BufferType.Transmitting, (buffer, _) =>
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmitting, (buffer, _) =>
             {
                 actual = buffer.Read().ToArray();
                 return Task.CompletedTask;
             });
-            MessageSender.SendToBuffer(BufferType.Transmitting, expected);
+            MessageSender.SendToBuffer(PipeType.Transmitting, expected);
 
-            MessageSender.SendFlushBufferCommand(BufferType.Transmitting);
+            MessageSender.SendFlushBufferCommand(PipeType.Transmitting);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
@@ -86,7 +86,7 @@ namespace HyperMsg
             var data = Guid.NewGuid().ToByteArray();
             var bufferCapacity = GetRequiredService<IBufferContext>().TransmittingBuffer.Writer.GetMemory().Length;
             var iterationCount = (bufferCapacity / data.Length) * 10;
-            HandlersRegistry.RegisterPipeHandler<IBufferReader>(BufferType.Transmitting, data => { });
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmitting, data => { });
 
             for (int i = 0; i < iterationCount; i++)
             {
@@ -100,7 +100,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterPipeHandler<IBufferReader>(BufferType.Transmitting, reader => actual = reader.Read().ToArray());
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmitting, reader => actual = reader.Read().ToArray());
 
             MessageSender.SendToTransmitBuffer(expected);
 
