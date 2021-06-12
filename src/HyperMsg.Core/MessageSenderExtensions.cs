@@ -89,5 +89,11 @@ namespace HyperMsg
             await messageSender.SendAsync(message, cancellationToken);
             return message.Response;
         }
+
+        public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, object portId, T message) => 
+            messageSender.Send(new PipeMessage<T>(pipeId, portId, message));
+
+        public static Task SendToPipeAsync<T>(this IMessageSender messageSender, object pipeId, object portId, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendAsync(new PipeMessage<T>(pipeId, portId, message), cancellationToken);
     }
 }

@@ -155,6 +155,42 @@ namespace HyperMsg
         public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, CancellationToken, Task<TResponse>> requestHandler) =>
             handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(message.Request, token));
 
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, Action<T> filter)
+        {
+            return handlersRegistry.RegisterHandler<PipeMessage<T>>(message =>
+            {
+                if (!Equals(pipeId, message.PipeId))
+                {
+                    return;
+                }
+
+                if (!Equals(portId, message.PortId))
+                {
+                    return;
+                }                
+
+                filter.Invoke(message.Message);
+            });
+        }
+
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, AsyncAction<T> filter)
+        {
+            return handlersRegistry.RegisterHandler<PipeMessage<T>>((message, token) =>
+            {
+                if (!Equals(pipeId, message.PipeId))
+                {
+                    return Task.CompletedTask;
+                }
+
+                if (!Equals(portId, message.PortId))
+                {
+                    return Task.CompletedTask;
+                }
+
+                return filter.Invoke(message.Message, token);
+            });
+        }
+
         public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, CancellationToken cancellationToken = default) => 
             handlersRegistry.WaitMessage<T>(_ => true, cancellationToken);
 
