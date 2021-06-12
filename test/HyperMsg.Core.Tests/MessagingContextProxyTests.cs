@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 
@@ -9,37 +8,12 @@ namespace HyperMsg
     public class MessagingContextProxyTests
     {
         private readonly IMessagingContext messagingContext;
-        private readonly IList<IDisposable> autoDisposables;
-        private readonly MessagingObjectMock messagingObject;
+        private readonly MessagingContextProxy proxy;
 
         public MessagingContextProxyTests()
         {
             messagingContext = A.Fake<IMessagingContext>();
-            autoDisposables = A.CollectionOfFake<IDisposable>(10);
-            messagingObject = new MessagingObjectMock(autoDisposables, messagingContext);
-        }
-
-        [Fact]
-        public void RegisterAutoDisposables_Registeres_Disposables_For_Auto_Disposing()
-        {
-            messagingObject.InvokeRegisterAutoDisposables();
-            messagingObject.Dispose();
-
-            foreach(var disposable in autoDisposables)
-            {
-                A.CallTo(() => disposable.Dispose()).MustHaveHappened();
-            }
-        }
-
-        [Fact]
-        public void RegisterAutoDisposables_Does_Not_Registeres_Disposables_For_Auto_Disposing()
-        {
-            messagingObject.Dispose();
-
-            foreach (var disposable in autoDisposables)
-            {
-                A.CallTo(() => disposable.Dispose()).MustNotHaveHappened();
-            }
+            proxy = new MessagingContextProxyMock(messagingContext);
         }
 
         [Fact]
@@ -47,7 +21,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<Action<string>>();
 
-            messagingObject.RegisterHandler(handler);
+            proxy.RegisterHandler(handler);
 
             A.CallTo(() => messagingContext.HandlersRegistry.RegisterHandler(handler)).MustHaveHappened();
         }
@@ -57,7 +31,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<AsyncAction<string>>();
 
-            messagingObject.RegisterHandler(handler);
+            proxy.RegisterHandler(handler);
 
             A.CallTo(() => messagingContext.HandlersRegistry.RegisterHandler(handler)).MustHaveHappened();
         }
@@ -67,7 +41,7 @@ namespace HyperMsg
         {
             var message = Guid.NewGuid();
 
-            messagingObject.Send(message);
+            proxy.Send(message);
 
             A.CallTo(() => messagingContext.Sender.Send(message)).MustHaveHappened();
         }
@@ -78,20 +52,16 @@ namespace HyperMsg
             var message = Guid.NewGuid();
             var token = new CancellationToken();
 
-            messagingObject.SendAsync(message, token);
+            proxy.SendAsync(message, token);
 
             A.CallTo(() => messagingContext.Sender.SendAsync(message, token)).MustHaveHappened();
         }
     }
 
-    public class MessagingObjectMock : MessagingContextProxy
+    internal class MessagingContextProxyMock : MessagingContextProxy
     {
-        private readonly IList<IDisposable> autoDisposables;
-
-        public MessagingObjectMock(IList<IDisposable> autoDisposables, IMessagingContext messagingContext) : base(messagingContext) => this.autoDisposables = autoDisposables;
-
-        protected override IEnumerable<IDisposable> GetAutoDisposables() => autoDisposables;
-
-        public void InvokeRegisterAutoDisposables() => RegisterAutoDisposables();
+        public MessagingContextProxyMock(IMessagingContext messagingContext) : base(messagingContext)
+        {
+        }
     }
 }
