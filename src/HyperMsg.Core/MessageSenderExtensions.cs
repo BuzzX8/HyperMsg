@@ -117,8 +117,14 @@ namespace HyperMsg
             return message.Response;
         }
 
+        public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, T message) =>
+            messageSender.SendToPipe(pipeId, null, message);
+
         public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, object portId, T message) => 
             messageSender.Send(new PipeMessage<T>(pipeId, portId, message));
+
+        public static Task SendToPipeAsync<T>(this IMessageSender messageSender, object pipeId, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendToPipeAsync(pipeId, null, message, cancellationToken);
 
         public static Task SendToPipeAsync<T>(this IMessageSender messageSender, object pipeId, object portId, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new PipeMessage<T>(pipeId, portId, message), cancellationToken);

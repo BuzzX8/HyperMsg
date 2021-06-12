@@ -85,7 +85,7 @@ namespace HyperMsg
         internal void FlushBuffer(BufferType bufferType)
         {
             (var buffer, _) = GetBufferWithLock(bufferType);
-            this.SendToPipeAsync(bufferType, typeof(BufferService), buffer.Reader);
+            this.SendToPipeAsync(bufferType, null, buffer.Reader);
         }
     }
 }

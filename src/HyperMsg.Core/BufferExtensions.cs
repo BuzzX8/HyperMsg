@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -35,6 +38,72 @@ namespace HyperMsg
             else
             {
                 throw new InvalidOperationException("Can not copy value into buffer.");
+            }
+        }
+
+        public static void ForEachSegment(this ReadOnlySequence<byte> data, Action<ReadOnlyMemory<byte>> dataSegmentHandler)
+        {
+            if (data.Length == 0)
+            {
+                return;
+            }
+
+            if (data.IsSingleSegment)
+            {
+                dataSegmentHandler(data.First);
+            }
+            else
+            {
+                var enumerator = data.GetEnumerator();
+
+                while (enumerator.MoveNext())
+                {
+                    dataSegmentHandler(enumerator.Current);
+                }
+            }
+        }
+
+        public static async Task ForEachSegment(this ReadOnlySequence<byte> data, AsyncAction<ReadOnlyMemory<byte>> dataSegmentHandler, CancellationToken cancellationToken = default)
+        {
+            if (data.Length == 0)
+            {
+                return;
+            }
+
+            if (data.IsSingleSegment)
+            {
+                await dataSegmentHandler(data.First, cancellationToken);
+            }
+            else
+            {
+                var enumerator = data.GetEnumerator();
+
+                while (enumerator.MoveNext())
+                {
+                    await dataSegmentHandler(enumerator.Current, cancellationToken);
+                }
+            }
+        }
+
+        public static void ForEachSegment(this IBufferReader bufferReader, Action<ReadOnlyMemory<byte>> dataSegmentHandler, bool advanceReader = true)
+        {
+            var data = bufferReader.Read();
+            data.ForEachSegment(dataSegmentHandler);
+
+            if (advanceReader)
+            {
+                bufferReader.Advance(data.Length);
+            }
+        }
+
+        public static async Task ForEachSegment(this IBufferReader bufferReader, AsyncAction<ReadOnlyMemory<byte>> dataSegmentHandler, bool advanceReader = true, CancellationToken cancellationToken = default)
+        {
+            var data = bufferReader.Read();
+            await data.ForEachSegment(dataSegmentHandler, cancellationToken);
+
+            if (advanceReader)
+            {
+                bufferReader.Advance(data.Length);
             }
         }
     }
