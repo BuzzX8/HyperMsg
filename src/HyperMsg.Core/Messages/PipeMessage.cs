@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg.Messages
 {
-    internal class PipeMessage<T>
+    internal struct PipeMessage<T>
     {
         public PipeMessage(object pipeId, object portId, T message) => 
             (PipeId, PortId, Message) = (pipeId, portId, message);
