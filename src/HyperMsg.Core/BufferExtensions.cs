@@ -41,6 +41,19 @@ namespace HyperMsg
             }
         }
 
+        public static bool TryWrite(this IBufferWriter writer, ReadOnlySpan<byte> value)
+        {
+            var span = writer.GetSpan(value.Length);
+
+            if (value.TryCopyTo(span))
+            {
+                writer.Advance(value.Length);
+                return true;
+            }
+
+            return false;
+        }
+
         public static void ForEachSegment(this ReadOnlySequence<byte> data, Action<ReadOnlyMemory<byte>> dataSegmentHandler)
         {
             if (data.Length == 0)
