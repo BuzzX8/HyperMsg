@@ -77,10 +77,17 @@ namespace HyperMsg
             return Task.CompletedTask;
         }
 
-        public static void SendFlushBufferCommand(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new FlushBufferCommand(bufferType));
+        public static void SendFlushBufferCommand(this IMessageSender messageSender, BufferType bufferType)
+        {
+            var service = messageSender.SendRequest<BufferService>();
+            service.FlushBuffer(bufferType);
+        }
 
-        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync(new FlushBufferCommand(bufferType), cancellationToken);
+        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default)
+        {
+            messageSender.SendFlushBufferCommand(bufferType);
+            return Task.CompletedTask;
+        }
 
         public static TResponse SendRequest<TResponse>(this IMessageSender messageSender)
         {
