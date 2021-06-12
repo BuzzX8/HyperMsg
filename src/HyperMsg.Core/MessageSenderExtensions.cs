@@ -56,8 +56,11 @@ namespace HyperMsg
         /// <param name="message">Message to send.</param>
         /// <param name="flushBuffer"></param>
         /// <returns></returns>
-        public static void SendToBuffer<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true) => 
-            messageSender.Send(new SendToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)));
+        public static void SendToBuffer<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true)
+        {
+            var service = messageSender.SendRequest<BufferService>();
+            service.WriteToBuffer(bufferType, message, flushBuffer);
+        }
 
         /// <summary>
         /// Sends message to transmit buffer.
@@ -68,13 +71,30 @@ namespace HyperMsg
         /// <param name="flushBuffer"></param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync(new SendToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)), cancellationToken);
+        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default)
+        {
+            messageSender.SendToBuffer(bufferType, message, flushBuffer);
+            return Task.CompletedTask;
+        }
 
         public static void SendFlushBufferCommand(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new FlushBufferCommand(bufferType));
 
         public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
             messageSender.SendAsync(new FlushBufferCommand(bufferType), cancellationToken);
+
+        public static TResponse SendRequest<TResponse>(this IMessageSender messageSender)
+        {
+            var message = new RequestResponseMessage<TResponse>();
+            messageSender.Send(message);
+            return message.Response;
+        }
+
+        public static async Task<TResponse> SendRequestAsync<TResponse>(this IMessageSender messageSender, CancellationToken cancellationToken = default)
+        {
+            var message = new RequestResponseMessage<TResponse>();
+            await messageSender.SendAsync(message, cancellationToken);
+            return message.Response;
+        }
 
         public static TResponse SendRequest<TRequest, TResponse>(this IMessageSender messageSender, TRequest request)
         {
