@@ -52,14 +52,14 @@ namespace HyperMsg
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
-        /// <param name="bufferType">Buffer type.</param>
+        /// <param name="pipeType">Buffer type.</param>
         /// <param name="message">Message to send.</param>
         /// <param name="flushBuffer"></param>
         /// <returns></returns>
-        public static void SendToBuffer<T>(this IMessageSender messageSender, PipeType bufferType, T message, bool flushBuffer = true)
+        public static void SendToBuffer<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true)
         {
             var service = messageSender.SendRequest<BufferService>();
-            service.WriteToBuffer(bufferType, message, flushBuffer);
+            service.WriteToBuffer(pipeType, message, flushBuffer);
         }
 
         /// <summary>
@@ -71,21 +71,21 @@ namespace HyperMsg
         /// <param name="flushBuffer"></param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, PipeType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default)
+        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true, CancellationToken _ = default)
         {
-            messageSender.SendToBuffer(bufferType, message, flushBuffer);
+            messageSender.SendToBuffer(pipeType, message, flushBuffer);
             return Task.CompletedTask;
         }
 
-        public static void SendFlushBufferCommand(this IMessageSender messageSender, PipeType bufferType)
+        public static void SendFlushBufferCommand(this IMessageSender messageSender, PipeType pipeType)
         {
             var service = messageSender.SendRequest<BufferService>();
-            service.FlushBuffer(bufferType);
+            service.FlushBuffer(pipeType);
         }
 
-        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, PipeType bufferType, CancellationToken cancellationToken = default)
+        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, PipeType pipeType, CancellationToken _ = default)
         {
-            messageSender.SendFlushBufferCommand(bufferType);
+            messageSender.SendFlushBufferCommand(pipeType);
             return Task.CompletedTask;
         }
 
@@ -130,11 +130,11 @@ namespace HyperMsg
         public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, T message) =>
             messageSender.SendToPipe(pipeId, null, message);
 
-        public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, object portId, T message) => 
-            messageSender.Send(new PipeMessage<T>(pipeId, portId, message));
-
         public static Task SendToPipeAsync<T>(this IMessageSender messageSender, object pipeId, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendToPipeAsync(pipeId, null, message, cancellationToken);
+
+        public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, object portId, T message) => 
+            messageSender.Send(new PipeMessage<T>(pipeId, portId, message));
 
         public static Task SendToPipeAsync<T>(this IMessageSender messageSender, object pipeId, object portId, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendAsync(new PipeMessage<T>(pipeId, portId, message), cancellationToken);

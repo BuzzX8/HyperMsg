@@ -86,11 +86,16 @@ namespace HyperMsg
             var data = Guid.NewGuid().ToByteArray();
             var bufferCapacity = GetRequiredService<IBufferContext>().TransmittingBuffer.Writer.GetMemory().Length;
             var iterationCount = (bufferCapacity / data.Length) * 10;
-            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmitting, data => { });
+            HandlersRegistry.RegisterTransmitPipeHandler<IBufferReader>(data => { });
 
             for (int i = 0; i < iterationCount; i++)
             {
-                MessageSender.SendToTransmitBuffer(data);
+                try
+                {
+                    MessageSender.SendToTransmitBuffer(data);
+                }
+                catch(InvalidOperationException)
+                { }
             }
         }
 
