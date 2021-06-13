@@ -12,7 +12,7 @@ namespace HyperMsg
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="message">Message to transmit.</param>
-        public static void SendToTransmitBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendToBuffer(BufferType.Transmitting, message);
+        public static void SendToTransmitBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendToBuffer(PipeType.Transmitting, message);
 
         /// <summary>
         /// Sends message to transmit buffer.
@@ -23,7 +23,7 @@ namespace HyperMsg
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
         public static Task SendToTransmitBufferAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
-            messageSender.SendToBufferAsync(BufferType.Transmitting, message, true, cancellationToken);
+            messageSender.SendToBufferAsync(PipeType.Transmitting, message, true, cancellationToken);
 
         /// <summary>
         /// Sends command for message serialization.
@@ -52,12 +52,15 @@ namespace HyperMsg
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
-        /// <param name="bufferType">Buffer type.</param>
+        /// <param name="pipeType">Buffer type.</param>
         /// <param name="message">Message to send.</param>
         /// <param name="flushBuffer"></param>
         /// <returns></returns>
-        public static void SendToBuffer<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true) => 
-            messageSender.Send(new SendToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)));
+        public static void SendToBuffer<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true)
+        {
+            var service = messageSender.SendRequest<BufferService>();
+            service.WriteToBuffer(pipeType, message, flushBuffer);
+        }
 
         /// <summary>
         /// Sends message to transmit buffer.
@@ -68,13 +71,37 @@ namespace HyperMsg
         /// <param name="flushBuffer"></param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, BufferType bufferType, T message, bool flushBuffer = true, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync(new SendToBufferCommand(handler => handler.WriteToBuffer(bufferType, message, flushBuffer)), cancellationToken);
+        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true, CancellationToken _ = default)
+        {
+            messageSender.SendToBuffer(pipeType, message, flushBuffer);
+            return Task.CompletedTask;
+        }
 
-        public static void SendFlushBufferCommand(this IMessageSender messageSender, BufferType bufferType) => messageSender.Send(new FlushBufferCommand(bufferType));
+        public static void SendFlushBufferCommand(this IMessageSender messageSender, PipeType pipeType)
+        {
+            var service = messageSender.SendRequest<BufferService>();
+            service.FlushBuffer(pipeType);
+        }
 
-        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, BufferType bufferType, CancellationToken cancellationToken = default) => 
-            messageSender.SendAsync(new FlushBufferCommand(bufferType), cancellationToken);
+        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, PipeType pipeType, CancellationToken _ = default)
+        {
+            messageSender.SendFlushBufferCommand(pipeType);
+            return Task.CompletedTask;
+        }
+
+        public static TResponse SendRequest<TResponse>(this IMessageSender messageSender)
+        {
+            var message = new RequestResponseMessage<TResponse>();
+            messageSender.Send(message);
+            return message.Response;
+        }
+
+        public static async Task<TResponse> SendRequestAsync<TResponse>(this IMessageSender messageSender, CancellationToken cancellationToken = default)
+        {
+            var message = new RequestResponseMessage<TResponse>();
+            await messageSender.SendAsync(message, cancellationToken);
+            return message.Response;
+        }
 
         public static TResponse SendRequest<TRequest, TResponse>(this IMessageSender messageSender, TRequest request)
         {
@@ -89,6 +116,22 @@ namespace HyperMsg
             await messageSender.SendAsync(message, cancellationToken);
             return message.Response;
         }
+
+        public static void SendToTransmittingPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Transmitting, message);
+
+        public static Task SendToTransmittingPipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
+            messageSender.SendToPipeAsync(PipeType.Transmitting, message, cancellationToken);
+
+        public static void SendToReceivingPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Receiving, message);
+
+        public static Task SendToReceivingPipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendToPipeAsync(PipeType.Receiving, message, cancellationToken);
+
+        public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, T message) =>
+            messageSender.SendToPipe(pipeId, null, message);
+
+        public static Task SendToPipeAsync<T>(this IMessageSender messageSender, object pipeId, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendToPipeAsync(pipeId, null, message, cancellationToken);
 
         public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, object portId, T message) => 
             messageSender.Send(new PipeMessage<T>(pipeId, portId, message));

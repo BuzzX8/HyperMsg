@@ -1,5 +1,8 @@
 ﻿using FakeItEasy;
 using System;
+using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace HyperMsg
@@ -44,6 +47,82 @@ namespace HyperMsg
             var count = (long)int.MaxValue + 1;
 
             Assert.Throws<ArgumentOutOfRangeException>(() => reader.Advance(count));
+        }
+
+        [Fact]
+        public void ForEachSegment_Does_Not_Invokes_Handler_For_Empty_Data()
+        {            
+            var data = new ReadOnlySequence<byte>();
+            var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
+
+            data.ForEachSegment(handler);
+
+            A.CallTo(() => handler.Invoke(A<ReadOnlyMemory<byte>>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public async Task ForEachSegment_Does_Not_Invokes_Async_Handler_For_Empty_Data()
+        {
+            var data = new ReadOnlySequence<byte>();
+            var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+
+            await data.ForEachSegment(handler);
+
+            A.CallTo(() => handler.Invoke(A<ReadOnlyMemory<byte>>._, A<CancellationToken>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void ForEachSegment_Invokes_Handler_For_Single_Segment()
+        {
+            var segment = Guid.NewGuid().ToByteArray().AsMemory();
+            var data = new ReadOnlySequence<byte>(segment);
+            var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
+
+            data.ForEachSegment(handler);
+
+            A.CallTo(() => handler.Invoke(segment)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task ForEachSegment_Invokes_Async_Handler_For_Single_Segment()
+        {
+            var segment = Guid.NewGuid().ToByteArray().AsMemory();
+            var data = new ReadOnlySequence<byte>(segment);
+            var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+
+            await data.ForEachSegment(handler, default);
+
+            A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void ForEachSegment_Invokes_Handler_And_Advances_BufferReader()
+        {
+            var segment = Guid.NewGuid().ToByteArray().AsMemory();
+            var data = new ReadOnlySequence<byte>(segment);
+            var bufferReader = A.Fake<IBufferReader>();
+            A.CallTo(() => bufferReader.Read()).Returns(data);
+            var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
+
+            bufferReader.ForEachSegment(handler);
+
+            A.CallTo(() => handler.Invoke(segment)).MustHaveHappened();
+            A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task ForEachSegment_Invokes_Async_Handler_And_Advances_BufferReader()
+        {
+            var segment = Guid.NewGuid().ToByteArray().AsMemory();
+            var data = new ReadOnlySequence<byte>(segment);
+            var bufferReader = A.Fake<IBufferReader>();
+            A.CallTo(() => bufferReader.Read()).Returns(data);
+            var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+
+            await bufferReader.ForEachSegment(handler);
+
+            A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
+            A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
         }
     }
 }

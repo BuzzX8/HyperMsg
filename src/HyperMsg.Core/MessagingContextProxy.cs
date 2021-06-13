@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public abstract class MessagingContextProxy : IMessageSender, IMessageHandlersRegistry, IDisposable
+    public abstract class MessagingContextProxy : IMessageSender, IMessageHandlersRegistry
     {
-        private readonly List<IDisposable> subscriptions;
-
-        protected MessagingContextProxy(IMessagingContext messagingContext) => (MessagingContext, subscriptions) = (messagingContext ?? throw new ArgumentNullException(nameof(messagingContext)), new());
+        protected MessagingContextProxy(IMessagingContext messagingContext) => (MessagingContext) = (messagingContext ?? throw new ArgumentNullException(nameof(messagingContext)));
 
         private IMessagingContext MessagingContext { get; }
 
@@ -18,26 +16,14 @@ namespace HyperMsg
 
         private IMessageSender Sender => MessagingContext.Sender;
 
-        private void RegisterDisposable(IDisposable disposable) => subscriptions.Add(disposable);
-
-        protected void RegisterAutoDisposables()
-        {
-            foreach(var handle in GetAutoDisposables())
-            {
-                RegisterDisposable(handle);
-            }
-        }
-
         protected virtual IEnumerable<IDisposable> GetAutoDisposables() => Enumerable.Empty<IDisposable>();
 
-        public IDisposable RegisterHandler<TMessage>(Action<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);
+        public virtual IDisposable RegisterHandler<TMessage>(Action<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);
 
-        public IDisposable RegisterHandler<TMessage>(AsyncAction<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);        
+        public virtual IDisposable RegisterHandler<TMessage>(AsyncAction<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);        
 
-        public void Send<T>(T message) => Sender.Send(message);
+        public virtual void Send<T>(T message) => Sender.Send(message);
 
-        public Task SendAsync<T>(T message, CancellationToken cancellationToken) => Sender.SendAsync(message, cancellationToken);        
-
-        public virtual void Dispose() => subscriptions.ForEach(s => s.Dispose());
+        public virtual Task SendAsync<T>(T message, CancellationToken cancellationToken) => Sender.SendAsync(message, cancellationToken);
     }
 }
