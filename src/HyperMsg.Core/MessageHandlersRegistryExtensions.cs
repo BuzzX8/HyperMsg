@@ -78,16 +78,16 @@ namespace HyperMsg
             handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(message.Request, token));
 
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Transmitting, handler);
+            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, handler);
 
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Transmitting, handler);
+            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, handler);
 
         public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Receiving, handler);
+            handlersRegistry.RegisterPipeHandler(PipeType.Receive, handler);
 
         public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Receiving, handler);
+            handlersRegistry.RegisterPipeHandler(PipeType.Receive, handler);
 
         public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Action<T> handler) =>
             handlersRegistry.RegisterPipeHandler(pipeId, null, handler);

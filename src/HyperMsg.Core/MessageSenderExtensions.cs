@@ -12,7 +12,7 @@ namespace HyperMsg
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="message">Message to transmit.</param>
-        public static void SendToTransmitBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendToBuffer(PipeType.Transmitting, message);
+        public static void SendToTransmitBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendToBuffer(PipeType.Transmit, message);
 
         /// <summary>
         /// Sends message to transmit buffer.
@@ -23,7 +23,12 @@ namespace HyperMsg
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
         public static Task SendToTransmitBufferAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
-            messageSender.SendToBufferAsync(PipeType.Transmitting, message, true, cancellationToken);
+            messageSender.SendToBufferAsync(PipeType.Transmit, message, true, cancellationToken);
+
+        public static void SendToReceiveBuffer<T>(this IMessageSender messageSender, T message) => messageSender.SendToBuffer(PipeType.Receive, message);
+
+        public static Task SendToReceiveBuffer<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
+            messageSender.SendToBufferAsync(PipeType.Receive, message);
 
         /// <summary>
         /// Sends command for message serialization.
@@ -117,15 +122,15 @@ namespace HyperMsg
             return message.Response;
         }
 
-        public static void SendToTransmitPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Transmitting, message);
+        public static void SendToTransmitPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Transmit, message);
 
         public static Task SendToTransmitPipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
-            messageSender.SendToPipeAsync(PipeType.Transmitting, message, cancellationToken);
+            messageSender.SendToPipeAsync(PipeType.Transmit, message, cancellationToken);
 
-        public static void SendToReceivePipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Receiving, message);
+        public static void SendToReceivePipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Receive, message);
 
         public static Task SendToReceivePipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) =>
-            messageSender.SendToPipeAsync(PipeType.Receiving, message, cancellationToken);
+            messageSender.SendToPipeAsync(PipeType.Receive, message, cancellationToken);
 
         public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, T message) =>
             messageSender.SendToPipe(pipeId, null, message);

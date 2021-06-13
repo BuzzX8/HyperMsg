@@ -15,9 +15,14 @@ namespace HyperMsg
         protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
             yield return this.RegisterRequestHandler(() => this);
+            yield return this.RegisterReceivePipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
+            yield return this.RegisterReceivePipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
+            yield return this.RegisterReceivePipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Receive, segment));
+            yield return this.RegisterReceivePipeHandler<byte[]>(array => WriteToBuffer(PipeType.Receive, array));
+            yield return this.RegisterReceivePipeHandler<Stream>(stream => WriteToBuffer(PipeType.Receive, stream));
         }
 
-        internal void WriteToBuffer<T>(PipeType bufferType, T message, bool flushBuffer)
+        internal void WriteToBuffer<T>(PipeType bufferType, T message, bool flushBuffer = true)
         {
             (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
@@ -28,8 +33,8 @@ namespace HyperMsg
         {
             return bufferType switch
             {
-                PipeType.Receiving => (bufferContext.ReceivingBuffer, receivingBufferLock),
-                PipeType.Transmitting => (bufferContext.TransmittingBuffer, transmittingBufferLock),
+                PipeType.Receive => (bufferContext.ReceivingBuffer, receivingBufferLock),
+                PipeType.Transmit => (bufferContext.TransmittingBuffer, transmittingBufferLock),
                 _ => throw new NotSupportedException($"Buffer type {bufferType} does not supported"),
             };
         }
