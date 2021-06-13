@@ -97,54 +97,6 @@ namespace HyperMsg
             Assert.Equal(response, actualResponse);
         }
 
-        [Fact]
-        public void WaitMessage_Completes_Task_With_Correct_Result()
-        {
-            var message = Guid.NewGuid();
-
-            var task = broker.WaitMessage<Guid>(m => m == message, default);
-            broker.Send(message);
-                        
-            Assert.Equal(message, task.Result);
-        }
-
-        [Fact]
-        public void WaitMessage_Fails_Task_If_Predicate_Throws_Exception()
-        {
-            var message = Guid.NewGuid();
-            var exception = new InvalidCastException();
-
-            var task = broker.WaitMessage<Guid>(m => throw exception, default);
-            broker.Send(Guid.NewGuid());
-
-            var _ = Assert.Throws<AggregateException>(() => task.Wait(1000));
-        }
-
-        [Fact]
-        public void WaitMessage_Cancels_Task_If_Canceled_With_CancellationToken()
-        {
-            var cancellation = new CancellationTokenSource();
-
-            var task = broker.WaitMessage<Guid>(m => false, cancellation.Token);
-            broker.Send(Guid.NewGuid());
-
-            cancellation.Cancel();
-
-            Assert.True(task.IsCanceled);
-        }
-
-        [Fact]
-        public void SendAndWaitMessage_Sends_Provided_Message()
-        {
-            var message = Guid.NewGuid();
-            var actualMessage = default(Guid);
-            broker.RegisterHandler<Guid>(m => actualMessage = m);
-
-            var task = broker.SendAndWaitMessage<Guid, string>(message);
-
-            Assert.Equal(message, actualMessage);
-        }
-
         private readonly Guid pipeId = Guid.NewGuid();
         private readonly Guid portId = Guid.NewGuid();
         private readonly Guid message = Guid.NewGuid();
