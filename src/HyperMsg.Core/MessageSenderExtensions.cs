@@ -124,13 +124,23 @@ namespace HyperMsg
 
         public static void SendToTransmitPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Transmit, message);
 
+        public static void SendToTransmitPipe<T>(this IMessageSender messageSender, object portId, T message) => messageSender.SendToPipe(PipeType.Transmit, portId, message);
+
         public static Task SendToTransmitPipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
             messageSender.SendToPipeAsync(PipeType.Transmit, message, cancellationToken);
 
+        public static Task SendToTransmitPipeAsync<T>(this IMessageSender messageSender, object portId, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendToPipeAsync(PipeType.Transmit, portId, message, cancellationToken);
+
         public static void SendToReceivePipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Receive, message);
+
+        public static void SendToReceivePipe<T>(this IMessageSender messageSender, object portId, T message) => messageSender.SendToPipe(PipeType.Receive, portId, message);
 
         public static Task SendToReceivePipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendToPipeAsync(PipeType.Receive, message, cancellationToken);
+
+        public static Task SendToReceivePipeAsync<T>(this IMessageSender messageSender, object portId, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendToPipeAsync(PipeType.Receive, portId, message, cancellationToken);
 
         public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, T message) =>
             messageSender.SendToPipe(pipeId, null, message);

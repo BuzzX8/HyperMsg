@@ -80,14 +80,26 @@ namespace HyperMsg
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> handler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Transmit, handler);
 
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<T> handler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, handler);
+
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> handler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Transmit, handler);
+
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> handler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, handler);
 
         public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> handler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Receive, handler);
 
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<T> handler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Receive, portId, handler);
+
         public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> handler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Receive, handler);
+
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> handler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Receive, portId, handler);
 
         public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Action<T> handler) =>
             handlersRegistry.RegisterPipeHandler(pipeId, null, handler);
@@ -129,38 +141,6 @@ namespace HyperMsg
 
                 return handler.Invoke(message.Message, token);
             });
-        }
-
-        public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, CancellationToken cancellationToken = default) => 
-            handlersRegistry.WaitMessage<T>(_ => true, cancellationToken);
-
-        public static Task<T> WaitMessage<T>(this IMessageHandlersRegistry handlersRegistry, Func<T, bool> messagePredicate, CancellationToken cancellationToken = default)
-        {
-            return WaitMessage<T>(completionSource => handlersRegistry.RegisterHandler<T>((message, token) =>
-            {
-                return Task.Run(() => Task.FromResult(messagePredicate.Invoke(message)))
-                    .ContinueWith(completed =>
-                    {
-                        if (completed.IsCompletedSuccessfully && completed.Result)
-                        {
-                            completionSource.SetResult(message);
-                        }
-
-                        if (completed.IsFaulted)
-                        {
-                            completionSource.SetException(completed.Exception);
-                        }
-                    });
-            }), cancellationToken);
-        }
-
-        internal static async Task<T> WaitMessage<T>(Func<TaskCompletionSource<T>, IDisposable> messageSubscriber, CancellationToken cancellationToken = default)
-        {
-            var completionSource = new TaskCompletionSource<T>();
-            using var _ = cancellationToken.Register(() => completionSource.SetCanceled());
-            using var __ = messageSubscriber.Invoke(completionSource);
-
-            return await completionSource.Task;
         }
     }
 }
