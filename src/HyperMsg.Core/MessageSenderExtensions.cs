@@ -117,14 +117,14 @@ namespace HyperMsg
             return message.Response;
         }
 
-        public static void SendToTransmittingPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Transmitting, message);
+        public static void SendToTransmitPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Transmitting, message);
 
-        public static Task SendToTransmittingPipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
+        public static Task SendToTransmitPipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) => 
             messageSender.SendToPipeAsync(PipeType.Transmitting, message, cancellationToken);
 
-        public static void SendToReceivingPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Receiving, message);
+        public static void SendToReceivePipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Receiving, message);
 
-        public static Task SendToReceivingPipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) =>
+        public static Task SendToReceivePipeAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) =>
             messageSender.SendToPipeAsync(PipeType.Receiving, message, cancellationToken);
 
         public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, T message) =>
