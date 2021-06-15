@@ -89,6 +89,12 @@ namespace HyperMsg
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> handler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, handler);
 
+        public static IDisposable RegisterTransmitPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, Action<T> handler) =>
+            handlersRegistry.RegisterPipeFilter(PipeType.Transmit, portFilter, handler);
+
+        public static IDisposable RegisterTransmitPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, AsyncAction<T> handler) =>
+            handlersRegistry.RegisterPipeFilter(PipeType.Transmit, portFilter, handler);
+
         public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> handler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Receive, handler);
 
@@ -100,6 +106,12 @@ namespace HyperMsg
 
         public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> handler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Receive, portId, handler);
+
+        public static IDisposable RegisterReceivePipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, Action<T> handler) =>
+            handlersRegistry.RegisterPipeFilter(PipeType.Receive, portFilter, handler);
+
+        public static IDisposable RegisterReceivePipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, AsyncAction<T> handler) =>
+            handlersRegistry.RegisterPipeFilter(PipeType.Receive, portFilter, handler);
 
         public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Action<T> handler) =>
             handlersRegistry.RegisterPipeHandler(pipeId, null, handler);
