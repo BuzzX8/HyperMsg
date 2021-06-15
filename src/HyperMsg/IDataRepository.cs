@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg
 {
-    public interface ISettings
+    public interface IDataRepository
     {
         T Get<T>(string key);
 

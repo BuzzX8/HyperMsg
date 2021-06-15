@@ -2,7 +2,7 @@
 
 namespace HyperMsg
 {
-    internal class Settings : ISettings
+    internal class DataRepository : IDataRepository
     {
         private readonly Dictionary<string, object> values = new();
 

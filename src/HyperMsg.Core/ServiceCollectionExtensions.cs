@@ -22,7 +22,7 @@ namespace HyperMsg
                 .AddBufferService()
                 .AddSharedMemoryPool()
                 .AddMessageBroker()
-                .AddSingleton<ISettings, Settings>();
+                .AddSingleton<IDataRepository, DataRepository>();
         }
 
         /// <summary>

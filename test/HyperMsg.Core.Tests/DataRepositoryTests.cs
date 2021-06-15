@@ -3,11 +3,11 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class SettingsTests : ServiceHostFixture
+    public class DataRepositoryTests : ServiceHostFixture
     {
-        private readonly ISettings settings;
+        private readonly IDataRepository settings;
 
-        public SettingsTests() => settings = GetRequiredService<ISettings>();
+        public DataRepositoryTests() => settings = GetRequiredService<IDataRepository>();
 
         [Fact]
         public void Get_Returns_Value_Provided_With_Set()
