@@ -107,6 +107,42 @@ namespace HyperMsg
         public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, AsyncAction<T> handler) =>
             handlersRegistry.RegisterPipeHandler(pipeId, null, handler);
 
+        public static IDisposable RegisterPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Func<object, bool> portFilter, Action<T> handler)
+        {
+            return handlersRegistry.RegisterHandler<PipeMessage<T>>(message =>
+            {
+                if (!Equals(pipeId, message.PipeId))
+                {
+                    return;
+                }
+
+                if (!portFilter.Invoke(message.PortId))
+                {
+                    return;
+                }
+
+                handler.Invoke(message.Message);
+            });
+        }
+
+        public static IDisposable RegisterPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Func<object, bool> portFilter, AsyncAction<T> handler)
+        {
+            return handlersRegistry.RegisterHandler<PipeMessage<T>>((message, token) =>
+            {
+                if (!Equals(pipeId, message.PipeId))
+                {
+                    return Task.CompletedTask;
+                }
+
+                if (!portFilter.Invoke(message.PortId))
+                {
+                    return Task.CompletedTask;
+                }
+
+                return handler.Invoke(message.Message, token);
+            });
+        }
+
         public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, Action<T> handler)
         {
             return handlersRegistry.RegisterHandler<PipeMessage<T>>(message =>

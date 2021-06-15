@@ -126,45 +126,67 @@ namespace HyperMsg
         [Fact]
         public void SendToPipe_Does_Not_Invokes_Pipe_Handler_With_Different_PortId()
         {
-            var filter = A.Fake<Action<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, filter);
-
+            var handler = A.Fake<Action<Guid>>();
+            broker.RegisterPipeHandler(pipeId, portId, handler);
             broker.SendToPipe(pipeId, Guid.NewGuid(), message);
-
-            A.CallTo(() => filter.Invoke(message)).MustNotHaveHappened();
+            A.CallTo(() => handler.Invoke(message)).MustNotHaveHappened();
         }
 
         [Fact]
         public async Task SendToPipeAsync_Does_Not_Invokes_Pipe_Handler_With_Different_PortId()
         {
-            var filter = A.Fake<AsyncAction<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, filter);
+            var handler = A.Fake<AsyncAction<Guid>>();
+            broker.RegisterPipeHandler(pipeId, portId, handler);
 
             await broker.SendToPipeAsync(pipeId, Guid.NewGuid(), message);
 
-            A.CallTo(() => filter.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
+            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
         }
 
         [Fact]
         public void SendToPipe_Does_Not_Invokes_Pipe_Handler_With_Different_PipeId()
         {
-            var filter = A.Fake<Action<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, filter);
+            var handler = A.Fake<Action<Guid>>();
+            broker.RegisterPipeHandler(pipeId, portId, handler);
 
             broker.SendToPipe(Guid.NewGuid(), portId, message);
 
-            A.CallTo(() => filter.Invoke(message)).MustNotHaveHappened();
+            A.CallTo(() => handler.Invoke(message)).MustNotHaveHappened();
         }
 
         [Fact]
         public async Task SendToPipeAsync_Does_Not_Invokes_Pipe_Handler_With_Different_PipeId()
         {
-            var filter = A.Fake<AsyncAction<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, filter);
+            var handler = A.Fake<AsyncAction<Guid>>();
+            broker.RegisterPipeHandler(pipeId, portId, handler);
 
             await broker.SendToPipeAsync(Guid.NewGuid(), portId, message);
 
-            A.CallTo(() => filter.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
+            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void SendToPipe_Invokes_Port_Filter()
+        {
+            var handler = A.Fake<Action<Guid>>();
+            var filter = A.Fake<Func<object, bool>>();
+            broker.RegisterPipeFilter(pipeId, filter, handler);
+
+            broker.SendToPipe(pipeId, portId, message);
+
+            A.CallTo(() => filter.Invoke(portId)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendToPipe_Invokes_Async_Port_Filter()
+        {
+            var handler = A.Fake<AsyncAction<Guid>>();
+            var filter = A.Fake<Func<object, bool>>();
+            broker.RegisterPipeFilter(pipeId, filter, handler);
+
+            broker.SendToPipe(pipeId, portId, message);
+
+            A.CallTo(() => filter.Invoke(portId)).MustHaveHappened();
         }
     }
 }
