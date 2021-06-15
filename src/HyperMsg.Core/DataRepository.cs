@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace HyperMsg
 {
     internal class DataRepository : IDataRepository
     {
-        private readonly Dictionary<string, object> values = new();
+        private readonly ConcurrentDictionary<object, object> values = new();
 
-        public T Get<T>(string key)
+        public T Get<T>(object key)
         {
             key = $"{typeof(T).FullName}:{key}";
 
@@ -18,10 +19,23 @@ namespace HyperMsg
             return (T)values[key];
         }
 
-        public void Set<T>(string key, T value)
+        public void AddOrUpdate<T>(object key, T value)
         {
             key = $"{typeof(T).FullName}:{key}";
             values[key] = value;
         }
+
+        public void Remove<T>(object key)
+        {
+
+        }
+
+        public bool Contains<T>(object key)
+        {
+            key = $"{typeof(T).FullName}:{key}";
+            return values.ContainsKey(key);
+        }
+
+        public void Clear() => values.Clear();
     }
 }

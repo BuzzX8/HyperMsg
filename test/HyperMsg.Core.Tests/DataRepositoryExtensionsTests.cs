@@ -14,7 +14,7 @@ namespace HyperMsg
         {
             var value = Guid.NewGuid();
 
-            settings.Set(value);
+            settings.AddOrUpdate(value);
 
             var actualValue = settings.Get<Guid>();
 

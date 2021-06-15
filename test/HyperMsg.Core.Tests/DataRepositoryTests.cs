@@ -15,7 +15,7 @@ namespace HyperMsg
             var key = Guid.NewGuid().ToString();
             var value = Guid.NewGuid();
 
-            settings.Set(key, value);
+            settings.AddOrUpdate(key, value);
             var actualValue = settings.Get<Guid>(key);
 
             Assert.Equal(value, actualValue);
@@ -26,7 +26,7 @@ namespace HyperMsg
         {
             var value = (int)Guid.NewGuid().ToByteArray()[0];
 
-            settings.Set(Guid.NewGuid().ToString(), value);
+            settings.AddOrUpdate(Guid.NewGuid().ToString(), value);
             var actualValue = settings.Get<int>(Guid.NewGuid().ToString());
 
             Assert.Equal(default, actualValue);
@@ -38,7 +38,7 @@ namespace HyperMsg
             var key = Guid.NewGuid().ToString();
             var value = (int)Guid.NewGuid().ToByteArray()[0];
 
-            settings.Set(key, value);
+            settings.AddOrUpdate(key, value);
             var actualValue = settings.Get<string>(key);
 
             Assert.Equal(default, actualValue);

@@ -4,7 +4,7 @@
     {
         public static T Get<T>(this IDataRepository settings) => settings.Get<T>(GetTypeKey<T>());
 
-        public static void Set<T>(this IDataRepository settings, T value) => settings.Set(GetTypeKey<T>(), value);
+        public static void AddOrUpdate<T>(this IDataRepository settings, T value) => settings.AddOrUpdate(GetTypeKey<T>(), value);
 
         public static bool TryGet<T>(this IDataRepository settings, out T value) => settings.TryGet(GetTypeKey<T>(), out value);
 

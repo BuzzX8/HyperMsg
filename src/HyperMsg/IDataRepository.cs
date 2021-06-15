@@ -2,8 +2,14 @@
 {
     public interface IDataRepository
     {
-        T Get<T>(string key);
+        T Get<T>(object key);
 
-        void Set<T>(string key, T value);
+        void AddOrUpdate<T>(object key, T value);
+
+        void Remove<T>(object key);
+
+        bool Contains<T>(object key);
+
+        void Clear();
     }
 }
