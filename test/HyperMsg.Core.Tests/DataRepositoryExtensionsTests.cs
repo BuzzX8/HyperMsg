@@ -50,5 +50,28 @@ namespace HyperMsg
             Assert.True(repository.Contains<Guid>(key));
             Assert.Equal(value, repository.Get<Guid>(key));
         }
+
+        [Fact]
+        public void SendDataExistenceRequest_Returns_True_Id_Data_Present_In_Repository()
+        {
+            var value = Guid.NewGuid();
+            var key = value.ToString();
+
+            repository.AddOrReplace(key, value);
+
+            Assert.True(MessageSender.SendDataExistenceRequest<Guid>(key));
+        }
+
+        [Fact]
+        public void SendDataDeletionRequest_Removes_Data_From_Repository()
+        {
+            var value = Guid.NewGuid();
+            var key = value.ToString();
+            repository.AddOrReplace(key, value);
+
+            MessageSender.SendDataDeletionRequest<Guid>(key);
+
+            Assert.False(repository.Contains<Guid>(key));
+        }
     }
 }

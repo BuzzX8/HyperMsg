@@ -36,6 +36,17 @@ namespace HyperMsg
             var repository = messageSender.SendRequest<IDataRepository>();
             repository.AddOrReplace(key, value);
         }
-            
+
+        public static bool SendDataExistenceRequest<T>(this IMessageSender messageSender, object key)
+        {
+            var repository = messageSender.SendRequest<IDataRepository>();
+            return repository.Contains<T>(key);
+        }
+
+        public static void SendDataDeletionRequest<T>(this IMessageSender messageSender, object key)
+        {
+            var repository = messageSender.SendRequest<IDataRepository>();
+            repository.Remove<T>(key);
+        }
     }
 }
