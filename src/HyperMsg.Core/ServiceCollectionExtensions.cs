@@ -22,7 +22,8 @@ namespace HyperMsg
                 .AddBufferService()
                 .AddSharedMemoryPool()
                 .AddMessageBroker()
-                .AddSingleton<IDataRepository, DataRepository>();
+                .AddSingleton<IDataRepository, DataRepository>()
+                .AddHostedService<DataRepositoryService>();
         }
 
         /// <summary>
