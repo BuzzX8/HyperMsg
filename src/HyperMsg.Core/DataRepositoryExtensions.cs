@@ -6,7 +6,7 @@ namespace HyperMsg
     {
         public static T Get<T>(this IDataRepository repository) => repository.Get<T>(GetTypeKey<T>());
 
-        public static void AddOrUpdate<T>(this IDataRepository repository, T value) => repository.AddOrUpdate(GetTypeKey<T>(), value);
+        public static void AddOrUpdate<T>(this IDataRepository repository, T value) => repository.AddOrReplace(GetTypeKey<T>(), value);
 
         public static bool TryGet<T>(this IDataRepository repository, out T value) => repository.TryGet(GetTypeKey<T>(), out value);
 

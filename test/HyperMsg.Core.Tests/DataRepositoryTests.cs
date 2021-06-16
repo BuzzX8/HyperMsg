@@ -16,7 +16,7 @@ namespace HyperMsg
             var value = Guid.NewGuid();
 
             Assert.False(repository.Contains<Guid>(key));
-            repository.AddOrUpdate(key, value);
+            repository.AddOrReplace(key, value);
             Assert.True(repository.Contains<Guid>(key));
 
             var actualValue = repository.Get<Guid>(key);
@@ -29,7 +29,7 @@ namespace HyperMsg
         {
             var value = (int)Guid.NewGuid().ToByteArray()[0];
 
-            repository.AddOrUpdate(Guid.NewGuid().ToString(), value);
+            repository.AddOrReplace(Guid.NewGuid().ToString(), value);
             var actualValue = repository.Get<int>(Guid.NewGuid().ToString());
 
             Assert.Equal(default, actualValue);
@@ -41,10 +41,23 @@ namespace HyperMsg
             var key = Guid.NewGuid().ToString();
             var value = (int)Guid.NewGuid().ToByteArray()[0];
 
-            repository.AddOrUpdate(key, value);
+            repository.AddOrReplace(key, value);
             var actualValue = repository.Get<string>(key);
 
             Assert.Equal(default, actualValue);
+        }
+
+        [Fact]
+        public void AddOrReplace_Replaces_Previously_Added_Value()
+        {
+            var key = Guid.NewGuid();
+            var value = Guid.NewGuid();
+
+            repository.AddOrReplace(key, Guid.NewGuid());
+            repository.AddOrReplace(key, value);
+            var actualValue = repository.Get<Guid>(key);
+
+            Assert.Equal(value, actualValue);
         }
 
         [Fact]
@@ -53,7 +66,7 @@ namespace HyperMsg
             var key = Guid.NewGuid().ToString();
             var value = Guid.NewGuid();
 
-            repository.AddOrUpdate(key, value);
+            repository.AddOrReplace(key, value);
             Assert.True(repository.Contains<Guid>(key));
 
             repository.Remove<Guid>(key);

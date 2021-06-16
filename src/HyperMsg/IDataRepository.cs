@@ -4,7 +4,7 @@
     {
         T Get<T>(object key);
 
-        void AddOrUpdate<T>(object key, T value);
+        void AddOrReplace<T>(object key, T value);
 
         void Remove<T>(object key);
 

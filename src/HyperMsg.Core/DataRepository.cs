@@ -1,42 +1,31 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace HyperMsg
 {
-    internal class DataRepository : IDataRepository
+    internal class DataRepository : IDataRepository, IDisposable
     {
-        private readonly ConcurrentDictionary<object, object> values = new();
+        private readonly ConcurrentDictionary<(Type, object), object> values = new();
 
         public T Get<T>(object key)
         {
-            key = $"{typeof(T).FullName}:{key}";
-
-            if (!values.ContainsKey(key))
+            if (!values.TryGetValue((typeof(T), key), out var value))
             {
                 return default;
             }
 
-            return (T)values[key];
+            return (T)value;
         }
 
-        public void AddOrUpdate<T>(object key, T value)
-        {
-            key = $"{typeof(T).FullName}:{key}";
-            values[key] = value;
-        }
+        public void AddOrReplace<T>(object key, T value) => values.AddOrUpdate((typeof(T), key), value, (key, oldValue) => value);
 
-        public void Remove<T>(object key)
-        {
-            key = $"{typeof(T).FullName}:{key}";
-            values.Remove(key, out var _);
-        }
+        public void Remove<T>(object key) => values.Remove((typeof(T), key), out var _);
 
-        public bool Contains<T>(object key)
-        {
-            key = $"{typeof(T).FullName}:{key}";
-            return values.ContainsKey(key);
-        }
+        public bool Contains<T>(object key) => values.ContainsKey((typeof(T), key));
 
         public void Clear() => values.Clear();
+
+        public void Dispose() => Clear();
     }
 }
