@@ -1,20 +1,28 @@
-﻿namespace HyperMsg
+﻿using System;
+
+namespace HyperMsg
 {
     public static class DataRepositoryExtensions
     {
-        public static T Get<T>(this IDataRepository settings) => settings.Get<T>(GetTypeKey<T>());
+        public static T Get<T>(this IDataRepository repository) => repository.Get<T>(GetTypeKey<T>());
 
-        public static void AddOrUpdate<T>(this IDataRepository settings, T value) => settings.AddOrUpdate(GetTypeKey<T>(), value);
+        public static void AddOrUpdate<T>(this IDataRepository repository, T value) => repository.AddOrUpdate(GetTypeKey<T>(), value);
 
-        public static bool TryGet<T>(this IDataRepository settings, out T value) => settings.TryGet(GetTypeKey<T>(), out value);
+        public static bool TryGet<T>(this IDataRepository repository, out T value) => repository.TryGet(GetTypeKey<T>(), out value);
 
-        public static bool TryGet<T>(this IDataRepository settings, string key, out T value)
+        public static bool TryGet<T>(this IDataRepository repository, object key, out T value)
         {
-            value = settings.Get<T>(key);
+            value = default;
 
-            return !Equals(value, default(T));
+            if (!repository.Contains<T>(key))
+            {
+                return false;
+            }
+
+            value = repository.Get<T>(key);
+            return true;
         }
 
-        private static string GetTypeKey<T>() => typeof(T).GUID.ToString();
+        private static Guid GetTypeKey<T>() => typeof(T).GUID;
     }
 }

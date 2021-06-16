@@ -5,9 +5,9 @@ namespace HyperMsg
 {
     public class DataRepositoryTests : ServiceHostFixture
     {
-        private readonly IDataRepository settings;
+        private readonly IDataRepository repository;
 
-        public DataRepositoryTests() => settings = GetRequiredService<IDataRepository>();
+        public DataRepositoryTests() => repository = GetRequiredService<IDataRepository>();
 
         [Fact]
         public void Get_Returns_Value_Provided_With_Set()
@@ -15,8 +15,11 @@ namespace HyperMsg
             var key = Guid.NewGuid().ToString();
             var value = Guid.NewGuid();
 
-            settings.AddOrUpdate(key, value);
-            var actualValue = settings.Get<Guid>(key);
+            Assert.False(repository.Contains<Guid>(key));
+            repository.AddOrUpdate(key, value);
+            Assert.True(repository.Contains<Guid>(key));
+
+            var actualValue = repository.Get<Guid>(key);
 
             Assert.Equal(value, actualValue);
         }
@@ -26,8 +29,8 @@ namespace HyperMsg
         {
             var value = (int)Guid.NewGuid().ToByteArray()[0];
 
-            settings.AddOrUpdate(Guid.NewGuid().ToString(), value);
-            var actualValue = settings.Get<int>(Guid.NewGuid().ToString());
+            repository.AddOrUpdate(Guid.NewGuid().ToString(), value);
+            var actualValue = repository.Get<int>(Guid.NewGuid().ToString());
 
             Assert.Equal(default, actualValue);
         }
@@ -38,10 +41,23 @@ namespace HyperMsg
             var key = Guid.NewGuid().ToString();
             var value = (int)Guid.NewGuid().ToByteArray()[0];
 
-            settings.AddOrUpdate(key, value);
-            var actualValue = settings.Get<string>(key);
+            repository.AddOrUpdate(key, value);
+            var actualValue = repository.Get<string>(key);
 
             Assert.Equal(default, actualValue);
+        }
+
+        [Fact]
+        public void Remove_Removes_Value()
+        {
+            var key = Guid.NewGuid().ToString();
+            var value = Guid.NewGuid();
+
+            repository.AddOrUpdate(key, value);
+            Assert.True(repository.Contains<Guid>(key));
+
+            repository.Remove<Guid>(key);
+            Assert.False(repository.Contains<Guid>(key));
         }
     }    
 }

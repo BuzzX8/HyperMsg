@@ -27,7 +27,8 @@ namespace HyperMsg
 
         public void Remove<T>(object key)
         {
-
+            key = $"{typeof(T).FullName}:{key}";
+            values.Remove(key, out var _);
         }
 
         public bool Contains<T>(object key)
