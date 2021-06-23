@@ -164,29 +164,5 @@ namespace HyperMsg
 
             A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
         }
-
-        [Fact]
-        public void SendToPipe_Invokes_Port_Filter()
-        {
-            var handler = A.Fake<Action<Guid>>();
-            var filter = A.Fake<Func<object, bool>>();
-            broker.RegisterPipeFilter(pipeId, filter, handler);
-
-            broker.SendToPipe(pipeId, portId, message);
-
-            A.CallTo(() => filter.Invoke(portId)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void SendToPipe_Invokes_Async_Port_Filter()
-        {
-            var handler = A.Fake<AsyncAction<Guid>>();
-            var filter = A.Fake<Func<object, bool>>();
-            broker.RegisterPipeFilter(pipeId, filter, handler);
-
-            broker.SendToPipe(pipeId, portId, message);
-
-            A.CallTo(() => filter.Invoke(portId)).MustHaveHappened();
-        }
     }
 }

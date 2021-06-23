@@ -100,4 +100,6 @@ namespace HyperMsg
             this.SendToPipeAsync(bufferType, buffer.Reader);
         }
     }
+
+    internal delegate void BufferWriteAction(IBufferWriter bufferWriter);
 }

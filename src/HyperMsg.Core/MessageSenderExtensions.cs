@@ -122,6 +122,8 @@ namespace HyperMsg
             return message.Response;
         }
 
+        #region Pipe extensions
+
         public static void SendToTransmitPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToPipe(PipeType.Transmit, message);
 
         public static void SendToTransmitPipe<T>(this IMessageSender messageSender, object portId, T message) => messageSender.SendToPipe(PipeType.Transmit, portId, message);
@@ -149,9 +151,11 @@ namespace HyperMsg
             messageSender.SendToPipeAsync(pipeId, null, message, cancellationToken);
 
         public static void SendToPipe<T>(this IMessageSender messageSender, object pipeId, object portId, T message) => 
-            messageSender.Send(new PipeMessage<T>(pipeId, portId, message));
+            messageSender.Send(new PipeMessage<T>(pipeId, portId, message, messageSender));
 
         public static Task SendToPipeAsync<T>(this IMessageSender messageSender, object pipeId, object portId, T message, CancellationToken cancellationToken = default) =>
-            messageSender.SendAsync(new PipeMessage<T>(pipeId, portId, message), cancellationToken);
+            messageSender.SendAsync(new PipeMessage<T>(pipeId, portId, message, messageSender), cancellationToken);
+
+        #endregion
     }
 }
