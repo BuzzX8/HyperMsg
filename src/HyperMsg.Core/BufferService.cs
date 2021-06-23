@@ -14,13 +14,14 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
-            yield return this.RegisterRequestHandler(() => this);
+            yield return RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
 
             yield return this.RegisterTransmitPipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
             yield return this.RegisterTransmitPipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
             yield return this.RegisterTransmitPipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Transmit, segment));
             yield return this.RegisterTransmitPipeHandler<byte[]>(array => WriteToBuffer(PipeType.Transmit, array));
             yield return this.RegisterTransmitPipeHandler<Stream>(stream => WriteToBuffer(PipeType.Transmit, stream));
+            yield return this.RegisterTransmitPipeHandler<BufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));            
 
             yield return this.RegisterReceivePipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
             yield return this.RegisterReceivePipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
@@ -74,9 +75,12 @@ namespace HyperMsg
                         WriteStream(writer, stream);
                         break;
 
-                    default:
-                        this.SendSerializeCommand(writer, message);
+                    case BufferWriteAction writeAction:
+                        writeAction.Invoke(writer);
                         break;
+
+                    default:
+                        throw new NotSupportedException();
                 }
             }
 
@@ -100,4 +104,8 @@ namespace HyperMsg
             this.SendToPipeAsync(bufferType, buffer.Reader);
         }
     }
+
+    internal delegate void BufferWriteAction(IBufferWriter bufferWriter);
+
+    internal delegate void BufferServiceAction(BufferService bufferService);
 }

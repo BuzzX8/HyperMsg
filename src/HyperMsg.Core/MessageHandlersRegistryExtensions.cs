@@ -1,6 +1,5 @@
 ﻿using HyperMsg.Messages;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -59,103 +58,87 @@ namespace HyperMsg
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
             handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
 
-        public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializationHandler) =>
-            handlersRegistry.RegisterHandler<SerializeCommand<T>>(command => serializationHandler.Invoke(command.BufferWriter, command.Message));
+        public static IDisposable RegisterTransmitBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler(bufferHandler);
 
-        public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferWriter, T> serializationHandler) =>
-            handlersRegistry.RegisterHandler<SerializeCommand<T>>((command, token) => serializationHandler.Invoke(command.BufferWriter, command.Message, token));
+        public static IDisposable RegisterTransmitBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler(bufferHandler);
 
-        public static IDisposable RegisterRequestHandler<TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TResponse> requestHandler) =>
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TResponse>>(message => message.Response = requestHandler.Invoke());
+        public static IDisposable RegisterReceiveBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(bufferHandler);
 
-        public static IDisposable RegisterRequestHandler<TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<CancellationToken, Task<TResponse>> requestHandler) =>
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(token));
+        public static IDisposable RegisterReceiveBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(bufferHandler);
 
-        public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, TResponse> requestHandler) => 
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(message => message.Response = requestHandler.Invoke(message.Request));
+        public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializationHandler) => 
+            handlersRegistry.RegisterTransmitPipeHandler<T>((sender, message) => sender.SendToTransmitPipe<BufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
 
-        public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, CancellationToken, Task<TResponse>> requestHandler) =>
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(message.Request, token));
+        #region Pipe extensions
 
-        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, handler);
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> pipeHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler(null, pipeHandler);
 
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, handler);
+            handlersRegistry.RegisterTransmitPipeHandler<T>(portId, (_, message) => handler.Invoke(message));
+
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler(null, pipeHandler);
+
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, pipeHandler);
 
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, handler);
+            handlersRegistry.RegisterTransmitPipeHandler(null, handler);
 
-        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, handler);
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> pipeHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler<T>(portId, (_, message, token) => pipeHandler.Invoke(message, token));
 
-        public static IDisposable RegisterTransmitPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, Action<T> handler) =>
-            handlersRegistry.RegisterPipeFilter(PipeType.Transmit, portFilter, handler);
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, pipeHandler);
 
-        public static IDisposable RegisterTransmitPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeFilter(PipeType.Transmit, portFilter, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> pipeHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(null, pipeHandler);
 
-        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Receive, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<T> pipeHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler<T>(portId, (_, message) => pipeHandler.Invoke(message));
 
-        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Receive, portId, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> pipeHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(null, pipeHandler);
 
-        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Receive, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> pipeHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler<T>(portId, (_, message, token) => pipeHandler.Invoke(message, token));
 
-        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(PipeType.Receive, portId, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(null, pipeHandler);
 
-        public static IDisposable RegisterReceivePipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, Action<T> handler) =>
-            handlersRegistry.RegisterPipeFilter(PipeType.Receive, portFilter, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Receive, portId, pipeHandler);
 
-        public static IDisposable RegisterReceivePipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, Func<object, bool> portFilter, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeFilter(PipeType.Receive, portFilter, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(null, pipeHandler);
 
-        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Action<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(pipeId, null, handler);
+        public static IDisposable RegisterReceivePipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, AsyncAction<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler(PipeType.Receive, portId, pipeHandler);
 
-        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, AsyncAction<T> handler) =>
-            handlersRegistry.RegisterPipeHandler(pipeId, null, handler);
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Action<T> pipeHandler) => 
+            handlersRegistry.RegisterPipeHandler(pipeId, null, pipeHandler);
 
-        public static IDisposable RegisterPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Func<object, bool> portFilter, Action<T> handler)
-        {
-            return handlersRegistry.RegisterHandler<PipeMessage<T>>(message =>
-            {
-                if (!Equals(pipeId, message.PipeId))
-                {
-                    return;
-                }
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, AsyncAction<T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler(pipeId, null, pipeHandler);
 
-                if (!portFilter.Invoke(message.PortId))
-                {
-                    return;
-                }
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Action<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler(pipeId, null, pipeHandler);
 
-                handler.Invoke(message.Message);
-            });
-        }
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, AsyncAction<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler(pipeId, null, pipeHandler);
 
-        public static IDisposable RegisterPipeFilter<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, Func<object, bool> portFilter, AsyncAction<T> handler)
-        {
-            return handlersRegistry.RegisterHandler<PipeMessage<T>>((message, token) =>
-            {
-                if (!Equals(pipeId, message.PipeId))
-                {
-                    return Task.CompletedTask;
-                }
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, Action<T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler<T>(pipeId, portId, (_, message) => pipeHandler.Invoke(message));
 
-                if (!portFilter.Invoke(message.PortId))
-                {
-                    return Task.CompletedTask;
-                }
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, AsyncAction<T> pipeHandler) =>
+            handlersRegistry.RegisterPipeHandler<T>(pipeId, portId, (_, message, token) => pipeHandler.Invoke(message, token));
 
-                return handler.Invoke(message.Message, token);
-            });
-        }
-
-        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, Action<T> handler)
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, Action<IMessageSender, T> pipeHandler)
         {
             return handlersRegistry.RegisterHandler<PipeMessage<T>>(message =>
             {
@@ -169,11 +152,11 @@ namespace HyperMsg
                     return;
                 }                
 
-                handler.Invoke(message.Message);
+                pipeHandler.Invoke(message.MessageSender, message.Message);
             });
         }
 
-        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, AsyncAction<T> handler)
+        public static IDisposable RegisterPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object pipeId, object portId, AsyncAction<IMessageSender, T> pipeHandler)
         {
             return handlersRegistry.RegisterHandler<PipeMessage<T>>((message, token) =>
             {
@@ -187,8 +170,10 @@ namespace HyperMsg
                     return Task.CompletedTask;
                 }
 
-                return handler.Invoke(message.Message, token);
+                return pipeHandler.Invoke(message.MessageSender, message.Message, token);
             });
         }
+
+        #endregion
     }
 }

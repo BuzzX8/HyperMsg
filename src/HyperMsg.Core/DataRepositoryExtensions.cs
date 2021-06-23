@@ -24,29 +24,5 @@ namespace HyperMsg
         }
 
         private static Guid GetTypeKey<T>() => typeof(T).GUID;
-
-        public static T SendDataRequest<T>(this IMessageSender messageSender, object key)
-        {
-            var repository = messageSender.SendRequest<IDataRepository>();
-            return repository.Get<T>(key);
-        }            
-
-        public static void SendToDataRepository<T>(this IMessageSender messageSender, object key, T value)
-        {
-            var repository = messageSender.SendRequest<IDataRepository>();
-            repository.AddOrReplace(key, value);
-        }
-
-        public static bool SendDataExistenceRequest<T>(this IMessageSender messageSender, object key)
-        {
-            var repository = messageSender.SendRequest<IDataRepository>();
-            return repository.Contains<T>(key);
-        }
-
-        public static void SendDataDeletionRequest<T>(this IMessageSender messageSender, object key)
-        {
-            var repository = messageSender.SendRequest<IDataRepository>();
-            repository.Remove<T>(key);
-        }
     }
 }
