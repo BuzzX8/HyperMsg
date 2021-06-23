@@ -31,28 +31,6 @@ namespace HyperMsg
             messageSender.SendToBufferAsync(PipeType.Receive, message);
 
         /// <summary>
-        /// Sends command for message serialization.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="bufferWriter">Writer for serialization.</param>
-        /// <param name="message">Message to serialize.</param>
-        public static void SendSerializeCommand<T>(this IMessageSender messageSender, IBufferWriter bufferWriter, T message) =>
-            messageSender.Send(new SerializeCommand<T>(bufferWriter, message));
-
-        /// <summary>
-        /// Sends command for message serialization.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="messageSender">Writer for serialization.</param>
-        /// <param name="bufferWriter">Writer for serialization.</param>
-        /// <param name="message">Message to serialize.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns></returns>
-        public static Task SendSerializeCommandAsync<T>(this IMessageSender messageSender, IBufferWriter bufferWriter, T message, CancellationToken cancellationToken = default) =>
-            messageSender.SendAsync(new SerializeCommand<T>(bufferWriter, message), cancellationToken);
-
-        /// <summary>
         /// Sends message to buffer.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>

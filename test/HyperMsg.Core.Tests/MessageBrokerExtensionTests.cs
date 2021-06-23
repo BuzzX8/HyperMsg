@@ -33,19 +33,6 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendSerializeCommand_Invokes_Handler_Registtered_By_RegisterSerializationHandler()
-        {
-            var handler = A.Fake<Action<IBufferWriter, Guid>>();
-            var bufferWriter = A.Fake<IBufferWriter>();
-            var message = Guid.NewGuid();
-
-            broker.RegisterSerializationHandler(handler);
-            broker.SendSerializeCommand(bufferWriter, message);
-
-            A.CallTo(() => handler.Invoke(bufferWriter, message)).MustHaveHappened();
-        }
-
-        [Fact]
         public void SendRequest_Invokes_Request_Handler()
         {
             var handler = A.Fake<Func<string, int>>();

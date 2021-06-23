@@ -60,9 +60,8 @@ namespace HyperMsg
             handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
 
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializationHandler)
-        {
-            //handlersRegistry.RegisterTransmitPipeHandler<T>(message =>)
-            return handlersRegistry.RegisterHandler<SerializeRequest<T>>(request => request.Sender.Send<BufferWriteAction>(writer => serializationHandler.Invoke(writer, request.Message)));
+        {            
+            return handlersRegistry.RegisterTransmitPipeHandler<T>((sender, message) => sender.SendToTransmitPipe<BufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
         }
 
         public static IDisposable RegisterRequestHandler<TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TResponse> requestHandler) =>
@@ -84,6 +83,9 @@ namespace HyperMsg
 
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<T> handler) =>
             handlersRegistry.RegisterTransmitPipeHandler<T>(portId, (_, message) => handler.Invoke(message));
+
+        public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IMessageSender, T> pipeHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler(null, pipeHandler);
 
         public static IDisposable RegisterTransmitPipeHandler<T>(this IMessageHandlersRegistry handlersRegistry, object portId, Action<IMessageSender, T> pipeHandler) =>
             handlersRegistry.RegisterPipeHandler(PipeType.Transmit, portId, pipeHandler);

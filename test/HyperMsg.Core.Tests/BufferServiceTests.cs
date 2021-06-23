@@ -107,7 +107,22 @@ namespace HyperMsg
 
             HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmit, reader => actual = reader.Read().ToArray());
 
-            MessageSender.SendToTransmitBuffer(expected);
+            MessageSender.SendToTransmitPipe(expected);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void RegisterSerializationHandler_Serializes_Message_Sent_To_Transmit_Pipe()
+        {
+            var expected = Guid.NewGuid();
+            var actual = default(Guid?);
+
+            HandlersRegistry.RegisterSerializationHandler<Guid>((writer, message) => writer.Write(message.ToByteArray()));
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmit, reader => actual = new Guid(reader.Read().ToArray()));
+
+            MessageSender.SendToTransmitPipe(expected);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
