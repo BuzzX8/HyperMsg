@@ -11,13 +11,13 @@ namespace HyperMsg
         #region Buffer extensions
 
         /// <summary>
-        /// Sends message to transmit buffer.
+        /// Sends memory data to transmit buffer.
         /// </summary>
         /// <param name="messageSender">Message sender.</param>
         public static void SendToTransmitBuffer(this IMessageSender messageSender, ReadOnlyMemory<byte> data, bool flushBuffer = true) => messageSender.SendToBuffer(PipeType.Transmit, data, flushBuffer);
 
         /// <summary>
-        /// Sends message to transmit buffer.
+        /// Sends memory data to transmit buffer.
         /// </summary>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
@@ -26,13 +26,13 @@ namespace HyperMsg
             messageSender.SendToBufferAsync(PipeType.Transmit, data, flushBuffer, cancellationToken);
 
         /// <summary>
-        /// Sends message to transmit buffer.
+        /// Sends stream data to transmit buffer.
         /// </summary>
         /// <param name="messageSender">Message sender.</param>
         public static void SendToTransmitBuffer(this IMessageSender messageSender, Stream stream, bool flushBuffer = true) => messageSender.SendToBuffer(PipeType.Transmit, stream, flushBuffer);
 
         /// <summary>
-        /// Sends message to transmit buffer.
+        /// Sends stream data to transmit buffer.
         /// </summary>
         /// <param name="messageSender">Message sender.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
@@ -71,14 +71,11 @@ namespace HyperMsg
         /// <param name="flushBuffer"></param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns></returns>
-        public static Task SendToBufferAsync<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true, CancellationToken _ = default)
+        internal static Task SendToBufferAsync<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true, CancellationToken _ = default)
         {
             messageSender.SendToBuffer(pipeType, message, flushBuffer);
             return Task.CompletedTask;
         }
-
-        public static void SendFlushBufferCommand(this IMessageSender messageSender, PipeType pipeType) => 
-            messageSender.Send<BufferServiceAction>(service => service.FlushBuffer(pipeType));
 
         #endregion
 

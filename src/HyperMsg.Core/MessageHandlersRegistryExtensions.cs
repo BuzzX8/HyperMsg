@@ -58,6 +58,18 @@ namespace HyperMsg
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
             handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
 
+        public static IDisposable RegisterTransmitBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler(bufferHandler);
+
+        public static IDisposable RegisterTransmitBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler(bufferHandler);
+
+        public static IDisposable RegisterReceiveBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(bufferHandler);
+
+        public static IDisposable RegisterReceiveBufferReaderHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferReader> bufferHandler) =>
+            handlersRegistry.RegisterReceivePipeHandler(bufferHandler);
+
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializationHandler) => 
             handlersRegistry.RegisterTransmitPipeHandler<T>((sender, message) => sender.SendToTransmitPipe<BufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
 
