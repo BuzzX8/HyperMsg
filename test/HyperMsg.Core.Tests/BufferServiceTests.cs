@@ -11,36 +11,107 @@ namespace HyperMsg
     public class BufferServiceTests : ServiceHostFixture
     {
         [Fact]
-        public void SendToBuffer_Invokes_FlushCommand_Handler()
+        public void SendToTransmitBuffer_Invokes_FlushCommand_Handler()
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
             HandlersRegistry.RegisterPipeHandler(PipeType.Transmit, bufferReader);
-            MessageSender.SendToBuffer(PipeType.Transmit, Guid.NewGuid().ToByteArray(), true);
+            MessageSender.SendToTransmitBuffer(Guid.NewGuid().ToByteArray());
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
         }
 
         [Fact]
-        public void SendToBuffer_Does_Not_Invokes_FlushCommand_Handler()
+        public async Task SendToTransmitBufferAsync_Invokes_FlushCommand_Handler()
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
             HandlersRegistry.RegisterPipeHandler(PipeType.Transmit, bufferReader);
-            MessageSender.SendToBuffer(PipeType.Transmit, Guid.NewGuid().ToByteArray(), false);
+            await MessageSender.SendToTransmitBufferAsync(Guid.NewGuid().ToByteArray());
+
+            A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendToTransmitBuffer_Does_Not_Invokes_FlushCommand_Handler()
+        {
+            var bufferReader = A.Fake<Action<IBufferReader>>();
+
+            HandlersRegistry.RegisterPipeHandler(PipeType.Transmit, bufferReader);
+            MessageSender.SendToTransmitBuffer(Guid.NewGuid().ToByteArray(), false);
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustNotHaveHappened();
         }
 
         [Fact]
-        public void SendToBuffer_Writes_Stream_Content_To_Buffer()
+        public void SendToReceiveBuffer_Invokes_FlushCommand_Handler()
+        {
+            var bufferReader = A.Fake<Action<IBufferReader>>();
+
+            HandlersRegistry.RegisterPipeHandler(PipeType.Receive, bufferReader);
+            MessageSender.SendToReceiveBuffer(Guid.NewGuid().ToByteArray());
+
+            A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendToReceiveBuffer_Does_Not_Invokes_FlushCommand_Handler()
+        {
+            var bufferReader = A.Fake<Action<IBufferReader>>();
+
+            HandlersRegistry.RegisterPipeHandler(PipeType.Receive, bufferReader);
+            MessageSender.SendToReceiveBuffer(Guid.NewGuid().ToByteArray(), false);
+
+            A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustNotHaveHappened();
+        }
+
+        [Fact]
+        public void SendTransmitToBuffer_Writes_Stream_Content_To_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmit, reader => actual = reader.Read().ToArray());
+            MessageSender.SendToTransmitBuffer(new MemoryStream(expected));
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task SendTransmitToBufferAsync_Writes_Stream_Content_To_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmit, reader => actual = reader.Read().ToArray());
+            await MessageSender.SendToTransmitBufferAsync(new MemoryStream(expected));
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SendReceiveToBuffer_Writes_Stream_Content_To_Buffer()
         {
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
             HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Receive, reader => actual = reader.Read().ToArray());
+            MessageSender.SendToReceiveBuffer(new MemoryStream(expected));
 
-            MessageSender.SendToBuffer(PipeType.Receive, new MemoryStream(expected));
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task SendReceiveToBufferAsync_Writes_Stream_Content_To_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Receive, reader => actual = reader.Read().ToArray());
+            await MessageSender.SendToReceiveBufferAsync(new MemoryStream(expected));
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
