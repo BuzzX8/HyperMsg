@@ -82,34 +82,6 @@ namespace HyperMsg
 
         #endregion
 
-        public static TResponse SendRequest<TResponse>(this IMessageSender messageSender)
-        {
-            var message = new RequestResponseMessage<TResponse>();
-            messageSender.Send(message);
-            return message.Response;
-        }
-
-        public static async Task<TResponse> SendRequestAsync<TResponse>(this IMessageSender messageSender, CancellationToken cancellationToken = default)
-        {
-            var message = new RequestResponseMessage<TResponse>();
-            await messageSender.SendAsync(message, cancellationToken);
-            return message.Response;
-        }
-
-        public static TResponse SendRequest<TRequest, TResponse>(this IMessageSender messageSender, TRequest request)
-        {
-            var message = new RequestResponseMessage<TRequest, TResponse>(request);
-            messageSender.Send(message);
-            return message.Response;
-        }
-
-        public static async Task<TResponse> SendRequestAsync<TRequest, TResponse>(this IMessageSender messageSender, TRequest request, CancellationToken cancellationToken = default)
-        {
-            var message = new RequestResponseMessage<TRequest, TResponse>(request);
-            await messageSender.SendAsync(message, cancellationToken);
-            return message.Response;
-        }
-
         #region Pipe extensions
 
         public static void SendToTransmitPipe<T>(this IMessageSender messageSender, T message) => messageSender.SendToTransmitPipe(null, message);

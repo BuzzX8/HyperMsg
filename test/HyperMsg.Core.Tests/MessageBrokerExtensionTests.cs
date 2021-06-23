@@ -32,58 +32,6 @@ namespace HyperMsg
             A.CallTo(() => handler.Invoke(A<Guid>._)).MustNotHaveHappened();
         }
 
-        [Fact]
-        public void SendRequest_Invokes_Request_Handler()
-        {
-            var handler = A.Fake<Func<string, int>>();
-            var request = Guid.NewGuid().ToString();
-            broker.RegisterRequestHandler(handler);
-
-            broker.SendRequest<string, int>(request);
-
-            A.CallTo(() => handler.Invoke(request)).MustHaveHappened();
-        }
-
-        [Fact]
-        public async Task SendRequestAsync_Invokes_Request_Handler()
-        {
-            var handler = A.Fake<Func<string, CancellationToken, Task<int>>>();
-            var request = Guid.NewGuid().ToString();
-            broker.RegisterRequestHandler(handler);
-
-            await broker.SendRequestAsync<string, int>(request);
-
-            A.CallTo(() => handler.Invoke(request, A<CancellationToken>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void SendRequest_Returns_Response_From_Handler()
-        {
-            var handler = A.Fake<Func<string, Guid>>();
-            var request = Guid.NewGuid().ToString();
-            var response = Guid.NewGuid();
-            broker.RegisterRequestHandler(handler);
-            A.CallTo(() => handler.Invoke(request)).Returns(response);
-
-            var actualResponse = broker.SendRequest<string, Guid>(request);
-
-            Assert.Equal(response, actualResponse);
-        }
-
-        [Fact]
-        public async Task SendRequestAsync_Returns_Response_From_Handler()
-        {
-            var handler = A.Fake<Func<string, CancellationToken, Task<Guid>>>();
-            var request = Guid.NewGuid().ToString();
-            var response = Guid.NewGuid();
-            broker.RegisterRequestHandler(handler);
-            A.CallTo(() => handler.Invoke(request, A<CancellationToken>._)).Returns(Task.FromResult(response));
-
-            var actualResponse = await broker.SendRequestAsync<string, Guid>(request);
-
-            Assert.Equal(response, actualResponse);
-        }
-
         private readonly Guid pipeId = Guid.NewGuid();
         private readonly Guid portId = Guid.NewGuid();
         private readonly Guid message = Guid.NewGuid();

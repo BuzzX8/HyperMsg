@@ -14,8 +14,7 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetAutoDisposables()
         {
-            yield return this.RegisterRequestHandler(() => this);
-            yield return this.RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
+            yield return RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
 
             yield return this.RegisterTransmitPipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
             yield return this.RegisterTransmitPipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));

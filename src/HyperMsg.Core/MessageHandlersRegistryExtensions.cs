@@ -1,6 +1,5 @@
 ﻿using HyperMsg.Messages;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -61,18 +60,6 @@ namespace HyperMsg
 
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializationHandler) => 
             handlersRegistry.RegisterTransmitPipeHandler<T>((sender, message) => sender.SendToTransmitPipe<BufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
-
-        public static IDisposable RegisterRequestHandler<TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TResponse> requestHandler) =>
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TResponse>>(message => message.Response = requestHandler.Invoke());
-
-        public static IDisposable RegisterRequestHandler<TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<CancellationToken, Task<TResponse>> requestHandler) =>
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(token));
-
-        public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, TResponse> requestHandler) => 
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(message => message.Response = requestHandler.Invoke(message.Request));
-
-        public static IDisposable RegisterRequestHandler<TRequest, TResponse>(this IMessageHandlersRegistry handlersRegistry, Func<TRequest, CancellationToken, Task<TResponse>> requestHandler) =>
-            handlersRegistry.RegisterHandler<RequestResponseMessage<TRequest, TResponse>>(async (message, token) => message.Response = await requestHandler.Invoke(message.Request, token));
 
         #region Pipe extensions
 
