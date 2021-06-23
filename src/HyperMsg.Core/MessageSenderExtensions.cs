@@ -59,11 +59,8 @@ namespace HyperMsg
         /// <param name="message">Message to send.</param>
         /// <param name="flushBuffer"></param>
         /// <returns></returns>
-        public static void SendToBuffer<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true)
-        {
-            var service = messageSender.SendRequest<BufferService>();
-            service.WriteToBuffer(pipeType, message, flushBuffer);
-        }
+        internal static void SendToBuffer<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool flushBuffer = true) => 
+            messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(pipeType, message, flushBuffer));
 
         /// <summary>
         /// Sends message to transmit buffer.
@@ -80,17 +77,8 @@ namespace HyperMsg
             return Task.CompletedTask;
         }
 
-        public static void SendFlushBufferCommand(this IMessageSender messageSender, PipeType pipeType)
-        {
-            var service = messageSender.SendRequest<BufferService>();
-            service.FlushBuffer(pipeType);
-        }
-
-        public static Task SendFlushBufferCommandAsync(this IMessageSender messageSender, PipeType pipeType, CancellationToken _ = default)
-        {
-            messageSender.SendFlushBufferCommand(pipeType);
-            return Task.CompletedTask;
-        }
+        public static void SendFlushBufferCommand(this IMessageSender messageSender, PipeType pipeType) => 
+            messageSender.Send<BufferServiceAction>(service => service.FlushBuffer(pipeType));
 
         #endregion
 

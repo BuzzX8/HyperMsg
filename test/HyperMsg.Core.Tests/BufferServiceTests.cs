@@ -55,6 +55,17 @@ namespace HyperMsg
         }
 
         [Fact]
+        public async Task SendToReceiveBufferAsync_Invokes_FlushCommand_Handler()
+        {
+            var bufferReader = A.Fake<Action<IBufferReader>>();
+
+            HandlersRegistry.RegisterPipeHandler(PipeType.Receive, bufferReader);
+            await MessageSender.SendToReceiveBufferAsync(Guid.NewGuid().ToByteArray());
+
+            A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
+        }
+
+        [Fact]
         public void SendToReceiveBuffer_Does_Not_Invokes_FlushCommand_Handler()
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
@@ -124,7 +135,7 @@ namespace HyperMsg
             var actual = default(byte[]);
 
             HandlersRegistry.RegisterPipeHandler<IBufferReader>(PipeType.Transmit, reader => actual = reader.Read().ToArray());
-            MessageSender.SendToBuffer(PipeType.Transmit, expected);
+            MessageSender.SendToTransmitBuffer(expected);
 
             MessageSender.SendFlushBufferCommand(PipeType.Transmit);
 
@@ -143,7 +154,7 @@ namespace HyperMsg
                 actual = buffer.Read().ToArray();
                 return Task.CompletedTask;
             });
-            MessageSender.SendToBuffer(PipeType.Transmit, expected);
+            MessageSender.SendToTransmitBuffer(expected);
 
             MessageSender.SendFlushBufferCommand(PipeType.Transmit);
 
