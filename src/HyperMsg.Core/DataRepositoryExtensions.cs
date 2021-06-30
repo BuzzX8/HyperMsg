@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HyperMsg
 {
     public static class DataRepositoryExtensions
     {
         public static T Get<T>(this IDataRepository repository) => repository.Get<T>(GetTypeKey<T>());
+
+        public static IEnumerable<object> GetAllKeys<T>(this IDataRepository repository) => repository.GetAll<T>().Select(kv => kv.key);
+
+        public static IEnumerable<T> GetAllValues<T>(this IDataRepository repository) => repository.GetAll<T>().Select(kv => kv.value);
 
         public static void AddOrReplace<T>(this IDataRepository repository, T value) => repository.AddOrReplace(GetTypeKey<T>(), value);
 
