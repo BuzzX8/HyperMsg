@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Xunit;
 
 namespace HyperMsg
@@ -48,6 +49,21 @@ namespace HyperMsg
         }
 
         [Fact]
+        public void GetAll_Returns_All_KeyValue_Pairs()
+        {
+            var expectedPairs = Enumerable.Range(1, 10).Select(i => ((object)i, Guid.NewGuid())).ToArray();
+
+            foreach(var pair in expectedPairs)
+            {
+                repository.AddOrReplace(pair.Item1, pair.Item2);
+            }
+
+            var actualPairs = repository.GetAll<Guid>().ToArray();
+
+            Assert.True(Enumerable.SequenceEqual(expectedPairs.OrderBy(i => i.Item1), actualPairs.OrderBy(i => i.key)));
+        }
+
+        [Fact]
         public void AddOrReplace_Replaces_Previously_Added_Value()
         {
             var key = Guid.NewGuid();
@@ -71,6 +87,21 @@ namespace HyperMsg
 
             repository.Remove<Guid>(key);
             Assert.False(repository.Contains<Guid>(key));
+        }
+
+        [Fact]
+        public void RemoveAll_Removes_All_Values_For_Given_Type()
+        {
+            var expectedPairs = Enumerable.Range(1, 10).Select(i => ((object)i, Guid.NewGuid())).ToArray();
+
+            foreach (var pair in expectedPairs)
+            {
+                repository.AddOrReplace(pair.Item1, pair.Item2);
+            }
+
+            repository.RemoveAll<Guid>();
+
+            Assert.Empty(repository.GetAll<Guid>());
         }
     }    
 }
