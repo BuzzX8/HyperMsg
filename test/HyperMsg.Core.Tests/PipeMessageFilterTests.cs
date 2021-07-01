@@ -5,21 +5,19 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class PipeFilterTests : ServiceHostFixture
+    public class PipeMessageFilterTests : ServiceHostFixture
     {
-        //private readonly IMessageSender messageSender;
-        private readonly PipeFilter<string> pipeFilter;
+        private readonly PipeMessageFilter<string> pipeFilter;
         private readonly Func<object, object, string, bool> filterFunc;
 
         private readonly Guid pipeId = Guid.NewGuid();
         private readonly Guid portId = Guid.NewGuid();
         private readonly string message = Guid.NewGuid().ToString();
 
-        public PipeFilterTests()
+        public PipeMessageFilterTests()
         {
-            //messageSender = A.Fake<IMessageSender>();
             filterFunc = A.Fake<Func<object, object, string, bool>>();
-            pipeFilter = new PipeFilter<string>(MessageSender, filterFunc);
+            pipeFilter = new PipeMessageFilter<string>(MessageSender, filterFunc);
         }
 
         [Fact]

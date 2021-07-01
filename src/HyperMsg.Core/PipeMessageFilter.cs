@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class PipeFilter<T> : IMessageSender
+    public class PipeMessageFilter<T> : IMessageSender
     {
         private readonly IMessageSender parentSender;
         private readonly Func<object, object, T, bool> filterFunc;
 
-        public PipeFilter(IMessageSender parentSender, Func<object, object, T, bool> filterFunc = null)
+        public PipeMessageFilter(IMessageSender parentSender, Func<object, object, T, bool> filterFunc = null)
         {
             this.parentSender = parentSender;
             this.filterFunc = filterFunc;
