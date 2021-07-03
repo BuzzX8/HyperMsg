@@ -8,10 +8,17 @@ namespace HyperMsg
     public class BufferService : MessagingService
     {
         private readonly IBufferContext bufferContext;
+        private readonly IBufferWriter<byte> transmitBufferWriter;
+        private readonly IBufferWriter<byte> receiveBufferWriter;
         private readonly object transmittingBufferLock = new();
         private readonly object receivingBufferLock = new();
 
-        public BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext) => this.bufferContext = bufferContext;
+        public BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext)
+        {
+            this.bufferContext = bufferContext;
+            transmitBufferWriter = new BufferWriterAdapter(bufferContext.TransmittingBuffer.Writer);
+            receiveBufferWriter = new BufferWriterAdapter(bufferContext.ReceivingBuffer.Writer);
+        }
 
         protected override IEnumerable<IDisposable> GetChildDisposables()
         {
@@ -23,6 +30,7 @@ namespace HyperMsg
             yield return this.RegisterTransmitPipeHandler<byte[]>(array => WriteToBuffer(PipeType.Transmit, array));
             yield return this.RegisterTransmitPipeHandler<Stream>(stream => WriteToBuffer(PipeType.Transmit, stream));
             yield return this.RegisterTransmitPipeHandler<BufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));            
+            yield return this.RegisterTransmitPipeHandler<ByteBufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));            
 
             yield return this.RegisterReceivePipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
             yield return this.RegisterReceivePipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
@@ -48,7 +56,7 @@ namespace HyperMsg
             };
         }
 
-        private void WriteToBuffer<T>(PipeType bufferType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
+        private void WriteToBuffer<T>(PipeType pipeType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
         {
             var writer = buffer.Writer;
 
@@ -81,7 +89,8 @@ namespace HyperMsg
                         break;
 
                     case ByteBufferWriteAction writeAction:
-                        throw new NotImplementedException();
+                        var adapter = GetBufferWriterAdapter(pipeType);
+                        writeAction.Invoke(adapter);
                         break;
 
                     default:
@@ -91,7 +100,7 @@ namespace HyperMsg
 
             if (flushBuffer)
             {
-                FlushBuffer(bufferType);
+                FlushBuffer(pipeType);
             }
         }
 
@@ -103,10 +112,20 @@ namespace HyperMsg
             writer.Advance(bytesRead);
         }
 
-        internal void FlushBuffer(PipeType bufferType)
+        private void FlushBuffer(PipeType bufferType)
         {
             (var buffer, _) = GetBufferWithLock(bufferType);
             this.SendToPipeAsync(bufferType, buffer.Reader);
+        }
+
+        private IBufferWriter<byte> GetBufferWriterAdapter(PipeType pipeType)
+        {
+            return pipeType switch
+            {
+                PipeType.Receive => receiveBufferWriter,
+                PipeType.Transmit => transmitBufferWriter,
+                _ => throw new NotSupportedException(),
+            };
         }
     }
 
