@@ -1,5 +1,6 @@
 ﻿using HyperMsg.Messages;
 using System;
+using System.Buffers;
 using System.Threading.Tasks;
 
 namespace HyperMsg
@@ -72,6 +73,9 @@ namespace HyperMsg
 
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializationHandler) => 
             handlersRegistry.RegisterTransmitPipeHandler<T>((sender, message) => sender.SendToTransmitPipe<BufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
+
+        public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter<byte>, T> serializationHandler) =>
+            handlersRegistry.RegisterTransmitPipeHandler<T>((sender, message) => sender.SendToTransmitPipe<ByteBufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
 
         #region Pipe extensions
 

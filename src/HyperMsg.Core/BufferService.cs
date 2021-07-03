@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 
@@ -79,6 +80,10 @@ namespace HyperMsg
                         writeAction.Invoke(writer);
                         break;
 
+                    case ByteBufferWriteAction writeAction:
+                        throw new NotImplementedException();
+                        break;
+
                     default:
                         throw new NotSupportedException();
                 }
@@ -106,6 +111,8 @@ namespace HyperMsg
     }
 
     internal delegate void BufferWriteAction(IBufferWriter bufferWriter);
+
+    internal delegate void ByteBufferWriteAction(IBufferWriter<byte> bufferWriter);
 
     internal delegate void BufferServiceAction(BufferService bufferService);
 }

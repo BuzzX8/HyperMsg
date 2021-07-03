@@ -106,4 +106,17 @@ namespace HyperMsg
 
         public void Dispose() => memoryOwner.Dispose();
     }
+
+    internal class BufferWriterAdapter : IBufferWriter<byte>
+    {
+        private readonly IBufferWriter bufferWriter;
+
+        public BufferWriterAdapter(IBufferWriter bufferWriter) => this.bufferWriter = bufferWriter;
+
+        public void Advance(int count) => bufferWriter.Advance(count);
+
+        public Memory<byte> GetMemory(int sizeHint = 0) => bufferWriter.GetMemory(sizeHint);
+
+        public Span<byte> GetSpan(int sizeHint = 0) => bufferWriter.GetSpan(sizeHint);
+    }
 }
