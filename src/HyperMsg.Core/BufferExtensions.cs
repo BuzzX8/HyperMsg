@@ -19,6 +19,12 @@ namespace HyperMsg
             writer.Advance((int)count);
         }
 
+        public static void Advance(this IBufferWriter<byte> writer, long count)
+        {
+            VerifyCountParam(count);
+            writer.Advance((int)count);
+        }
+
         private static void VerifyCountParam(long count)
         {
             if (count > int.MaxValue)
