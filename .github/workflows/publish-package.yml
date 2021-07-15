@@ -15,11 +15,10 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
-          source-url: https://nuget.pkg.github.com/BuzzX8/index.json
+          source-url: https://nuget.pkg.github.com/buzzx8/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - run: dotnet build -c Release
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}      
       - name: Create the package
-        run: dotnet pack -c Release -p:PackageVersion=${{ github.event.inputs.package_version }}
+        run: dotnet pack -c Release -o ./packages -p:PackageVersion=${{ github.event.inputs.package_version }}
       - name: Publish the package to GPR
-        run: dotnet nuget push ./bin/Release/*.nupkg
+        run: dotnet nuget push ./packages/*.nupkg
