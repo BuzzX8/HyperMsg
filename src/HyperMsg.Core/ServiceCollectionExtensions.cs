@@ -21,8 +21,7 @@ namespace HyperMsg
             return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
                 .AddBufferService()
                 .AddSharedMemoryPool()
-                .AddMessageBroker()
-                .AddSingleton<IDataRepository, DataRepository>();
+                .AddMessageBroker();
         }
 
         /// <summary>
