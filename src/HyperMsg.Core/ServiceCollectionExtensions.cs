@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Buffers;
-using System.Linq;
 
 namespace HyperMsg
 {
@@ -70,26 +68,6 @@ namespace HyperMsg
             return services.AddSingleton<IMessageSender>(broker)
                 .AddSingleton<IMessageHandlersRegistry>(broker)
                 .AddSingleton<IMessagingContext>(broker);
-        }
-
-        public static IServiceCollection AddConfigurator(this IServiceCollection services, Action<IServiceProvider> configurator)
-        {
-            services.AddHostedService<ConfigurationService>(provider =>
-            {
-                var configurators = provider.GetRequiredService<ConfiguratorCollection>();
-                return new (configurators, provider);
-            });
-
-
-            if (services.SingleOrDefault(s => s.ServiceType == typeof(ConfiguratorCollection))?.ImplementationInstance is not ConfiguratorCollection configurators)
-            {
-                configurators = new ConfiguratorCollection();
-                services.AddSingleton(configurators);
-            }
-
-            configurators.Add(configurator);
-
-            return services;
         }
     }
 }

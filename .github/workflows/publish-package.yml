@@ -1,5 +1,10 @@
 name: Publish package
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      package_version:
+        description: Package version
+        required: true
 
 jobs:
   publish:
@@ -15,6 +20,6 @@ jobs:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - run: dotnet build -c Release
       - name: Create the package
-        run: dotnet pack -c Release
+        run: dotnet pack -c Release -p:PackageVersion=${{ github.event.inputs.package_version }}
       - name: Publish the package to GPR
         run: dotnet nuget push ./bin/Release/*.nupkg
