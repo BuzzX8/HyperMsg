@@ -1,5 +1,10 @@
 name: Publish package
-on: workflow_dispatch
+on: 
+  workflow_dispatch:
+    inputs:
+      package_version:
+        description: Package version
+        required: true
 
 jobs:
   publish:
@@ -12,9 +17,8 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
           source-url: https://nuget.pkg.github.com/BuzzX8/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - run: dotnet build -c Release
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}      
       - name: Create the package
-        run: dotnet pack -c Release
+        run: dotnet pack -c Release -o ./packages -p:PackageVersion=${{ github.event.inputs.package_version }}
       - name: Publish the package to GPR
-        run: dotnet nuget push ./bin/Release/*.nupkg
+        run: dotnet nuget push ./packages/*.nupkg --api-key ${{secrets.GITHUB_TOKEN}}
