@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>HyperMsg</RootNamespace>
     <LangVersion>9.0</LangVersion>
+    <RepositoryUrl>https://github.com/BuzzX8/HyperMsg</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
