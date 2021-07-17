@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class ServiceHost : IHost, IServiceProvider
+    public class Host : IHost, IServiceProvider
     {
         private readonly ServiceProvider serviceProvider;
 
-        public ServiceHost(IServiceCollection services) => serviceProvider = services.BuildServiceProvider();
+        public Host(IServiceCollection services) => serviceProvider = services.BuildServiceProvider();
 
         public IServiceProvider Services => serviceProvider;
 
@@ -42,15 +42,15 @@ namespace HyperMsg
             }
         }
 
-        public static ServiceHost Create(Action<IServiceCollection> serviceConfigurator)
+        public static Host Create(Action<IServiceCollection> serviceConfigurator)
         {
             var services = new ServiceCollection();            
             serviceConfigurator.Invoke(services);
 
-            return new ServiceHost(services);
+            return new Host(services);
         }
 
-        public static ServiceHost CreateDefault(Action<IServiceCollection> serviceConfigurator = null)
+        public static Host CreateDefault(Action<IServiceCollection> serviceConfigurator = null)
         {
             return Create(services =>
             {

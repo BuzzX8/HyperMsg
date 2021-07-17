@@ -5,7 +5,7 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class PipeMessageFilterTests : ServiceHostFixture
+    public class PipeMessageFilterTests : HostFixture
     {
         private readonly PipeMessageFilter<string> pipeFilter;
         private readonly Func<object, object, string, bool> filterFunc;

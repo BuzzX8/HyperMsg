@@ -2,17 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>9.0</LangVersion>
     <RootNamespace>HyperMsg</RootNamespace>
     <RepositoryUrl>https://github.com/BuzzX8/HyperMsg</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HyperMsg\HyperMsg.csproj" />
+    <ProjectReference Include="..\HyperMsg.Core\HyperMsg.Core.csproj" />
   </ItemGroup>
-
 </Project>
