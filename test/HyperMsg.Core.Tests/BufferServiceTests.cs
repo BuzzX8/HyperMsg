@@ -16,7 +16,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(bufferReader);
+            HandlersRegistry.RegisterTransmitBufferHandler(bufferReader);
             MessageSender.SendToTransmitBuffer(Guid.NewGuid().ToByteArray());
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
@@ -27,7 +27,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<AsyncAction<IBufferReader>>();
 
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(bufferReader);
+            HandlersRegistry.RegisterTransmitBufferHandler(bufferReader);
             await MessageSender.SendToTransmitBufferAsync(Guid.NewGuid().ToByteArray());
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._, A<CancellationToken>._)).MustHaveHappened();
@@ -38,7 +38,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(bufferReader);
+            HandlersRegistry.RegisterTransmitBufferHandler(bufferReader);
             MessageSender.SendToTransmitBuffer(Guid.NewGuid().ToByteArray(), false);
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustNotHaveHappened();
@@ -49,7 +49,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
-            HandlersRegistry.RegisterReceiveBufferReaderHandler(bufferReader);
+            HandlersRegistry.RegisterReceiveBufferHandler(bufferReader);
             MessageSender.SendToReceiveBuffer(Guid.NewGuid().ToByteArray());
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustHaveHappened();
@@ -60,7 +60,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<AsyncAction<IBufferReader>>();
 
-            HandlersRegistry.RegisterReceiveBufferReaderHandler(bufferReader);
+            HandlersRegistry.RegisterReceiveBufferHandler(bufferReader);
             await MessageSender.SendToReceiveBufferAsync(Guid.NewGuid().ToByteArray());
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._, A<CancellationToken>._)).MustHaveHappened();
@@ -71,7 +71,7 @@ namespace HyperMsg
         {
             var bufferReader = A.Fake<Action<IBufferReader>>();
 
-            HandlersRegistry.RegisterReceiveBufferReaderHandler(bufferReader);
+            HandlersRegistry.RegisterReceiveBufferHandler(bufferReader);
             MessageSender.SendToReceiveBuffer(Guid.NewGuid().ToByteArray(), false);
 
             A.CallTo(() => bufferReader.Invoke(A<IBufferReader>._)).MustNotHaveHappened();
@@ -83,7 +83,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(reader => actual = reader.Read().ToArray());
+            HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = reader.Read().ToArray());
             MessageSender.SendToTransmitBuffer(new MemoryStream(expected));
 
             Assert.NotNull(actual);
@@ -96,7 +96,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(reader => actual = reader.Read().ToArray());
+            HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = reader.Read().ToArray());
             await MessageSender.SendToTransmitBufferAsync(new MemoryStream(expected));
 
             Assert.NotNull(actual);
@@ -109,7 +109,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterReceiveBufferReaderHandler(reader => actual = reader.Read().ToArray());
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
             MessageSender.SendToReceiveBuffer(new MemoryStream(expected));
 
             Assert.NotNull(actual);
@@ -122,7 +122,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterReceiveBufferReaderHandler(reader => actual = reader.Read().ToArray());
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
             await MessageSender.SendToReceiveBufferAsync(new MemoryStream(expected));
 
             Assert.NotNull(actual);
@@ -135,7 +135,7 @@ namespace HyperMsg
             var data = Guid.NewGuid().ToByteArray();
             var bufferCapacity = GetRequiredService<IBufferContext>().TransmittingBuffer.Writer.GetMemory().Length;
             var iterationCount = (bufferCapacity / data.Length) * 10;
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(data => { });
+            HandlersRegistry.RegisterTransmitBufferHandler(data => { });
 
             for (int i = 0; i < iterationCount; i++)
             {
@@ -154,7 +154,7 @@ namespace HyperMsg
             var expected = Guid.NewGuid().ToByteArray();
             var actual = default(byte[]);
 
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(reader => actual = reader.Read().ToArray());
+            HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = reader.Read().ToArray());
             MessageSender.SendToTransmitPipe(expected);
 
             Assert.NotNull(actual);
@@ -170,7 +170,7 @@ namespace HyperMsg
             static void Serialize(IBufferWriter writer, Guid message) => writer.Write(message.ToByteArray());
 
             HandlersRegistry.RegisterSerializationHandler<Guid>(Serialize);
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(reader => actual = new Guid(reader.Read().ToArray()));
+            HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = new Guid(reader.Read().ToArray()));
             MessageSender.SendToTransmitPipe(expected);
 
             Assert.NotNull(actual);
@@ -186,7 +186,7 @@ namespace HyperMsg
             static void Serialize(IBufferWriter<byte> writer, Guid message) => writer.Write(message.ToByteArray());
 
             HandlersRegistry.RegisterSerializationHandler<Guid>(Serialize);
-            HandlersRegistry.RegisterTransmitBufferReaderHandler(reader => actual = new Guid(reader.Read().ToArray()));
+            HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = new Guid(reader.Read().ToArray()));
             MessageSender.SendToTransmitPipe(expected);
 
             Assert.NotNull(actual);
