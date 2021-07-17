@@ -9,7 +9,7 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class BufferServiceTests : ServiceHostFixture
+    public class BufferServiceTests : HostFixture
     {
         [Fact]
         public void SendToTransmitBuffer_Invokes_BufferReader_Handler()
