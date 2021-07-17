@@ -17,7 +17,7 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
           source-url: https://nuget.pkg.github.com/BuzzX8/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}      
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Create the package
         run: dotnet pack -c Release -o ./packages -p:PackageVersion=${{ github.event.inputs.package_version }}
       - name: Publish the package to GPR
