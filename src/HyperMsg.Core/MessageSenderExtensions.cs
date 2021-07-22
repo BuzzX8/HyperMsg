@@ -1,5 +1,6 @@
 ﻿using HyperMsg.Messages;
 using System;
+using System.Buffers;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,7 +82,19 @@ namespace HyperMsg
         /// <param name="invokeBufferHandler">Indicates whatever buffer handler should be invoked or not.</param>
         public static Task SendToReceiveBufferAsync(this IMessageSender messageSender, Stream stream, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
             messageSender.SendToBufferAsync(PipeType.Receive, stream, invokeBufferHandler, cancellationToken);
-        
+
+        public static void SendToReceiveBuffer(this IMessageSender messageSender, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true) =>
+            messageSender.SendToBuffer(PipeType.Receive, writeAction, invokeBufferHandler);
+
+        public static Task SendToReceiveBufferAsync(this IMessageSender messageSender, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
+            messageSender.SendToBufferAsync(PipeType.Receive, writeAction, invokeBufferHandler, cancellationToken);
+
+        public static void SendToReceiveBuffer(this IMessageSender messageSender, Action<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true) =>
+            messageSender.SendToBuffer(PipeType.Receive, writeAction, invokeBufferHandler);
+
+        public static Task SendToReceiveBufferAsync(this IMessageSender messageSender, Action<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
+            messageSender.SendToBufferAsync(PipeType.Receive, writeAction, invokeBufferHandler, cancellationToken);
+
         internal static void SendToBuffer<T>(this IMessageSender messageSender, PipeType pipeType, T message, bool invokeBufferHandler = true) => 
             messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(pipeType, message, invokeBufferHandler));
         

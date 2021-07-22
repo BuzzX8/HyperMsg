@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg
 {
-    public enum PipeType
+    internal enum PipeType
     {
         None,
         Transmit,
