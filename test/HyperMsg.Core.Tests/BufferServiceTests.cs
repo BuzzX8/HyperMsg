@@ -130,6 +130,66 @@ namespace HyperMsg
         }
 
         [Fact]
+        public void SendToReceiveBuffer_Invokes_Write_Delegate_For_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            void WriteAction(IBufferWriter writer) => writer.Write(expected);
+
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
+            MessageSender.SendToReceiveBuffer(WriteAction);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task SendToReceiveBufferAsync_Invokes_Write_Delegate_For_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            void WriteAction(IBufferWriter writer) => writer.Write(expected);
+
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
+            await MessageSender.SendToReceiveBufferAsync(WriteAction);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SendToReceiveBuffer_Invokes_Write_Delegate_For_Buffer_Adapter()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            void WriteAction(IBufferWriter<byte> writer) => writer.Write(expected);
+
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
+            MessageSender.SendToReceiveBuffer(WriteAction);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task SendToReceiveBufferAsync_Invokes_Write_Delegate_For_Buffer_Adapter()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            void WriteAction(IBufferWriter<byte> writer) => writer.Write(expected);
+
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
+            await MessageSender.SendToReceiveBufferAsync(WriteAction);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public void RegisterBufferFlushDataHandler_Advances_Buffer_Reader()
         {
             var data = Guid.NewGuid().ToByteArray();

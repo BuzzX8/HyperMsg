@@ -7,30 +7,39 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
+    /// <summary>
+    /// Implementation of hosted service which exists in scope of MessagingContext
+    /// </summary>
     public class MessagingService : MessagingContextProxy, IHostedService, IDisposable
     {
-        private readonly List<IDisposable> childDisposables;
+        private readonly List<IDisposable> subscriptionHandles;
 
-        public MessagingService(IMessagingContext messagingContext) : base(messagingContext) => childDisposables = new();
+        public MessagingService(IMessagingContext messagingContext) : base(messagingContext) => subscriptionHandles = new();
 
-        protected virtual IEnumerable<IDisposable> GetChildDisposables() => Enumerable.Empty<IDisposable>();
+        /// <summary>
+        /// Should return subscription handles for message handlers which must exist during service lifetime.
+        /// </summary>
+        /// <returns>List of subscription handles.</returns>
+        protected virtual IEnumerable<IDisposable> GetSubscriptionHandles() => Enumerable.Empty<IDisposable>();
 
-        protected void RegisterChildDisposables()
+        private void RegisterSubscriptionHandles()
         {
-            foreach (var disposable in GetChildDisposables())
+            if (subscriptionHandles.Count > 0)
             {
-                childDisposables.Add(disposable);
+                return;
             }
+
+            subscriptionHandles.AddRange(GetSubscriptionHandles());
         }
 
         public virtual Task StartAsync(CancellationToken cancellationToken)
         {
-            RegisterChildDisposables();
+            RegisterSubscriptionHandles();
             return Task.CompletedTask;
         }
 
         public virtual Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-        public virtual void Dispose() => childDisposables.ForEach(s => s.Dispose());
+        public virtual void Dispose() => subscriptionHandles.ForEach(s => s.Dispose());
     }
 }
