@@ -5,6 +5,7 @@
     <LangVersion>9.0</LangVersion>
     <RootNamespace>HyperMsg</RootNamespace>
     <RepositoryUrl>https://github.com/BuzzX8/HyperMsg</RepositoryUrl>
+    <Description>Provides implementaion for fundamental interfaces, basic extensions for pipes and serialization.</Description>
   </PropertyGroup>
 
   <ItemGroup>

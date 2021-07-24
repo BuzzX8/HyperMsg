@@ -20,7 +20,7 @@ namespace HyperMsg
             receiveBufferWriter = new BufferWriterAdapter(bufferContext.ReceivingBuffer.Writer);
         }
 
-        protected override IEnumerable<IDisposable> GetChildDisposables()
+        protected override IEnumerable<IDisposable> GetSubscriptionHandles()
         {
             yield return RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
 
