@@ -17,10 +17,10 @@ namespace HyperMsg
         public MessagingService(IMessagingContext messagingContext) : base(messagingContext) => subscriptionHandles = new();
 
         /// <summary>
-        /// Should return subscription handles for message handlers which must exist during service lifetime.
+        /// Should return registration handles for message handlers which must exist during service lifetime.
         /// </summary>
-        /// <returns>List of subscription handles.</returns>
-        protected virtual IEnumerable<IDisposable> GetSubscriptionHandles() => Enumerable.Empty<IDisposable>();
+        /// <returns>List of registration handles.</returns>
+        protected virtual IEnumerable<IDisposable> GetRegistrationHandles() => Enumerable.Empty<IDisposable>();
 
         private void RegisterSubscriptionHandles()
         {
@@ -29,7 +29,7 @@ namespace HyperMsg
                 return;
             }
 
-            subscriptionHandles.AddRange(GetSubscriptionHandles());
+            subscriptionHandles.AddRange(GetRegistrationHandles());
         }
 
         public virtual Task StartAsync(CancellationToken cancellationToken)
