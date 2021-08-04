@@ -8,7 +8,7 @@ namespace HyperMsg
     public class MessagingContextProxyTests
     {
         private readonly IMessagingContext messagingContext;
-        private readonly MessagingContextProxy proxy;
+        private readonly MessagingContextProxyMock proxy;
 
         public MessagingContextProxyTests()
         {
@@ -21,7 +21,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<Action<string>>();
 
-            proxy.RegisterHandler(handler);
+            proxy.MessageHandlersRegistry.RegisterHandler(handler);
 
             A.CallTo(() => messagingContext.HandlersRegistry.RegisterHandler(handler)).MustHaveHappened();
         }
@@ -31,7 +31,7 @@ namespace HyperMsg
         {
             var handler = A.Fake<AsyncAction<string>>();
 
-            proxy.RegisterHandler(handler);
+            proxy.MessageHandlersRegistry.RegisterHandler(handler);
 
             A.CallTo(() => messagingContext.HandlersRegistry.RegisterHandler(handler)).MustHaveHappened();
         }
@@ -41,7 +41,7 @@ namespace HyperMsg
         {
             var message = Guid.NewGuid();
 
-            proxy.Send(message);
+            proxy.MessageSender.Send(message);
 
             A.CallTo(() => messagingContext.Sender.Send(message)).MustHaveHappened();
         }
@@ -52,7 +52,7 @@ namespace HyperMsg
             var message = Guid.NewGuid();
             var token = new CancellationToken();
 
-            proxy.SendAsync(message, token);
+            proxy.MessageSender.SendAsync(message, token);
 
             A.CallTo(() => messagingContext.Sender.SendAsync(message, token)).MustHaveHappened();
         }
@@ -63,5 +63,9 @@ namespace HyperMsg
         public MessagingContextProxyMock(IMessagingContext messagingContext) : base(messagingContext)
         {
         }
+
+        public IMessageSender MessageSender => Sender;
+
+        public IMessageHandlersRegistry MessageHandlersRegistry => HandlersRegistry;
     }
 }

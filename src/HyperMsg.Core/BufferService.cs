@@ -22,21 +22,21 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetRegistrationHandles()
         {
-            yield return RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
+            yield return HandlersRegistry.RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
 
-            yield return this.RegisterTransmitPipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
-            yield return this.RegisterTransmitPipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
-            yield return this.RegisterTransmitPipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Transmit, segment));
-            yield return this.RegisterTransmitPipeHandler<byte[]>(array => WriteToBuffer(PipeType.Transmit, array));
-            yield return this.RegisterTransmitPipeHandler<Stream>(stream => WriteToBuffer(PipeType.Transmit, stream));
-            yield return this.RegisterTransmitPipeHandler<BufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));            
-            yield return this.RegisterTransmitPipeHandler<ByteBufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));
+            yield return HandlersRegistry.RegisterTransmitPipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
+            yield return HandlersRegistry.RegisterTransmitPipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
+            yield return HandlersRegistry.RegisterTransmitPipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Transmit, segment));
+            yield return HandlersRegistry.RegisterTransmitPipeHandler<byte[]>(array => WriteToBuffer(PipeType.Transmit, array));
+            yield return HandlersRegistry.RegisterTransmitPipeHandler<Stream>(stream => WriteToBuffer(PipeType.Transmit, stream));
+            yield return HandlersRegistry.RegisterTransmitPipeHandler<BufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));            
+            yield return HandlersRegistry.RegisterTransmitPipeHandler<ByteBufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));
 
-            yield return this.RegisterReceivePipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
-            yield return this.RegisterReceivePipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
-            yield return this.RegisterReceivePipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Receive, segment));
-            yield return this.RegisterReceivePipeHandler<byte[]>(array => WriteToBuffer(PipeType.Receive, array));
-            yield return this.RegisterReceivePipeHandler<Stream>(stream => WriteToBuffer(PipeType.Receive, stream));
+            yield return HandlersRegistry.RegisterReceivePipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
+            yield return HandlersRegistry.RegisterReceivePipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
+            yield return HandlersRegistry.RegisterReceivePipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Receive, segment));
+            yield return HandlersRegistry.RegisterReceivePipeHandler<byte[]>(array => WriteToBuffer(PipeType.Receive, array));
+            yield return HandlersRegistry.RegisterReceivePipeHandler<Stream>(stream => WriteToBuffer(PipeType.Receive, stream));
         }
 
         internal void WriteToBuffer<T>(PipeType bufferType, T message, bool flushBuffer = true)
@@ -124,7 +124,7 @@ namespace HyperMsg
         private void FlushBuffer(PipeType bufferType)
         {
             (var buffer, _) = GetBufferWithLock(bufferType);
-            this.SendToPipeAsync(bufferType, buffer.Reader);
+            Sender.SendToPipeAsync(bufferType, buffer.Reader);
         }
 
         private IBufferWriter<byte> GetBufferWriterAdapter(PipeType pipeType)

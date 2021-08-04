@@ -1,25 +1,15 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public abstract class MessagingContextProxy : IMessageSender, IMessageHandlersRegistry
+    public abstract class MessagingContextProxy
     {
         protected MessagingContextProxy(IMessagingContext messagingContext) => (MessagingContext) = (messagingContext ?? throw new ArgumentNullException(nameof(messagingContext)));
 
-        private IMessagingContext MessagingContext { get; }
+        protected IMessagingContext MessagingContext { get; }
 
-        private IMessageHandlersRegistry HandlersRegistry => MessagingContext.HandlersRegistry;
+        protected IMessageHandlersRegistry HandlersRegistry => MessagingContext.HandlersRegistry;
 
-        private IMessageSender Sender => MessagingContext.Sender;
-
-        public virtual IDisposable RegisterHandler<TMessage>(Action<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);
-
-        public virtual IDisposable RegisterHandler<TMessage>(AsyncAction<TMessage> handler) => HandlersRegistry.RegisterHandler(handler);        
-
-        public virtual void Send<T>(T message) => Sender.Send(message);
-
-        public virtual Task SendAsync<T>(T message, CancellationToken cancellationToken) => Sender.SendAsync(message, cancellationToken);
+        protected IMessageSender Sender => MessagingContext.Sender;
     }
 }
