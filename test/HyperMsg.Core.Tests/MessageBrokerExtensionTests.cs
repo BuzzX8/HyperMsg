@@ -32,70 +32,69 @@ namespace HyperMsg
             A.CallTo(() => handler.Invoke(A<Guid>._)).MustNotHaveHappened();
         }
 
-        private readonly Guid pipeId = Guid.NewGuid();
-        private readonly Guid portId = Guid.NewGuid();
+        private readonly Guid topicId = Guid.NewGuid();
         private readonly Guid message = Guid.NewGuid();
 
         [Fact]
-        public void SendToPipe_Invokes_Handler_Registered_With_RegisterPipeHandler()
+        public void SendToTopic_Invokes_Handler_Registered_With_RegisterTopicHandler()
         {
             var filter = A.Fake<Action<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, filter);
+            broker.RegisterTopicHandler(topicId, filter);
 
-            broker.SendToPipe(pipeId, portId, message);
+            broker.SendToTopic(topicId, message);
 
             A.CallTo(() => filter.Invoke(message)).MustHaveHappened();
         }
 
         [Fact]
-        public async Task SendToPipeAsync_Invokes_Handler_Registered_With_RegisterPipeHandler()
+        public async Task SendToTopicAsync_Invokes_Handler_Registered_With_RegisterTopicHandler()
         {
             var filter = A.Fake<AsyncAction<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, filter);
+            broker.RegisterTopicHandler(topicId, filter);
 
-            await broker.SendToPipeAsync(pipeId, portId, message);
+            await broker.SendToTopicAsync(topicId, message);
 
             A.CallTo(() => filter.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
         }
 
         [Fact]
-        public void SendToPipe_Does_Not_Invokes_Pipe_Handler_With_Different_PortId()
+        public void SendToTopic_Does_Not_Invokes_Topic_Handler_With_Different_PortId()
         {
             var handler = A.Fake<Action<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, handler);
-            broker.SendToPipe(pipeId, Guid.NewGuid(), message);
+            broker.RegisterTopicHandler(topicId, handler);
+            broker.SendToTopic(topicId, message);
             A.CallTo(() => handler.Invoke(message)).MustNotHaveHappened();
         }
 
         [Fact]
-        public async Task SendToPipeAsync_Does_Not_Invokes_Pipe_Handler_With_Different_PortId()
+        public async Task SendToTopicAsync_Does_Not_Invokes_Topic_Handler_With_Different_PortId()
         {
             var handler = A.Fake<AsyncAction<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, handler);
+            broker.RegisterTopicHandler(topicId, handler);
 
-            await broker.SendToPipeAsync(pipeId, Guid.NewGuid(), message);
+            await broker.SendToTopicAsync(topicId, message);
 
             A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
         }
 
         [Fact]
-        public void SendToPipe_Does_Not_Invokes_Pipe_Handler_With_Different_PipeId()
+        public void SendToTopic_Does_Not_Invokes_Topic_Handler_With_Different_TopicId()
         {
             var handler = A.Fake<Action<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, handler);
+            broker.RegisterTopicHandler(topicId, handler);
 
-            broker.SendToPipe(Guid.NewGuid(), portId, message);
+            broker.SendToTopic(Guid.NewGuid(), message);
 
             A.CallTo(() => handler.Invoke(message)).MustNotHaveHappened();
         }
 
         [Fact]
-        public async Task SendToPipeAsync_Does_Not_Invokes_Pipe_Handler_With_Different_PipeId()
+        public async Task SendToTopicAsync_Does_Not_Invokes_Topic_Handler_With_Different_TopicId()
         {
             var handler = A.Fake<AsyncAction<Guid>>();
-            broker.RegisterPipeHandler(pipeId, portId, handler);
+            broker.RegisterTopicHandler(topicId, handler);
 
-            await broker.SendToPipeAsync(Guid.NewGuid(), portId, message);
+            await broker.SendToTopicAsync(Guid.NewGuid(), message);
 
             A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
         }

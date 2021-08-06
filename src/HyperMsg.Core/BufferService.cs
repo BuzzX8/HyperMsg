@@ -24,39 +24,39 @@ namespace HyperMsg
         {
             yield return HandlersRegistry.RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
 
-            yield return HandlersRegistry.RegisterTransmitPipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
-            yield return HandlersRegistry.RegisterTransmitPipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Transmit, memory));
-            yield return HandlersRegistry.RegisterTransmitPipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Transmit, segment));
-            yield return HandlersRegistry.RegisterTransmitPipeHandler<byte[]>(array => WriteToBuffer(PipeType.Transmit, array));
-            yield return HandlersRegistry.RegisterTransmitPipeHandler<Stream>(stream => WriteToBuffer(PipeType.Transmit, stream));
-            yield return HandlersRegistry.RegisterTransmitPipeHandler<BufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));            
-            yield return HandlersRegistry.RegisterTransmitPipeHandler<ByteBufferWriteAction>(action => WriteToBuffer(PipeType.Transmit, action));
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<Memory<byte>>(memory => WriteToBuffer(CoreTopicType.Transmit, memory));
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(CoreTopicType.Transmit, memory));
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<ArraySegment<byte>>(segment => WriteToBuffer(CoreTopicType.Transmit, segment));
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<byte[]>(array => WriteToBuffer(CoreTopicType.Transmit, array));
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<Stream>(stream => WriteToBuffer(CoreTopicType.Transmit, stream));
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<BufferWriteAction>(action => WriteToBuffer(CoreTopicType.Transmit, action));            
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<ByteBufferWriteAction>(action => WriteToBuffer(CoreTopicType.Transmit, action));
 
-            yield return HandlersRegistry.RegisterReceivePipeHandler<Memory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
-            yield return HandlersRegistry.RegisterReceivePipeHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(PipeType.Receive, memory));
-            yield return HandlersRegistry.RegisterReceivePipeHandler<ArraySegment<byte>>(segment => WriteToBuffer(PipeType.Receive, segment));
-            yield return HandlersRegistry.RegisterReceivePipeHandler<byte[]>(array => WriteToBuffer(PipeType.Receive, array));
-            yield return HandlersRegistry.RegisterReceivePipeHandler<Stream>(stream => WriteToBuffer(PipeType.Receive, stream));
+            yield return HandlersRegistry.RegisterReceiveTopicHandler<Memory<byte>>(memory => WriteToBuffer(CoreTopicType.Receive, memory));
+            yield return HandlersRegistry.RegisterReceiveTopicHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(CoreTopicType.Receive, memory));
+            yield return HandlersRegistry.RegisterReceiveTopicHandler<ArraySegment<byte>>(segment => WriteToBuffer(CoreTopicType.Receive, segment));
+            yield return HandlersRegistry.RegisterReceiveTopicHandler<byte[]>(array => WriteToBuffer(CoreTopicType.Receive, array));
+            yield return HandlersRegistry.RegisterReceiveTopicHandler<Stream>(stream => WriteToBuffer(CoreTopicType.Receive, stream));
         }
 
-        internal void WriteToBuffer<T>(PipeType bufferType, T message, bool flushBuffer = true)
+        internal void WriteToBuffer<T>(CoreTopicType bufferType, T message, bool flushBuffer = true)
         {
             (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
 
             WriteToBuffer(bufferType, message, buffer, bufferLock, flushBuffer);
         }
 
-        private (IBuffer buffer, object bufferLock) GetBufferWithLock(PipeType bufferType)
+        private (IBuffer buffer, object bufferLock) GetBufferWithLock(CoreTopicType bufferType)
         {
             return bufferType switch
             {
-                PipeType.Receive => (bufferContext.ReceivingBuffer, receivingBufferLock),
-                PipeType.Transmit => (bufferContext.TransmittingBuffer, transmittingBufferLock),
+                CoreTopicType.Receive => (bufferContext.ReceivingBuffer, receivingBufferLock),
+                CoreTopicType.Transmit => (bufferContext.TransmittingBuffer, transmittingBufferLock),
                 _ => throw new NotSupportedException($"Buffer type {bufferType} does not supported"),
             };
         }
 
-        private void WriteToBuffer<T>(PipeType pipeType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
+        private void WriteToBuffer<T>(CoreTopicType TopicType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
         {
             var writer = buffer.Writer;
 
@@ -89,7 +89,7 @@ namespace HyperMsg
                         break;
 
                     case Action<IBufferWriter<byte>> writeAction:
-                        var adapter = GetBufferWriterAdapter(pipeType);
+                        var adapter = GetBufferWriterAdapter(TopicType);
                         writeAction.Invoke(adapter);
                         break;
 
@@ -98,7 +98,7 @@ namespace HyperMsg
                         break;
 
                     case ByteBufferWriteAction writeAction:
-                        adapter = GetBufferWriterAdapter(pipeType);
+                        adapter = GetBufferWriterAdapter(TopicType);
                         writeAction.Invoke(adapter);
                         break;
 
@@ -109,11 +109,11 @@ namespace HyperMsg
 
             if (flushBuffer)
             {
-                FlushBuffer(pipeType);
+                FlushBuffer(TopicType);
             }
         }
 
-        private void WriteStream(IBufferWriter writer, Stream stream)
+        private static void WriteStream(IBufferWriter writer, Stream stream)
         {
             var buffer = writer.GetMemory();
             var bytesRead = stream.Read(buffer.Span);
@@ -121,18 +121,18 @@ namespace HyperMsg
             writer.Advance(bytesRead);
         }
 
-        private void FlushBuffer(PipeType bufferType)
+        private void FlushBuffer(CoreTopicType bufferType)
         {
             (var buffer, _) = GetBufferWithLock(bufferType);
-            Sender.SendToPipeAsync(bufferType, buffer.Reader);
+            Sender.SendToTopicAsync(bufferType, buffer.Reader);
         }
 
-        private IBufferWriter<byte> GetBufferWriterAdapter(PipeType pipeType)
+        private IBufferWriter<byte> GetBufferWriterAdapter(CoreTopicType TopicType)
         {
-            return pipeType switch
+            return TopicType switch
             {
-                PipeType.Receive => receiveBufferWriter,
-                PipeType.Transmit => transmitBufferWriter,
+                CoreTopicType.Receive => receiveBufferWriter,
+                CoreTopicType.Transmit => transmitBufferWriter,
                 _ => throw new NotSupportedException(),
             };
         }
