@@ -238,7 +238,7 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void RegisterSerializationHandler_Serializes_Message_Sent_To_Transmit_Topic_()
+        public void RegisterSerializationHandler_Serializes_Message_Sent_To_Byte_Transmit_Topic()
         {
             var expected = Guid.NewGuid();
             var actual = default(Guid?);

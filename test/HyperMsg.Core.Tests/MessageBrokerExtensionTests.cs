@@ -58,26 +58,6 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendToTopic_Does_Not_Invokes_Topic_Handler_With_Different_PortId()
-        {
-            var handler = A.Fake<Action<Guid>>();
-            broker.RegisterTopicHandler(topicId, handler);
-            broker.SendToTopic(topicId, message);
-            A.CallTo(() => handler.Invoke(message)).MustNotHaveHappened();
-        }
-
-        [Fact]
-        public async Task SendToTopicAsync_Does_Not_Invokes_Topic_Handler_With_Different_PortId()
-        {
-            var handler = A.Fake<AsyncAction<Guid>>();
-            broker.RegisterTopicHandler(topicId, handler);
-
-            await broker.SendToTopicAsync(topicId, message);
-
-            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
-        }
-
-        [Fact]
         public void SendToTopic_Does_Not_Invokes_Topic_Handler_With_Different_TopicId()
         {
             var handler = A.Fake<Action<Guid>>();

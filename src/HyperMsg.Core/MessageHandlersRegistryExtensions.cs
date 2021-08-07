@@ -130,7 +130,7 @@ namespace HyperMsg
         /// <param name="bufferHandler">Buffer handler.</param>
         /// <returns>Registration handle.</returns>
         public static IDisposable RegisterTransmitBufferHandler(this IMessageHandlersRegistry handlersRegistry, Action<IBufferReader> bufferHandler) =>
-            handlersRegistry.RegisterReceiveTopicHandler(bufferHandler);
+            handlersRegistry.RegisterTransmitTopicHandler(bufferHandler);
 
         /// <summary>
         /// Registers handler which will be invoked each when new data written into transmit buffer.
@@ -139,7 +139,7 @@ namespace HyperMsg
         /// <param name="bufferHandler">Buffer handler.</param>
         /// <returns>Registration handle.</returns>
         public static IDisposable RegisterTransmitBufferHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferReader> bufferHandler) =>
-            handlersRegistry.RegisterReceiveTopicHandler(bufferHandler);
+            handlersRegistry.RegisterTransmitTopicHandler(bufferHandler);
 
         /// <summary>
         /// Registers handler which will be invoked each when new data written into receive buffer.

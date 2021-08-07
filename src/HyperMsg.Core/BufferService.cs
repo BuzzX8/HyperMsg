@@ -39,24 +39,24 @@ namespace HyperMsg
             yield return HandlersRegistry.RegisterReceiveTopicHandler<Stream>(stream => WriteToBuffer(CoreTopicType.Receive, stream));
         }
 
-        internal void WriteToBuffer<T>(CoreTopicType bufferType, T message, bool flushBuffer = true)
+        internal void WriteToBuffer<T>(CoreTopicType topicType, T message, bool flushBuffer = true)
         {
-            (var buffer, var bufferLock) = GetBufferWithLock(bufferType);
+            (var buffer, var bufferLock) = GetBufferWithLock(topicType);
 
-            WriteToBuffer(bufferType, message, buffer, bufferLock, flushBuffer);
+            WriteToBuffer(topicType, message, buffer, bufferLock, flushBuffer);
         }
 
-        private (IBuffer buffer, object bufferLock) GetBufferWithLock(CoreTopicType bufferType)
+        private (IBuffer buffer, object bufferLock) GetBufferWithLock(CoreTopicType topicType)
         {
-            return bufferType switch
+            return topicType switch
             {
                 CoreTopicType.Receive => (bufferContext.ReceivingBuffer, receivingBufferLock),
                 CoreTopicType.Transmit => (bufferContext.TransmittingBuffer, transmittingBufferLock),
-                _ => throw new NotSupportedException($"Buffer type {bufferType} does not supported"),
+                _ => throw new NotSupportedException($"Buffer type {topicType} does not supported"),
             };
         }
 
-        private void WriteToBuffer<T>(CoreTopicType TopicType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
+        private void WriteToBuffer<T>(CoreTopicType topicType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
         {
             var writer = buffer.Writer;
 
@@ -89,7 +89,7 @@ namespace HyperMsg
                         break;
 
                     case Action<IBufferWriter<byte>> writeAction:
-                        var adapter = GetBufferWriterAdapter(TopicType);
+                        var adapter = GetBufferWriterAdapter(topicType);
                         writeAction.Invoke(adapter);
                         break;
 
@@ -98,7 +98,7 @@ namespace HyperMsg
                         break;
 
                     case ByteBufferWriteAction writeAction:
-                        adapter = GetBufferWriterAdapter(TopicType);
+                        adapter = GetBufferWriterAdapter(topicType);
                         writeAction.Invoke(adapter);
                         break;
 
@@ -109,7 +109,7 @@ namespace HyperMsg
 
             if (flushBuffer)
             {
-                FlushBuffer(TopicType);
+                FlushBuffer(topicType);
             }
         }
 
@@ -121,15 +121,15 @@ namespace HyperMsg
             writer.Advance(bytesRead);
         }
 
-        private void FlushBuffer(CoreTopicType bufferType)
+        private void FlushBuffer(CoreTopicType topicType)
         {
-            (var buffer, _) = GetBufferWithLock(bufferType);
-            Sender.SendToTopicAsync(bufferType, buffer.Reader);
+            (var buffer, _) = GetBufferWithLock(topicType);
+            Sender.SendToTopic(topicType, buffer.Reader);
         }
 
-        private IBufferWriter<byte> GetBufferWriterAdapter(CoreTopicType TopicType)
+        private IBufferWriter<byte> GetBufferWriterAdapter(CoreTopicType topicType)
         {
-            return TopicType switch
+            return topicType switch
             {
                 CoreTopicType.Receive => receiveBufferWriter,
                 CoreTopicType.Transmit => transmitBufferWriter,
