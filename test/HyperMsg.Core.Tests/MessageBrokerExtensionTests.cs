@@ -78,5 +78,71 @@ namespace HyperMsg
 
             A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustNotHaveHappened();
         }
+
+        [Fact]
+        public void SendToTransportTopic_Invokes_Handler_Registered_By_RegisterTransportTopicHandler()
+        {
+            var handler = A.Fake<Action<Guid>>();
+            broker.RegisterTransportTopicHandler(handler);
+
+            broker.SendToTransportTopic(message);
+
+            A.CallTo(() => handler.Invoke(message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task SendToTransportTopicAsync_Invokes_Handler_Registered_By_RegisterTransportTopicHandler()
+        {
+            var handler = A.Fake<AsyncAction<Guid>>();
+            broker.RegisterTransportTopicHandler(handler);
+
+            await broker.SendToTransportTopicAsync(message);
+
+            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendToTransmitTopic_Invokes_Handler_Registered_By_RegisterTransportTopicHandler()
+        {
+            var handler = A.Fake<Action<Guid>>();
+            broker.RegisterTransmitTopicHandler(handler);
+
+            broker.SendToTransmitTopic(message);
+
+            A.CallTo(() => handler.Invoke(message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task SendToTransmitTopicAsync_Invokes_Handler_Registered_By_RegisterTransportTopicHandler()
+        {
+            var handler = A.Fake<AsyncAction<Guid>>();
+            broker.RegisterTransmitTopicHandler(handler);
+
+            await broker.SendToTransmitTopicAsync(message);
+
+            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
+        }
+
+        [Fact]
+        public void SendToReceiveTopic_Invokes_Handler_Registered_By_RegisterTransportTopicHandler()
+        {
+            var handler = A.Fake<Action<Guid>>();
+            broker.RegisterReceiveTopicHandler(handler);
+
+            broker.SendToReceiveTopic(message);
+
+            A.CallTo(() => handler.Invoke(message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task SendToReceiveTopicAsync_Invokes_Handler_Registered_By_RegisterTransportTopicHandler()
+        {
+            var handler = A.Fake<AsyncAction<Guid>>();
+            broker.RegisterReceiveTopicHandler(handler);
+
+            await broker.SendToReceiveTopicAsync(message);
+
+            A.CallTo(() => handler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
+        }
     }
 }
