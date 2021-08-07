@@ -215,14 +215,14 @@ namespace HyperMsg
             var actual = default(byte[]);
 
             HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = reader.Read().ToArray());
-            MessageSender.SendToTransmitPipe(expected);
+            MessageSender.SendToTransmitTopic(expected);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void RegisterSerializationHandler_Serializes_Message_Sent_To_Transmit_Pipe()
+        public void RegisterSerializationHandler_Serializes_Message_Sent_To_Transmit_Topic()
         {
             var expected = Guid.NewGuid();
             var actual = default(Guid?);
@@ -231,14 +231,14 @@ namespace HyperMsg
 
             HandlersRegistry.RegisterSerializationHandler<Guid>(Serialize);
             HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = new Guid(reader.Read().ToArray()));
-            MessageSender.SendToTransmitPipe(expected);
+            MessageSender.SendToTransmitTopic(expected);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public void RegisterSerializationHandler_Serializes_Message_Sent_To_Transmit_Pipe_()
+        public void RegisterSerializationHandler_Serializes_Message_Sent_To_Byte_Transmit_Topic()
         {
             var expected = Guid.NewGuid();
             var actual = default(Guid?);
@@ -247,7 +247,7 @@ namespace HyperMsg
 
             HandlersRegistry.RegisterSerializationHandler<Guid>(Serialize);
             HandlersRegistry.RegisterTransmitBufferHandler(reader => actual = new Guid(reader.Read().ToArray()));
-            MessageSender.SendToTransmitPipe(expected);
+            MessageSender.SendToTransmitTopic(expected);
 
             Assert.NotNull(actual);
             Assert.Equal(expected, actual);
