@@ -108,6 +108,25 @@ namespace HyperMsg
 
         #region Topic extensions
 
+
+        /// <summary>
+        /// Sends message to receive topic.
+        /// </summary>
+        /// <typeparam name="T">Type of message to send.</typeparam>
+        /// <param name="messageSender">Message sender.</param>
+        /// <param name="message">Message to send.</param>
+        public static void SendToTransportTopic<T>(this IMessageSender messageSender, T message) => messageSender.SendToTopic(CoreTopicType.Transport, message);
+
+        /// <summary>
+        /// Sends message to receive topic asynchronously.
+        /// </summary>
+        /// <typeparam name="T">Type of message to send.</typeparam>
+        /// <param name="messageSender">Message sender.</param>
+        /// <param name="message">Message to send.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        public static Task SendToTransportTopicAsync<T>(this IMessageSender messageSender, T message, CancellationToken cancellationToken = default) =>
+            messageSender.SendToTopicAsync(CoreTopicType.Transport, message, cancellationToken);
+
         /// <summary>
         /// Sends message to transmit topic.
         /// </summary>
