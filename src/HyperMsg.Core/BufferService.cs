@@ -124,7 +124,7 @@ namespace HyperMsg
         private void FlushBuffer(CoreTopicType topicType)
         {
             (var buffer, _) = GetBufferWithLock(topicType);
-            Sender.SendToTopic(topicType, buffer.Reader);
+            Sender.SendToTopicAsync(topicType, buffer.Reader);
         }
 
         private IBufferWriter<byte> GetBufferWriterAdapter(CoreTopicType topicType)

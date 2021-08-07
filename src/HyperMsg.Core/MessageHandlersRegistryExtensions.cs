@@ -123,6 +123,8 @@ namespace HyperMsg
         public static IDisposable RegisterHandler<T>(this IMessageHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
             handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
 
+        #region Buffer extensions
+
         /// <summary>
         /// Registers handler which will be invoked each when new data written into transmit buffer.
         /// </summary>
@@ -159,6 +161,10 @@ namespace HyperMsg
         public static IDisposable RegisterReceiveBufferHandler(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IBufferReader> bufferHandler) =>
             handlersRegistry.RegisterReceiveTopicHandler(bufferHandler);
 
+        #endregion
+
+        #region Serialization extensions
+
         /// <summary>
         /// Registers handler which should serialize specified type of message to buffer.
         /// </summary>
@@ -179,7 +185,29 @@ namespace HyperMsg
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter<byte>, T> serializationHandler) =>
             handlersRegistry.RegisterTransmitTopicHandler<T>((sender, message) => sender.SendToTransmitTopic<ByteBufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
 
+        #endregion
+
         #region Topic extensions
+
+        /// <summary>
+        /// Registers handler for transport topic.
+        /// </summary>
+        /// <typeparam name="T">Type of message.</typeparam>
+        /// <param name="handlersRegistry">Message handlers registry.</param>
+        /// <param name="topicHandler">Topic handler.</param>
+        /// <returns>Registration handle.</returns>
+        public static IDisposable RegisterTransportTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> topicHandler) =>
+            handlersRegistry.RegisterTopicHandler(CoreTopicType.Transport, topicHandler);
+
+        /// <summary>
+        /// Registers handler for transport topic.
+        /// </summary>
+        /// <typeparam name="T">Type of message.</typeparam>
+        /// <param name="handlersRegistry">Message handlers registry.</param>
+        /// <param name="topicHandler">Topic handler.</param>
+        /// <returns>Registration handle.</returns>
+        public static IDisposable RegisterTransportTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> topicHandler) =>
+            handlersRegistry.RegisterTopicHandler(CoreTopicType.Transport, topicHandler);
 
         /// <summary>
         /// Registers handler for transmit topic.
