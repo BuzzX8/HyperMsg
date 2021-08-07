@@ -186,80 +186,80 @@ namespace HyperMsg
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> TopicHandler) =>
-            handlersRegistry.RegisterTransmitTopicHandler<T>((_, message) => TopicHandler.Invoke(message));
+        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> topicHandler) =>
+            handlersRegistry.RegisterTransmitTopicHandler<T>((_, message) => topicHandler.Invoke(message));
 
         /// <summary>
         /// Registers handler for transmit topic.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IMessageSender, T> TopicHandler) =>
-            handlersRegistry.RegisterTopicHandler(CoreTopicType.Transmit, TopicHandler);
+        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IMessageSender, T> topicHandler) =>
+            handlersRegistry.RegisterTopicHandler(CoreTopicType.Transmit, topicHandler);
 
         /// <summary>
         /// Registers handler for transmit topic.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> TopicHandler) =>
-            handlersRegistry.RegisterTransmitTopicHandler<T>((_, message, token) => TopicHandler.Invoke(message, token));
+        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> topicHandler) =>
+            handlersRegistry.RegisterTransmitTopicHandler<T>((_, message, token) => topicHandler.Invoke(message, token));
 
         /// <summary>
         /// Registers handler for transmit topic.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IMessageSender, T> TopicHandler) =>
-            handlersRegistry.RegisterTopicHandler(CoreTopicType.Transmit, TopicHandler);
+        public static IDisposable RegisterTransmitTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IMessageSender, T> topicHandler) =>
+            handlersRegistry.RegisterTopicHandler(CoreTopicType.Transmit, topicHandler);
 
         /// <summary>
         /// Registers handler for receive topic.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> TopicHandler) =>
-            handlersRegistry.RegisterReceiveTopicHandler<T>((_, message) => TopicHandler.Invoke(message));
+        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<T> topicHandler) =>
+            handlersRegistry.RegisterReceiveTopicHandler<T>((_, message) => topicHandler.Invoke(message));
 
         /// <summary>
         /// Registers handler for receive topic.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> TopicHandler) =>
-            handlersRegistry.RegisterReceiveTopicHandler<T>((_, message, token) => TopicHandler.Invoke(message, token));
+        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<T> topicHandler) =>
+            handlersRegistry.RegisterReceiveTopicHandler<T>((_, message, token) => topicHandler.Invoke(message, token));
 
         /// <summary>
         /// Registers handler for receive topic.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IMessageSender, T> TopicHandler) =>
-            handlersRegistry.RegisterTopicHandler(CoreTopicType.Receive, TopicHandler);
+        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IMessageSender, T> topicHandler) =>
+            handlersRegistry.RegisterTopicHandler(CoreTopicType.Receive, topicHandler);
 
         /// <summary>
         /// Registers handler for receive topic.
         /// </summary>
         /// <typeparam name="T">Type of message.</typeparam>
         /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="TopicHandler">Topic handler.</param>
+        /// <param name="topicHandler">Topic handler.</param>
         /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IMessageSender, T> TopicHandler) =>
-            handlersRegistry.RegisterTopicHandler(CoreTopicType.Receive, TopicHandler);
+        public static IDisposable RegisterReceiveTopicHandler<T>(this IMessageHandlersRegistry handlersRegistry, AsyncAction<IMessageSender, T> topicHandler) =>
+            handlersRegistry.RegisterTopicHandler(CoreTopicType.Receive, topicHandler);
 
         /// <summary>
         /// Registers topic handler.
