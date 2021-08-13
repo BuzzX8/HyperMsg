@@ -7,7 +7,7 @@
 
         public object TopicId { get; }
 
-        public  T Message { get; }
+        public T Message { get; }
 
         public IMessageSender MessageSender { get; }
     }
