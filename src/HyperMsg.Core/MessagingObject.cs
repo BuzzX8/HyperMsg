@@ -16,6 +16,8 @@ namespace HyperMsg
 
         protected void AddRegistrations(params IDisposable[] registrations) => this.registrations.AddRange(registrations);
 
+        protected void AddRegistrations(IEnumerable<IDisposable> registrations) => this.registrations.AddRange(registrations);
+
         public void Dispose() => registrations.ForEach(r => r.Dispose());
 
         protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
@@ -28,10 +30,7 @@ namespace HyperMsg
             return true;
         }
 
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

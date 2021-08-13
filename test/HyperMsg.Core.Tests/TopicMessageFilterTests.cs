@@ -7,43 +7,43 @@ namespace HyperMsg
 {
     public class TopicMessageFilterTests : HostFixture
     {
-        private readonly TopicMessageFilter<string> TopicFilter;
+        private readonly StringFilter topicFilter;
         private readonly Func<object, string, bool> filterFunc;
 
-        private readonly Guid TopicId = Guid.NewGuid();
+        private readonly Guid topicId = Guid.NewGuid();
         private readonly string message = Guid.NewGuid().ToString();
 
         public TopicMessageFilterTests()
         {
             filterFunc = A.Fake<Func<object, string, bool>>();
-            TopicFilter = new TopicMessageFilter<string>(MessageSender, filterFunc);
+            topicFilter = new StringFilter(MessageSender, filterFunc);
         }
 
         [Fact]
         public void SendToTopic_Extension_Invokes_Filter_Predicate()
         {
-            TopicFilter.SendToTopic(TopicId, message);
+            topicFilter.SendToTopic(topicId, message);
 
-            A.CallTo(() => filterFunc.Invoke(TopicId, message)).MustHaveHappened();
+            A.CallTo(() => filterFunc.Invoke(topicId, message)).MustHaveHappened();
         }
 
         [Fact]
         public async Task SendToTopicAsync_Extension_Invokes_Filter_Predicate()
         {
-            await TopicFilter.SendToTopicAsync(TopicId, message);
+            await topicFilter.SendToTopicAsync(topicId, message);
 
-            A.CallTo(() => filterFunc.Invoke(TopicId, message)).MustHaveHappened();
+            A.CallTo(() => filterFunc.Invoke(topicId, message)).MustHaveHappened();
         }
 
         [Fact]
         public void SendToTopic_Extension_Does_Not_Sends_Message_If_FilterFunc_Returns_False()
         {
-            A.CallTo(() => filterFunc.Invoke(TopicId, message)).Returns(false);
+            A.CallTo(() => filterFunc.Invoke(topicId, message)).Returns(false);
 
             var actualMessage = string.Empty;
-            HandlersRegistry.RegisterTopicHandler<string>(TopicId, message => actualMessage = message);
+            HandlersRegistry.RegisterTopicHandler<string>(topicId, message => actualMessage = message);
 
-            TopicFilter.SendToTopic(TopicId, message);
+            topicFilter.SendToTopic(topicId, message);
 
             Assert.Empty(actualMessage);
         }
@@ -51,12 +51,12 @@ namespace HyperMsg
         [Fact]
         public async Task SendToTopicAsync_Extension_Does_Not_Sends_Message_If_FilterFunc_Returns_False()
         {
-            A.CallTo(() => filterFunc.Invoke(TopicId, message)).Returns(false);
+            A.CallTo(() => filterFunc.Invoke(topicId, message)).Returns(false);
 
             var actualMessage = string.Empty;
-            HandlersRegistry.RegisterTopicHandler<string>(TopicId, message => actualMessage = message);
+            HandlersRegistry.RegisterTopicHandler<string>(topicId, message => actualMessage = message);
 
-            await TopicFilter.SendToTopicAsync(TopicId, message);
+            await topicFilter.SendToTopicAsync(topicId, message);
 
             Assert.Empty(actualMessage);
         }
@@ -64,12 +64,12 @@ namespace HyperMsg
         [Fact]
         public void SendToTopic_Extension_Sends_Message_If_FilterFunc_Returns_True()
         {
-            A.CallTo(() => filterFunc.Invoke(TopicId, message)).Returns(true);
+            A.CallTo(() => filterFunc.Invoke(topicId, message)).Returns(true);
 
             var actualMessage = string.Empty;
-            HandlersRegistry.RegisterTopicHandler<string>(TopicId, message => actualMessage = message);
+            HandlersRegistry.RegisterTopicHandler<string>(topicId, message => actualMessage = message);
 
-            TopicFilter.SendToTopic(TopicId, message);
+            topicFilter.SendToTopic(topicId, message);
 
             Assert.Equal(message, actualMessage);
         }
@@ -77,14 +77,24 @@ namespace HyperMsg
         [Fact]
         public async Task SendToTopicAsync_Extension_Message_If_FilterFunc_Returns_True()
         {
-            A.CallTo(() => filterFunc.Invoke(TopicId, message)).Returns(true);
+            A.CallTo(() => filterFunc.Invoke(topicId, message)).Returns(true);
 
             var actualMessage = string.Empty;
-            HandlersRegistry.RegisterTopicHandler<string>(TopicId, message => actualMessage = message);
+            HandlersRegistry.RegisterTopicHandler<string>(topicId, message => actualMessage = message);
 
-            await TopicFilter.SendToTopicAsync(TopicId, message);
+            await topicFilter.SendToTopicAsync(topicId, message);
 
             Assert.Equal(message, actualMessage);
         }
+    }
+
+    internal class StringFilter : TopicMessageFilter<string>
+    {
+        private readonly Func<object, string, bool> filterFunc;
+
+        public StringFilter(IMessageSender messageSender, Func<object, string, bool> filterFunc) : base(messageSender)
+            => this.filterFunc = filterFunc;
+
+        protected override bool HandleTopicMessage(object topicId, ref string message) => filterFunc.Invoke(topicId, message);
     }
 }

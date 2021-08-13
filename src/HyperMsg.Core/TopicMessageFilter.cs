@@ -1,49 +1,23 @@
 ﻿using HyperMsg.Messages;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class TopicMessageFilter<T> : IMessageSender
+    public abstract class TopicMessageFilter<T> : MessageFilter
     {
-        private readonly IMessageSender parentSender;
-        private readonly Func<object, T, bool> filterFunc;
+        public TopicMessageFilter(IMessageSender messageSender) : base(messageSender)
+        { }
 
-        public TopicMessageFilter(IMessageSender parentSender, Func<object, T, bool> filterFunc = null)
+        protected override bool HandleMessage<TMessage>(ref TMessage message)
         {
-            this.parentSender = parentSender;
-            this.filterFunc = filterFunc;
-        }
-
-        protected virtual bool ShoudlFilterMessage(object TopicId, T message)
-        {
-            if (filterFunc == null)
+            if (message is TopicMessage<T> topicMessage)
             {
-                return false;
+                var msg = topicMessage.Message;
+                return HandleTopicMessage(topicMessage.TopicId, ref msg);
             }
 
-            return filterFunc.Invoke(TopicId, message);
+            return false;
         }
 
-        public virtual void Send<TMessage>(TMessage message)
-        {
-            if (message is TopicMessage<T> TopicMessage && !ShoudlFilterMessage(TopicMessage.TopicId, TopicMessage.Message))
-            {
-                return;
-            }
-
-            parentSender.Send(message);
-        }
-
-        public virtual Task SendAsync<TMessage>(TMessage message, CancellationToken cancellationToken)
-        {
-            if (message is TopicMessage<T> TopicMessage && !ShoudlFilterMessage(TopicMessage.TopicId, TopicMessage.Message))
-            {
-                return Task.CompletedTask;
-            }
-
-            return parentSender.SendAsync(message, cancellationToken);
-        }
+        protected abstract bool HandleTopicMessage(object topicId, ref T message);
     }
 }
