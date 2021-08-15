@@ -18,7 +18,7 @@ namespace HyperMsg
 
         protected void AddRegistrations(IEnumerable<IDisposable> registrations) => this.registrations.AddRange(registrations);
 
-        public void Dispose() => registrations.ForEach(r => r.Dispose());
+        public virtual void Dispose() => registrations.ForEach(r => r.Dispose());
 
         protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
