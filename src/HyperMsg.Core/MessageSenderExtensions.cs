@@ -86,6 +86,12 @@ namespace HyperMsg
         public static void SendToReceiveBuffer(this IMessageSender messageSender, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true) =>
             messageSender.SendToBuffer(CoreTopicType.Receive, writeAction, invokeBufferHandler);
 
+        public static Task SendToReceiveBufferAsync(this IMessageSender messageSender, AsyncAction<IBufferWriter> writeAction, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
+            messageSender.SendToBufferAsync(CoreTopicType.Receive, writeAction, invokeBufferHandler, cancellationToken);
+
+        public static Task SendToReceiveBufferAsync(this IMessageSender messageSender, AsyncAction<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
+            messageSender.SendToBufferAsync(CoreTopicType.Receive, writeAction, invokeBufferHandler, cancellationToken);
+
         public static Task SendToReceiveBufferAsync(this IMessageSender messageSender, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
             messageSender.SendToBufferAsync(CoreTopicType.Receive, writeAction, invokeBufferHandler, cancellationToken);
 
@@ -97,10 +103,34 @@ namespace HyperMsg
 
         internal static void SendToBuffer<T>(this IMessageSender messageSender, CoreTopicType topicType, T message, bool invokeBufferHandler = true) => 
             messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(topicType, message, invokeBufferHandler));
-        
+
+        internal static void SendToBuffer(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true) =>
+            messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(topicType, writeAction, invokeBufferHandler));
+
+        internal static void SendToBuffer(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true) =>
+            messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(topicType, writeAction, invokeBufferHandler));
+
+        internal static Task SendToBufferAsync(this IMessageSender messageSender, CoreTopicType topicType, AsyncAction<IBufferWriter> writeAction, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
+            messageSender.SendAsync<BufferServiceAsyncAction>((service, token) => service.WriteToBufferAsync(topicType, writeAction, invokeBufferHandler, token), cancellationToken);
+
+        internal static Task SendToBufferAsync(this IMessageSender messageSender, CoreTopicType topicType, AsyncAction<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true, CancellationToken cancellationToken = default) =>
+            messageSender.SendAsync<BufferServiceAsyncAction>((service, token) => service.WriteToBufferAsync(topicType, writeAction, invokeBufferHandler, token), cancellationToken);
+
         internal static Task SendToBufferAsync<T>(this IMessageSender messageSender, CoreTopicType topicType, T message, bool invokeBufferHandler = true, CancellationToken _ = default)
         {
             messageSender.SendToBuffer(topicType, message, invokeBufferHandler);
+            return Task.CompletedTask;
+        }
+
+        internal static Task SendToBufferAsync(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true, CancellationToken _ = default)
+        {
+            messageSender.SendToBuffer(topicType, writeAction, invokeBufferHandler);
+            return Task.CompletedTask;
+        }
+
+        internal static Task SendToBufferAsync(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true, CancellationToken _ = default)
+        {
+            messageSender.SendToBuffer(topicType, writeAction, invokeBufferHandler);
             return Task.CompletedTask;
         }
 

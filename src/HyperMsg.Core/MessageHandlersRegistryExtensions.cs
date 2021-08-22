@@ -173,7 +173,10 @@ namespace HyperMsg
         /// <param name="serializationHandler">Handler which should serialize message into buffer.</param>
         /// <returns>Registration handle.</returns>
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializationHandler) => 
-            handlersRegistry.RegisterTransmitTopicHandler<T>((sender, message) => sender.SendToTransmitTopic<BufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
+            handlersRegistry.RegisterTransmitTopicHandler<T>((sender, message) => sender.SendToTransmitTopic<BufferServiceAction>(service => SerializeMessage(service, CoreTopicType.Transmit, message, serializationHandler)));
+
+        private static void SerializeMessage<T>(BufferService service, CoreTopicType topicType, T message, Action<IBufferWriter, T> serializationHandler) => 
+            service.WriteToBuffer(topicType, writer => serializationHandler.Invoke(writer, message));
 
         /// <summary>
         /// Registers handler which should serialize specified type of message to buffer.
@@ -183,7 +186,10 @@ namespace HyperMsg
         /// <param name="serializationHandler">Handler which should serialize message into buffer.</param>
         /// <returns>Registration handle.</returns>
         public static IDisposable RegisterSerializationHandler<T>(this IMessageHandlersRegistry handlersRegistry, Action<IBufferWriter<byte>, T> serializationHandler) =>
-            handlersRegistry.RegisterTransmitTopicHandler<T>((sender, message) => sender.SendToTransmitTopic<ByteBufferWriteAction>(writer => serializationHandler.Invoke(writer, message)));
+            handlersRegistry.RegisterTransmitTopicHandler<T>((sender, message) => sender.SendToTransmitTopic<BufferServiceAction>(service => SerializeMessage(service, CoreTopicType.Transmit, message, serializationHandler)));
+
+        private static void SerializeMessage<T>(BufferService service, CoreTopicType topicType, T message, Action<IBufferWriter<byte>, T> serializationHandler) => 
+            service.WriteToBuffer(topicType, writer => serializationHandler.Invoke(writer, message));
 
         #endregion
 

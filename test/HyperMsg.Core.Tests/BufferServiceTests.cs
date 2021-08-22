@@ -145,6 +145,44 @@ namespace HyperMsg
         }
 
         [Fact]
+        public void SendToReceiveBuffer_Invokes_Async_Write_Delegate_For_Buffer()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            Task WriteAction(IBufferWriter writer, CancellationToken _)
+            {
+                writer.Write(expected);
+                return Task.CompletedTask;
+            }
+
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
+            MessageSender.SendToReceiveBufferAsync(WriteAction);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void SendToReceiveBuffer_Invokes_Async_Write_Delegate_For_Buffer_Adapter()
+        {
+            var expected = Guid.NewGuid().ToByteArray();
+            var actual = default(byte[]);
+
+            Task WriteAction(IBufferWriter<byte> writer, CancellationToken _)
+            {
+                writer.Write(expected);
+                return Task.CompletedTask;
+            }
+
+            HandlersRegistry.RegisterReceiveBufferHandler(reader => actual = reader.Read().ToArray());
+            MessageSender.SendToReceiveBufferAsync(WriteAction);
+
+            Assert.NotNull(actual);
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public async Task SendToReceiveBufferAsync_Invokes_Write_Delegate_For_Buffer()
         {
             var expected = Guid.NewGuid().ToByteArray();
