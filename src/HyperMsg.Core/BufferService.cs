@@ -2,6 +2,8 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -23,6 +25,8 @@ namespace HyperMsg
         protected override IEnumerable<IDisposable> GetRegistrationHandles()
         {
             yield return HandlersRegistry.RegisterHandler<BufferServiceAction>(action => action.Invoke(this));
+            yield return HandlersRegistry.RegisterTransmitTopicHandler<BufferServiceAction>(action => action.Invoke(this));
+            yield return HandlersRegistry.RegisterHandler<BufferServiceAsyncAction>((action, token) => action.Invoke(this, token));
 
             yield return HandlersRegistry.RegisterTransmitTopicHandler<Memory<byte>>(memory => WriteToBuffer(CoreTopicType.Transmit, memory));
             yield return HandlersRegistry.RegisterTransmitTopicHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(CoreTopicType.Transmit, memory));
@@ -44,6 +48,37 @@ namespace HyperMsg
             (var buffer, var bufferLock) = GetBufferWithLock(topicType);
 
             WriteToBuffer(topicType, message, buffer, bufferLock, flushBuffer);
+        }
+
+        internal void WriteToBuffer(CoreTopicType topicType, Action<IBufferWriter> writeAction, bool flushBuffer = true)
+        {
+            (var buffer, var bufferLock) = GetBufferWithLock(topicType);
+
+            lock(bufferLock)
+            {
+                writeAction.Invoke(buffer.Writer);
+                
+                if (flushBuffer)
+                {
+                    FlushBuffer(topicType);
+                }
+            }
+        }
+
+        internal void WriteToBuffer(CoreTopicType topicType, Action<IBufferWriter<byte>> writeAction, bool flushBuffer = true)
+        {
+            (_, var bufferLock) = GetBufferWithLock(topicType);
+            var bufferWriter = GetBufferWriterAdapter(topicType);
+
+            lock (bufferLock)
+            {
+                writeAction.Invoke(bufferWriter);
+
+                if (flushBuffer)
+                {
+                    FlushBuffer(topicType);
+                }
+            }
         }
 
         private (IBuffer buffer, object bufferLock) GetBufferWithLock(CoreTopicType topicType)
@@ -84,23 +119,23 @@ namespace HyperMsg
                         WriteStream(writer, stream);
                         break;
 
-                    case Action<IBufferWriter> writeAction:
-                        writeAction.Invoke(writer);
-                        break;
+                    //case Action<IBufferWriter> writeAction:
+                    //    writeAction.Invoke(writer);
+                    //    break;
 
-                    case Action<IBufferWriter<byte>> writeAction:
-                        var adapter = GetBufferWriterAdapter(topicType);
-                        writeAction.Invoke(adapter);
-                        break;
+                    //case Action<IBufferWriter<byte>> writeAction:
+                    //    var adapter = GetBufferWriterAdapter(topicType);
+                    //    writeAction.Invoke(adapter);
+                    //    break;
 
-                    case BufferWriteAction writeAction:
-                        writeAction.Invoke(writer);
-                        break;
+                    //case BufferWriteAction writeAction:
+                    //    writeAction.Invoke(writer);
+                    //    break;
 
-                    case ByteBufferWriteAction writeAction:
-                        adapter = GetBufferWriterAdapter(topicType);
-                        writeAction.Invoke(adapter);
-                        break;
+                    //case ByteBufferWriteAction writeAction:
+                    //    adapter = GetBufferWriterAdapter(topicType);
+                    //    writeAction.Invoke(adapter);
+                    //    break;
 
                     default:
                         throw new NotSupportedException();
@@ -143,4 +178,6 @@ namespace HyperMsg
     internal delegate void ByteBufferWriteAction(IBufferWriter<byte> bufferWriter);
 
     internal delegate void BufferServiceAction(BufferService bufferService);
+
+    internal delegate Task BufferServiceAsyncAction(BufferService bufferService, CancellationToken cancellationToken);
 }

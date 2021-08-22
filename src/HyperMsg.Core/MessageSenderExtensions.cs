@@ -97,10 +97,28 @@ namespace HyperMsg
 
         internal static void SendToBuffer<T>(this IMessageSender messageSender, CoreTopicType topicType, T message, bool invokeBufferHandler = true) => 
             messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(topicType, message, invokeBufferHandler));
-        
+
+        internal static void SendToBuffer(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true) =>
+            messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(topicType, writeAction, invokeBufferHandler));
+
+        internal static void SendToBuffer(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true) =>
+            messageSender.Send<BufferServiceAction>(service => service.WriteToBuffer(topicType, writeAction, invokeBufferHandler));
+
         internal static Task SendToBufferAsync<T>(this IMessageSender messageSender, CoreTopicType topicType, T message, bool invokeBufferHandler = true, CancellationToken _ = default)
         {
             messageSender.SendToBuffer(topicType, message, invokeBufferHandler);
+            return Task.CompletedTask;
+        }
+
+        internal static Task SendToBufferAsync(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter> writeAction, bool invokeBufferHandler = true, CancellationToken _ = default)
+        {
+            messageSender.SendToBuffer(topicType, writeAction, invokeBufferHandler);
+            return Task.CompletedTask;
+        }
+
+        internal static Task SendToBufferAsync(this IMessageSender messageSender, CoreTopicType topicType, Action<IBufferWriter<byte>> writeAction, bool invokeBufferHandler = true, CancellationToken _ = default)
+        {
+            messageSender.SendToBuffer(topicType, writeAction, invokeBufferHandler);
             return Task.CompletedTask;
         }
 
