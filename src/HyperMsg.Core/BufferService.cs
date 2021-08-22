@@ -33,8 +33,6 @@ namespace HyperMsg
             yield return HandlersRegistry.RegisterTransmitTopicHandler<ArraySegment<byte>>(segment => WriteToBuffer(CoreTopicType.Transmit, segment));
             yield return HandlersRegistry.RegisterTransmitTopicHandler<byte[]>(array => WriteToBuffer(CoreTopicType.Transmit, array));
             yield return HandlersRegistry.RegisterTransmitTopicHandler<Stream>(stream => WriteToBuffer(CoreTopicType.Transmit, stream));
-            yield return HandlersRegistry.RegisterTransmitTopicHandler<BufferWriteAction>(action => WriteToBuffer(CoreTopicType.Transmit, action));            
-            yield return HandlersRegistry.RegisterTransmitTopicHandler<ByteBufferWriteAction>(action => WriteToBuffer(CoreTopicType.Transmit, action));
 
             yield return HandlersRegistry.RegisterReceiveTopicHandler<Memory<byte>>(memory => WriteToBuffer(CoreTopicType.Receive, memory));
             yield return HandlersRegistry.RegisterReceiveTopicHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(CoreTopicType.Receive, memory));
@@ -81,6 +79,49 @@ namespace HyperMsg
             }
         }
 
+        internal async Task WriteToBufferAsync(CoreTopicType topicType, AsyncAction<IBufferWriter> writeAction, bool flushBuffer = true, CancellationToken cancellationToken = default)
+        {
+            (var buffer, var bufferLock) = GetBufferWithLock(topicType);
+                        
+            Monitor.Enter(bufferLock);
+
+            try
+            {
+                await writeAction.Invoke(buffer.Writer, cancellationToken);
+
+                if (flushBuffer)
+                {
+                    FlushBuffer(topicType);
+                }
+            }
+            finally
+            {
+                Monitor.Exit(bufferLock);
+            }
+        }
+
+        internal async Task WriteToBufferAsync(CoreTopicType topicType, AsyncAction<IBufferWriter<byte>> writeAction, bool flushBuffer = true, CancellationToken cancellationToken = default)
+        {
+            (var _, var bufferLock) = GetBufferWithLock(topicType);
+            var bufferWriter = GetBufferWriterAdapter(topicType);
+
+            Monitor.Enter(bufferWriter);
+
+            try
+            {
+                await writeAction.Invoke(bufferWriter, cancellationToken);
+
+                if (flushBuffer)
+                {
+                    FlushBuffer(topicType);
+                }
+            }
+            finally
+            {
+                Monitor.Exit(bufferLock);
+            }
+        }
+
         private (IBuffer buffer, object bufferLock) GetBufferWithLock(CoreTopicType topicType)
         {
             return topicType switch
@@ -119,24 +160,6 @@ namespace HyperMsg
                         WriteStream(writer, stream);
                         break;
 
-                    //case Action<IBufferWriter> writeAction:
-                    //    writeAction.Invoke(writer);
-                    //    break;
-
-                    //case Action<IBufferWriter<byte>> writeAction:
-                    //    var adapter = GetBufferWriterAdapter(topicType);
-                    //    writeAction.Invoke(adapter);
-                    //    break;
-
-                    //case BufferWriteAction writeAction:
-                    //    writeAction.Invoke(writer);
-                    //    break;
-
-                    //case ByteBufferWriteAction writeAction:
-                    //    adapter = GetBufferWriterAdapter(topicType);
-                    //    writeAction.Invoke(adapter);
-                    //    break;
-
                     default:
                         throw new NotSupportedException();
                 }
@@ -172,10 +195,6 @@ namespace HyperMsg
             };
         }
     }
-
-    internal delegate void BufferWriteAction(IBufferWriter bufferWriter);
-
-    internal delegate void ByteBufferWriteAction(IBufferWriter<byte> bufferWriter);
 
     internal delegate void BufferServiceAction(BufferService bufferService);
 
