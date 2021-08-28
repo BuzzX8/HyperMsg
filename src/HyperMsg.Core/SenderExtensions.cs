@@ -18,16 +18,16 @@ namespace HyperMsg
             sender.SendAsync(new Message<THeader, TBody>(header, body), cancellationToken);
 
         public static void SendCommand<T>(this ISender sender, T command) =>
-            sender.SendMessage<BasicMessageType, T>(BasicMessageType.Command, command);
+            sender.SendMessage(BasicMessageType.Command, command);
 
         public static Task SendCommandAsync<T>(this ISender sender, T command, CancellationToken cancellationToken = default) =>
-            sender.SendMessageAsync<BasicMessageType, T>(BasicMessageType.Command, command, cancellationToken);
+            sender.SendMessageAsync(BasicMessageType.Command, command, cancellationToken);
 
         public static void SendEvent<T>(this ISender sender, T @event) =>
-            sender.SendMessage<BasicMessageType, T>(BasicMessageType.Event, @event);
+            sender.SendMessage(BasicMessageType.Event, @event);
 
         public static Task SendEventAsync<T>(this ISender sender, T @event, CancellationToken cancellationToken = default) =>
-            sender.SendMessageAsync<BasicMessageType, T>(BasicMessageType.Event, @event, cancellationToken);
+            sender.SendMessageAsync(BasicMessageType.Event, @event, cancellationToken);
 
         #endregion
 
