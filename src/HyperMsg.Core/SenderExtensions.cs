@@ -31,6 +31,16 @@ namespace HyperMsg
 
         #endregion
 
+        #region Transfering extensions
+
+        public static void SendTransmitCommand<T>(this ISender sender, T data) =>
+            sender.SendCommand(new Message<BasicMessageType, T>(BasicMessageType.Transmit, data));
+        
+        public static Task SendTransmitCommandAsync<T>(this ISender sender, T data, CancellationToken cancellationToken = default) =>
+            sender.SendCommandAsync(new Message<BasicMessageType, T>(BasicMessageType.Transmit, data));
+
+        #endregion
+
         #region Buffer extensions
 
         /// <summary>

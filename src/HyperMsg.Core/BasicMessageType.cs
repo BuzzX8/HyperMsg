@@ -3,6 +3,9 @@ namespace HyperMsg
     internal enum BasicMessageType
     {
         Command,
-        Event
+        Event,
+        Transmit,
+        Receive,
+        Transport
     }
 }
