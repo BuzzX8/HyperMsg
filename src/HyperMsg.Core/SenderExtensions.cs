@@ -11,23 +11,23 @@ namespace HyperMsg
     {
         #region Basic extensions
 
-        public static void SendMessage<T>(this ISender sender, T data, object id = null) =>
-            sender.Send(new Message<T>(data, id));
+        public static void SendMessage<THeader, TBody>(this ISender sender, THeader header, TBody body) =>
+            sender.Send(new Message<THeader, TBody>(header, body));
 
-        public static Task SendMessageAsync<T>(this ISender sender, T data, object id = null, CancellationToken cancellationToken = default) =>
-            sender.SendAsync(new Message<T>(data, id), cancellationToken);
+        public static Task SendMessageAsync<THeader, TBody>(this ISender sender, THeader header, TBody body, CancellationToken cancellationToken = default) =>
+            sender.SendAsync(new Message<THeader, TBody>(header, body), cancellationToken);
 
         public static void SendCommand<T>(this ISender sender, T command) =>
-            sender.SendMessage<T>(command, BasicMessageType.Command);
+            sender.SendMessage<BasicMessageType, T>(BasicMessageType.Command, command);
 
         public static Task SendCommandAsync<T>(this ISender sender, T command, CancellationToken cancellationToken = default) =>
-            sender.SendMessageAsync<T>(command, BasicMessageType.Command, cancellationToken);
+            sender.SendMessageAsync<BasicMessageType, T>(BasicMessageType.Command, command, cancellationToken);
 
         public static void SendEvent<T>(this ISender sender, T @event) =>
-            sender.SendMessage<T>(@event, BasicMessageType.Event);
+            sender.SendMessage<BasicMessageType, T>(BasicMessageType.Event, @event);
 
         public static Task SendEventAsync<T>(this ISender sender, T @event, CancellationToken cancellationToken = default) =>
-            sender.SendMessageAsync<T>(@event, BasicMessageType.Event, cancellationToken);
+            sender.SendMessageAsync<BasicMessageType, T>(BasicMessageType.Event, @event, cancellationToken);
 
         #endregion
 

@@ -5,123 +5,61 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public static class MessageHandlersRegistryExtensions
+    public static class HandlersRegistryExtensions
     {
-        /// <summary>
-        /// Registers handler which will be invoked if predicate returns true for message.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="predicate">Message predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked if predicate returns true.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, Func<T, bool> predicate, Action messageHandler) =>
-            handlersRegistry.RegisterHandler<T>(m =>
-            {
-                if (predicate.Invoke(m))
-                {
-                    messageHandler.Invoke();
-                }
-            });
+        #region Basic extensions
+        
+        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, Action<THeader, TBody> messageHandler) =>
+            handlersRegistry.RegisterHandler<Message<THeader, TBody>>(m => messageHandler.Invoke(m.Header, m.Body));
 
-        /// <summary>
-        /// Registers handler which will be invoked if predicate returns true for message.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="predicate">Message predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked if predicate returns true.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, Func<T, bool> predicate, Action<T> messageHandler) =>
-            handlersRegistry.RegisterHandler<T>(m =>
-            {
-                if (predicate.Invoke(m))
-                {
-                    messageHandler.Invoke(m);
-                }
-            });
+        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, AsyncAction<THeader, TBody> messageHandler) =>
+            handlersRegistry.RegisterHandler<Message<THeader, TBody>>((m, t) => messageHandler.Invoke(m.Header, m.Body, t));
 
-        /// <summary>
-        /// Registers handler which will be invoked if predicate returns true for message.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="predicate">Message predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked if predicate returns true.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, Func<T, bool> predicate, AsyncAction messageHandler) =>
-            handlersRegistry.RegisterHandler<T>((m, t) =>
+        public static IDisposable RegisterCommandHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> commandHandler) =>
+            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body) =>
             {
-                if (predicate.Invoke(m))
+                if (!Equals(type, BasicMessageType.Command))
                 {
-                    return messageHandler.Invoke(t);
+                    return;
                 }
 
-                return Task.CompletedTask;
+                commandHandler.Invoke(body);
             });
 
-        /// <summary>
-        /// Registers handler which will be invoked if predicate returns true for message.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="predicate">Message predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked if predicate returns true.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, Func<T, bool> predicate, AsyncAction<T> messageHandler) =>
-            handlersRegistry.RegisterHandler<T>((m, t) =>
+        public static IDisposable RegisterCommandHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> commandHandler) =>
+            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body, token) =>
             {
-                if (predicate.Invoke(m))
+                if (!Equals(type, BasicMessageType.Command))
                 {
-                    return messageHandler.Invoke(m, t);
+                    return Task.CompletedTask;
                 }
 
-                return Task.CompletedTask;
+                return commandHandler.Invoke(body, token);
             });
 
-        /// <summary>
-        /// Registers handler which will be invoked for equal messages.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="message">Message instance which Equals method will be used as predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked for messages equal to provided message instance.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, T message, Action messageHandler) =>
-            handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
+        public static IDisposable RegisterEventHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> eventHandler) =>
+            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body) =>
+            {
+                if (!Equals(type, BasicMessageType.Event))
+                {
+                    return;
+                }
 
-        /// <summary>
-        /// Registers handler which will be invoked for equal messages.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="message">Message instance which Equals method will be used as predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked for messages equal to provided message instance.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, T message, Action<T> messageHandler) =>
-            handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+                eventHandler.Invoke(body);
+            });
 
-        /// <summary>
-        /// Registers handler which will be invoked for equal messages.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="message">Message instance which Equals method will be used as predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked for messages equal to provided message instance.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, T message, AsyncAction messageHandler) =>
-            handlersRegistry.RegisterHandler<T>(m => m.Equals(message), messageHandler);
+        public static IDisposable RegisterEventHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> eventHandler) =>
+            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body, token) =>
+            {
+                if (!Equals(type, BasicMessageType.Event))
+                {
+                    return Task.CompletedTask;
+                }
 
-        /// <summary>
-        /// Registers handler which will be invoked for equal messages.
-        /// </summary>
-        /// <typeparam name="T">Type of message.</typeparam>
-        /// <param name="handlersRegistry">Message handlers registry.</param>
-        /// <param name="message">Message instance which Equals method will be used as predicate.</param>
-        /// <param name="messageHandler">Message handler which will be invoked for messages equal to provided message instance.</param>
-        /// <returns>Registration handle.</returns>
-        public static IDisposable RegisterHandler<T>(this IHandlersRegistry handlersRegistry, T message, AsyncAction<T> messageHandler) =>
-            handlersRegistry.RegisterHandler(m => m.Equals(message), messageHandler);
+                return eventHandler.Invoke(body, token);
+            });
+
+        #endregion 
 
         #region Buffer extensions
 

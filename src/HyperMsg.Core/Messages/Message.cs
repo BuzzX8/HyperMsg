@@ -1,11 +1,11 @@
 namespace HyperMsg.Messages
 {
-    internal struct Message<T>
+    internal struct Message<THeader, TBody>
     {
-        internal Message(T data, object id = null) => (Data, Id) = (data, id);
+        internal Message(THeader header, TBody body) => (Header, Body) = (header, body);
 
-        public object Id { get; }
+        public THeader Header { get; }
 
-        public T Data { get; }
+        public TBody Body { get; }
     }
 }
