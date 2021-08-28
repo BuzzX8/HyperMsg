@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public abstract class MessageFilter : IMessageSender
+    public abstract class MessageFilter : ISender
     {
-        private readonly IMessageSender messageSender;
+        private readonly ISender messageSender;
 
-        protected MessageFilter(IMessageSender messageSender) => 
+        protected MessageFilter(ISender messageSender) => 
             this.messageSender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
 
         public virtual void Send<T>(T message)

@@ -4,7 +4,7 @@ namespace HyperMsg
 {
     public abstract class TopicMessageFilter<T> : MessageFilter
     {
-        public TopicMessageFilter(IMessageSender messageSender) : base(messageSender)
+        public TopicMessageFilter(ISender messageSender) : base(messageSender)
         { }
 
         protected override bool HandleMessage<TMessage>(ref TMessage message)

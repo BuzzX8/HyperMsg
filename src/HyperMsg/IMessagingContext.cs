@@ -8,11 +8,11 @@
         /// <summary>
         /// Message sender.
         /// </summary>
-        IMessageSender Sender { get; }
+        ISender Sender { get; }
 
         /// <summary>
         /// Message handlers registry.
         /// </summary>
-        IMessageHandlersRegistry HandlersRegistry { get; }
+        IHandlersRegistry HandlersRegistry { get; }
     }
 }

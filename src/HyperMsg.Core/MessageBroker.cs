@@ -9,7 +9,7 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for MessageSender and MessageHandlerRegistry
     /// </summary>
-    public class MessageBroker : IMessageSender, IMessageHandlersRegistry, IMessagingContext
+    public class MessageBroker : ISender, IHandlersRegistry, IMessagingContext
     {
         private class Subscription : IDisposable
         {
@@ -42,9 +42,9 @@ namespace HyperMsg
         private readonly ConcurrentDictionary<Type, Delegate> messageHandlers = new();        
         private readonly object sync = new();
 
-        public IMessageSender Sender => this;
+        public ISender Sender => this;
 
-        public IMessageHandlersRegistry HandlersRegistry => this;
+        public IHandlersRegistry HandlersRegistry => this;
 
         public IDisposable RegisterHandler<T>(Action<T> messageHandler) => RegisterHandler<T>((m, t) =>
         {

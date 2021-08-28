@@ -65,8 +65,8 @@ namespace HyperMsg
         public static IServiceCollection AddMessageBroker(this IServiceCollection services)
         {
             var broker = new MessageBroker();
-            return services.AddSingleton<IMessageSender>(broker)
-                .AddSingleton<IMessageHandlersRegistry>(broker)
+            return services.AddSingleton<ISender>(broker)
+                .AddSingleton<IHandlersRegistry>(broker)
                 .AddSingleton<IMessagingContext>(broker);
         }
     }

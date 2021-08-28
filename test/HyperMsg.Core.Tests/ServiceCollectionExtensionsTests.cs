@@ -14,8 +14,8 @@ namespace HyperMsg
             services.AddMessageBroker();
             var provider = services.BuildServiceProvider();
 
-            var sender = provider.GetService<IMessageSender>();
-            var observable = provider.GetService<IMessageHandlersRegistry>();
+            var sender = provider.GetService<ISender>();
+            var observable = provider.GetService<IHandlersRegistry>();
             var context = provider.GetService<IMessagingContext>();
 
             Assert.NotNull(sender);
