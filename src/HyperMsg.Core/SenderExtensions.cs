@@ -7,8 +7,30 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public static class MessageSenderExtensions
+    public static class SenderExtensions
     {
+        #region Basic extensions
+
+        public static void SendMessage<T>(this ISender sender, T data, object id = null) =>
+            sender.Send(new Message<T>(data, id));
+
+        public static Task SendMessageAsync<T>(this ISender sender, T data, object id = null, CancellationToken cancellationToken = default) =>
+            sender.SendAsync(new Message<T>(data, id), cancellationToken);
+
+        public static void SendCommand<T>(this ISender sender, T command) =>
+            sender.SendMessage<T>(command, BasicMessageType.Command);
+
+        public static Task SendCommandAsync<T>(this ISender sender, T command, CancellationToken cancellationToken = default) =>
+            sender.SendMessageAsync<T>(command, BasicMessageType.Command, cancellationToken);
+
+        public static void SendEvent<T>(this ISender sender, T @event) =>
+            sender.SendMessage<T>(@event, BasicMessageType.Event);
+
+        public static Task SendEventAsync<T>(this ISender sender, T @event, CancellationToken cancellationToken = default) =>
+            sender.SendMessageAsync<T>(@event, BasicMessageType.Event, cancellationToken);
+
+        #endregion
+
         #region Buffer extensions
 
         /// <summary>
