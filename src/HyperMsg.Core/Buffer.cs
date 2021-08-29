@@ -51,7 +51,7 @@ namespace HyperMsg
 
         ReadOnlySequence<byte> IBufferReader.Read() => new(CommitedMemory);
 
-        void IBufferWriter.Advance(int count)
+        void IBufferWriter<byte>.Advance(int count)
         {
             if (count < 0)
             {
@@ -69,7 +69,7 @@ namespace HyperMsg
             }
         }
 
-        Memory<byte> IBufferWriter.GetMemory(int sizeHint)
+        public Memory<byte> GetMemory(int sizeHint)
         {
             if (sizeHint < 0)
             {
@@ -96,7 +96,7 @@ namespace HyperMsg
             }
         }
 
-        Span<byte> IBufferWriter.GetSpan(int sizeHint)
+        public Span<byte> GetSpan(int sizeHint)
         {
             var writer = (IBufferWriter)this;
             return writer.GetMemory(sizeHint).Span;
