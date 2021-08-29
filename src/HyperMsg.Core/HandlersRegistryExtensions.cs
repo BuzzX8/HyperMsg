@@ -85,6 +85,28 @@ namespace HyperMsg
                 return commandHandler.Invoke(message.Body, token);
             });
 
+        public static IDisposable RegisterReceiveEventHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> commandHandler) =>
+            handlersRegistry.RegisterEventHandler<Message<BasicMessageType, T>>(message =>
+            {
+                if (!Equals(message.Header, BasicMessageType.Receive))
+                {
+                    return;
+                }
+
+                commandHandler.Invoke(message.Body);
+            });
+
+        public static IDisposable RegisterReceiveEventHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> commandHandler) =>
+            handlersRegistry.RegisterEventHandler<Message<BasicMessageType, T>>((message, token) =>
+            {
+                if (!Equals(message.Header, BasicMessageType.Receive))
+                {
+                    return Task.CompletedTask;
+                }
+
+                return commandHandler.Invoke(message.Body, token);
+            });
+
         #endregion
 
         #region Buffer extensions

@@ -39,6 +39,12 @@ namespace HyperMsg
         public static Task SendTransmitCommandAsync<T>(this ISender sender, T data, CancellationToken cancellationToken = default) =>
             sender.SendCommandAsync(new Message<BasicMessageType, T>(BasicMessageType.Transmit, data));
 
+        public static void SendReceiveEvent<T>(this ISender sender, T data) =>
+            sender.SendEvent(new Message<BasicMessageType, T>(BasicMessageType.Receive, data));
+        
+        public static Task SendReceiveEventAsync<T>(this ISender sender, T data, CancellationToken cancellationToken = default) =>
+            sender.SendEventAsync(new Message<BasicMessageType, T>(BasicMessageType.Receive, data), cancellationToken);
+
         #endregion
 
         #region Buffer extensions

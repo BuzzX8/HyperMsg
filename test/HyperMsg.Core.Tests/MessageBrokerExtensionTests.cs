@@ -92,16 +92,37 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendTransmitCommandAsync_Invokes_Handler_Registered_With_RegisterTransmitCommandHandler()
+        public async Task SendTransmitCommandAsync_Invokes_Handler_Registered_With_RegisterTransmitCommandHandler()
         {
             var commandHandler = A.Fake<AsyncAction<Guid>>();
-            broker.RegisterCommandHandler(commandHandler);
+            broker.RegisterTransmitCommandHandler(commandHandler);
 
-            broker.SendCommand(message);
+            await broker.SendTransmitCommandAsync(message);
 
             A.CallTo(() => commandHandler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
         }
 
+        [Fact]
+        public void SendReceiveEvent_Invokes_Handler_Registered_With_RegisterReceiveEventHandler()
+        {
+            var commandHandler = A.Fake<Action<Guid>>();
+            broker.RegisterReceiveEventHandler(commandHandler);
+
+            broker.SendReceiveEvent(message);
+
+            A.CallTo(() => commandHandler.Invoke(message)).MustHaveHappened();
+        }
+
+        [Fact]
+        public async Task SendReceiveEventAsync_Invokes_Handler_Registered_With_RegisterReceiveEventHandler()
+        {
+            var commandHandler = A.Fake<AsyncAction<Guid>>();
+            broker.RegisterReceiveEventHandler(commandHandler);
+
+            await broker.SendReceiveEventAsync(message);
+
+            A.CallTo(() => commandHandler.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
+        }
 
         [Fact]
         public void SendToTopic_Invokes_Handler_Registered_With_RegisterTopicHandler()
