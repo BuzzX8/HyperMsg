@@ -92,7 +92,7 @@ namespace HyperMsg
     {
         private readonly Func<object, string, bool> filterFunc;
 
-        public StringFilter(IMessageSender messageSender, Func<object, string, bool> filterFunc) : base(messageSender)
+        public StringFilter(ISender messageSender, Func<object, string, bool> filterFunc) : base(messageSender)
             => this.filterFunc = filterFunc;
 
         protected override bool HandleTopicMessage(object topicId, ref string message) => filterFunc.Invoke(topicId, message);

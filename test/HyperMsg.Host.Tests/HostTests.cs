@@ -62,7 +62,7 @@ namespace HyperMsg
         {
             var host = Host.CreateDefault();
 
-            var sender = host.GetRequiredService<IMessageSender>();
+            var sender = host.GetRequiredService<ISender>();
 
             Assert.NotNull(sender);
         }

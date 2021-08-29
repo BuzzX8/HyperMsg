@@ -8,8 +8,8 @@ namespace HyperMsg
 
         protected IMessagingContext MessagingContext { get; }
 
-        protected IMessageHandlersRegistry HandlersRegistry => MessagingContext.HandlersRegistry;
+        protected IHandlersRegistry HandlersRegistry => MessagingContext.HandlersRegistry;
 
-        protected IMessageSender Sender => MessagingContext.Sender;
+        protected ISender Sender => MessagingContext.Sender;
     }
 }

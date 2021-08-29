@@ -64,8 +64,8 @@ namespace HyperMsg
         {
         }
 
-        public IMessageSender MessageSender => Sender;
+        public ISender MessageSender => Sender;
 
-        public IMessageHandlersRegistry MessageHandlersRegistry => HandlersRegistry;
+        public IHandlersRegistry MessageHandlersRegistry => HandlersRegistry;
     }
 }
