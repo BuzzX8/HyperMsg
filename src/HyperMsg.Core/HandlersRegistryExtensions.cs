@@ -15,49 +15,39 @@ namespace HyperMsg
         public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, AsyncAction<THeader, TBody> messageHandler) =>
             handlersRegistry.RegisterHandler<Message<THeader, TBody>>((m, t) => messageHandler.Invoke(m.Header, m.Body, t));
 
-        public static IDisposable RegisterCommandHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> commandHandler) =>
-            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body) =>
+        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, THeader header, Action<TBody> messageHandler) =>
+            handlersRegistry.RegisterMessageHandler<THeader, TBody>((h, b) =>
             {
-                if (!Equals(type, BasicMessageType.Command))
+                if (!Equals(header, h))
                 {
                     return;
                 }
 
-                commandHandler.Invoke(body);
+                messageHandler.Invoke(b);
             });
+
+        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, THeader header, AsyncAction<TBody> messageHandler) =>
+            handlersRegistry.RegisterMessageHandler<THeader, TBody>((h, b, t) =>
+            {
+                if (!Equals(header, h))
+                {
+                    return Task.CompletedTask;
+                }
+
+                return messageHandler.Invoke(b, t);
+            });
+
+        public static IDisposable RegisterCommandHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> commandHandler) =>
+            handlersRegistry.RegisterMessageHandler(BasicMessageType.Command, commandHandler);
 
         public static IDisposable RegisterCommandHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> commandHandler) =>
-            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body, token) =>
-            {
-                if (!Equals(type, BasicMessageType.Command))
-                {
-                    return Task.CompletedTask;
-                }
-
-                return commandHandler.Invoke(body, token);
-            });
+            handlersRegistry.RegisterMessageHandler(BasicMessageType.Command, commandHandler);
 
         public static IDisposable RegisterEventHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> eventHandler) =>
-            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body) =>
-            {
-                if (!Equals(type, BasicMessageType.Event))
-                {
-                    return;
-                }
-
-                eventHandler.Invoke(body);
-            });
+            handlersRegistry.RegisterMessageHandler(BasicMessageType.Event, eventHandler);
 
         public static IDisposable RegisterEventHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> eventHandler) =>
-            handlersRegistry.RegisterMessageHandler<BasicMessageType, T>((type, body, token) =>
-            {
-                if (!Equals(type, BasicMessageType.Event))
-                {
-                    return Task.CompletedTask;
-                }
-
-                return eventHandler.Invoke(body, token);
-            });
+            handlersRegistry.RegisterMessageHandler(BasicMessageType.Event, eventHandler);
 
         #endregion
 
