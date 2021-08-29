@@ -149,6 +149,16 @@ namespace HyperMsg
 
         #endregion
 
+        #region Filter extensions
+
+        public static IDisposable RegisterFilter<T>(this IHandlersRegistry handlersRegistry, Action<ISender, T> filterHandler) =>
+            handlersRegistry.RegisterMessageHandler(filterHandler);
+        
+        public static IDisposable RegisterFilter<T>(this IHandlersRegistry handlersRegistry, AsyncAction<ISender, T> filterHandler) =>
+            handlersRegistry.RegisterMessageHandler(filterHandler);
+
+        #endregion
+
         #region Serialization extensions
 
         /// <summary>
