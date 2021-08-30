@@ -1,5 +1,4 @@
-﻿using HyperMsg.Messages;
-using System;
+﻿using System;
 using System.Buffers;
 using System.IO;
 using System.Threading;
@@ -67,85 +66,6 @@ namespace HyperMsg
         
         internal static Task SendActionRequestToBufferAsync(this ISender sender, BasicMessageType type, AsyncAction<IBuffer> action, CancellationToken cancellationToken = default) =>
             sender.SendMessageAsync(type, action);
-
-        #endregion
-
-        #region Topic extensions
-
-
-        /// <summary>
-        /// Sends message to receive topic.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        public static void SendToTransportTopic<T>(this ISender messageSender, T message) => messageSender.SendToTopic(CoreTopicType.Transport, message);
-
-        /// <summary>
-        /// Sends message to receive topic asynchronously.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        public static Task SendToTransportTopicAsync<T>(this ISender messageSender, T message, CancellationToken cancellationToken = default) =>
-            messageSender.SendToTopicAsync(CoreTopicType.Transport, message, cancellationToken);
-
-        /// <summary>
-        /// Sends message to transmit topic.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        public static void SendToTransmitTopic<T>(this ISender messageSender, T message) => messageSender.SendToTopic(CoreTopicType.Transmit, message);
-
-        /// <summary>
-        /// Sends message to transmit topic asynchronously.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        public static Task SendToTransmitTopicAsync<T>(this ISender messageSender, T message, CancellationToken cancellationToken = default) =>
-            messageSender.SendToTopicAsync(CoreTopicType.Transmit, message, cancellationToken);
-
-        /// <summary>
-        /// Sends message to receive topic.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        public static void SendToReceiveTopic<T>(this ISender messageSender, T message) => messageSender.SendToTopic(CoreTopicType.Receive, message);
-
-        /// <summary>
-        /// Sends message to receive topic asynchronously.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        public static Task SendToReceiveTopicAsync<T>(this ISender messageSender, T message, CancellationToken cancellationToken = default) =>
-            messageSender.SendToTopicAsync(CoreTopicType.Receive, message, cancellationToken);
-
-        /// <summary>
-        /// Sends message to topic.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="topicId">Topic ID.</param>
-        /// <param name="message">Message to send.</param>
-        public static void SendToTopic<T>(this ISender messageSender, object topicId, T message) => 
-            messageSender.Send(new TopicMessage<T>(topicId, message, messageSender));
-
-        /// <summary>
-        /// Sends message to topic asynchronously.
-        /// </summary>
-        /// <typeparam name="T">Type of message to send.</typeparam>
-        /// <param name="messageSender">Message sender.</param>
-        /// <param name="topicId">Topic ID.</param>
-        /// <param name="message">Message to send.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>        
-        public static Task SendToTopicAsync<T>(this ISender messageSender, object topicId, T message, CancellationToken cancellationToken = default) =>
-            messageSender.SendAsync(new TopicMessage<T>(topicId, message, messageSender), cancellationToken);
 
         #endregion
     }

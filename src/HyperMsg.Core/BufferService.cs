@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,10 +11,8 @@ namespace HyperMsg
         private readonly object transmittingBufferLock = new();
         private readonly object receivingBufferLock = new();
 
-        public BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext)
-        {
+        public BufferService(IMessagingContext messagingContext, IBufferContext bufferContext) : base(messagingContext) => 
             this.bufferContext = bufferContext;
-        }
 
         protected override IEnumerable<IDisposable> GetRegistrationHandles()
         {
@@ -110,22 +107,12 @@ namespace HyperMsg
         //     }
         // }
 
-        private static void WriteStream(IBufferWriter writer, Stream stream)
-        {
-            var buffer = writer.GetMemory();
-            var bytesRead = stream.Read(buffer.Span);
+        // private static void WriteStream(IBufferWriter writer, Stream stream)
+        // {
+        //     var buffer = writer.GetMemory();
+        //     var bytesRead = stream.Read(buffer.Span);
 
-            writer.Advance(bytesRead);
-        }
-
-        private void FlushBuffer(BasicMessageType topicType)
-        {
-            (var buffer, _) = GetBufferWithLock(topicType);
-            Sender.SendToTopicAsync(topicType, buffer.Reader);
-        }
+        //     writer.Advance(bytesRead);
+        // }
     }
-
-    internal delegate void BufferAction(IBuffer buffer);
-
-    internal delegate Task BufferAsyncAction(IBuffer buffer, CancellationToken cancellationToken);
 }
