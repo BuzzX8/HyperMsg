@@ -11,6 +11,7 @@ namespace HyperMsg
     {
         #region Basic extensions
 
+        /// <param name="message">Message to send.</param>
         public static void SendMessage<THeader, TBody>(this ISender sender, THeader header, TBody body) =>
             sender.Send(new Message<THeader, TBody>(header, body));
 
@@ -49,10 +50,22 @@ namespace HyperMsg
 
         #region Buffer extensions
 
-        internal static void SendBufferAction(this ISender sender, BasicMessageType type, BufferAction action) =>
+        public static void SendActionRequestToReceiveBuffer(this ISender sender, Action<IBuffer> action) =>
+            sender.SendActionRequestToBuffer(BasicMessageType.Receive, action);
+
+        public static Task SendActionRequestToReceiveBufferAsync(this ISender sender, AsyncAction<IBuffer> action, CancellationToken cancellationToken = default) =>
+            sender.SendActionRequestToBufferAsync(BasicMessageType.Receive, action, cancellationToken);
+        
+        public static void SendActionRequestToTransmitBuffer(this ISender sender, Action<IBuffer> action) =>
+            sender.SendActionRequestToBuffer(BasicMessageType.Transmit, action);
+
+        public static Task SendActionRequestToTransmitBufferAsync(this ISender sender, AsyncAction<IBuffer> action, CancellationToken cancellationToken = default) =>
+            sender.SendActionRequestToBufferAsync(BasicMessageType.Transmit, action, cancellationToken);
+
+        internal static void SendActionRequestToBuffer(this ISender sender, BasicMessageType type, Action<IBuffer> action) =>
             sender.SendMessage(type, action);
         
-        internal static Task SendBufferAsyncActionAsync(this ISender sender, BasicMessageType type, BufferAsyncAction action, CancellationToken cancellationToken = default) =>
+        internal static Task SendActionRequestToBufferAsync(this ISender sender, BasicMessageType type, AsyncAction<IBuffer> action, CancellationToken cancellationToken = default) =>
             sender.SendMessageAsync(type, action);
 
         #endregion
@@ -65,7 +78,6 @@ namespace HyperMsg
         /// </summary>
         /// <typeparam name="T">Type of message to send.</typeparam>
         /// <param name="messageSender">Message sender.</param>
-        /// <param name="message">Message to send.</param>
         public static void SendToTransportTopic<T>(this ISender messageSender, T message) => messageSender.SendToTopic(CoreTopicType.Transport, message);
 
         /// <summary>

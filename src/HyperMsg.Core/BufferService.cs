@@ -19,8 +19,8 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetRegistrationHandles()
         {
-            yield return HandlersRegistry.RegisterMessageHandler<BasicMessageType, BufferAction>(HandleBufferAction);
-            yield return HandlersRegistry.RegisterMessageHandler<BasicMessageType, BufferAsyncAction>(HandleBufferActionAsync);
+            yield return HandlersRegistry.RegisterMessageHandler<BasicMessageType, Action<IBuffer>>(HandleBufferAction);
+            yield return HandlersRegistry.RegisterMessageHandler<BasicMessageType, AsyncAction<IBuffer>>(HandleBufferActionAsync);
 
             // yield return HandlersRegistry.RegisterTransmitTopicHandler<Memory<byte>>(memory => WriteToBuffer(CoreTopicType.Transmit, memory));
             // yield return HandlersRegistry.RegisterTransmitTopicHandler<ReadOnlyMemory<byte>>(memory => WriteToBuffer(CoreTopicType.Transmit, memory));
@@ -35,7 +35,7 @@ namespace HyperMsg
             // yield return HandlersRegistry.RegisterReceiveTopicHandler<Stream>(stream => WriteToBuffer(CoreTopicType.Receive, stream));
         }
 
-        private void HandleBufferAction(BasicMessageType type, BufferAction bufferAction)
+        private void HandleBufferAction(BasicMessageType type, Action<IBuffer> bufferAction)
         {
             (var buffer, var bufferLock) = GetBufferWithLock(type);
 
@@ -45,7 +45,7 @@ namespace HyperMsg
             }
         }
 
-        private async Task HandleBufferActionAsync(BasicMessageType type, BufferAsyncAction bufferAction, CancellationToken cancellationToken)
+        private async Task HandleBufferActionAsync(BasicMessageType type, AsyncAction<IBuffer> bufferAction, CancellationToken cancellationToken)
         {
             (var buffer, var bufferLock) = GetBufferWithLock(type);
                         
@@ -71,44 +71,44 @@ namespace HyperMsg
             };
         }
 
-        private void WriteToBuffer<T>(BasicMessageType topicType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
-        {
-            var writer = buffer.Writer;
+        // private void WriteToBuffer<T>(BasicMessageType topicType, T message, IBuffer buffer, object bufferLock, bool flushBuffer)
+        // {
+        //     var writer = buffer.Writer;
 
-            lock (bufferLock)
-            {
-                switch (message)
-                {
-                    case Memory<byte> memory:
-                        writer.Write(memory.Span);
-                        break;
+        //     lock (bufferLock)
+        //     {
+        //         switch (message)
+        //         {
+        //             case Memory<byte> memory:
+        //                 writer.Write(memory.Span);
+        //                 break;
 
-                    case ReadOnlyMemory<byte> memory:
-                        writer.Write(memory.Span);
-                        break;
+        //             case ReadOnlyMemory<byte> memory:
+        //                 writer.Write(memory.Span);
+        //                 break;
 
-                    case ArraySegment<byte> arraySegment:
-                        writer.Write(arraySegment.AsSpan());
-                        break;
+        //             case ArraySegment<byte> arraySegment:
+        //                 writer.Write(arraySegment.AsSpan());
+        //                 break;
 
-                    case byte[] array:
-                        writer.Write(array);
-                        break;
+        //             case byte[] array:
+        //                 writer.Write(array);
+        //                 break;
 
-                    case Stream stream:
-                        WriteStream(writer, stream);
-                        break;
+        //             case Stream stream:
+        //                 WriteStream(writer, stream);
+        //                 break;
 
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
+        //             default:
+        //                 throw new NotSupportedException();
+        //         }
+        //     }
 
-            if (flushBuffer)
-            {
-                FlushBuffer(topicType);
-            }
-        }
+        //     if (flushBuffer)
+        //     {
+        //         FlushBuffer(topicType);
+        //     }
+        // }
 
         private static void WriteStream(IBufferWriter writer, Stream stream)
         {
