@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Buffers;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,7 +8,6 @@ namespace HyperMsg
     {
         #region Basic extensions
 
-        /// <param name="message">Message to send.</param>
         public static void SendMessage<THeader, TBody>(this ISender sender, THeader header, TBody body) =>
             sender.Send(new Message<THeader, TBody>(header, body));
 
