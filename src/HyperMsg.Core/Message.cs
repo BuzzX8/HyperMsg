@@ -1,4 +1,4 @@
-namespace HyperMsg.Messages
+namespace HyperMsg
 {
     internal struct Message<THeader, TBody>
     {
