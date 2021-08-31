@@ -15,7 +15,7 @@ namespace HyperMsg
 
         protected IMessagingContext MessagingContext => GetRequiredService<IMessagingContext>();
 
-        protected ISender MessageSender => GetRequiredService<ISender>();
+        protected ISender Sender => GetRequiredService<ISender>();
 
         protected IHandlersRegistry HandlersRegistry => GetRequiredService<IHandlersRegistry>();
 
