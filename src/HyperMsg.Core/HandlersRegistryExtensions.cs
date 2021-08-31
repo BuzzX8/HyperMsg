@@ -97,24 +97,10 @@ namespace HyperMsg
 
         #endregion
 
-        #region Buffer extensions
-
-        
-        #endregion
-
-        #region Filter extensions
-
-        public static IDisposable RegisterFilterHandler<T>(this IHandlersRegistry handlersRegistry, Action<ISender, T> filterHandler) =>
-            handlersRegistry.RegisterMessageHandler(filterHandler);
-        
-        public static IDisposable RegisterFilterHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<ISender, T> filterHandler) =>
-            handlersRegistry.RegisterMessageHandler(filterHandler);
-
-        #endregion
-
         #region Serialization extensions
 
-        
+        public static IDisposable RegisterSerializer<T>(this IHandlersRegistry handlersRegistry, ISender sender, Action<IBufferWriter, T> serializer) =>
+             handlersRegistry.RegisterTransmitCommandHandler<T>(message => sender.SendActionRequestToTransmitBuffer(buffer => serializer.Invoke(buffer.Writer, message)));
 
         #endregion
     }

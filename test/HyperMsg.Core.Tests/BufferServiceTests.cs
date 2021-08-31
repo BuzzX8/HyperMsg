@@ -15,7 +15,7 @@ namespace HyperMsg
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
-            MessageSender.SendActionRequestToReceiveBuffer(buffer => buffer.Writer.Write(expectedData));
+            Sender.SendActionRequestToReceiveBuffer(buffer => buffer.Writer.Write(expectedData));
 
             actualData = buffer.Reader.Read().ToArray();
             Assert.Equal(expectedData, actualData);
@@ -28,7 +28,7 @@ namespace HyperMsg
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
-            await MessageSender.SendActionRequestToReceiveBufferAsync((buffer, _) =>
+            await Sender.SendActionRequestToReceiveBufferAsync((buffer, _) =>
             {
                 buffer.Writer.Write(expectedData);
                 return Task.CompletedTask;
@@ -45,7 +45,7 @@ namespace HyperMsg
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
-            MessageSender.SendActionRequestToTransmitBuffer(buffer => buffer.Writer.Write(expectedData));
+            Sender.SendActionRequestToTransmitBuffer(buffer => buffer.Writer.Write(expectedData));
 
             actualData = buffer.Reader.Read().ToArray();
             Assert.Equal(expectedData, actualData);
@@ -58,13 +58,27 @@ namespace HyperMsg
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
-            await MessageSender.SendActionRequestToTransmitBufferAsync((buffer, _) =>
+            await Sender.SendActionRequestToTransmitBufferAsync((buffer, _) =>
             {
                 buffer.Writer.Write(expectedData);
                 return Task.CompletedTask;
             });
 
             actualData = buffer.Reader.Read().ToArray();
+            Assert.Equal(expectedData, actualData);
+        }
+
+        [Fact]
+        public void RegisterSerializer_Writes_Transmitted_Data_Into_Buffer()
+        {
+            var buffer = GetRequiredService<IBufferContext>().TransmittingBuffer;
+            var expectedData = Guid.NewGuid();
+            var actualData = default(Guid);
+            HandlersRegistry.RegisterSerializer<Guid>(Sender, (writer, data) => writer.Write(data.ToByteArray()));
+
+            Sender.SendTransmitCommand(expectedData);
+            actualData = new Guid(buffer.Reader.Read().ToArray());
+
             Assert.Equal(expectedData, actualData);
         }
     }
