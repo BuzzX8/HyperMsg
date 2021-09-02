@@ -5,94 +5,40 @@ namespace HyperMsg
 {
     public static class HandlersRegistryExtensions
     {
-        #region Basic extensions
+        #region Buffer extensions
+
+        public static IDisposable RegisterTransmitBufferCommandHandler(this IHandlersRegistry handlersRegistry, Action<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferCommandHandler(BufferType.Transmit, bufferHandler);
         
-        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, Action<THeader, TBody> messageHandler) =>
-            handlersRegistry.RegisterHandler<Message<THeader, TBody>>(m => messageHandler.Invoke(m.Header, m.Body));
+        public static IDisposable RegisterTransmitBufferCommandHandler(this IHandlersRegistry handlersRegistry, AsyncAction<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferCommandHandler(BufferType.Transmit, bufferHandler);
+        
+        public static IDisposable RegisterReceiveBufferCommandHandler(this IHandlersRegistry handlersRegistry, Action<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferCommandHandler(BufferType.Receive, bufferHandler);
+        
+        public static IDisposable RegisterReceiveBufferCommandHandler(this IHandlersRegistry handlersRegistry, AsyncAction<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferCommandHandler(BufferType.Receive, bufferHandler);
 
-        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, AsyncAction<THeader, TBody> messageHandler) =>
-            handlersRegistry.RegisterHandler<Message<THeader, TBody>>((m, t) => messageHandler.Invoke(m.Header, m.Body, t));
-
-        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, THeader header, Action<TBody> messageHandler) =>
-            handlersRegistry.RegisterMessageHandler<THeader, TBody>((h, b) =>
+        internal static IDisposable RegisterBufferCommandHandler(this IHandlersRegistry handlersRegistry, BufferType bufferType, Action<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterHandler<HandleBufferCommand>(command => 
             {
-                if (!Equals(header, h))
+                if (command.BufferType != bufferType)
                 {
                     return;
                 }
 
-                messageHandler.Invoke(b);
+                bufferHandler.Invoke(command.Buffer);
             });
-
-        public static IDisposable RegisterMessageHandler<THeader, TBody>(this IHandlersRegistry handlersRegistry, THeader header, AsyncAction<TBody> messageHandler) =>
-            handlersRegistry.RegisterMessageHandler<THeader, TBody>((h, b, t) =>
+        
+        internal static IDisposable RegisterBufferCommandHandler(this IHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterHandler<HandleBufferCommand>((command, token) => 
             {
-                if (!Equals(header, h))
+                if (command.BufferType != bufferType)
                 {
                     return Task.CompletedTask;
                 }
 
-                return messageHandler.Invoke(b, t);
-            });
-
-        public static IDisposable RegisterCommandHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> commandHandler) =>
-            handlersRegistry.RegisterMessageHandler(BasicMessageType.Command, commandHandler);
-
-        public static IDisposable RegisterCommandHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> commandHandler) =>
-            handlersRegistry.RegisterMessageHandler(BasicMessageType.Command, commandHandler);
-
-        public static IDisposable RegisterEventHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> eventHandler) =>
-            handlersRegistry.RegisterMessageHandler(BasicMessageType.Event, eventHandler);
-
-        public static IDisposable RegisterEventHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> eventHandler) =>
-            handlersRegistry.RegisterMessageHandler(BasicMessageType.Event, eventHandler);
-
-        #endregion
-
-        #region Transfering extensions
-
-        public static IDisposable RegisterTransmitCommandHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> commandHandler) =>
-            handlersRegistry.RegisterCommandHandler<Message<BasicMessageType, T>>(message =>
-            {
-                if (!Equals(message.Header, BasicMessageType.Transmit))
-                {
-                    return;
-                }
-
-                commandHandler.Invoke(message.Body);
-            });
-
-        public static IDisposable RegisterTransmitCommandHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> commandHandler) =>
-            handlersRegistry.RegisterCommandHandler<Message<BasicMessageType, T>>((message, token) =>
-            {
-                if (!Equals(message.Header, BasicMessageType.Transmit))
-                {
-                    return Task.CompletedTask;
-                }
-
-                return commandHandler.Invoke(message.Body, token);
-            });
-
-        public static IDisposable RegisterReceiveEventHandler<T>(this IHandlersRegistry handlersRegistry, Action<T> commandHandler) =>
-            handlersRegistry.RegisterEventHandler<Message<BasicMessageType, T>>(message =>
-            {
-                if (!Equals(message.Header, BasicMessageType.Receive))
-                {
-                    return;
-                }
-
-                commandHandler.Invoke(message.Body);
-            });
-
-        public static IDisposable RegisterReceiveEventHandler<T>(this IHandlersRegistry handlersRegistry, AsyncAction<T> commandHandler) =>
-            handlersRegistry.RegisterEventHandler<Message<BasicMessageType, T>>((message, token) =>
-            {
-                if (!Equals(message.Header, BasicMessageType.Receive))
-                {
-                    return Task.CompletedTask;
-                }
-
-                return commandHandler.Invoke(message.Body, token);
+                return bufferHandler.Invoke(command.Buffer, token);
             });
 
         #endregion
@@ -100,7 +46,7 @@ namespace HyperMsg
         #region Serialization extensions
 
         public static IDisposable RegisterSerializer<T>(this IHandlersRegistry handlersRegistry, ISender sender, Action<IBufferWriter, T> serializer) =>
-             handlersRegistry.RegisterTransmitCommandHandler<T>(message => sender.SendActionRequestToTransmitBuffer(buffer => serializer.Invoke(buffer.Writer, message)));
+             handlersRegistry.RegisterHandler<T>(message => sender.SendActionRequestToTransmitBuffer(buffer => serializer.Invoke(buffer.Writer, message)));
 
         #endregion
     }

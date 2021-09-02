@@ -16,29 +16,30 @@ namespace HyperMsg
 
         protected override IEnumerable<IDisposable> GetRegistrationHandles()
         {
-            yield return HandlersRegistry.RegisterMessageHandler<BasicMessageType, Action<IBuffer>>(HandleBufferAction);
-            yield return HandlersRegistry.RegisterMessageHandler<BasicMessageType, AsyncAction<IBuffer>>(HandleBufferActionAsync);
+            yield return HandlersRegistry.RegisterHandler<BufferActionRequest>(HandleBufferAction);
+            yield return HandlersRegistry.RegisterHandler<BufferAsyncActionRequest>(HandleBufferActionAsync);
+            yield return HandlersRegistry.RegisterHandler<HandleBufferRequest>(HandleBufferRequestAsync);
         }
 
-        private void HandleBufferAction(BasicMessageType type, Action<IBuffer> bufferAction)
+        private void HandleBufferAction(BufferActionRequest request)
         {
-            (var buffer, var bufferLock) = GetBufferWithLock(type);
+            (var buffer, var bufferLock) = GetBufferWithLock(request.BufferType);
 
             lock(bufferLock)
             {
-                bufferAction.Invoke(buffer);
+                request.BufferAction.Invoke(buffer);
             }
         }
 
-        private async Task HandleBufferActionAsync(BasicMessageType type, AsyncAction<IBuffer> bufferAction, CancellationToken cancellationToken)
+        private async Task HandleBufferActionAsync(BufferAsyncActionRequest request, CancellationToken cancellationToken)
         {
-            (var buffer, var bufferLock) = GetBufferWithLock(type);
+            (var buffer, var bufferLock) = GetBufferWithLock(request.BufferType);
                         
             Monitor.Enter(bufferLock);
 
             try
             {
-                await bufferAction.Invoke(buffer, cancellationToken);
+                await request.BufferAction.Invoke(buffer, cancellationToken);
             }
             finally
             {
@@ -46,14 +47,60 @@ namespace HyperMsg
             }
         }
 
-        private (IBuffer buffer, object bufferLock) GetBufferWithLock(BasicMessageType topicType)
+        private Task HandleBufferRequestAsync(HandleBufferRequest command, CancellationToken cancellationToken) => 
+            HandleBufferActionAsync(new BufferAsyncActionRequest(command.BufferType, (buffer, token) => Sender.SendAsync(new HandleBufferCommand(command.BufferType, buffer), token)), cancellationToken);
+
+        private (IBuffer buffer, object bufferLock) GetBufferWithLock(BufferType type)
         {
-            return topicType switch
+            return type switch
             {
-                BasicMessageType.Receive => (bufferContext.ReceivingBuffer, receivingBufferLock),
-                BasicMessageType.Transmit => (bufferContext.TransmittingBuffer, transmittingBufferLock),
-                _ => throw new NotSupportedException($"Buffer type {topicType} does not supported"),
+                BufferType.Receive => (bufferContext.ReceivingBuffer, receivingBufferLock),
+                BufferType.Transmit => (bufferContext.TransmittingBuffer, transmittingBufferLock),
+                _ => throw new NotSupportedException($"Buffer type {type} does not supported"),
             };
         }
+    }
+
+    internal struct BufferActionRequest
+    {
+        public BufferActionRequest(BufferType bufferType, Action<IBuffer> bufferAction) =>
+            (BufferType, BufferAction) = (bufferType, bufferAction);
+
+        public BufferType BufferType { get; }
+
+        public Action<IBuffer> BufferAction { get; }
+    }
+    
+    internal struct BufferAsyncActionRequest
+    {
+        public BufferAsyncActionRequest(BufferType bufferType, AsyncAction<IBuffer> bufferAction) =>
+            (BufferType, BufferAction) = (bufferType, bufferAction);
+
+        public BufferType BufferType { get; }
+
+        public AsyncAction<IBuffer> BufferAction { get; }
+    }
+
+    internal struct HandleBufferRequest
+    {
+        public HandleBufferRequest(BufferType bufferType) =>
+            BufferType = bufferType;
+
+        public BufferType BufferType { get; }
+    }
+
+    internal struct HandleBufferCommand
+    {
+        public HandleBufferCommand(BufferType bufferType, IBuffer buffer) => (BufferType, Buffer) = (bufferType, buffer);
+
+        public IBuffer Buffer { get; }
+
+        public BufferType BufferType { get; }
+    }
+
+    internal enum BufferType
+    {
+        Receive,
+        Transmit
     }
 }
