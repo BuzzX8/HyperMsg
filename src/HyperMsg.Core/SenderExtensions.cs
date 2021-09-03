@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using HyperMsg.Messages;
 
 namespace HyperMsg
 {
@@ -9,7 +10,7 @@ namespace HyperMsg
         #region Buffer extensions
 
         public static void SendToTransmitBuffer<T>(this ISender sender, T message) =>
-            throw new NotImplementedException();
+            sender.Send(new SerializationCommand<T>(sender, message));
         
         public static Task SendToTransmitBufferAsync<T>(this ISender sender, T message, CancellationToken cancellationToken = default) =>
             throw new NotImplementedException();

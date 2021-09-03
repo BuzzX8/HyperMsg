@@ -49,7 +49,8 @@ namespace HyperMsg
         public static IDisposable RegisterSerializer<T>(this IHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializer) =>
              handlersRegistry.RegisterHandler<SerializationCommand<T>>(command =>
              {
-                 
+                 command.Sender.SendActionRequestToTransmitBuffer(buffer => serializer.Invoke(buffer.Writer, command.Message));
+                 command.Sender.SendInvokeTransmitBufferHandlersCommand();
              });
 
         #endregion
