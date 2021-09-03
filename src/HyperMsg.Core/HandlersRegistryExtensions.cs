@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HyperMsg.Messages;
 
 namespace HyperMsg
 {
@@ -45,8 +46,11 @@ namespace HyperMsg
 
         #region Serialization extensions
 
-        public static IDisposable RegisterSerializer<T>(this IHandlersRegistry handlersRegistry, ISender sender, Action<IBufferWriter, T> serializer) =>
-             handlersRegistry.RegisterHandler<T>(message => sender.SendActionRequestToTransmitBuffer(buffer => serializer.Invoke(buffer.Writer, message)));
+        public static IDisposable RegisterSerializer<T>(this IHandlersRegistry handlersRegistry, Action<IBufferWriter, T> serializer) =>
+             handlersRegistry.RegisterHandler<SerializationCommand<T>>(command =>
+             {
+                 
+             });
 
         #endregion
     }

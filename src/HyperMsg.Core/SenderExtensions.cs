@@ -8,6 +8,12 @@ namespace HyperMsg
     {
         #region Buffer extensions
 
+        public static void SendToTransmitBuffer<T>(this ISender sender, T message) =>
+            throw new NotImplementedException();
+        
+        public static Task SendToTransmitBufferAsync<T>(this ISender sender, T message, CancellationToken cancellationToken = default) =>
+            throw new NotImplementedException();
+
         public static void SendActionRequestToReceiveBuffer(this ISender sender, Action<IBuffer> action) =>
             sender.SendActionRequestToBuffer(BufferType.Receive, action);
 
