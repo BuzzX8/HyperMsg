@@ -7,19 +7,19 @@ namespace HyperMsg
     {
         #region Buffer extensions
 
-        public static IDisposable RegisterTransmitBufferCommandHandler(this IHandlersRegistry handlersRegistry, Action<IBuffer> bufferHandler) =>
-            handlersRegistry.RegisterBufferCommandHandler(BufferType.Transmit, bufferHandler);
+        public static IDisposable RegisterTransmitBufferHandler(this IHandlersRegistry handlersRegistry, Action<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferHandler(BufferType.Transmit, bufferHandler);
         
-        public static IDisposable RegisterTransmitBufferCommandHandler(this IHandlersRegistry handlersRegistry, AsyncAction<IBuffer> bufferHandler) =>
-            handlersRegistry.RegisterBufferCommandHandler(BufferType.Transmit, bufferHandler);
+        public static IDisposable RegisterTransmitBufferHandler(this IHandlersRegistry handlersRegistry, AsyncAction<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferHandler(BufferType.Transmit, bufferHandler);
         
-        public static IDisposable RegisterReceiveBufferCommandHandler(this IHandlersRegistry handlersRegistry, Action<IBuffer> bufferHandler) =>
-            handlersRegistry.RegisterBufferCommandHandler(BufferType.Receive, bufferHandler);
+        public static IDisposable RegisterReceiveBufferHandler(this IHandlersRegistry handlersRegistry, Action<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferHandler(BufferType.Receive, bufferHandler);
         
-        public static IDisposable RegisterReceiveBufferCommandHandler(this IHandlersRegistry handlersRegistry, AsyncAction<IBuffer> bufferHandler) =>
-            handlersRegistry.RegisterBufferCommandHandler(BufferType.Receive, bufferHandler);
+        public static IDisposable RegisterReceiveBufferHandler(this IHandlersRegistry handlersRegistry, AsyncAction<IBuffer> bufferHandler) =>
+            handlersRegistry.RegisterBufferHandler(BufferType.Receive, bufferHandler);
 
-        internal static IDisposable RegisterBufferCommandHandler(this IHandlersRegistry handlersRegistry, BufferType bufferType, Action<IBuffer> bufferHandler) =>
+        internal static IDisposable RegisterBufferHandler(this IHandlersRegistry handlersRegistry, BufferType bufferType, Action<IBuffer> bufferHandler) =>
             handlersRegistry.RegisterHandler<HandleBufferCommand>(command => 
             {
                 if (command.BufferType != bufferType)
@@ -30,7 +30,7 @@ namespace HyperMsg
                 bufferHandler.Invoke(command.Buffer);
             });
         
-        internal static IDisposable RegisterBufferCommandHandler(this IHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<IBuffer> bufferHandler) =>
+        internal static IDisposable RegisterBufferHandler(this IHandlersRegistry handlersRegistry, BufferType bufferType, AsyncAction<IBuffer> bufferHandler) =>
             handlersRegistry.RegisterHandler<HandleBufferCommand>((command, token) => 
             {
                 if (command.BufferType != bufferType)

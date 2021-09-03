@@ -26,23 +26,17 @@ namespace HyperMsg
         internal static Task SendActionRequestToBufferAsync(this ISender sender, BufferType type, AsyncAction<IBuffer> action, CancellationToken cancellationToken = default) =>
             sender.SendAsync(new BufferAsyncActionRequest(type, action), cancellationToken);
 
-        public static void SendHandleReceiveBufferCommand(this ISender sender) =>
-            sender.Send(new HandleBufferRequest(BufferType.Receive));
+        public static void SendInvokeReceiveBufferHandlersCommand(this ISender sender) =>
+            sender.Send(new InvokeBufferHandlersCommand(BufferType.Receive));
 
-        public static Task SendHandleReceiveBufferCommandAsync(this ISender sender, CancellationToken cancellationToken = default) =>
-            sender.SendAsync(new HandleBufferRequest(BufferType.Receive), cancellationToken);
+        public static Task SendInvokeReceiveBufferHandlersCommandAsync(this ISender sender, CancellationToken cancellationToken = default) =>
+            sender.SendAsync(new InvokeBufferHandlersCommand(BufferType.Receive), cancellationToken);
         
-        public static void SendHandleTransmitBufferCommand(this ISender sender) =>
-            sender.Send(new HandleBufferRequest(BufferType.Transmit));
+        public static void SendInvokeTransmitBufferHandlersCommand(this ISender sender) =>
+            sender.Send(new InvokeBufferHandlersCommand(BufferType.Transmit));
 
-        public static Task SendHandleTransmitBufferCommandAsync(this ISender sender, CancellationToken cancellationToken = default) =>
-            sender.SendAsync(new HandleBufferRequest(BufferType.Transmit), cancellationToken);
-
-        internal static void SendHandleBufferCommand(this ISender sender, BufferType type) =>
-            sender.Send(new HandleBufferRequest(type));
-
-        internal static Task SendHandleBufferCommandAsync(this ISender sender, BufferType type, CancellationToken cancellationToken) =>
-            sender.SendAsync(new HandleBufferRequest(type), cancellationToken);
+        public static Task SendInvokeTransmitBufferHandlersCommandAsync(this ISender sender, CancellationToken cancellationToken = default) =>
+            sender.SendAsync(new InvokeBufferHandlersCommand(BufferType.Transmit), cancellationToken);
 
         #endregion
     }

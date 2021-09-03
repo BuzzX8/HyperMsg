@@ -18,7 +18,7 @@ namespace HyperMsg
         {
             yield return HandlersRegistry.RegisterHandler<BufferActionRequest>(HandleBufferAction);
             yield return HandlersRegistry.RegisterHandler<BufferAsyncActionRequest>(HandleBufferActionAsync);
-            yield return HandlersRegistry.RegisterHandler<HandleBufferRequest>(HandleBufferRequestAsync);
+            yield return HandlersRegistry.RegisterHandler<InvokeBufferHandlersCommand>(HandleBufferRequestAsync);
         }
 
         private void HandleBufferAction(BufferActionRequest request)
@@ -47,7 +47,7 @@ namespace HyperMsg
             }
         }
 
-        private Task HandleBufferRequestAsync(HandleBufferRequest command, CancellationToken cancellationToken) => 
+        private Task HandleBufferRequestAsync(InvokeBufferHandlersCommand command, CancellationToken cancellationToken) => 
             HandleBufferActionAsync(new BufferAsyncActionRequest(command.BufferType, (buffer, token) => Sender.SendAsync(new HandleBufferCommand(command.BufferType, buffer), token)), cancellationToken);
 
         private (IBuffer buffer, object bufferLock) GetBufferWithLock(BufferType type)
@@ -81,9 +81,9 @@ namespace HyperMsg
         public AsyncAction<IBuffer> BufferAction { get; }
     }
 
-    internal struct HandleBufferRequest
+    internal struct InvokeBufferHandlersCommand
     {
-        public HandleBufferRequest(BufferType bufferType) =>
+        public InvokeBufferHandlersCommand(BufferType bufferType) =>
             BufferType = bufferType;
 
         public BufferType BufferType { get; }

@@ -69,69 +69,69 @@ namespace HyperMsg
         }
 
         [Fact]
-        public void SendHandleReceiveBufferCommand_Invokes_Handler_Registered_With_RegisterReceiveBufferCommandHandler()
+        public void SendInvokeReceiveBufferHandlersCommand_Invokes_Handler_Registered_With_RegisterReceiveBufferHandler()
         {
             var buffer = GetRequiredService<IBufferContext>().ReceivingBuffer;
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
             buffer.Writer.Write(expectedData);
-            HandlersRegistry.RegisterReceiveBufferCommandHandler(buffer => actualData = buffer.Reader.Read().ToArray());
+            HandlersRegistry.RegisterReceiveBufferHandler(buffer => actualData = buffer.Reader.Read().ToArray());
 
-            Sender.SendHandleReceiveBufferCommand();
+            Sender.SendInvokeReceiveBufferHandlersCommand();
 
             Assert.Equal(expectedData, actualData);
         }
         
         [Fact]
-        public async Task SendHandleReceiveBufferCommandAsync_Invokes_Handler_Registered_With_RegisterReceiveBufferCommandHandler()
+        public async Task SendInvokeReceiveBufferHandlersCommandAsync_Invokes_Handler_Registered_With_RegisterReceiveBufferHandler()
         {
             var buffer = GetRequiredService<IBufferContext>().ReceivingBuffer;
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
             buffer.Writer.Write(expectedData);
-            HandlersRegistry.RegisterReceiveBufferCommandHandler((buffer, _) =>
+            HandlersRegistry.RegisterReceiveBufferHandler((buffer, _) =>
             {
                 actualData = buffer.Reader.Read().ToArray();
                 return Task.CompletedTask;
             });
 
-            await Sender.SendHandleReceiveBufferCommandAsync();
+            await Sender.SendInvokeReceiveBufferHandlersCommandAsync();
 
             Assert.Equal(expectedData, actualData);
         }
         
         [Fact]
-        public void SendHandleTransmitBufferCommand_Invokes_Handler_Registered_With_RegisterReceiveBufferCommandHandler()
+        public void SendInvokeTransmitBufferHandlersCommand_Invokes_Handler_Registered_With_RegisterTransmitBufferHandler()
         {
             var buffer = GetRequiredService<IBufferContext>().TransmittingBuffer;
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
             buffer.Writer.Write(expectedData);
-            HandlersRegistry.RegisterTransmitBufferCommandHandler(buffer => actualData = buffer.Reader.Read().ToArray());
+            HandlersRegistry.RegisterTransmitBufferHandler(buffer => actualData = buffer.Reader.Read().ToArray());
 
-            Sender.SendHandleTransmitBufferCommand();
+            Sender.SendInvokeTransmitBufferHandlersCommand();
 
             Assert.Equal(expectedData, actualData);
         }
         
         [Fact]
-        public async Task SendHandleTransmitBufferCommandAsync_Invokes_Handler_Registered_With_RegisterReceiveBufferCommandHandler()
+        public async Task SendInvokeTransmitBufferHandlersCommandAsync_Invokes_Handler_Registered_With_RegisterTransmitBufferHandler()
         {
             var buffer = GetRequiredService<IBufferContext>().TransmittingBuffer;
             var expectedData = Guid.NewGuid().ToByteArray();
             var actualData = default(byte[]);
 
             buffer.Writer.Write(expectedData);
-            HandlersRegistry.RegisterTransmitBufferCommandHandler((buffer, _) =>
+            HandlersRegistry.RegisterTransmitBufferHandler((buffer, _) =>
             {
                 actualData = buffer.Reader.Read().ToArray();
                 return Task.CompletedTask;
             });
 
-            await Sender.SendHandleTransmitBufferCommandAsync();
+            await Sender.SendInvokeTransmitBufferHandlersCommandAsync();
 
             Assert.Equal(expectedData, actualData);
         }
