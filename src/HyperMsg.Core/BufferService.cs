@@ -98,7 +98,7 @@ namespace HyperMsg
         public BufferType BufferType { get; }
     }
 
-    internal enum BufferType
+    public enum BufferType
     {
         Receive,
         Transmit
