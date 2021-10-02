@@ -8,18 +8,19 @@ namespace HyperMsg
         const int DefaultBufferSize = -1;
 
         /// <summary>
-        /// Adds core services required for messaging and buffering infrastructure (MessageSender, MessageObservable,
-        /// receiving and transmitting buffer).
+        /// Adds core services required for messaging and buffering infrastructure.
         /// </summary>
         /// <param name="services"></param>
         /// <param name="receivingBufferSize">Size of receiving buffer.</param>
         /// <param name="transmittingBufferSize">Size of transmitting buffer.</param>
         public static IServiceCollection AddMessagingServices(this IServiceCollection services, int receivingBufferSize = DefaultBufferSize, int transmittingBufferSize = DefaultBufferSize)
         {
-            return services.AddBufferContext(receivingBufferSize, transmittingBufferSize)
-                .AddBufferService()
+            return services
+                .AddBufferContext(receivingBufferSize, transmittingBufferSize)
                 .AddSharedMemoryPool()
-                .AddMessageBroker();
+                .AddMessageBroker()
+                .AddBufferFilter()
+                .WireBaseInterfaces();
         }
 
         /// <summary>
@@ -41,13 +42,11 @@ namespace HyperMsg
                 var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
                 var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
                 var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
-                var sender = provider.GetRequiredService<ISender>();
+                var sender = provider.GetRequiredService<MessageBroker>();
 
                 return new BufferContext(receivingBuffer, transmittingBuffer, sender) as IBufferContext;
             });
         }
-
-        public static IServiceCollection AddBufferService(this IServiceCollection services) => services.AddHostedService<BufferService>();
 
         /// <summary>
         /// Adds implementation for IBufferFactory. Depends on MemoryPool<byte>
@@ -60,15 +59,29 @@ namespace HyperMsg
         });
 
         /// <summary>
-        /// Adds implementation for services IMessagingContext, IMessageSender and IMessageObservable.
+        /// 
         /// </summary>
         /// <param name="serviceRegistry"></param>
-        public static IServiceCollection AddMessageBroker(this IServiceCollection services)
+        public static IServiceCollection AddMessageBroker(this IServiceCollection services) => services.AddSingleton<MessageBroker>();
+
+        public static IServiceCollection AddBufferFilter(this IServiceCollection services)
         {
-            var broker = new MessageBroker();
-            return services.AddSingleton<ISender>(broker)
-                .AddSingleton<IHandlersRegistry>(broker)
-                .AddSingleton<IMessagingContext>(broker);
+            return services.AddSingleton(provider => 
+            {
+                var broker = provider.GetRequiredService<MessageBroker>();
+                var bufferContext = provider.GetRequiredService<IBufferContext>();
+                var filter = new BufferFilter(bufferContext.TransmittingBuffer, broker);                
+                
+                return filter;
+            });
+        }
+
+        private static IServiceCollection WireBaseInterfaces(this IServiceCollection services)
+        {
+            return services
+                .AddSingleton(provider => provider.GetRequiredService<BufferFilter>() as ISender)
+                .AddSingleton(provider => provider.GetRequiredService<MessageBroker>() as IMessagingContext)
+                .AddSingleton(provider => provider.GetRequiredService<MessageBroker>() as IHandlersRegistry);
         }
     }
 }

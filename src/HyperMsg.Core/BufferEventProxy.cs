@@ -34,4 +34,10 @@ namespace HyperMsg
 
         public IBufferReader BufferReader {get;}
     }
+
+    public enum BufferType
+    {
+        Receive,
+        Transmit
+    }
 }
