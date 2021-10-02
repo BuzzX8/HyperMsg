@@ -18,14 +18,6 @@ namespace HyperMsg
             return new Buffer(memory);
         }
 
-        public IBufferContext CreateContext(int receivingBufferSize, int transmittingBufferSize)
-        {
-            var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
-            var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
-
-            return new BufferContext(receivingBuffer, transmittingBuffer);
-        }
-
         public void Dispose() => memoryPool.Dispose();
     }
 }

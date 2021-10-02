@@ -16,15 +16,5 @@ namespace HyperMsg
 
             Assert.NotNull(buffer);
         }
-
-        [Fact]
-        public void CreateContext_Creates_BufferContext()
-        {
-            var context = factory.CreateContext(100, 100);
-
-            Assert.NotNull(context);
-            Assert.NotNull(context.ReceivingBuffer);
-            Assert.NotNull(context.TransmittingBuffer);
-        }
     }
 }

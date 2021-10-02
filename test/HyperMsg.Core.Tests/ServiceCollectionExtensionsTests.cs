@@ -9,18 +9,14 @@ namespace HyperMsg
         private readonly ServiceCollection services = new();
 
         [Fact]
-        public void AddMessageBroker_Adds_Sender_Observable_And_Context()
+        public void AddMessageBroker_Adds_MessageBroker()
         {
             services.AddMessageBroker();
             var provider = services.BuildServiceProvider();
 
-            var sender = provider.GetService<ISender>();
-            var observable = provider.GetService<IHandlersRegistry>();
-            var context = provider.GetService<IMessagingContext>();
+            var broker = provider.GetRequiredService<MessageBroker>();
 
-            Assert.NotNull(sender);
-            Assert.NotNull(observable);
-            Assert.NotNull(context);
+            Assert.NotNull(broker);
         }
 
         [Fact]
@@ -37,8 +33,9 @@ namespace HyperMsg
         [Fact]
         public void AddBufferContext_Adds_BufferContext()
         {
-            services.AddSharedMemoryPool();
-            services.AddBufferContext();
+            services.AddSharedMemoryPool()
+                .AddBufferContext()
+                .AddMessageBroker();
             var provider = services.BuildServiceProvider();
 
             var context = provider.GetService<IBufferContext>();
