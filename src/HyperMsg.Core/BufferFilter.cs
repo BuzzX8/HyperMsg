@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class BufferFilter : ISender, IBufferFilter
+    internal class BufferFilter : ISender, IBufferFilter
     {
         private readonly Dictionary<Type, Delegate> writers;
         private readonly IBuffer buffer;
