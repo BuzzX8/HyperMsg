@@ -10,10 +10,7 @@ namespace HyperMsg
     {
         private readonly IBufferFilter bufferFilter;
 
-        public BufferFilterTests()
-        {
-            bufferFilter = GetRequiredService<IBufferFilter>();
-        }
+        public BufferFilterTests() => bufferFilter = GetRequiredService<IBufferFilter>();
 
         [Fact]
         public void Send_Writes_Message_To_Buffer()
