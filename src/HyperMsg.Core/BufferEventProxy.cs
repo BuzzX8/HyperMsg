@@ -25,7 +25,7 @@ namespace HyperMsg
         public void Dispose() => buffer.Dispose();
     }
 
-    public struct BufferUpdatedEvent
+    internal struct BufferUpdatedEvent
     {
         public BufferUpdatedEvent(BufferType bufferType, IBufferReader bufferReader)
             => (BufferType, BufferReader) = (bufferType, bufferReader);
@@ -35,7 +35,7 @@ namespace HyperMsg
         public IBufferReader BufferReader {get;}
     }
 
-    public enum BufferType
+    internal enum BufferType
     {
         Receive,
         Transmit

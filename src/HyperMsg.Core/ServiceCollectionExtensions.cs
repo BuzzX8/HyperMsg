@@ -70,10 +70,9 @@ namespace HyperMsg
             {
                 var broker = provider.GetRequiredService<MessageBroker>();
                 var bufferContext = provider.GetRequiredService<IBufferContext>();
-                var filter = new BufferFilter(bufferContext.TransmittingBuffer, broker);                
-                
-                return filter;
-            });
+
+                return new BufferFilter(bufferContext.TransmittingBuffer, broker);
+            }).AddSingleton(provider => provider.GetRequiredService<BufferFilter>() as IBufferFilter);
         }
 
         private static IServiceCollection WireBaseInterfaces(this IServiceCollection services)
