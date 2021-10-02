@@ -11,7 +11,7 @@ namespace HyperMsg
         private readonly IBuffer buffer;
         private readonly ISender sender;
 
-        public BufferFilter(IBuffer buffer, ISender sender)
+        internal BufferFilter(IBuffer buffer, ISender sender)
         {
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
             this.sender = sender ?? throw new ArgumentNullException(nameof(sender));
@@ -29,6 +29,7 @@ namespace HyperMsg
             {
                 var writer = (Action<IBufferWriter, T>)writers[typeof(T)];
                 writer.Invoke(buffer.Writer, message);
+                buffer.Flush();
                 
                 return;
             }
@@ -43,7 +44,7 @@ namespace HyperMsg
                 var writer = (Action<IBufferWriter, T>)writers[typeof(T)];
                 writer.Invoke(buffer.Writer, message);
 
-                return Task.CompletedTask;
+                return buffer.FlushAsync(cancellationToken);
             }
 
             return sender.SendAsync(message, cancellationToken);

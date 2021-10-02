@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
@@ -105,18 +107,9 @@ namespace HyperMsg
         public void Clear() => position = length = 0;
 
         public void Dispose() => memoryOwner.Dispose();
-    }
 
-    internal class BufferWriterAdapter : IBufferWriter<byte>
-    {
-        private readonly IBufferWriter bufferWriter;
+        public void Flush() => throw new NotImplementedException();
 
-        public BufferWriterAdapter(IBufferWriter bufferWriter) => this.bufferWriter = bufferWriter;
-
-        public void Advance(int count) => bufferWriter.Advance(count);
-
-        public Memory<byte> GetMemory(int sizeHint = 0) => bufferWriter.GetMemory(sizeHint);
-
-        public Span<byte> GetSpan(int sizeHint = 0) => bufferWriter.GetSpan(sizeHint);
+        public Task FlushAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
     }
 }

@@ -41,8 +41,9 @@ namespace HyperMsg
                 var memoryPool = provider.GetRequiredService<MemoryPool<byte>>();
                 var receivingBuffer = new Buffer(memoryPool.Rent(receivingBufferSize));
                 var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
+                var sender = provider.GetRequiredService<ISender>();
 
-                return new BufferContext(receivingBuffer, transmittingBuffer) as IBufferContext;
+                return new BufferContext(receivingBuffer, transmittingBuffer, sender) as IBufferContext;
             });
         }
 

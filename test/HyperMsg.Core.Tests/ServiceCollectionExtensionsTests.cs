@@ -37,8 +37,9 @@ namespace HyperMsg
         [Fact]
         public void AddBufferContext_Adds_BufferContext()
         {
-            services.AddSharedMemoryPool();
-            services.AddBufferContext();
+            services.AddSharedMemoryPool()
+                .AddBufferContext()
+                .AddMessageBroker();
             var provider = services.BuildServiceProvider();
 
             var context = provider.GetService<IBufferContext>();

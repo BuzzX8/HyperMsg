@@ -1,29 +1,28 @@
-using System;
-using System.Buffers;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    internal class BufferEventProxy : IBuffer, IBufferWriter
+    internal class BufferEventProxy : IBuffer
     {
         private readonly BufferType bufferType;
-        private readonly IBuffer buffer;
+        private readonly Buffer buffer;
         private readonly ISender sender;
+
+        public BufferEventProxy(BufferType bufferType, Buffer buffer, ISender sender) =>
+            (this.bufferType, this.buffer, this.sender) = (bufferType, buffer, sender);
 
         public IBufferReader Reader => buffer.Reader;
 
-        public IBufferWriter Writer => this;
+        public IBufferWriter Writer => buffer.Writer;
 
         public void Clear() => buffer.Clear();
 
-        void IBufferWriter<byte>.Advance(int count)
-        {
-            buffer.Writer.Advance(count);
-            sender.Send(new BufferUpdatedEvent());
-        }
+        public void Flush() => sender.Send(new BufferUpdatedEvent(bufferType, buffer.Reader));
 
-        Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint) => buffer.Writer.GetMemory(sizeHint);
+        public Task FlushAsync(CancellationToken cancellationToken) => sender.SendAsync(new BufferUpdatedEvent(bufferType, buffer.Reader), cancellationToken);
 
-        Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint) => buffer.Writer.GetSpan(sizeHint);
+        public void Dispose() => buffer.Dispose();
     }
 
     public struct BufferUpdatedEvent
