@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    public class StreamFilter : Stream
+    public class StreamFilter : Stream, IStreamFilter
     {
         private readonly IBufferReader receiveBufferReader;
         private readonly IBuffer transmitBuffer;
 
-        public StreamFilter(IBufferReader receiveBufferReader, IBuffer transmitBuffer)
+        internal StreamFilter(IBufferReader receiveBufferReader, IBuffer transmitBuffer)
         {
             this.receiveBufferReader = receiveBufferReader ?? throw new ArgumentNullException(nameof(receiveBufferReader));
             this.transmitBuffer = transmitBuffer ?? throw new ArgumentNullException(nameof(transmitBuffer));
@@ -29,6 +29,8 @@ namespace HyperMsg
             get => throw new NotSupportedException();
             set => throw new NotSupportedException();
         }
+
+        public Stream Stream => this;
 
         public override int Read(Span<byte> buffer)
         {
@@ -54,5 +56,30 @@ namespace HyperMsg
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
         public override void SetLength(long value) => throw new NotSupportedException();
+    }
+
+    public interface IStreamFilter
+    {
+        Stream Stream { get; }
+    }
+
+    public interface IStreamContext
+    {
+        Stream Left { get; }
+
+        Stream Right { get; }
+    }
+
+    internal class StreamContext : IStreamContext
+    {
+        public StreamContext(IBufferContext bufferContext)
+        {
+            Left = new StreamFilter(bufferContext.ReceivingBuffer.Reader, bufferContext.TransmittingBuffer);
+            Right = new StreamFilter(bufferContext.TransmittingBuffer.Reader, bufferContext.ReceivingBuffer);
+        }
+
+        public Stream Left { get; }
+
+        public Stream Right { get; }
     }
 }
