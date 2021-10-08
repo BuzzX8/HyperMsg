@@ -6,11 +6,11 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class BufferFilterTests : HostFixture
+    public class SerializationFilterTests : HostFixture
     {
-        private readonly IBufferFilter bufferFilter;
+        private readonly ISerializationFilter bufferFilter;
 
-        public BufferFilterTests() => bufferFilter = GetRequiredService<IBufferFilter>();
+        public SerializationFilterTests() => bufferFilter = GetRequiredService<ISerializationFilter>();
 
         [Fact]
         public void Send_Writes_Message_To_Buffer()
@@ -18,7 +18,7 @@ namespace HyperMsg
             var message = Guid.NewGuid();
             var bytes = default(byte[]);
 
-            bufferFilter.AddWriter<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
+            bufferFilter.AddSerializer<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
             HandlersRegistry.RegisterTransmitBufferHandler(reader => bytes = reader.Read().ToArray());
 
             Sender.Send(message);
@@ -32,7 +32,7 @@ namespace HyperMsg
             var message = Guid.NewGuid();
             var bytes = default(byte[]);
 
-            bufferFilter.AddWriter<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
+            bufferFilter.AddSerializer<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
             HandlersRegistry.RegisterTransmitBufferHandler((reader, _) =>
             {
                 bytes = reader.Read().ToArray();

@@ -10,8 +10,10 @@ namespace HyperMsg
         private readonly IBufferReader receiveBufferReader;
         private readonly IBuffer transmitBuffer;
 
-        public StreamFilter()
+        public StreamFilter(IBufferReader receiveBufferReader, IBuffer transmitBuffer)
         {
+            this.receiveBufferReader = receiveBufferReader ?? throw new ArgumentNullException(nameof(receiveBufferReader));
+            this.transmitBuffer = transmitBuffer ?? throw new ArgumentNullException(nameof(transmitBuffer));
         }
 
         public override bool CanRead => true;
