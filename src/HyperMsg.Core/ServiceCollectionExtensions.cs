@@ -75,16 +75,6 @@ namespace HyperMsg
             }).AddSingleton(provider => provider.GetRequiredService<SerializationFilter>() as ISerializationFilter);
         }
 
-        public static IServiceCollection AddStreamFilter(this IServiceCollection services)
-        {
-            return services.AddSingleton(provider =>
-            {
-               var bufferContext = provider.GetRequiredService<IBufferContext>();
-               var filter = new StreamFilter(bufferContext.ReceivingBuffer.Reader, bufferContext.TransmittingBuffer);
-               return filter as IStreamFilter;
-            });
-        }
-
         private static IServiceCollection WireBaseInterfaces(this IServiceCollection services)
         {
             return services
