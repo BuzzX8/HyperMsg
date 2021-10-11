@@ -19,7 +19,7 @@ namespace HyperMsg
                 .AddBufferContext(receivingBufferSize, transmittingBufferSize)
                 .AddSharedMemoryPool()
                 .AddMessageBroker()
-                .AddBufferFilter()
+                .AddSerializationFilter()
                 .WireBaseInterfaces();
         }
 
@@ -64,21 +64,21 @@ namespace HyperMsg
         /// <param name="serviceRegistry"></param>
         public static IServiceCollection AddMessageBroker(this IServiceCollection services) => services.AddSingleton<MessageBroker>();
 
-        public static IServiceCollection AddBufferFilter(this IServiceCollection services)
+        public static IServiceCollection AddSerializationFilter(this IServiceCollection services)
         {
             return services.AddSingleton(provider => 
             {
                 var broker = provider.GetRequiredService<MessageBroker>();
                 var bufferContext = provider.GetRequiredService<IBufferContext>();
 
-                return new BufferFilter(bufferContext.TransmittingBuffer, broker);
-            }).AddSingleton(provider => provider.GetRequiredService<BufferFilter>() as IBufferFilter);
+                return new SerializationFilter(bufferContext.TransmittingBuffer, broker);
+            }).AddSingleton(provider => provider.GetRequiredService<SerializationFilter>() as ISerializationFilter);
         }
 
         private static IServiceCollection WireBaseInterfaces(this IServiceCollection services)
         {
             return services
-                .AddSingleton(provider => provider.GetRequiredService<BufferFilter>() as ISender)
+                .AddSingleton(provider => provider.GetRequiredService<SerializationFilter>() as ISender)
                 .AddSingleton(provider => provider.GetRequiredService<MessageBroker>() as IMessagingContext)
                 .AddSingleton(provider => provider.GetRequiredService<MessageBroker>() as IHandlersRegistry);
         }

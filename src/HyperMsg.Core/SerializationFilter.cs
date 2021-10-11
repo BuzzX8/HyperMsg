@@ -5,23 +5,23 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    internal class BufferFilter : ISender, IBufferFilter
+    internal class SerializationFilter : ISender, ISerializationFilter
     {
         private readonly Dictionary<Type, Delegate> writers;
         private readonly IBuffer buffer;
         private readonly ISender sender;
 
-        internal BufferFilter(IBuffer buffer, ISender sender)
+        internal SerializationFilter(IBuffer buffer, ISender sender)
         {
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
             this.sender = sender ?? throw new ArgumentNullException(nameof(sender));
             writers = new();
         }
 
-        public void AddWriter<T>(Action<IBufferWriter, T> writer)
-            => writers.Add(typeof(T), writer);
+        public void AddSerializer<T>(Action<IBufferWriter, T> serializer)
+            => writers.Add(typeof(T), serializer);
 
-        public void RemoveWriter<T>() => writers.Remove(typeof(T));
+        public void RemoveSerializer<T>() => writers.Remove(typeof(T));
 
         public void Send<T>(T message)
         {
@@ -51,10 +51,10 @@ namespace HyperMsg
         }
     }
 
-    public interface IBufferFilter
+    public interface ISerializationFilter
     {
-        void AddWriter<T>(Action<IBufferWriter, T> writer);
+        void AddSerializer<T>(Action<IBufferWriter, T> serializer);
 
-        void RemoveWriter<T>();
+        void RemoveSerializer<T>();
     }
 }
