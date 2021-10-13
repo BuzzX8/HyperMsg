@@ -20,6 +20,7 @@ namespace HyperMsg
                 .AddSharedMemoryPool()
                 .AddMessageBroker()
                 .AddSerializationFilter()
+                .AddHandlersRegistration()
                 .WireBaseInterfaces();
         }
 
@@ -63,6 +64,12 @@ namespace HyperMsg
         /// </summary>
         /// <param name="serviceRegistry"></param>
         public static IServiceCollection AddMessageBroker(this IServiceCollection services) => services.AddSingleton<MessageBroker>();
+
+        private static IServiceCollection AddHandlersRegistration(this IServiceCollection services)
+        {
+            return services.AddSingleton<HandlersRegistratorList>()
+                .AddHostedService<HandlersRegistrationService>();
+        }
 
         public static IServiceCollection AddSerializationFilter(this IServiceCollection services)
         {
