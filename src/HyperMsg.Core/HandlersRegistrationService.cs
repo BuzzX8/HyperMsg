@@ -6,17 +6,17 @@ using Registrator = System.Func<HyperMsg.IHandlersRegistry, System.Collections.G
 
 namespace HyperMsg
 {
-    public class HandlersRegistrationService : HostedServiceBase
+    internal class HandlersRegistrationService : HostedServiceBase
     {
         private readonly IHandlersRegistry handlersRegistry;
-        private readonly List<Registrator> registrators;
+        private readonly HandlersRegistratorList registrators;
         private readonly List<IDisposable> registrations;
 
         public HandlersRegistrationService(HandlersRegistratorList registrators, IHandlersRegistry handlersRegistry)
         {
             this.handlersRegistry = handlersRegistry;
+            this.registrators = registrators;
             registrations = new();
-            this.registrators = new(registrators);
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
