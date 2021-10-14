@@ -9,7 +9,7 @@ namespace HyperMsg
     /// <summary>
     /// Provides implementation for MessageSender and MessageHandlerRegistry
     /// </summary>
-    public class MessageBroker : ISender, IHandlersRegistry, IMessagingContext
+    public class MessageBroker : ISender, IHandlersRegistry
     {
         private class Subscription : IDisposable
         {
