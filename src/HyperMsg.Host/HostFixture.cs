@@ -13,8 +13,6 @@ namespace HyperMsg
             host.Start();
         }
 
-        protected IMessagingContext MessagingContext => GetRequiredService<IMessagingContext>();
-
         protected ISender Sender => GetRequiredService<ISender>();
 
         protected IHandlersRegistry HandlersRegistry => GetRequiredService<IHandlersRegistry>();

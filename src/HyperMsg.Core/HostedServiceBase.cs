@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace HyperMsg
 {
     /// <summary>
-    /// 
+    /// Basic implementation fo hosted service
     /// </summary>
     public abstract class HostedServiceBase : IHostedService, IDisposable
     {

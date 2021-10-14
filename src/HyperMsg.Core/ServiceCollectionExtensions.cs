@@ -86,7 +86,6 @@ namespace HyperMsg
         {
             return services
                 .AddSingleton(provider => provider.GetRequiredService<SerializationFilter>() as ISender)
-                .AddSingleton(provider => provider.GetRequiredService<MessageBroker>() as IMessagingContext)
                 .AddSingleton(provider => provider.GetRequiredService<MessageBroker>() as IHandlersRegistry);
         }
     }
