@@ -4,13 +4,13 @@ namespace HyperMsg
 {
     internal class BufferContext : IBufferContext, IDisposable
     {
-        private readonly BufferEventProxy receivingBuffer;
-        private readonly BufferEventProxy transmittingBuffer;
+        private readonly Buffer receivingBuffer;
+        private readonly Buffer transmittingBuffer;
 
-        internal BufferContext(Buffer receivingBuffer, Buffer transmittingBuffer, ISender sender)
+        internal BufferContext(Buffer receivingBuffer, Buffer transmittingBuffer)
         {
-            this.receivingBuffer = new BufferEventProxy(BufferType.Receive, receivingBuffer, sender);
-            this.transmittingBuffer = new BufferEventProxy(BufferType.Transmit, transmittingBuffer, sender);
+            this.receivingBuffer = receivingBuffer;
+            this.transmittingBuffer = transmittingBuffer;
         }
 
         public IBuffer ReceivingBuffer => receivingBuffer;
