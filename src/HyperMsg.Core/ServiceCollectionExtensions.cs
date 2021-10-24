@@ -78,7 +78,7 @@ namespace HyperMsg
                 var broker = provider.GetRequiredService<MessageBroker>();
                 var bufferContext = provider.GetRequiredService<IBufferContext>();
 
-                return new SerializationFilter(bufferContext.TransmittingBuffer, broker);
+                return new SerializationFilter(bufferContext.TransmittingBuffer, BufferType.Transmit, broker);
             }).AddSingleton(provider => provider.GetRequiredService<SerializationFilter>() as ISerializationFilter);
         }
 

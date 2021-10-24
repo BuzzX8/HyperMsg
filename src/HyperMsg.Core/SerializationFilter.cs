@@ -8,11 +8,13 @@ namespace HyperMsg
     internal class SerializationFilter : MessageFilter, ISerializationFilter
     {
         private readonly Dictionary<Type, Delegate> serializers;
+        private readonly BufferType bufferType;
         private readonly IBuffer buffer;
 
-        internal SerializationFilter(IBuffer buffer, ISender sender) : base(sender)
+        internal SerializationFilter(IBuffer buffer, BufferType bufferType, ISender sender) : base(sender)
         {
-            this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
+            this.buffer = buffer;
+            this.bufferType = bufferType;
             serializers = new();
         }
 
@@ -23,30 +25,30 @@ namespace HyperMsg
 
         protected override bool HandleMessage<T>(T message)
         {
-            if (serializers.ContainsKey(typeof(T)))
+            if (!serializers.ContainsKey(typeof(T)))
             {
-                var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
-                writer.Invoke(buffer.Writer, message);
-                Sender.Send(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader));
-                
-                return true;
+                return false;
             }
 
-            return false;
+            var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
+            writer.Invoke(buffer.Writer, message);
+            Sender.Send(new BufferUpdatedEvent(bufferType, buffer.Reader));
+
+            return true;
         }        
 
         protected override async Task<bool> HandleMessageAsync<T>(T message, CancellationToken cancellationToken)
         {
-            if (serializers.ContainsKey(typeof(T)))
+            if (!serializers.ContainsKey(typeof(T)))
             {
-                var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
-                writer.Invoke(buffer.Writer, message);
-                await Sender.SendAsync(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader), cancellationToken);
-                
-                return true;
+                return false;
             }
 
-            return false;
+            var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
+            writer.Invoke(buffer.Writer, message);
+            await Sender.SendAsync(new BufferUpdatedEvent(bufferType, buffer.Reader), cancellationToken);
+
+            return true;
         }
     }
 
