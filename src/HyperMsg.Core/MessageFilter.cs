@@ -6,10 +6,10 @@ namespace HyperMsg
 {
     public abstract class MessageFilter : ISender
     {
-        private readonly ISender sender;
+        protected MessageFilter(ISender sender) => 
+            Sender = sender ?? throw new ArgumentNullException(nameof(sender));
 
-        protected MessageFilter(ISender messageSender) => 
-            this.sender = messageSender ?? throw new ArgumentNullException(nameof(messageSender));
+        protected ISender Sender { get; }
 
         public virtual void Send<T>(T message)
         {
@@ -18,7 +18,7 @@ namespace HyperMsg
                 return;
             }
 
-            sender.Send(message);
+            Sender.Send(message);
         }
 
         public virtual Task SendAsync<T>(T message, CancellationToken cancellationToken)
@@ -28,7 +28,7 @@ namespace HyperMsg
                 return Task.CompletedTask;
             }
 
-            return sender.SendAsync(message, cancellationToken);
+            return Sender.SendAsync(message, cancellationToken);
         }
 
         protected abstract bool HandleMessage<T>(T message);

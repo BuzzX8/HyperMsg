@@ -27,7 +27,7 @@ namespace HyperMsg
             {
                 var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
                 writer.Invoke(buffer.Writer, message);
-                Send(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader));
+                Sender.Send(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader));
                 
                 return true;
             }
@@ -41,7 +41,7 @@ namespace HyperMsg
             {
                 var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
                 writer.Invoke(buffer.Writer, message);
-                await SendAsync(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader), cancellationToken);
+                await Sender.SendAsync(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader), cancellationToken);
                 
                 return true;
             }
