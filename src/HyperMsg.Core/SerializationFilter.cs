@@ -5,16 +5,14 @@ using System.Threading.Tasks;
 
 namespace HyperMsg
 {
-    internal class SerializationFilter : ISender, ISerializationFilter
+    internal class SerializationFilter : MessageFilter, ISerializationFilter
     {
         private readonly Dictionary<Type, Delegate> writers;
         private readonly IBuffer buffer;
-        private readonly ISender sender;
 
-        internal SerializationFilter(IBuffer buffer, ISender sender)
+        internal SerializationFilter(IBuffer buffer, ISender sender) : base(sender)
         {
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
-            this.sender = sender ?? throw new ArgumentNullException(nameof(sender));
             writers = new();
         }
 
@@ -23,7 +21,7 @@ namespace HyperMsg
 
         public void RemoveSerializer<T>() => writers.Remove(typeof(T));
 
-        public void Send<T>(T message)
+        protected override bool HandleMessage<T>(T message)
         {
             if (writers.ContainsKey(typeof(T)))
             {
@@ -31,23 +29,24 @@ namespace HyperMsg
                 writer.Invoke(buffer.Writer, message);
                 buffer.Flush();
                 
-                return;
+                return true;
             }
 
-            sender.Send(message);
-        }
+            return false;
+        }        
 
-        public Task SendAsync<T>(T message, CancellationToken cancellationToken)
+        protected override async Task<bool> HandleMessageAsync<T>(T message, CancellationToken cancellationToken)
         {
             if (writers.ContainsKey(typeof(T)))
             {
                 var writer = (Action<IBufferWriter, T>)writers[typeof(T)];
                 writer.Invoke(buffer.Writer, message);
-
-                return buffer.FlushAsync(cancellationToken);
+                await buffer.FlushAsync(cancellationToken);
+                
+                return true;
             }
 
-            return sender.SendAsync(message, cancellationToken);
+            return false;
         }
     }
 
