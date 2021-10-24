@@ -13,7 +13,7 @@ namespace HyperMsg
 
         public virtual void Send<T>(T message)
         {
-            if (!HandleMessage(message))
+            if (HandleMessage(message))
             {
                 return;
             }
@@ -23,7 +23,7 @@ namespace HyperMsg
 
         public virtual Task SendAsync<T>(T message, CancellationToken cancellationToken)
         {
-            if (!HandleMessage(message))
+            if (HandleMessage(message))
             {
                 return Task.CompletedTask;
             }

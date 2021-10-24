@@ -45,7 +45,7 @@ namespace HyperMsg
                 var transmittingBuffer = new Buffer(memoryPool.Rent(transmittingBufferSize));
                 var sender = provider.GetRequiredService<MessageBroker>();
 
-                return new BufferContext(receivingBuffer, transmittingBuffer, sender) as IBufferContext;
+                return new BufferContext(receivingBuffer, transmittingBuffer) as IBufferContext;
             });
         }
 

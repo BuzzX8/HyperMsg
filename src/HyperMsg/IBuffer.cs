@@ -1,7 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace HyperMsg
+﻿namespace HyperMsg
 {
     /// <summary>
     /// Defines methods for basic operations with byte buffer and
@@ -23,9 +20,5 @@ namespace HyperMsg
         /// Clears buffer data.
         /// </summary>
         void Clear();
-
-        void Flush();
-
-        Task FlushAsync(CancellationToken cancellationToken);
     }
 }

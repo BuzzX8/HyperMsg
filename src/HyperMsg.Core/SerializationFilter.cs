@@ -7,27 +7,27 @@ namespace HyperMsg
 {
     internal class SerializationFilter : MessageFilter, ISerializationFilter
     {
-        private readonly Dictionary<Type, Delegate> writers;
+        private readonly Dictionary<Type, Delegate> serializers;
         private readonly IBuffer buffer;
 
         internal SerializationFilter(IBuffer buffer, ISender sender) : base(sender)
         {
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
-            writers = new();
+            serializers = new();
         }
 
         public void AddSerializer<T>(Action<IBufferWriter, T> serializer)
-            => writers.Add(typeof(T), serializer);
+            => serializers.Add(typeof(T), serializer);
 
-        public void RemoveSerializer<T>() => writers.Remove(typeof(T));
+        public void RemoveSerializer<T>() => serializers.Remove(typeof(T));
 
         protected override bool HandleMessage<T>(T message)
         {
-            if (writers.ContainsKey(typeof(T)))
+            if (serializers.ContainsKey(typeof(T)))
             {
-                var writer = (Action<IBufferWriter, T>)writers[typeof(T)];
+                var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
                 writer.Invoke(buffer.Writer, message);
-                buffer.Flush();
+                Send(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader));
                 
                 return true;
             }
@@ -37,17 +37,33 @@ namespace HyperMsg
 
         protected override async Task<bool> HandleMessageAsync<T>(T message, CancellationToken cancellationToken)
         {
-            if (writers.ContainsKey(typeof(T)))
+            if (serializers.ContainsKey(typeof(T)))
             {
-                var writer = (Action<IBufferWriter, T>)writers[typeof(T)];
+                var writer = (Action<IBufferWriter, T>)serializers[typeof(T)];
                 writer.Invoke(buffer.Writer, message);
-                await buffer.FlushAsync(cancellationToken);
+                await SendAsync(new BufferUpdatedEvent(BufferType.Transmit, buffer.Reader), cancellationToken);
                 
                 return true;
             }
 
             return false;
         }
+    }
+
+    internal struct BufferUpdatedEvent
+    {
+        public BufferUpdatedEvent(BufferType bufferType, IBufferReader bufferReader)
+            => (BufferType, BufferReader) = (bufferType, bufferReader);
+
+        public BufferType BufferType { get; }
+
+        public IBufferReader BufferReader { get; }
+    }
+
+    internal enum BufferType
+    {
+        Receive,
+        Transmit
     }
 
     public interface ISerializationFilter
