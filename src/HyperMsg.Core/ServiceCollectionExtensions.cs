@@ -21,6 +21,7 @@ namespace HyperMsg
                 .AddMessageBroker()
                 .AddSerializationFilter()
                 .AddHandlersRegistration()
+                .AddSingleton<IResultRepository, ResultRepository>()
                 .WireBaseInterfaces();
         }
 
