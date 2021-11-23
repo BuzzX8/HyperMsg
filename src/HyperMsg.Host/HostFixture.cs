@@ -1,30 +1,28 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
 
-namespace HyperMsg
+namespace HyperMsg;
+
+public abstract class HostFixture : IDisposable
 {
-    public abstract class HostFixture : IDisposable
+    private readonly Host host;
+
+    protected HostFixture(Action<IServiceCollection> serviceConfigurator = null)
     {
-        private readonly Host host;
+        host = Host.CreateDefault(serviceConfigurator);
+        host.Start();
+    }
 
-        protected HostFixture(Action<IServiceCollection> serviceConfigurator = null)
-        {
-            host = Host.CreateDefault(serviceConfigurator);
-            host.Start();
-        }
+    protected ISender Sender => GetRequiredService<ISender>();
 
-        protected ISender Sender => GetRequiredService<ISender>();
+    protected IHandlersRegistry HandlersRegistry => GetRequiredService<IHandlersRegistry>();
 
-        protected IHandlersRegistry HandlersRegistry => GetRequiredService<IHandlersRegistry>();
+    protected T GetService<T>() => host.GetService<T>();
 
-        protected T GetService<T>() => host.GetService<T>();
+    protected T GetRequiredService<T>() => host.GetRequiredService<T>();
 
-        protected T GetRequiredService<T>() => host.GetRequiredService<T>();
-
-        public virtual void Dispose()
-        {
-            host.Stop();
-            host.Dispose();
-        }
+    public virtual void Dispose()
+    {
+        host.Stop();
+        host.Dispose();
     }
 }

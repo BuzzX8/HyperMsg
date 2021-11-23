@@ -57,7 +57,7 @@ public static class BufferExtensions
         return false;
     }
 
-    public static void ForEachSegment(this ReadOnlySequence<byte> data, Action<ReadOnlyMemory<byte>> dataSegmentHandler)
+    public static void ForEachSegment(in this ReadOnlySequence<byte> data, Action<ReadOnlyMemory<byte>> dataSegmentHandler)
     {
         if (data.Length == 0)
         {

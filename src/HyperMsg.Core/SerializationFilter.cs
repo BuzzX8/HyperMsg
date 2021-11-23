@@ -47,15 +47,7 @@ internal class SerializationFilter : MessageFilter, ISerializationFilter
     }
 }
 
-internal struct BufferUpdatedEvent
-{
-    public BufferUpdatedEvent(BufferType bufferType, IBufferReader bufferReader)
-        => (BufferType, BufferReader) = (bufferType, bufferReader);
-
-    public BufferType BufferType { get; }
-
-    public IBufferReader BufferReader { get; }
-}
+internal readonly record struct BufferUpdatedEvent(BufferType BufferType, IBufferReader BufferReader);
 
 internal enum BufferType
 {

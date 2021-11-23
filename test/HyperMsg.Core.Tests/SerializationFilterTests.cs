@@ -1,47 +1,43 @@
-﻿using System;
-using System.Buffers;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Buffers;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg;
+
+public class SerializationFilterTests : HostFixture
 {
-    public class SerializationFilterTests : HostFixture
+    private readonly ISerializationFilter bufferFilter;
+
+    public SerializationFilterTests() => bufferFilter = GetRequiredService<ISerializationFilter>();
+
+    [Fact]
+    public void Send_Writes_Message_To_Buffer()
     {
-        private readonly ISerializationFilter bufferFilter;
+        var message = Guid.NewGuid();
+        var bytes = default(byte[]);
 
-        public SerializationFilterTests() => bufferFilter = GetRequiredService<ISerializationFilter>();
+        bufferFilter.AddSerializer<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
+        HandlersRegistry.RegisterTransmitBufferHandler(reader => bytes = reader.Read().ToArray());
 
-        [Fact]
-        public void Send_Writes_Message_To_Buffer()
+        Sender.Send(message);
+
+        Assert.Equal(message.ToByteArray(), bytes);
+    }
+
+    [Fact]
+    public async Task SendAsync_Writes_Message_To_Buffer()
+    {
+        var message = Guid.NewGuid();
+        var bytes = default(byte[]);
+
+        bufferFilter.AddSerializer<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
+        HandlersRegistry.RegisterTransmitBufferHandler((reader, _) =>
         {
-            var message = Guid.NewGuid();
-            var bytes = default(byte[]);
+            bytes = reader.Read().ToArray();
+            return Task.CompletedTask;
+        });
 
-            bufferFilter.AddSerializer<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
-            HandlersRegistry.RegisterTransmitBufferHandler(reader => bytes = reader.Read().ToArray());
+        await Sender.SendAsync(message, default);
 
-            Sender.Send(message);
-
-            Assert.Equal(message.ToByteArray(), bytes);
-        }
-
-        [Fact]
-        public async Task SendAsync_Writes_Message_To_Buffer()
-        {
-            var message = Guid.NewGuid();
-            var bytes = default(byte[]);
-
-            bufferFilter.AddSerializer<Guid>((writer, guid) => writer.Write(guid.ToByteArray()));
-            HandlersRegistry.RegisterTransmitBufferHandler((reader, _) =>
-            {
-                bytes = reader.Read().ToArray();
-                return Task.CompletedTask;
-            });
-
-            await Sender.SendAsync(message, default);
-
-            Assert.Equal(message.ToByteArray(), bytes);
-        }
+        Assert.Equal(message.ToByteArray(), bytes);
     }
 }

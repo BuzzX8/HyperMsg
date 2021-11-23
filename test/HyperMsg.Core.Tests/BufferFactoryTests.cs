@@ -1,20 +1,19 @@
 ﻿using System.Buffers;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg;
+
+public class BufferFactoryTests
 {
-    public class BufferFactoryTests
+    private readonly BufferFactory factory = new(MemoryPool<byte>.Shared);
+
+    [Fact]
+    public void CreateBuffer_Creates_Buffer()
     {
-        private readonly BufferFactory factory = new BufferFactory(MemoryPool<byte>.Shared);
+        var bufferSize = 50;
 
-        [Fact]
-        public void CreateBuffer_Creates_Buffer()
-        {            
-            var bufferSize = 50;
+        var buffer = factory.CreateBuffer(bufferSize);
 
-            var buffer = factory.CreateBuffer(bufferSize);
-
-            Assert.NotNull(buffer);
-        }
+        Assert.NotNull(buffer);
     }
 }
