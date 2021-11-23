@@ -2,57 +2,56 @@
 using System.Buffers;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg;
+
+public class ServiceCollectionExtensionsTests
 {
-    public class ServiceCollectionExtensionsTests
+    private readonly ServiceCollection services = new();
+
+    [Fact]
+    public void AddMessageBroker_Adds_MessageBroker()
     {
-        private readonly ServiceCollection services = new();
+        services.AddMessageBroker();
+        var provider = services.BuildServiceProvider();
 
-        [Fact]
-        public void AddMessageBroker_Adds_MessageBroker()
-        {
-            services.AddMessageBroker();
-            var provider = services.BuildServiceProvider();
+        var broker = provider.GetRequiredService<MessageBroker>();
 
-            var broker = provider.GetRequiredService<MessageBroker>();
+        Assert.NotNull(broker);
+    }
 
-            Assert.NotNull(broker);
-        }
+    [Fact]
+    public void AddSharedMemoryPool_Adds_Memory_Pool()
+    {
+        services.AddSharedMemoryPool();
+        var provider = services.BuildServiceProvider();
 
-        [Fact]
-        public void AddSharedMemoryPool_Adds_Memory_Pool()
-        {
-            services.AddSharedMemoryPool();
-            var provider = services.BuildServiceProvider();
+        var pool = provider.GetService<MemoryPool<byte>>();
 
-            var pool = provider.GetService<MemoryPool<byte>>();
+        Assert.NotNull(pool);
+    }
 
-            Assert.NotNull(pool);
-        }
+    [Fact]
+    public void AddBufferContext_Adds_BufferContext()
+    {
+        services.AddSharedMemoryPool()
+            .AddBufferContext()
+            .AddMessageBroker();
+        var provider = services.BuildServiceProvider();
 
-        [Fact]
-        public void AddBufferContext_Adds_BufferContext()
-        {
-            services.AddSharedMemoryPool()
-                .AddBufferContext()
-                .AddMessageBroker();
-            var provider = services.BuildServiceProvider();
+        var context = provider.GetService<IBufferContext>();
 
-            var context = provider.GetService<IBufferContext>();
+        Assert.NotNull(context);
+    }
 
-            Assert.NotNull(context);
-        }
+    [Fact]
+    public void AddBufferFactory_Adds_BufferFactory()
+    {
+        services.AddSharedMemoryPool();
+        services.AddBufferFactory();
+        var provider = services.BuildServiceProvider();
 
-        [Fact]
-        public void AddBufferFactory_Adds_BufferFactory()
-        {
-            services.AddSharedMemoryPool();
-            services.AddBufferFactory();
-            var provider = services.BuildServiceProvider();
+        var factory = provider.GetService<IBufferFactory>();
 
-            var factory = provider.GetService<IBufferFactory>();
-
-            Assert.NotNull(factory);
-        }
+        Assert.NotNull(factory);
     }
 }

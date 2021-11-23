@@ -1,18 +1,17 @@
-﻿namespace HyperMsg
+﻿namespace HyperMsg;
+
+/// <summary>
+/// Represents buffers designated for transmitting and receiving data.
+/// </summary>
+public interface IBufferContext
 {
     /// <summary>
-    /// Represents buffers designated for transmitting and receiving data.
+    /// Buffer for receiving incoming data.
     /// </summary>
-    public interface IBufferContext
-    {
-        /// <summary>
-        /// Buffer for receiving incoming data.
-        /// </summary>
-        IBuffer ReceivingBuffer { get; }
+    IBuffer ReceivingBuffer { get; }
 
-        /// <summary>
-        /// Buffer for transmitting data.
-        /// </summary>
-        IBuffer TransmittingBuffer { get; }
-    }
+    /// <summary>
+    /// Buffer for transmitting data.
+    /// </summary>
+    IBuffer TransmittingBuffer { get; }
 }

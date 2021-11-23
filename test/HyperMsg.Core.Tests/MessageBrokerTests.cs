@@ -1,120 +1,116 @@
 ﻿using FakeItEasy;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg;
+
+public class MessageBrokerTests
 {
-    public class MessageBrokerTests
+    private readonly MessageBroker broker = new();
+    private readonly CancellationTokenSource tokenSource = new();
+
+    [Fact]
+    public void Send_Invokes_Single_Observers()
     {
-        private readonly MessageBroker broker = new MessageBroker();
-        private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
+        var observer = A.Fake<AsyncAction<Guid>>();
+        var message = Guid.NewGuid();
+        broker.RegisterHandler(observer);
 
-        [Fact]
-        public void Send_Invokes_Single_Observers()
+        broker.Send(message);
+
+        A.CallTo(() => observer.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
+    }
+
+    [Fact]
+    public void Send_Invokes_Multiple_Observers()
+    {
+        var observers = A.CollectionOfFake<Action<Guid>>(3);
+        var message = Guid.NewGuid();
+
+        foreach (var observer in observers)
         {
-            var observer = A.Fake<AsyncAction<Guid>>();
-            var message = Guid.NewGuid();
             broker.RegisterHandler(observer);
+        }
 
-            broker.Send(message);
+        broker.Send(message);
 
+        foreach (var observer in observers)
+        {
+            A.CallTo(() => observer.Invoke(message)).MustHaveHappened();
+        }
+    }
+
+    [Fact]
+    public void Send_Invokes_Multiple_Async_Observers()
+    {
+        var observers = A.CollectionOfFake<AsyncAction<Guid>>(3);
+        var message = Guid.NewGuid();
+
+        foreach (var observer in observers)
+        {
+            broker.RegisterHandler(observer);
+        }
+
+        broker.Send(message);
+
+        foreach (var observer in observers)
+        {
             A.CallTo(() => observer.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
         }
+    }
 
-        [Fact]
-        public void Send_Invokes_Multiple_Observers()
+    [Fact]
+    public async Task SendAsync_Invokes_Async_Observers()
+    {
+        var observer = A.Fake<AsyncAction<Guid>>();
+        var message = Guid.NewGuid();
+        broker.RegisterHandler(observer);
+
+        await broker.SendAsync(message, tokenSource.Token);
+
+        A.CallTo(() => observer.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
+    }
+
+    [Fact]
+    public void Send_Does_Not_Throw_Exception_When_New_Observer_Subscribed()
+    {
+        broker.RegisterHandler<Guid>(m =>
         {
-            var observers = A.CollectionOfFake<Action<Guid>>(3);
-            var message = Guid.NewGuid();
+            broker.RegisterHandler<string>(s => { });
+        });
 
-            foreach (var observer in observers)
-            {
-                broker.RegisterHandler(observer);
-            }
+        broker.Send(Guid.NewGuid());
+    }
 
-            broker.Send(message);
+    [Fact]
+    public void Send_Does_Not_Invokes_Unsubscribed_Observers()
+    {
+        var observer = A.Fake<Action<Guid>>();
+        var subscription = broker.RegisterHandler(observer);
 
-            foreach (var observer in observers)
-            {
-                A.CallTo(() => observer.Invoke(message)).MustHaveHappened();
-            }
-        }
+        subscription.Dispose();
+        broker.Send(Guid.NewGuid());
 
-        [Fact]
-        public void Send_Invokes_Multiple_Async_Observers()
-        {
-            var observers = A.CollectionOfFake<AsyncAction<Guid>>(3);
-            var message = Guid.NewGuid();
-            
-            foreach(var observer in observers)
-            {
-                broker.RegisterHandler(observer);
-            }
+        A.CallTo(() => observer.Invoke(A<Guid>._)).MustNotHaveHappened();
+    }
 
-            broker.Send(message);
+    [Fact]
+    public void Send_Does_Not_Invokes_Unsubscribed_Async_Observers()
+    {
+        var observer = A.Fake<AsyncAction<Guid>>();
+        var subscription = broker.RegisterHandler(observer);
 
-            foreach (var observer in observers)
-            {
-                A.CallTo(() => observer.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
-            }
-        }
+        subscription.Dispose();
+        broker.Send(Guid.NewGuid());
 
-        [Fact]
-        public async Task SendAsync_Invokes_Async_Observers()
-        {
-            var observer = A.Fake<AsyncAction<Guid>>();
-            var message = Guid.NewGuid();
-            broker.RegisterHandler(observer);
+        A.CallTo(() => observer.Invoke(A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
+    }
 
-            await broker.SendAsync(message, tokenSource.Token);
+    [Fact]
+    public void Send_Does_Not_Throw_Exception_If_Cancelling_Subscription_Inside_Observer()
+    {
+        var subscription = broker.RegisterHandler<Guid>(m => { });
+        broker.RegisterHandler<Guid>(m => subscription.Dispose());
 
-            A.CallTo(() => observer.Invoke(message, A<CancellationToken>._)).MustHaveHappened();
-        }
-
-        [Fact]
-        public void Send_Does_Not_Throw_Exception_When_New_Observer_Subscribed()
-        {
-            broker.RegisterHandler<Guid>(m =>
-            {
-                broker.RegisterHandler<string>(s => { });
-            });
-
-            broker.Send(Guid.NewGuid());
-        }
-
-        [Fact]
-        public void Send_Does_Not_Invokes_Unsubscribed_Observers()
-        {
-            var observer = A.Fake<Action<Guid>>();
-            var subscription = broker.RegisterHandler(observer);
-
-            subscription.Dispose();
-            broker.Send(Guid.NewGuid());
-
-            A.CallTo(() => observer.Invoke(A<Guid>._)).MustNotHaveHappened();
-        }
-
-        [Fact]
-        public void Send_Does_Not_Invokes_Unsubscribed_Async_Observers()
-        {
-            var observer = A.Fake<AsyncAction<Guid>>();
-            var subscription = broker.RegisterHandler(observer);
-
-            subscription.Dispose();
-            broker.Send(Guid.NewGuid());
-
-            A.CallTo(() => observer.Invoke(A<Guid>._, A<CancellationToken>._)).MustNotHaveHappened();
-        }
-
-        [Fact]
-        public void Send_Does_Not_Throw_Exception_If_Cancelling_Subscription_Inside_Observer()
-        {
-            var subscription = broker.RegisterHandler<Guid>(m => { });
-            broker.RegisterHandler<Guid>(m => subscription.Dispose());
-
-            broker.Send(Guid.NewGuid());
-        }        
+        broker.Send(Guid.NewGuid());
     }
 }

@@ -1,148 +1,144 @@
 ﻿using FakeItEasy;
-using System;
 using System.Buffers;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
-namespace HyperMsg
+namespace HyperMsg;
+
+public class BufferExtensionsTests
 {
-    public class BufferExtensionsTests
+    [Fact]
+    public void Advance_Advances_BufferReader()
     {
-        [Fact]
-        public void Advance_Advances_BufferReader()
-        {
-            var reader = A.Fake<IBufferReader>();
-            var count = (long)Guid.NewGuid().ToByteArray()[0];
+        var reader = A.Fake<IBufferReader>();
+        var count = (long)Guid.NewGuid().ToByteArray()[0];
 
-            reader.Advance(count);
+        reader.Advance(count);
 
-            A.CallTo(() => reader.Advance((int)count)).MustHaveHappened();
-        }
+        A.CallTo(() => reader.Advance((int)count)).MustHaveHappened();
+    }
 
-        [Fact]
-        public void Advance_BufferReader_Throws_Exception_If_Count_Value_Greater_Then_Int32_Max()
-        {
-            var reader = A.Fake<IBufferReader>();
-            var count = (long)int.MaxValue + 1;
+    [Fact]
+    public void Advance_BufferReader_Throws_Exception_If_Count_Value_Greater_Then_Int32_Max()
+    {
+        var reader = A.Fake<IBufferReader>();
+        var count = (long)int.MaxValue + 1;
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => reader.Advance(count));
-        }
+        Assert.Throws<ArgumentOutOfRangeException>(() => reader.Advance(count));
+    }
 
-        [Fact]
-        public void Advance_Advances_BufferWriter()
-        {
-            var reader = A.Fake<IBufferWriter>();
-            var count = (long)Guid.NewGuid().ToByteArray()[0];
+    [Fact]
+    public void Advance_Advances_BufferWriter()
+    {
+        var reader = A.Fake<IBufferWriter>();
+        var count = (long)Guid.NewGuid().ToByteArray()[0];
 
-            reader.Advance(count);
+        reader.Advance(count);
 
-            A.CallTo(() => reader.Advance((int)count)).MustHaveHappened();
-        }
+        A.CallTo(() => reader.Advance((int)count)).MustHaveHappened();
+    }
 
-        [Fact]
-        public void Advance_Advances_System_BufferWriter()
-        {
-            var reader = A.Fake<IBufferWriter<byte>>();
-            var count = (long)Guid.NewGuid().ToByteArray()[0];
+    [Fact]
+    public void Advance_Advances_System_BufferWriter()
+    {
+        var reader = A.Fake<IBufferWriter<byte>>();
+        var count = (long)Guid.NewGuid().ToByteArray()[0];
 
-            reader.Advance(count);
+        reader.Advance(count);
 
-            A.CallTo(() => reader.Advance((int)count)).MustHaveHappened();
-        }
+        A.CallTo(() => reader.Advance((int)count)).MustHaveHappened();
+    }
 
-        [Fact]
-        public void Advance_BufferWriter_Throws_Exception_If_Count_Value_Greater_Then_Int32_Max()
-        {
-            var reader = A.Fake<IBufferWriter>();
-            var count = (long)int.MaxValue + 1;
+    [Fact]
+    public void Advance_BufferWriter_Throws_Exception_If_Count_Value_Greater_Then_Int32_Max()
+    {
+        var reader = A.Fake<IBufferWriter>();
+        var count = (long)int.MaxValue + 1;
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => reader.Advance(count));
-        }
+        Assert.Throws<ArgumentOutOfRangeException>(() => reader.Advance(count));
+    }
 
-        [Fact]
-        public void Advance_System_BufferWriter_Throws_Exception_If_Count_Value_Greater_Then_Int32_Max()
-        {
-            var reader = A.Fake<IBufferWriter>();
-            var count = (long)int.MaxValue + 1;
+    [Fact]
+    public void Advance_System_BufferWriter_Throws_Exception_If_Count_Value_Greater_Then_Int32_Max()
+    {
+        var reader = A.Fake<IBufferWriter>();
+        var count = (long)int.MaxValue + 1;
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => reader.Advance(count));
-        }
+        Assert.Throws<ArgumentOutOfRangeException>(() => reader.Advance(count));
+    }
 
-        [Fact]
-        public void ForEachSegment_Does_Not_Invokes_Handler_For_Empty_Data()
-        {            
-            var data = new ReadOnlySequence<byte>();
-            var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
+    [Fact]
+    public void ForEachSegment_Does_Not_Invokes_Handler_For_Empty_Data()
+    {
+        var data = new ReadOnlySequence<byte>();
+        var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
 
-            data.ForEachSegment(handler);
+        data.ForEachSegment(handler);
 
-            A.CallTo(() => handler.Invoke(A<ReadOnlyMemory<byte>>._)).MustNotHaveHappened();
-        }
+        A.CallTo(() => handler.Invoke(A<ReadOnlyMemory<byte>>._)).MustNotHaveHappened();
+    }
 
-        [Fact]
-        public async Task ForEachSegment_Does_Not_Invokes_Async_Handler_For_Empty_Data()
-        {
-            var data = new ReadOnlySequence<byte>();
-            var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+    [Fact]
+    public async Task ForEachSegment_Does_Not_Invokes_Async_Handler_For_Empty_Data()
+    {
+        var data = new ReadOnlySequence<byte>();
+        var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
 
-            await data.ForEachSegment(handler);
+        await data.ForEachSegment(handler);
 
-            A.CallTo(() => handler.Invoke(A<ReadOnlyMemory<byte>>._, A<CancellationToken>._)).MustNotHaveHappened();
-        }
+        A.CallTo(() => handler.Invoke(A<ReadOnlyMemory<byte>>._, A<CancellationToken>._)).MustNotHaveHappened();
+    }
 
-        [Fact]
-        public void ForEachSegment_Invokes_Handler_For_Single_Segment()
-        {
-            var segment = Guid.NewGuid().ToByteArray().AsMemory();
-            var data = new ReadOnlySequence<byte>(segment);
-            var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
+    [Fact]
+    public void ForEachSegment_Invokes_Handler_For_Single_Segment()
+    {
+        var segment = Guid.NewGuid().ToByteArray().AsMemory();
+        var data = new ReadOnlySequence<byte>(segment);
+        var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
 
-            data.ForEachSegment(handler);
+        data.ForEachSegment(handler);
 
-            A.CallTo(() => handler.Invoke(segment)).MustHaveHappened();
-        }
+        A.CallTo(() => handler.Invoke(segment)).MustHaveHappened();
+    }
 
-        [Fact]
-        public async Task ForEachSegment_Invokes_Async_Handler_For_Single_Segment()
-        {
-            var segment = Guid.NewGuid().ToByteArray().AsMemory();
-            var data = new ReadOnlySequence<byte>(segment);
-            var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+    [Fact]
+    public async Task ForEachSegment_Invokes_Async_Handler_For_Single_Segment()
+    {
+        var segment = Guid.NewGuid().ToByteArray().AsMemory();
+        var data = new ReadOnlySequence<byte>(segment);
+        var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
 
-            await data.ForEachSegment(handler, default);
+        await data.ForEachSegment(handler, default);
 
-            A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
-        }
+        A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
+    }
 
-        [Fact]
-        public void ForEachSegment_Invokes_Handler_And_Advances_BufferReader()
-        {
-            var segment = Guid.NewGuid().ToByteArray().AsMemory();
-            var data = new ReadOnlySequence<byte>(segment);
-            var bufferReader = A.Fake<IBufferReader>();
-            A.CallTo(() => bufferReader.Read()).Returns(data);
-            var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
+    [Fact]
+    public void ForEachSegment_Invokes_Handler_And_Advances_BufferReader()
+    {
+        var segment = Guid.NewGuid().ToByteArray().AsMemory();
+        var data = new ReadOnlySequence<byte>(segment);
+        var bufferReader = A.Fake<IBufferReader>();
+        A.CallTo(() => bufferReader.Read()).Returns(data);
+        var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
 
-            bufferReader.ForEachSegment(handler);
+        bufferReader.ForEachSegment(handler);
 
-            A.CallTo(() => handler.Invoke(segment)).MustHaveHappened();
-            A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
-        }
+        A.CallTo(() => handler.Invoke(segment)).MustHaveHappened();
+        A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
+    }
 
-        [Fact]
-        public async Task ForEachSegment_Invokes_Async_Handler_And_Advances_BufferReader()
-        {
-            var segment = Guid.NewGuid().ToByteArray().AsMemory();
-            var data = new ReadOnlySequence<byte>(segment);
-            var bufferReader = A.Fake<IBufferReader>();
-            A.CallTo(() => bufferReader.Read()).Returns(data);
-            var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+    [Fact]
+    public async Task ForEachSegment_Invokes_Async_Handler_And_Advances_BufferReader()
+    {
+        var segment = Guid.NewGuid().ToByteArray().AsMemory();
+        var data = new ReadOnlySequence<byte>(segment);
+        var bufferReader = A.Fake<IBufferReader>();
+        A.CallTo(() => bufferReader.Read()).Returns(data);
+        var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
 
-            await bufferReader.ForEachSegment(handler);
+        await bufferReader.ForEachSegment(handler);
 
-            A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
-            A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
-        }
+        A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
+        A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
     }
 }
