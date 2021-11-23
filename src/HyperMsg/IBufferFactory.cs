@@ -1,15 +1,14 @@
-﻿namespace HyperMsg
+﻿namespace HyperMsg;
+
+/// <summary>
+/// Represents factory for creating buffers and buffer context.
+/// </summary>
+public interface IBufferFactory
 {
     /// <summary>
-    /// Represents factory for creating buffers and buffer context.
+    /// Creates buffer.
     /// </summary>
-    public interface IBufferFactory
-    {
-        /// <summary>
-        /// Creates buffer.
-        /// </summary>
-        /// <param name="bufferSize">Size of buffer.</param>
-        /// <returns></returns>
-        IBuffer CreateBuffer(int bufferSize);
-    }
+    /// <param name="bufferSize">Size of buffer.</param>
+    /// <returns></returns>
+    IBuffer CreateBuffer(int bufferSize);
 }

@@ -1,26 +1,23 @@
-﻿using System;
+﻿namespace HyperMsg;
 
-namespace HyperMsg
+internal class BufferContext : IBufferContext, IDisposable
 {
-    internal class BufferContext : IBufferContext, IDisposable
+    private readonly Buffer receivingBuffer;
+    private readonly Buffer transmittingBuffer;
+
+    internal BufferContext(Buffer receivingBuffer, Buffer transmittingBuffer)
     {
-        private readonly Buffer receivingBuffer;
-        private readonly Buffer transmittingBuffer;
+        this.receivingBuffer = receivingBuffer;
+        this.transmittingBuffer = transmittingBuffer;
+    }
 
-        internal BufferContext(Buffer receivingBuffer, Buffer transmittingBuffer)
-        {
-            this.receivingBuffer = receivingBuffer;
-            this.transmittingBuffer = transmittingBuffer;
-        }
+    public IBuffer ReceivingBuffer => receivingBuffer;
 
-        public IBuffer ReceivingBuffer => receivingBuffer;
+    public IBuffer TransmittingBuffer => transmittingBuffer;
 
-        public IBuffer TransmittingBuffer => transmittingBuffer;
-
-        public void Dispose()
-        {
-            receivingBuffer.Dispose();
-            transmittingBuffer.Dispose();
-        }
+    public void Dispose()
+    {
+        receivingBuffer.Dispose();
+        transmittingBuffer.Dispose();
     }
 }
