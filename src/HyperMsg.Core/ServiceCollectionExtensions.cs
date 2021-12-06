@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
             .AddMessageBroker()
             .AddSerializationFilter()
             .AddHandlersRegistration()
+            .AddSingleton<IResultRepository, ResultRepository>()
             .WireBaseInterfaces();
     }
 
