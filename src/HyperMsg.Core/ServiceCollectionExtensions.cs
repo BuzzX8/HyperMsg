@@ -19,7 +19,6 @@ public static class ServiceCollectionExtensions
             .AddBufferContext(receivingBufferSize, transmittingBufferSize)
             .AddSharedMemoryPool()
             .AddMessageBroker()
-            .AddSerializationFilter()
             .AddHandlersRegistration()
             .WireBaseInterfaces();
     }
@@ -71,21 +70,9 @@ public static class ServiceCollectionExtensions
             .AddHostedService<HandlersRegistrationService>();
     }
 
-    public static IServiceCollection AddSerializationFilter(this IServiceCollection services)
-    {
-        return services.AddSingleton(provider =>
-        {
-            var broker = provider.GetRequiredService<MessageBroker>();
-            var bufferContext = provider.GetRequiredService<IBufferContext>();
-
-            return new SerializationFilter(bufferContext.TransmittingBuffer, BufferType.Transmit, broker);
-        }).AddSingleton(provider => provider.GetRequiredService<SerializationFilter>() as ISerializationFilter);
-    }
-
     private static IServiceCollection WireBaseInterfaces(this IServiceCollection services)
     {
         return services
-            .AddSingleton(provider => provider.GetRequiredService<SerializationFilter>() as ISender)
             .AddSingleton(provider => provider.GetRequiredService<MessageBroker>() as IHandlersRegistry);
     }
 }

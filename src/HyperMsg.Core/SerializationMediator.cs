@@ -2,8 +2,14 @@
 
 public class SerializationMediator : ISender
 {
-    private readonly IBuffer buffer;
+    private readonly IBufferWriter writer;
     private readonly ISerializersRegistry registry;
+
+    public SerializationMediator(IBufferWriter bufferWriter, ISerializersRegistry serializersRegistry)
+    {
+        writer = bufferWriter ?? throw new ArgumentNullException(nameof(bufferWriter));
+        registry = serializersRegistry ?? throw new ArgumentNullException(nameof(serializersRegistry));
+    }
 
     public void Send<T>(T message) => SerializeMessage(message);
 
@@ -31,7 +37,7 @@ public class SerializationMediator : ISender
 
         var serializer = registry.Get<T>();
 
-        serializer.Invoke(buffer.Writer, message);
+        serializer.Invoke(writer, message);
 
         return true;
     }
