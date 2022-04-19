@@ -14,7 +14,7 @@ public abstract class HostFixture : IDisposable
 
     protected ISender Sender => GetRequiredService<ISender>();
 
-    protected IHandlersRegistry HandlersRegistry => GetRequiredService<IHandlersRegistry>();
+    protected IRegistry HandlersRegistry => GetRequiredService<IRegistry>();
 
     protected T GetService<T>() => host.GetService<T>();
 
