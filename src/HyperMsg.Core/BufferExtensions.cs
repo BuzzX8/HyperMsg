@@ -79,7 +79,7 @@ public static class BufferExtensions
         }
     }
 
-    public static async Task ForEachSegment(this ReadOnlySequence<byte> data, AsyncAction<ReadOnlyMemory<byte>> dataSegmentHandler, CancellationToken cancellationToken = default)
+    public static async Task ForEachSegment(this ReadOnlySequence<byte> data, Func<ReadOnlyMemory<byte>, CancellationToken, Task> dataSegmentHandler, CancellationToken cancellationToken = default)
     {
         if (data.Length == 0)
         {
@@ -88,7 +88,7 @@ public static class BufferExtensions
 
         if (data.IsSingleSegment)
         {
-            await dataSegmentHandler(data.First, cancellationToken);
+            await dataSegmentHandler.Invoke(data.First, cancellationToken);
         }
         else
         {
@@ -112,7 +112,7 @@ public static class BufferExtensions
         }
     }
 
-    public static async Task ForEachSegment(this IBufferReader bufferReader, AsyncAction<ReadOnlyMemory<byte>> dataSegmentHandler, bool advanceReader = true, CancellationToken cancellationToken = default)
+    public static async Task ForEachSegment(this IBufferReader bufferReader, Func<ReadOnlyMemory<byte>, CancellationToken, Task> dataSegmentHandler, bool advanceReader = true, CancellationToken cancellationToken = default)
     {
         var data = bufferReader.Read();
         await data.ForEachSegment(dataSegmentHandler, cancellationToken);

@@ -12,7 +12,7 @@ public abstract class HostFixture : IDisposable
         host.Start();
     }
 
-    protected ISender Sender => GetRequiredService<ISender>();
+    protected IForwarder Sender => GetRequiredService<IForwarder>();
 
     protected IRegistry HandlersRegistry => GetRequiredService<IRegistry>();
 

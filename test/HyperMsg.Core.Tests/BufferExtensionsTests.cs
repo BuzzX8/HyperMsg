@@ -81,7 +81,7 @@ public class BufferExtensionsTests
     public async Task ForEachSegment_Does_Not_Invokes_Async_Handler_For_Empty_Data()
     {
         var data = new ReadOnlySequence<byte>();
-        var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+        var handler = A.Fake<Func<ReadOnlyMemory<byte>, CancellationToken, Task>>();
 
         await data.ForEachSegment(handler);
 
@@ -105,7 +105,7 @@ public class BufferExtensionsTests
     {
         var segment = Guid.NewGuid().ToByteArray().AsMemory();
         var data = new ReadOnlySequence<byte>(segment);
-        var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+        var handler = A.Fake<Func<ReadOnlyMemory<byte>, CancellationToken, Task>>();
 
         await data.ForEachSegment(handler, default);
 
@@ -134,7 +134,7 @@ public class BufferExtensionsTests
         var data = new ReadOnlySequence<byte>(segment);
         var bufferReader = A.Fake<IBufferReader>();
         A.CallTo(() => bufferReader.Read()).Returns(data);
-        var handler = A.Fake<AsyncAction<ReadOnlyMemory<byte>>>();
+        var handler = A.Fake<Func<ReadOnlyMemory<byte>, CancellationToken, Task>>();
 
         await bufferReader.ForEachSegment(handler);
 

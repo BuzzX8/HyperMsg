@@ -58,7 +58,7 @@ public class HostTests
     {
         var host = Host.CreateDefault();
 
-        var sender = host.GetRequiredService<ISender>();
+        var sender = host.GetRequiredService<IForwarder>();
 
         Assert.NotNull(sender);
     }
