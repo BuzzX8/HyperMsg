@@ -51,7 +51,6 @@ public class Host : IHost, IServiceProvider
     {
         return Create(services =>
         {
-            services.AddMessagingServices();
             serviceConfigurator?.Invoke(services);
         });
     }

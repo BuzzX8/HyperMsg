@@ -53,16 +53,6 @@ public class HostTests
         A.CallTo(() => configurator.Invoke(A<IServiceCollection>._)).MustHaveHappened();
     }
 
-    [Fact]
-    public void CreateDefault_Adds_MessagingServices()
-    {
-        var host = Host.CreateDefault();
-
-        var sender = host.GetRequiredService<ISender>();
-
-        Assert.NotNull(sender);
-    }
-
     public abstract class HostedService1 : IHostedService
     {
         public abstract Task StartAsync(CancellationToken cancellationToken);
