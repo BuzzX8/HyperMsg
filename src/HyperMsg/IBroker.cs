@@ -2,6 +2,6 @@
 {
     public interface IBroker : IForwarder
     {
-        void Register(IRegistrator registrator);
+        IRegistry Registry { get; }
     }
 }
