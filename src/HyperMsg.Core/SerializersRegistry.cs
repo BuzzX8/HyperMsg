@@ -24,7 +24,7 @@
             registry.Register(registration.Handler);
         }
 
-        public void Deregister<T>() 
+        public void Deregister<T>()
         {
             if (!registrations.ContainsKey(typeof(T)))
                 return;
