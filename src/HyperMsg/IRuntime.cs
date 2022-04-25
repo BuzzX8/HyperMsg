@@ -6,6 +6,6 @@
 
         IBroker ReceivingBroker { get; }
 
-        ISerializersRegistry SerializersRegistry { get; }
+        IServiceProvider ServiceProvider { get; }
     }
 }
