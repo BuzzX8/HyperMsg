@@ -104,8 +104,4 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
     public void Clear() => position = length = 0;
 
     public void Dispose() => memoryOwner.Dispose();
-
-    public void Flush() => throw new NotImplementedException();
-
-    public Task FlushAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
 }

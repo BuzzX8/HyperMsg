@@ -2,11 +2,13 @@
 
 namespace HyperMsg;
 
-public class BufferFactory : IBufferFactory, IDisposable
+public class BufferFactory
 {
     private readonly MemoryPool<byte> memoryPool;
 
-    public BufferFactory(MemoryPool<byte> memoryPool)
+    public static readonly BufferFactory Shared = new(MemoryPool<byte>.Shared);
+
+    internal BufferFactory(MemoryPool<byte> memoryPool)
     {
         this.memoryPool = memoryPool ?? throw new ArgumentNullException(nameof(memoryPool));
     }
@@ -16,6 +18,4 @@ public class BufferFactory : IBufferFactory, IDisposable
         var memory = memoryPool.Rent(bufferSize);
         return new Buffer(memory);
     }
-
-    public void Dispose() => memoryPool.Dispose();
 }
