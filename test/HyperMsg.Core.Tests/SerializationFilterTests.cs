@@ -3,16 +3,16 @@ using Xunit;
 
 namespace HyperMsg
 {
-    public class SerializersRegistryTests
+    public class SerializationFilterTests
     {
         private readonly MessageBroker broker = new();
-        private readonly SerializersRegistry serializersRegistry;
+        private readonly SerializationFilter serializersRegistry;
         private readonly IBuffer buffer;
 
-        public SerializersRegistryTests()
+        public SerializationFilterTests()
         {
             buffer = A.Fake<IBuffer>();
-            serializersRegistry = new SerializersRegistry(broker, buffer);
+            serializersRegistry = new SerializationFilter(broker, buffer);
         }
 
         [Fact]
