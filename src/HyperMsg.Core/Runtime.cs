@@ -1,8 +1,8 @@
 ﻿namespace HyperMsg
 {
-    public class Runtime : IRuntime
+    internal class Runtime : IRuntime
     {
-        public Runtime(IServiceProvider serviceProvider)
+        internal Runtime(IServiceProvider serviceProvider)
         {
             SendingBroker = new MessageBroker();
             ReceivingBroker = new MessageBroker();

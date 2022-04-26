@@ -1,13 +1,13 @@
 ﻿namespace HyperMsg
 {
-    public class SerializersRegistry : ISerializersRegistry, IDisposable
+    public class SerializationFilter : IDisposable
     {
         private readonly IRegistry registry;
         private readonly IBuffer buffer;
 
         private readonly Dictionary<Type, IDisposable> registrations = new();
 
-        public SerializersRegistry(IRegistry registry, IBuffer buffer) =>
+        public SerializationFilter(IRegistry registry, IBuffer buffer) =>
             (this.registry, this.buffer) = (registry, buffer);
 
         public void Register<T>(Action<IBufferWriter, T> serializer)
