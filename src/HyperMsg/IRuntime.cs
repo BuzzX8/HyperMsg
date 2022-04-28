@@ -2,9 +2,9 @@
 {
     public interface IRuntime
     {
-        IBroker SendingBroker { get; }
+        IBroker Sender { get; }
 
-        IBroker ReceivingBroker { get; }
+        IBroker Receiver { get; }
 
         IServiceProvider ServiceProvider { get; }
     }

@@ -1,4 +1,5 @@
 ﻿using FakeItEasy;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace HyperMsg
@@ -11,7 +12,7 @@ namespace HyperMsg
         public void AddService_Adds_Service_To_Runtime_ServiceProvider()
         {
             var service = A.Fake<Action>();
-            builder.AddService(service);
+            builder.Services.AddSingleton(service);
 
             var runtime = builder.Build();
 
