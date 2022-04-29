@@ -1,11 +1,9 @@
 ﻿namespace HyperMsg
 {
-    public interface IRuntime
+    public interface IContext
     {
         IBroker Sender { get; }
 
         IBroker Receiver { get; }
-
-        IServiceProvider ServiceProvider { get; }
     }
 }

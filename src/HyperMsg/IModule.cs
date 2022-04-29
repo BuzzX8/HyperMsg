@@ -2,8 +2,8 @@
 {
     public interface IModule
     {
-        void Install(IRuntime runtime);
+        void Install(IContext runtime);
 
-        void Uninstall(IRuntime runtime);
+        void Uninstall(IContext runtime);
     }
 }

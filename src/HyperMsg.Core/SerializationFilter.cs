@@ -7,7 +7,7 @@
 
         private readonly Dictionary<Type, IDisposable> registrations = new();
 
-        public SerializationFilter(IRegistry registry, IBuffer buffer) =>
+        internal SerializationFilter(IRegistry registry, IBuffer buffer) =>
             (this.registry, this.buffer) = (registry, buffer);
 
         public void Register<T>(Action<IBufferWriter, T> serializer)
