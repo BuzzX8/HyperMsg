@@ -1,12 +1,8 @@
 ﻿namespace HyperMsg
 {
-    internal class Context : IContext
+    public class Context : IContext
     {
-        public Context()
-        {
-            Sender = new MessageBroker();
-            Receiver = new MessageBroker();
-        }
+        public Context() => (Sender, Receiver) = (new MessageBroker(), new MessageBroker());
 
         public IBroker Sender { get; }
 
