@@ -8,13 +8,25 @@ public abstract class HostFixture : IDisposable
 
     protected HostFixture(Action<IServiceCollection> serviceConfigurator = null)
     {
-        host = Host.CreateDefault(serviceConfigurator);
+        host = Host.Create(services =>
+        {
+            services.AddContext().AddSerializationFilter();
+            serviceConfigurator?.Invoke(services);
+        });
         host.Start();
     }
 
-    protected IForwarder Sender => GetRequiredService<IForwarder>();
+    protected IContext Context => GetRequiredService<IContext>();
 
-    protected IRegistry HandlersRegistry => GetRequiredService<IRegistry>();
+    protected IForwarder Sender => Context.Sender;
+
+    protected IForwarder Receiver => Context.Receiver;
+
+    protected IRegistry SenderRegistry => Context.Sender.Registry;
+
+    protected IRegistry ReceiverRegistry => Context.Receiver.Registry;
+
+    protected SerializationFilter SerializationFilter => GetRequiredService<SerializationFilter>();
 
     protected T GetService<T>() => host.GetService<T>();
 
