@@ -19,8 +19,11 @@ public static class ServiceCollectionExtensions
             var context = provider.GetRequiredService<IContext>();
             var sender = context.Sender;
             var filter = new SerializationFilter(sender.Registry, serializationBuffer);
+
             filter.BufferUpdated += buffer => sender.Dispatch(new BufferUpdatedEvent(buffer, BufferType.Transmitting));
             return filter;
         });
     }
+
+    public static IServiceCollection AddSendBufferFilter(this IServiceCollection services) => services.AddSingleton<SendBufferFilter>();
 }
