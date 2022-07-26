@@ -30,4 +30,16 @@ public class ServiceCollectionExtensionTests
 
         Assert.NotNull(filter);
     }
+
+    [Fact]
+    public void AddSerializationFilter_Adds_SerializationFilter_Service()
+    {
+        services.AddContext();
+        services.AddSerializationFilter();
+
+        var provider = services.BuildServiceProvider();
+        var filter = provider.GetService<SerializationFilter>();
+
+        Assert.NotNull(filter);
+    }
 }
