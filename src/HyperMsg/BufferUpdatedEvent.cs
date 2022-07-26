@@ -1,4 +1,10 @@
-﻿namespace HyperMsg
+﻿namespace HyperMsg;
+
+public record BufferUpdatedEvent(IBuffer Buffer, BufferType BufferType = BufferType.None);
+
+public enum BufferType
 {
-    public record BufferUpdatedEvent(IBuffer Buffer);
+    None,
+    Receiving,
+    Transmitting
 }

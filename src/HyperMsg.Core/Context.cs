@@ -1,11 +1,10 @@
-﻿namespace HyperMsg
+﻿namespace HyperMsg;
+
+public class Context : IContext
 {
-    public class Context : IContext
-    {
-        public Context() => (Sender, Receiver) = (new MessageBroker(), new MessageBroker());
+    public Context() => (Sender, Receiver) = (new MessageBroker(), new MessageBroker());
 
-        public IBroker Sender { get; }
+    public IBroker Sender { get; }
 
-        public IBroker Receiver { get; }
-    }
+    public IBroker Receiver { get; }
 }

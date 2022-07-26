@@ -1,9 +1,8 @@
-﻿namespace HyperMsg
-{
-    public interface IContext
-    {
-        IBroker Sender { get; }
+﻿namespace HyperMsg;
 
-        IBroker Receiver { get; }
-    }
+public interface IContext
+{
+    IBroker Sender { get; }
+
+    IBroker Receiver { get; }
 }
