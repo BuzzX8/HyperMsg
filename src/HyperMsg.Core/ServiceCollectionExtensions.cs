@@ -19,6 +19,12 @@ public static class ServiceCollectionExtensions
             var context = provider.GetRequiredService<IContext>();
             var sender = context.Sender;
             var filter = new SerializationFilter(sender.Registry, serializationBuffer);
+
+            if (provider.GetService<SendBufferFilter>() is var bufferFilter)
+            {
+                filter.BufferUpdated += bufferFilter.Send;
+            }
+
             filter.BufferUpdated += buffer => sender.Dispatch(new BufferUpdatedEvent(buffer, BufferType.Transmitting));
             return filter;
         });
