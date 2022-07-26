@@ -1,7 +1,6 @@
-﻿namespace HyperMsg
+﻿namespace HyperMsg;
+
+public interface IBroker : IForwarder
 {
-    public interface IBroker : IForwarder
-    {
-        IRegistry Registry { get; }
-    }
+    IRegistry Registry { get; }
 }
