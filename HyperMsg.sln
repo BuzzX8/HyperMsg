@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperMsg.Host", "src\HyperM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperMsg.Host.Tests", "test\HyperMsg.Host.Tests\HyperMsg.Host.Tests.csproj", "{E5777725-1956-479F-8EA8-1F9E8717DF22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperMsg.Net", "HyperMsg.Net\HyperMsg.Net.csproj", "{81E01E92-22B8-4B10-A820-25752C796AD9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperMsg.Net", "src\HyperMsg.Net\HyperMsg.Net.csproj", "{81E01E92-22B8-4B10-A820-25752C796AD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
