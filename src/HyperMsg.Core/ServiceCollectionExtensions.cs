@@ -29,4 +29,6 @@ public static class ServiceCollectionExtensions
             return filter;
         });
     }
+
+    public static IServiceCollection AddSendBufferFilter(this IServiceCollection services) => services.AddSingleton<SendBufferFilter>();
 }
