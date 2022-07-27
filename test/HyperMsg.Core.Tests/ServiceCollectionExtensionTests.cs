@@ -10,22 +10,25 @@ public class ServiceCollectionExtensionTests
     [Fact]
     public void AddSendBufferFilter_Adds_SendBufferFilter_Service()
     {
-        services.AddSendBufferFilter();
+        services.AddCompositeSerializer();
+        services.AddSendingPipeline();
 
         var provider = services.BuildServiceProvider();
-        var filter = provider.GetService<SendingPipeline>();
+        var pipeline = provider.GetService<SendingPipeline>();
 
-        Assert.NotNull(filter);
+        Assert.NotNull(pipeline);
     }
 
     [Fact]
-    public void AddSerializationFilter_Adds_SerializationFilter_Service()
+    public void AddCompositeSerializer_Adds_SerializationFilter_Service()
     {
-        services.AddSerializationFilter();
+        services.AddCompositeSerializer();
 
         var provider = services.BuildServiceProvider();
-        var filter = provider.GetService<SerializationFilter>();
+        var instance = provider.GetService<CompositeSerializer>();
+        var @interface = provider.GetService<ISerializer>();
 
-        Assert.NotNull(filter);
+        Assert.NotNull(instance);
+        Assert.NotNull(@interface);
     }
 }
