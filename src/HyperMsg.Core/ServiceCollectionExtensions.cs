@@ -17,5 +17,5 @@ public static class ServiceCollectionExtensions
         return services.AddSingleton<SerializationFilter>();
     }
 
-    public static IServiceCollection AddSendBufferFilter(this IServiceCollection services) => services.AddSingleton<SendBufferFilter>();
+    public static IServiceCollection AddSendBufferFilter(this IServiceCollection services) => services.AddSingleton<SendingPipeline>();
 }

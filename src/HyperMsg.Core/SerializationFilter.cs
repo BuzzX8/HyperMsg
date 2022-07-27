@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public class SerializationFilter
+public class SerializationFilter : ISerializer
 {
     private readonly Dictionary<Type, object> serializers = new();
 

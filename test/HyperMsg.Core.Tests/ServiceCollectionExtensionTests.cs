@@ -26,7 +26,7 @@ public class ServiceCollectionExtensionTests
         services.AddSendBufferFilter();
 
         var provider = services.BuildServiceProvider();
-        var filter = provider.GetService<SendBufferFilter>();
+        var filter = provider.GetService<SendingPipeline>();
 
         Assert.NotNull(filter);
     }
