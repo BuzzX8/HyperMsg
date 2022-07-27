@@ -10,23 +10,13 @@ public abstract class HostFixture : IDisposable
     {
         host = Host.Create(services =>
         {
-            services.AddContext().AddSerializationFilter();
+            services.AddCompositeSerializer();
             serviceConfigurator?.Invoke(services);
         });
         host.Start();
     }
 
-    protected IContext Context => GetRequiredService<IContext>();
-
-    protected IForwarder Sender => Context.Sender;
-
-    protected IForwarder Receiver => Context.Receiver;
-
-    protected IRegistry SenderRegistry => Context.Sender.Registry;
-
-    protected IRegistry ReceiverRegistry => Context.Receiver.Registry;
-
-    protected SerializationFilter SerializationFilter => GetRequiredService<SerializationFilter>();
+    protected CompositeSerializer SerializationFilter => GetRequiredService<CompositeSerializer>();
 
     protected T GetService<T>() => host.GetService<T>();
 

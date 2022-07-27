@@ -8,38 +8,27 @@ public class ServiceCollectionExtensionTests
     private readonly ServiceCollection services = new();
 
     [Fact]
-    public void AddContext_Adds_Context_Service()
-    {
-        services.AddContext();
-
-        var provider = services.BuildServiceProvider();
-        var context = provider.GetService<IContext>();
-
-        Assert.NotNull(context);
-        Assert.NotNull(context.Sender);
-        Assert.NotNull(context.Receiver);
-    }
-
-    [Fact]
     public void AddSendBufferFilter_Adds_SendBufferFilter_Service()
     {
-        services.AddSendBufferFilter();
+        services.AddCompositeSerializer();
+        services.AddSendingPipeline();
 
         var provider = services.BuildServiceProvider();
-        var filter = provider.GetService<SendBufferFilter>();
+        var pipeline = provider.GetService<SendingPipeline>();
 
-        Assert.NotNull(filter);
+        Assert.NotNull(pipeline);
     }
 
     [Fact]
-    public void AddSerializationFilter_Adds_SerializationFilter_Service()
+    public void AddCompositeSerializer_Adds_SerializationFilter_Service()
     {
-        services.AddContext();
-        services.AddSerializationFilter();
+        services.AddCompositeSerializer();
 
         var provider = services.BuildServiceProvider();
-        var filter = provider.GetService<SerializationFilter>();
+        var instance = provider.GetService<CompositeSerializer>();
+        var @interface = provider.GetService<ISerializer>();
 
-        Assert.NotNull(filter);
+        Assert.NotNull(instance);
+        Assert.NotNull(@interface);
     }
 }

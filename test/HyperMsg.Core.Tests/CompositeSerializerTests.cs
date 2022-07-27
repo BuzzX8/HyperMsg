@@ -3,15 +3,15 @@ using Xunit;
 
 namespace HyperMsg;
 
-public class SerializationFilterTests
+public class CompositeSerializerTests
 {
-    private readonly SerializationFilter filter;
+    private readonly CompositeSerializer serializer;
     private readonly IBuffer buffer;
 
-    public SerializationFilterTests()
+    public CompositeSerializerTests()
     {
         buffer = A.Fake<IBuffer>();
-        filter = new();
+        serializer = new();
     }
 
     [Fact]
@@ -19,9 +19,9 @@ public class SerializationFilterTests
     {
         var message = Guid.NewGuid();
         var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        filter.Register(serializer);
+        this.serializer.Register(serializer);
 
-        filter.Serialize(buffer.Writer, message);
+        this.serializer.Serialize(buffer.Writer, message);
 
         A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustHaveHappened();
     }
@@ -31,10 +31,10 @@ public class SerializationFilterTests
     {
         var message = Guid.NewGuid();
         var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        filter.Register(serializer);
-        filter.Deregister<Guid>();
+        this.serializer.Register(serializer);
+        this.serializer.Deregister<Guid>();
 
-        filter.Serialize(buffer.Writer, message);
+        this.serializer.Serialize(buffer.Writer, message);
 
         A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustNotHaveHappened();
     }

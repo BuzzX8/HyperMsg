@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public interface IForwarder
+public interface IDispatcher
 {
     void Dispatch<T>(T _);
 }
