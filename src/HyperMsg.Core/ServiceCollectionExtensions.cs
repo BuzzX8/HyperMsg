@@ -14,15 +14,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddSerializationFilter(this IServiceCollection services, IBuffer serializationBuffer)
     {
-        return services.AddSingleton(provider =>
-        {
-            var context = provider.GetRequiredService<IContext>();
-            var sender = context.Sender;
-            var filter = new SerializationFilter(sender.Registry, serializationBuffer);
-
-            filter.BufferUpdated += buffer => sender.Dispatch(new BufferUpdatedEvent(buffer, BufferType.Transmitting));
-            return filter;
-        });
+        return services.AddSingleton<SerializationFilter>();
     }
 
     public static IServiceCollection AddSendBufferFilter(this IServiceCollection services) => services.AddSingleton<SendBufferFilter>();

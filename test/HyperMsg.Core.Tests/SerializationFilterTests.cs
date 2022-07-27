@@ -5,52 +5,37 @@ namespace HyperMsg;
 
 public class SerializationFilterTests
 {
-    private readonly MessageBroker broker = new();
-    private readonly SerializationFilter serializersRegistry;
+    private readonly SerializationFilter filter;
     private readonly IBuffer buffer;
 
     public SerializationFilterTests()
     {
         buffer = A.Fake<IBuffer>();
-        serializersRegistry = new SerializationFilter(broker, buffer);
+        filter = new();
     }
 
     [Fact]
-    public void Dispatch_Invokes_Registered_Serializer()
+    public void Serialize_Invokes_Registered_Serializer()
     {
         var message = Guid.NewGuid();
         var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        serializersRegistry.Register(serializer);
+        filter.Register(serializer);
 
-        broker.Dispatch(message);
+        filter.Serialize(buffer.Writer, message);
 
         A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustHaveHappened();
     }
 
     [Fact]
-    public void Dispatch_Does_Not_Invokes_Deregistered_Serializer()
+    public void Serialize_Does_Not_Invokes_Deregistered_Serializer()
     {
         var message = Guid.NewGuid();
         var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        serializersRegistry.Register(serializer);
-        serializersRegistry.Deregister<Guid>();
+        filter.Register(serializer);
+        filter.Deregister<Guid>();
 
-        broker.Dispatch(message);
+        filter.Serialize(buffer.Writer, message);
 
         A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustNotHaveHappened();
-    }
-
-    [Fact]
-    public void Dispatch_Rises_BufferUpdated_Event()
-    {
-        var message = Guid.NewGuid();
-        var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        var eventHandler = A.Fake<Action<IBuffer>>();
-        serializersRegistry.Register(serializer);
-        serializersRegistry.BufferUpdated += eventHandler;
-
-        broker.Dispatch(message);
-
-        A.CallTo(() => eventHandler.Invoke(buffer)).MustHaveHappened();
     }
 }
