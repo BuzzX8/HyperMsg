@@ -29,11 +29,11 @@ public class SendingPipelineTests
     [Fact]
     public void Dispatch_Invokes_Buffer_Handler()
     {
-        var handler = A.Fake<Action<IBuffer>>();
+        var handler = A.Fake<Action<IBufferReader>>();
         pipeline.BufferHandler = handler;
 
         pipeline.Dispatch(Guid.NewGuid());
 
-        A.CallTo(() => handler.Invoke(buffer)).MustHaveHappened();
+        A.CallTo(() => handler.Invoke(buffer.Reader)).MustHaveHappened();
     }
 }
