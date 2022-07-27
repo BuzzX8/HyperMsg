@@ -6,7 +6,7 @@ namespace HyperMsg;
 /// <summary>
 /// Provides implementation for MessageSender and MessageHandlerRegistry
 /// </summary>
-public class MessageBroker : IBroker, IRegistry
+public class MessageBroker : IDispatcher, IRegistry
 {
     private readonly ConcurrentDictionary<Type, Delegate> messageHandlers = new();
     private readonly object sync = new();
