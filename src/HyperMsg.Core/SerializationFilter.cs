@@ -21,7 +21,7 @@ public class SerializationFilter
 
     public void Serialize<T>(IBufferWriter writer, T message)
     {
-        if(!serializers.ContainsKey(typeof(T)))
+        if (!serializers.ContainsKey(typeof(T)))
         {
             return;
         }
