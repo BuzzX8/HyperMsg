@@ -11,7 +11,7 @@ public class SendingPipeline : IDispatcher
         this.buffer = buffer;
     }
 
-    public Action<IBuffer> BufferHandler { get; set; }
+    public Action<IBufferReader> BufferHandler { get; set; }
 
     public void Dispatch<T>(T message)
     {
@@ -19,5 +19,5 @@ public class SendingPipeline : IDispatcher
         OnBufferUpdated();
     }
 
-    private void OnBufferUpdated() => BufferHandler?.Invoke(buffer);
+    private void OnBufferUpdated() => BufferHandler?.Invoke(buffer.Reader);
 }
