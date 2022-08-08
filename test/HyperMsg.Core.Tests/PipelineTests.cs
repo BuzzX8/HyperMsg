@@ -3,17 +3,19 @@ using Xunit;
 
 namespace HyperMsg;
 
-public class SendingPipelineTests
+public class PipelineTests
 {
     public readonly IBuffer buffer;
     public readonly ISerializer serializer;
-    public readonly SendingPipeline pipeline;
+    public readonly Deserializer deserializer;
+    public readonly Pipeline pipeline;
 
-    public SendingPipelineTests()
+    public PipelineTests()
     {
         buffer = A.Fake<IBuffer>();
         serializer = A.Fake<ISerializer>();
-        pipeline = new SendingPipeline(serializer, buffer);
+        deserializer = A.Fake<Deserializer>();
+        pipeline = new (deserializer, serializer, buffer);
     }
 
     [Fact]
@@ -27,13 +29,23 @@ public class SendingPipelineTests
     }
 
     [Fact]
-    public void Dispatch_Invokes_Buffer_Handler()
+    public void Dispatch_Invokes_SendingBufferUpdated_Event()
     {
         var handler = A.Fake<Action<IBufferReader>>();
-        pipeline.BufferHandler = handler;
+        pipeline.SendingBufferUpdated += handler;
 
         pipeline.Dispatch(Guid.NewGuid());
 
         A.CallTo(() => handler.Invoke(buffer.Reader)).MustHaveHappened();
+    }
+
+    [Fact]
+    public void OnReceivingBufferUpdated_Invokes_Deserializer()
+    {
+        var receivingBuffer = A.Fake<IBuffer>();
+
+        pipeline.OnReceivingBufferUpdated(receivingBuffer);
+
+        A.CallTo(() => deserializer.Invoke(receivingBuffer.Reader, A<IDispatcher>._)).MustHaveHappened();
     }
 }
