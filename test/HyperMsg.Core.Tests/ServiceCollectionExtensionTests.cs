@@ -8,13 +8,14 @@ public class ServiceCollectionExtensionTests
     private readonly ServiceCollection services = new();
 
     [Fact]
-    public void AddSendingPipeline_Adds_SendingPipeline_Service()
+    public void AddPipeline_Adds_SendingPipeline_Service()
     {
         services.AddCompositeSerializer();
-        services.AddSendingPipeline();
+        services.AddDeserializer((_, _) => { });
+        services.AddPipeline();
 
         var provider = services.BuildServiceProvider();
-        var pipeline = provider.GetService<SendingPipeline>();
+        var pipeline = provider.GetService<Pipeline>();
 
         Assert.NotNull(pipeline);
     }
@@ -30,17 +31,5 @@ public class ServiceCollectionExtensionTests
 
         Assert.NotNull(instance);
         Assert.NotNull(@interface);
-    }
-
-    [Fact]
-    public void AddReceivingPipeline_Adds_ReceivingPipeline_Service()
-    {
-        services.AddMessageBroker();
-        services.AddReceivingPipeline();
-
-        var provider = services.BuildServiceProvider();
-        var pipeline = provider.GetRequiredService<ReceivingPipeline>();
-
-        Assert.NotNull(pipeline);
     }
 }
