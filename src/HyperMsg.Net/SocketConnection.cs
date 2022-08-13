@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace HyperMsg.Net;
 
-public class SocketConnection
+public class SocketConnection : IConnectionStateObserver
 {
     private readonly Socket socket;
     private readonly EndPoint endPoint;
@@ -19,4 +19,9 @@ public class SocketConnection
     }
 
     public event Action<ConnectionState> StateChanged;
+}
+
+public interface IConnectionStateObserver
+{
+    event Action<ConnectionState> StateChanged;
 }
