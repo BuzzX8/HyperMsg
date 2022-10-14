@@ -21,18 +21,18 @@ public class BufferTests
     }
 
     [Fact]
-    public void ReadAsync_Returns_Written_Bytes()
+    public void GetMemory_Returns_Written_Bytes()
     {
         var expectedBytes = Guid.NewGuid().ToByteArray();
         WriteBytes(expectedBytes);
 
-        var actualBytes = buffer.Reader.Read();
+        var actualBytes = buffer.Reader.GetMemory();
 
         Assert.Equal(expectedBytes, actualBytes.ToArray());
     }
 
     [Fact]
-    public void Reader_Advance_Advances_Reading_Position()
+    public void GetMemory_Advance_Advances_Reading_Position()
     {
         var bytes = Guid.NewGuid().ToByteArray();
         var advanceCount = bytes.Length / 2;
@@ -40,7 +40,7 @@ public class BufferTests
         WriteBytes(bytes);
 
         buffer.Reader.Advance(advanceCount);
-        var actualBytes = buffer.Reader.Read();
+        var actualBytes = buffer.Reader.GetMemory();
 
         Assert.Equal(expectedBytes, actualBytes.ToArray());
     }
@@ -57,7 +57,7 @@ public class BufferTests
         WriteBytes(Guid.NewGuid().ToByteArray());
 
         buffer.Clear();
-        var bytes = buffer.Reader.Read();
+        var bytes = buffer.Reader.GetMemory();
 
         Assert.Equal(0, bytes.Length);
     }
@@ -104,7 +104,7 @@ public class BufferTests
 
         WriteBytes(data);
 
-        Assert.Equal(data, buffer.Reader.Read().ToArray());
+        Assert.Equal(data, buffer.Reader.GetMemory().ToArray());
     }
 
     [Fact]

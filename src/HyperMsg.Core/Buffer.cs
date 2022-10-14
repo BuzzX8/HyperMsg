@@ -29,6 +29,8 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
 
     private long AvailableMemory => Memory.Length - length;
 
+    #region IBufferReader
+
     void IBufferReader.Advance(int count)
     {
         if (count < 0)
@@ -48,7 +50,13 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
         }
     }
 
-    ReadOnlyMemory<byte> IBufferReader.Read() => CommitedMemory;
+    ReadOnlyMemory<byte> IBufferReader.GetMemory() => CommitedMemory;
+
+    ReadOnlySpan<byte> IBufferReader.GetSpan() => CommitedMemory.Span;
+
+    #endregion
+
+    #region IBufferWriter
 
     void IBufferWriter<byte>.Advance(int count)
     {
@@ -68,7 +76,7 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
         }
     }
 
-    public Memory<byte> GetMemory(int sizeHint)
+    Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint)
     {
         if (sizeHint < 0)
         {
@@ -95,11 +103,13 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
         }
     }
 
-    public Span<byte> GetSpan(int sizeHint)
+    Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)
     {
         var writer = (IBufferWriter)this;
         return writer.GetMemory(sizeHint).Span;
     }
+
+    #endregion
 
     public void Clear() => position = length = 0;
 
