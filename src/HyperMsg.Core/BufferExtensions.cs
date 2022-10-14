@@ -100,26 +100,4 @@ public static class BufferExtensions
             }
         }
     }
-
-    public static void ForEachSegment(this IBufferReader bufferReader, Action<ReadOnlyMemory<byte>> dataSegmentHandler, bool advanceReader = true)
-    {
-        var data = bufferReader.Read();
-        data.ForEachSegment(dataSegmentHandler);
-
-        if (advanceReader)
-        {
-            bufferReader.Advance(data.Length);
-        }
-    }
-
-    public static async Task ForEachSegment(this IBufferReader bufferReader, Func<ReadOnlyMemory<byte>, CancellationToken, Task> dataSegmentHandler, bool advanceReader = true, CancellationToken cancellationToken = default)
-    {
-        var data = bufferReader.Read();
-        await data.ForEachSegment(dataSegmentHandler, cancellationToken);
-
-        if (advanceReader)
-        {
-            bufferReader.Advance(data.Length);
-        }
-    }
 }

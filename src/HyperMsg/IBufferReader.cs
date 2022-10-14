@@ -1,6 +1,4 @@
-﻿using System.Buffers;
-
-namespace HyperMsg;
+﻿namespace HyperMsg;
 
 /// <summary>
 /// Defines methods for reading data from buffer.
@@ -18,5 +16,5 @@ public interface IBufferReader
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>List of buffer chunks with data.</returns>
-    ReadOnlySequence<byte> Read();
+    ReadOnlyMemory<byte> Read();
 }

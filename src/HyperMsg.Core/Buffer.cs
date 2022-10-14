@@ -48,7 +48,7 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
         }
     }
 
-    ReadOnlySequence<byte> IBufferReader.Read() => new(CommitedMemory);
+    ReadOnlyMemory<byte> IBufferReader.Read() => CommitedMemory;
 
     void IBufferWriter<byte>.Advance(int count)
     {
