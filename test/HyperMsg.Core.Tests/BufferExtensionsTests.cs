@@ -111,34 +111,4 @@ public class BufferExtensionsTests
 
         A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
     }
-
-    [Fact]
-    public void ForEachSegment_Invokes_Handler_And_Advances_BufferReader()
-    {
-        var segment = Guid.NewGuid().ToByteArray().AsMemory();
-        var data = new ReadOnlySequence<byte>(segment);
-        var bufferReader = A.Fake<IBufferReader>();
-        A.CallTo(() => bufferReader.Read()).Returns(data);
-        var handler = A.Fake<Action<ReadOnlyMemory<byte>>>();
-
-        bufferReader.ForEachSegment(handler);
-
-        A.CallTo(() => handler.Invoke(segment)).MustHaveHappened();
-        A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
-    }
-
-    [Fact]
-    public async Task ForEachSegment_Invokes_Async_Handler_And_Advances_BufferReader()
-    {
-        var segment = Guid.NewGuid().ToByteArray().AsMemory();
-        var data = new ReadOnlySequence<byte>(segment);
-        var bufferReader = A.Fake<IBufferReader>();
-        A.CallTo(() => bufferReader.Read()).Returns(data);
-        var handler = A.Fake<Func<ReadOnlyMemory<byte>, CancellationToken, Task>>();
-
-        await bufferReader.ForEachSegment(handler);
-
-        A.CallTo(() => handler.Invoke(segment, A<CancellationToken>._)).MustHaveHappened();
-        A.CallTo(() => bufferReader.Advance(segment.Length)).MustHaveHappened();
-    }
 }
