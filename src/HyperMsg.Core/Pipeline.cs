@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public class Pipeline : IDispatcher, IRegistry
+public class Pipeline : IDispatcher, IRegistry, IBufferMediator
 {
     private readonly Deserializer deserializer;
     private readonly ISerializer serializer;
