@@ -3,14 +3,14 @@ using Xunit;
 
 namespace HyperMsg;
 
-public class PipelineTests
+public class KernelTests
 {
     public readonly IBuffer buffer;
     public readonly ISerializer serializer;
     public readonly Deserializer deserializer;
-    public readonly Pipeline pipeline;
+    public readonly Kernel pipeline;
 
-    public PipelineTests()
+    public KernelTests()
     {
         buffer = A.Fake<IBuffer>();
         serializer = A.Fake<ISerializer>();
@@ -32,7 +32,7 @@ public class PipelineTests
     public void Dispatch_Invokes_SendingBufferUpdated_Event()
     {
         var handler = A.Fake<Action<IBufferReader>>();
-        pipeline.SendingBufferUpdated += handler;
+        pipeline.MessageSerialized += handler;
 
         pipeline.Dispatch(Guid.NewGuid());
 
@@ -44,7 +44,7 @@ public class PipelineTests
     {
         var receivingBuffer = A.Fake<IBuffer>();
 
-        pipeline.OnReceivingBufferUpdated(receivingBuffer);
+        pipeline.ReadBuffer(receivingBuffer.Reader);
 
         A.CallTo(() => deserializer.Invoke(receivingBuffer.Reader, A<IDispatcher>._)).MustHaveHappened();
     }

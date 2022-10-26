@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public class Pipeline : IDispatcher, IRegistry
+public class Kernel : IDispatcher, IRegistry, ITransportGateway
 {
     private readonly Deserializer deserializer;
     private readonly ISerializer serializer;
@@ -8,7 +8,7 @@ public class Pipeline : IDispatcher, IRegistry
 
     private readonly MessageBroker broker;
 
-    public Pipeline(Deserializer deserializer, ISerializer serializer, IBuffer buffer)
+    public Kernel(Deserializer deserializer, ISerializer serializer, IBuffer buffer)
     {
         this.deserializer = deserializer;
         this.serializer = serializer;
@@ -19,14 +19,14 @@ public class Pipeline : IDispatcher, IRegistry
     public void Dispatch<T>(T message)
     {
         serializer.Serialize(buffer.Writer, message);
-        SendingBufferUpdated?.Invoke(buffer.Reader);
+        MessageSerialized?.Invoke(buffer.Reader);
     }
 
     public void Register<T>(Action<T> handler) => broker.Register(handler);
 
     public void Deregister<T>(Action<T> handler) => broker.Deregister(handler);
 
-    public void OnReceivingBufferUpdated(IBuffer buffer) => deserializer.Invoke(buffer.Reader, broker);
+    public void ReadBuffer(IBufferReader bufferReader) => deserializer.Invoke(bufferReader, broker);
 
-    public event Action<IBufferReader> SendingBufferUpdated;
+    public event Action<IBufferReader> MessageSerialized;
 }

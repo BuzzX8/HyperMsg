@@ -56,48 +56,4 @@ public static class BufferExtensions
 
         return false;
     }
-
-    public static void ForEachSegment(in this ReadOnlySequence<byte> data, Action<ReadOnlyMemory<byte>> dataSegmentHandler)
-    {
-        if (data.Length == 0)
-        {
-            return;
-        }
-
-        if (data.IsSingleSegment)
-        {
-            dataSegmentHandler(data.First);
-        }
-        else
-        {
-            var enumerator = data.GetEnumerator();
-
-            while (enumerator.MoveNext())
-            {
-                dataSegmentHandler(enumerator.Current);
-            }
-        }
-    }
-
-    public static async Task ForEachSegment(this ReadOnlySequence<byte> data, Func<ReadOnlyMemory<byte>, CancellationToken, Task> dataSegmentHandler, CancellationToken cancellationToken = default)
-    {
-        if (data.Length == 0)
-        {
-            return;
-        }
-
-        if (data.IsSingleSegment)
-        {
-            await dataSegmentHandler.Invoke(data.First, cancellationToken);
-        }
-        else
-        {
-            var enumerator = data.GetEnumerator();
-
-            while (enumerator.MoveNext())
-            {
-                await dataSegmentHandler(enumerator.Current, cancellationToken);
-            }
-        }
-    }
 }
