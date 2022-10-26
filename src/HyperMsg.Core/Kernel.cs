@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public class Pipeline : IDispatcher, IRegistry, ITransportGateway
+public class Kernel : IDispatcher, IRegistry, ITransportGateway
 {
     private readonly Deserializer deserializer;
     private readonly ISerializer serializer;
@@ -8,7 +8,7 @@ public class Pipeline : IDispatcher, IRegistry, ITransportGateway
 
     private readonly MessageBroker broker;
 
-    public Pipeline(Deserializer deserializer, ISerializer serializer, IBuffer buffer)
+    public Kernel(Deserializer deserializer, ISerializer serializer, IBuffer buffer)
     {
         this.deserializer = deserializer;
         this.serializer = serializer;

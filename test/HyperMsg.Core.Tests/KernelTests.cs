@@ -3,14 +3,14 @@ using Xunit;
 
 namespace HyperMsg;
 
-public class PipelineTests
+public class KernelTests
 {
     public readonly IBuffer buffer;
     public readonly ISerializer serializer;
     public readonly Deserializer deserializer;
-    public readonly Pipeline pipeline;
+    public readonly Kernel pipeline;
 
-    public PipelineTests()
+    public KernelTests()
     {
         buffer = A.Fake<IBuffer>();
         serializer = A.Fake<ISerializer>();

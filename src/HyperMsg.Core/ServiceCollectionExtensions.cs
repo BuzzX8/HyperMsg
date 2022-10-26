@@ -6,20 +6,15 @@ public static class ServiceCollectionExtensions
 {
     public const int DefaultBufferSize = 65 * 1024;
 
-    public static IServiceCollection AddPipeline(this IServiceCollection services, int bufferSize = DefaultBufferSize) =>
-        services.AddPipeline(BufferFactory.Shared.CreateBuffer(bufferSize));
+    public static IServiceCollection AddKernel(this IServiceCollection services, Deserializer deserializer, ISerializer serializer, int bufferSize = DefaultBufferSize) =>
+        services.AddKernel(deserializer, serializer, BufferFactory.Shared.CreateBuffer(bufferSize));
 
-    public static IServiceCollection AddPipeline(this IServiceCollection services, IBuffer sendingBuffer)
+    public static IServiceCollection AddKernel(this IServiceCollection services, Deserializer deserializer, ISerializer serializer, IBuffer sendingBuffer)
     {
-        return services.AddSingleton(provider =>
-        {
-            var deserializer = provider.GetRequiredService<Deserializer>();
-            var serializer = provider.GetRequiredService<ISerializer>();
-            return new Pipeline(deserializer, serializer, sendingBuffer);
-        });
+        var kernel = new Kernel(deserializer, serializer, sendingBuffer);
+
+        return services.AddSingleton<IDispatcher>(kernel)
+            .AddSingleton<IRegistry>(kernel)
+            .AddSingleton<ITransportGateway>(kernel);
     }
-
-    public static IServiceCollection AddSerializer(this IServiceCollection services, ISerializer serializer) => services.AddSingleton(serializer);
-
-    public static IServiceCollection AddDeserializer(this IServiceCollection services, Deserializer deserializer) => services.AddSingleton(deserializer);
 }

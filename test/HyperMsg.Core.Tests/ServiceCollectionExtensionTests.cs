@@ -9,15 +9,19 @@ public class ServiceCollectionExtensionTests
     private readonly ServiceCollection services = new();
 
     [Fact]
-    public void AddPipeline_Adds_SendingPipeline_Service()
+    public void AddKernel_Adds_Dispatcher_Registry_And_TransportGateway_Service()
     {
-        services.AddSingleton(A.Fake<ISerializer>());
-        services.AddDeserializer((_, _) => { });
-        services.AddPipeline();
+        var serializer = A.Fake<ISerializer>();
+        var deserializer = A.Fake<Deserializer>();
+        services.AddKernel(deserializer, serializer);
 
         var provider = services.BuildServiceProvider();
-        var pipeline = provider.GetService<Pipeline>();
+        var dispatcher = provider.GetService<IDispatcher>();
+        var registry = provider.GetService<IRegistry>();
+        var transportGateway = provider.GetService<ITransportGateway>();
 
-        Assert.NotNull(pipeline);
+        Assert.NotNull(dispatcher);
+        Assert.NotNull(registry);
+        Assert.NotNull(transportGateway);
     }
 }
