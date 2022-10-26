@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FakeItEasy;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace HyperMsg;
@@ -9,7 +10,8 @@ public class ServiceCollectionExtensionTests
 
     [Fact]
     public void AddPipeline_Adds_SendingPipeline_Service()
-    {        
+    {
+        services.AddSingleton(A.Fake<ISerializer>());
         services.AddDeserializer((_, _) => { });
         services.AddPipeline();
 
