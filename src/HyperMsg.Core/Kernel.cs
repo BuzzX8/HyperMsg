@@ -2,13 +2,13 @@
 
 public class Kernel : IDispatcher, IRegistry, ITransportGateway
 {
-    private readonly Deserializer deserializer;
-    private readonly ISerializer serializer;
+    private readonly Decoder deserializer;
+    private readonly IEncoder serializer;
     private readonly IBuffer buffer;
 
     private readonly MessageBroker broker;
 
-    public Kernel(Deserializer deserializer, ISerializer serializer, IBuffer buffer)
+    public Kernel(Decoder deserializer, IEncoder serializer, IBuffer buffer)
     {
         this.deserializer = deserializer;
         this.serializer = serializer;
@@ -18,7 +18,7 @@ public class Kernel : IDispatcher, IRegistry, ITransportGateway
 
     public void Dispatch<T>(T message)
     {
-        serializer.Serialize(buffer.Writer, message);
+        serializer.Encode(buffer.Writer, message);
         MessageSerialized?.Invoke(buffer.Reader);
     }
 

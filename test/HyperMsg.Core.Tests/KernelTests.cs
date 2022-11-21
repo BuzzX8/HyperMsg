@@ -6,15 +6,15 @@ namespace HyperMsg;
 public class KernelTests
 {
     public readonly IBuffer buffer;
-    public readonly ISerializer serializer;
-    public readonly Deserializer deserializer;
+    public readonly Encoder serializer;
+    public readonly Decoder deserializer;
     public readonly Kernel pipeline;
 
     public KernelTests()
     {
         buffer = A.Fake<IBuffer>();
-        serializer = A.Fake<ISerializer>();
-        deserializer = A.Fake<Deserializer>();
+        serializer = A.Fake<Encoder>();
+        deserializer = A.Fake<Decoder>();
         pipeline = new (deserializer, serializer, buffer);
     }
 
