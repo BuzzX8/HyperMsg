@@ -5,13 +5,13 @@ namespace HyperMsg;
 
 public class CompositeEncoderTests
 {
-    private readonly CompositeEncoder serializer;
+    private readonly CompositeEncoder encoder;
     private readonly IBuffer buffer;
 
     public CompositeEncoderTests()
     {
         buffer = A.Fake<IBuffer>();
-        serializer = new();
+        encoder = new();
     }
 
     [Fact]
@@ -19,9 +19,9 @@ public class CompositeEncoderTests
     {
         var message = Guid.NewGuid();
         var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        this.serializer.Register(serializer);
+        this.encoder.Register(serializer);
 
-        this.serializer.Encode(buffer.Writer, message);
+        this.encoder.Encode(buffer.Writer, message);
 
         A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustHaveHappened();
     }
@@ -31,10 +31,10 @@ public class CompositeEncoderTests
     {
         var message = Guid.NewGuid();
         var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        this.serializer.Register(serializer);
-        this.serializer.Deregister<Guid>();
+        this.encoder.Register(serializer);
+        this.encoder.Deregister<Guid>();
 
-        this.serializer.Encode(buffer.Writer, message);
+        this.encoder.Encode(buffer.Writer, message);
 
         A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustNotHaveHappened();
     }
