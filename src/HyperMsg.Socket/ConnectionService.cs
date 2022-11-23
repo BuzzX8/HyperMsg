@@ -54,6 +54,11 @@ public class ConnectionService : IDisposable
 
     private void Disconnect(Disconnect _)
     {
+        if (!socket.Connected)
+        {
+            dispatcher.Dispatch(new DisconnectResult(SocketError.NotConnected));
+        }
+
         if (!socket.DisconnectAsync(asyncEventArgs))
         {
             OperationCompleted(socket, asyncEventArgs);
