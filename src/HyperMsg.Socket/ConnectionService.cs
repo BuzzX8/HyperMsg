@@ -44,7 +44,7 @@ public class ConnectionService : IDisposable
 
     private void Connect(Connect connect)
     {
-        asyncEventArgs.RemoteEndPoint = connect.EndPoint;
+        asyncEventArgs.RemoteEndPoint = connect.RemoteEndPoint;
 
         if (!socket.ConnectAsync(asyncEventArgs))
         {
@@ -87,9 +87,9 @@ public class ConnectionService : IDisposable
     }
 }
 
-public record struct Connect(EndPoint EndPoint);
+public record struct Connect(EndPoint RemoteEndPoint);
 
-public record struct ConnectResult(EndPoint? EndPoint, SocketError Error);
+public record struct ConnectResult(EndPoint? RemoteEndPoint, SocketError Error);
 
 public record struct Disconnect;
 
