@@ -13,7 +13,7 @@ public class ConnectionService : Service
         this.socket = socket;
 
         asyncEventArgs = new();
-        asyncEventArgs.Completed += OperationCompleted;        
+        asyncEventArgs.Completed += OperationCompleted;
     }
 
     private void OperationCompleted(object? _, SocketAsyncEventArgs eventArgs) 
@@ -66,7 +66,7 @@ public class ConnectionService : Service
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         base.Dispose();
         asyncEventArgs.Completed -= OperationCompleted;
