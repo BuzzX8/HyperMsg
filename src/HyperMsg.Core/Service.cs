@@ -11,6 +11,8 @@ public abstract class Service : IHostedService
         this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
     }
 
+    protected void Dispatch<T>(T message) => topic.Dispatch(message);
+
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
         RegisterHandlers(topic);
