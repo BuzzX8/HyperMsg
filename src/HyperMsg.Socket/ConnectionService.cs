@@ -29,12 +29,17 @@ public class ConnectionService : IDisposable
             case SocketAsyncOperation.Connect: 
                 dispatcher.Dispatch(new ConnectResult(eventArgs.RemoteEndPoint, eventArgs.SocketError));
                 break;
+
+            case SocketAsyncOperation.Disconnect:
+                dispatcher.Dispatch(new DisconnectResult(eventArgs.SocketError));
+                break;
         }
     }
 
     private void RegisterHandlers(IRegistry registry)
     {
         registry.Register<Connect>(Connect);
+        registry.Register<Disconnect>(Disconnect);
     }
 
     private void Connect(Connect connect)
@@ -47,9 +52,18 @@ public class ConnectionService : IDisposable
         }
     }
 
+    private void Disconnect(Disconnect _)
+    {
+        if (!socket.DisconnectAsync(asyncEventArgs))
+        {
+            OperationCompleted(socket, asyncEventArgs);
+        }
+    }
+
     private void UnregisterHandlers(IRegistry registry)
     {
         registry.Deregister<Connect>(Connect);
+        registry.Deregister<Disconnect>(Disconnect);
     }
 
     public void Dispose()
@@ -73,4 +87,4 @@ public record struct ConnectResult(EndPoint? EndPoint, SocketError Error);
 
 public record struct Disconnect;
 
-public record struct Disconnected;
+public record struct DisconnectResult(SocketError Error);

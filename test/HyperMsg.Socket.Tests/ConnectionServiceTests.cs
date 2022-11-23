@@ -44,6 +44,23 @@ public class ConnectionServiceTests : IDisposable
         Assert.True(acceptingTask.IsCompleted);
     }
 
+    [Fact]
+    public void Dispatching_Disconnect_Message_For_Disonnected_Socket()
+    {
+        var result = default(DisconnectResult);
+        var @event = new ManualResetEventSlim();
+        broker.Register<DisconnectResult>(c =>
+        {
+            result = c;
+            @event.Set();
+        });
+
+        broker.Dispatch(new Disconnect());
+        @event.Wait(TimeSpan.FromSeconds(2));
+
+        Assert.Equal(SocketError.NotConnected, result.Error);
+    }
+
     public void Dispose()
     {
         connectionService.Dispose();
