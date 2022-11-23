@@ -18,7 +18,8 @@ public class ConnectionServiceTests : IDisposable
     {
         broker = new();
         socket = new(SocketType.Stream, ProtocolType.Tcp);
-        connectionService = new(broker, broker, socket);
+        connectionService = new(broker, socket);
+        connectionService.StartAsync(default);
 
         acceptingSocket = new(SocketType.Stream, ProtocolType.Tcp);
         syncEvent = new();

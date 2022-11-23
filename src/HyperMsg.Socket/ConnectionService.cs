@@ -3,23 +3,17 @@ using System.Net.Sockets;
 
 namespace HyperMsg.Socket;
 
-public class ConnectionService : IDisposable
+public class ConnectionService : Service
 {
-    private readonly IDispatcher dispatcher;
-    private readonly IRegistry registry;
-
     private readonly System.Net.Sockets.Socket socket;
     private readonly SocketAsyncEventArgs asyncEventArgs;
 
-    public ConnectionService(IDispatcher dispatcher, IRegistry registry, System.Net.Sockets.Socket socket)
+    public ConnectionService(ITopic topic, System.Net.Sockets.Socket socket) : base(topic)
     {
-        this.dispatcher = dispatcher;
-        this.registry = registry;
         this.socket = socket;
 
         asyncEventArgs = new();
-        asyncEventArgs.Completed += OperationCompleted;
-        RegisterHandlers(registry);
+        asyncEventArgs.Completed += OperationCompleted;        
     }
 
     private void OperationCompleted(object? _, SocketAsyncEventArgs eventArgs) 
@@ -27,19 +21,25 @@ public class ConnectionService : IDisposable
         switch (eventArgs.LastOperation)
         {
             case SocketAsyncOperation.Connect: 
-                dispatcher.Dispatch(new ConnectResult(eventArgs.RemoteEndPoint, eventArgs.SocketError));
+                Dispatch(new ConnectResult(eventArgs.RemoteEndPoint, eventArgs.SocketError));
                 break;
 
             case SocketAsyncOperation.Disconnect:
-                dispatcher.Dispatch(new DisconnectResult(eventArgs.SocketError));
+                Dispatch(new DisconnectResult(eventArgs.SocketError));
                 break;
         }
     }
 
-    private void RegisterHandlers(IRegistry registry)
+    protected override void RegisterHandlers(IRegistry registry)
     {
         registry.Register<Connect>(Connect);
         registry.Register<Disconnect>(Disconnect);
+    }
+    
+    protected override void UnregisterHandlers(IRegistry registry)
+    {
+        registry.Unregister<Connect>(Connect);
+        registry.Unregister<Disconnect>(Disconnect);
     }
 
     private void Connect(Connect connect)
@@ -56,7 +56,7 @@ public class ConnectionService : IDisposable
     {
         if (!socket.Connected)
         {
-            dispatcher.Dispatch(new DisconnectResult(SocketError.NotConnected));
+            Dispatch(new DisconnectResult(SocketError.NotConnected));
             return;
         }
 
@@ -66,15 +66,9 @@ public class ConnectionService : IDisposable
         }
     }
 
-    private void UnregisterHandlers(IRegistry registry)
-    {
-        registry.Deregister<Connect>(Connect);
-        registry.Deregister<Disconnect>(Disconnect);
-    }
-
     public void Dispose()
     {
-        UnregisterHandlers(registry);
+        base.Dispose();
         asyncEventArgs.Completed -= OperationCompleted;
         asyncEventArgs.Dispose();
 
