@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace HyperMsg.Socket;
 
-public class ConnectionService
+public class ConnectionService : IDisposable
 {
     private readonly IDispatcher dispatcher;
     private readonly IRegistry registry;
@@ -24,9 +24,11 @@ public class ConnectionService
 
     private void OperationCompleted(object? _, SocketAsyncEventArgs eventArgs) 
     {
-        if (eventArgs.LastOperation == SocketAsyncOperation.Connect)
+        switch (eventArgs.LastOperation)
         {
-            dispatcher.Dispatch(new ConnectResult(eventArgs.RemoteEndPoint, eventArgs.SocketError));
+            case SocketAsyncOperation.Connect: 
+                dispatcher.Dispatch(new ConnectResult(eventArgs.RemoteEndPoint, eventArgs.SocketError));
+                break;
         }
     }
 
@@ -38,7 +40,7 @@ public class ConnectionService
     private void Connect(Connect connect)
     {
         asyncEventArgs.RemoteEndPoint = connect.EndPoint;
-        
+
         if (!socket.ConnectAsync(asyncEventArgs))
         {
             OperationCompleted(socket, asyncEventArgs);
@@ -55,6 +57,13 @@ public class ConnectionService
         UnregisterHandlers(registry);
         asyncEventArgs.Completed -= OperationCompleted;
         asyncEventArgs.Dispose();
+
+        if (socket.Connected)
+        {
+            socket.Shutdown(SocketShutdown.Both);
+        }
+
+        socket.Dispose();
     }
 }
 
