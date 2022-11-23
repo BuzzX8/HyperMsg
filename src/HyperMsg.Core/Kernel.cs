@@ -2,23 +2,23 @@
 
 public class Kernel : IDispatcher, IRegistry, ITransportGateway
 {
-    private readonly Decoder deserializer;
-    private readonly IEncoder serializer;
+    private readonly Decoder decoder;
+    private readonly IEncoder encoder;
     private readonly IBuffer buffer;
 
     private readonly MessageBroker broker;
 
-    public Kernel(Decoder deserializer, IEncoder serializer, IBuffer buffer)
+    public Kernel(Decoder decoder, IEncoder encoder, IBuffer buffer)
     {
-        this.deserializer = deserializer;
-        this.serializer = serializer;
+        this.decoder = decoder;
+        this.encoder = encoder;
         this.buffer = buffer;
         broker = new();
     }
 
     public void Dispatch<T>(T message)
     {
-        serializer.Encode(buffer.Writer, message);
+        encoder.Encode(buffer.Writer, message);
         MessageSerialized?.Invoke(buffer.Reader);
     }
 
@@ -26,7 +26,7 @@ public class Kernel : IDispatcher, IRegistry, ITransportGateway
 
     public void Deregister<T>(Action<T> handler) => broker.Deregister(handler);
 
-    public void ReadBuffer(IBufferReader bufferReader) => deserializer.Invoke(bufferReader, broker);
+    public void ReadBuffer(IBufferReader bufferReader) => decoder.Invoke(bufferReader, broker);
 
     public event Action<IBufferReader> MessageSerialized;
 }

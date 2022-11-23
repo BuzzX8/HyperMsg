@@ -4,14 +4,14 @@ public class CompositeEncoder : IEncoder
 {
     private readonly Dictionary<Type, object> encoders = new();
 
-    public void Register<T>(Action<IBufferWriter, T> serializer)
+    public void Add<T>(Encoder<T> encoder)
     {
-        Deregister<T>();
+        Remove<T>();
 
-        encoders[typeof(T)] = serializer;
+        encoders[typeof(T)] = encoder;
     }
 
-    public void Deregister<T>()
+    public void Remove<T>()
     {
         if (!encoders.ContainsKey(typeof(T)))
             return;
@@ -26,7 +26,7 @@ public class CompositeEncoder : IEncoder
             return;
         }
 
-        var serializer = (Action<IBufferWriter, T>)encoders[typeof(T)];
+        var serializer = (Encoder<T>)encoders[typeof(T)];
 
         serializer.Invoke(writer, message);
     }

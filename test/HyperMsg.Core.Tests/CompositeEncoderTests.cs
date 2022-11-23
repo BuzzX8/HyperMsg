@@ -18,24 +18,24 @@ public class CompositeEncoderTests
     public void Serialize_Invokes_Registered_Serializer()
     {
         var message = Guid.NewGuid();
-        var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        this.encoder.Register(serializer);
+        var encoder = A.Fake<Encoder<Guid>>();
+        this.encoder.Add(encoder);
 
         this.encoder.Encode(buffer.Writer, message);
 
-        A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustHaveHappened();
+        A.CallTo(() => encoder.Invoke(buffer.Writer, message)).MustHaveHappened();
     }
 
     [Fact]
     public void Serialize_Does_Not_Invokes_Deregistered_Serializer()
     {
         var message = Guid.NewGuid();
-        var serializer = A.Fake<Action<IBufferWriter, Guid>>();
-        this.encoder.Register(serializer);
-        this.encoder.Deregister<Guid>();
+        var encoder = A.Fake<Encoder<Guid>>();
+        this.encoder.Add(encoder);
+        this.encoder.Remove<Guid>();
 
         this.encoder.Encode(buffer.Writer, message);
 
-        A.CallTo(() => serializer.Invoke(buffer.Writer, message)).MustNotHaveHappened();
+        A.CallTo(() => encoder.Invoke(buffer.Writer, message)).MustNotHaveHappened();
     }
 }

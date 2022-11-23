@@ -11,7 +11,7 @@ public class ServiceCollectionExtensionTests
     [Fact]
     public void AddKernel_Adds_Dispatcher_Registry_And_TransportGateway_Service()
     {
-        var serializer = A.Fake<Encoder>();
+        var serializer = A.Fake<IEncoder>();
         var deserializer = A.Fake<Decoder>();
         services.AddKernel(deserializer, serializer);
 
