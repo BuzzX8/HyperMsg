@@ -18,28 +18,50 @@ public class ConnectionService
         this.socket = socket;
 
         asyncEventArgs = new();
+        asyncEventArgs.Completed += OperationCompleted;
         RegisterHandlers(registry);
+    }
+
+    private void OperationCompleted(object? _, SocketAsyncEventArgs eventArgs) 
+    {
+        if (eventArgs.LastOperation == SocketAsyncOperation.Connect)
+        {
+            dispatcher.Dispatch(new ConnectResult(eventArgs.RemoteEndPoint, eventArgs.SocketError));
+        }
     }
 
     private void RegisterHandlers(IRegistry registry)
     {
-
+        registry.Register<Connect>(Connect);
     }
 
     private void Connect(Connect connect)
     {
         asyncEventArgs.RemoteEndPoint = connect.EndPoint;
-        socket.ConnectAsync(asyncEventArgs);
+        
+        if (!socket.ConnectAsync(asyncEventArgs))
+        {
+            OperationCompleted(socket, asyncEventArgs);
+        }
     }
 
     private void UnregisterHandlers(IRegistry registry)
     {
-
+        registry.Deregister<Connect>(Connect);
     }
 
-    public void Dispose() => UnregisterHandlers(registry);
+    public void Dispose()
+    {
+        UnregisterHandlers(registry);
+        asyncEventArgs.Completed -= OperationCompleted;
+        asyncEventArgs.Dispose();
+    }
 }
 
 public record struct Connect(EndPoint EndPoint);
 
+public record struct ConnectResult(EndPoint? EndPoint, SocketError Error);
+
 public record struct Disconnect;
+
+public record struct Disconnected;
