@@ -11,10 +11,10 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddKernel(this IServiceCollection services, Decoder deserializer, IEncoder serializer, IBuffer sendingBuffer)
     {
-        var kernel = new Kernel(deserializer, serializer, sendingBuffer);
+        var kernel = new CodingService(deserializer, serializer, sendingBuffer);
 
         return services.AddSingleton<IDispatcher>(kernel)
             .AddSingleton<IRegistry>(kernel)
-            .AddSingleton<ITransportGateway>(kernel);
+            .AddSingleton<ICoderGateway>(kernel);
     }
 }

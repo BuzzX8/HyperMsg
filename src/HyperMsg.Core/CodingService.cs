@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public class Kernel : IDispatcher, IRegistry, ITransportGateway
+public class CodingService : IDispatcher, IRegistry, ICoderGateway
 {
     private readonly Decoder decoder;
     private readonly IEncoder encoder;
@@ -8,7 +8,7 @@ public class Kernel : IDispatcher, IRegistry, ITransportGateway
 
     private readonly MessageBroker broker;
 
-    public Kernel(Decoder decoder, IEncoder encoder, IBuffer buffer)
+    public CodingService(Decoder decoder, IEncoder encoder, IBuffer buffer)
     {
         this.decoder = decoder;
         this.encoder = encoder;
@@ -19,14 +19,14 @@ public class Kernel : IDispatcher, IRegistry, ITransportGateway
     public void Dispatch<T>(T message)
     {
         encoder.Encode(buffer.Writer, message);
-        MessageSerialized?.Invoke(buffer.Reader);
+        MessageEncoded?.Invoke(buffer.Reader);
     }
 
     public void Register<T>(Action<T> handler) => broker.Register(handler);
 
     public void Unregister<T>(Action<T> handler) => broker.Unregister(handler);
 
-    public void ReadBuffer(IBufferReader bufferReader) => decoder.Invoke(bufferReader, broker);
+    public void TryDecodeMessage(IBufferReader bufferReader) => decoder.Invoke(bufferReader, broker);
 
-    public event Action<IBufferReader> MessageSerialized;
+    public event Action<IBufferReader> MessageEncoded;
 }

@@ -3,19 +3,19 @@ using Xunit;
 
 namespace HyperMsg;
 
-public class KernelTests
+public class CodingServiceTests
 {
     public readonly IBuffer buffer;
     public readonly IEncoder encoder;
     public readonly Decoder decoder;
-    public readonly Kernel kernel;
+    public readonly CodingService service;
 
-    public KernelTests()
+    public CodingServiceTests()
     {
         buffer = A.Fake<IBuffer>();
         encoder = A.Fake<IEncoder>();
         decoder = A.Fake<Decoder>();
-        kernel = new (decoder, encoder, buffer);
+        service = new (decoder, encoder, buffer);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public class KernelTests
     {
         var message = Guid.NewGuid();
 
-        kernel.Dispatch(message);
+        service.Dispatch(message);
 
         A.CallTo(() => encoder.Encode(buffer.Writer, message)).MustHaveHappened();
     }
@@ -32,9 +32,9 @@ public class KernelTests
     public void Dispatch_Invokes_SendingBufferUpdated_Event()
     {
         var handler = A.Fake<Action<IBufferReader>>();
-        kernel.MessageSerialized += handler;
+        service.MessageEncoded += handler;
 
-        kernel.Dispatch(Guid.NewGuid());
+        service.Dispatch(Guid.NewGuid());
 
         A.CallTo(() => handler.Invoke(buffer.Reader)).MustHaveHappened();
     }
@@ -44,7 +44,7 @@ public class KernelTests
     {
         var receivingBuffer = A.Fake<IBuffer>();
 
-        kernel.ReadBuffer(receivingBuffer.Reader);
+        service.TryDecodeMessage(receivingBuffer.Reader);
 
         A.CallTo(() => decoder.Invoke(receivingBuffer.Reader, A<IDispatcher>._)).MustHaveHappened();
     }

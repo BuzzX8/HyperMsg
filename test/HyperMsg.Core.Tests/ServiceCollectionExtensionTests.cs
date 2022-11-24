@@ -18,7 +18,7 @@ public class ServiceCollectionExtensionTests
         var provider = services.BuildServiceProvider();
         var dispatcher = provider.GetService<IDispatcher>();
         var registry = provider.GetService<IRegistry>();
-        var transportGateway = provider.GetService<ITransportGateway>();
+        var transportGateway = provider.GetService<ICoderGateway>();
 
         Assert.NotNull(dispatcher);
         Assert.NotNull(registry);
