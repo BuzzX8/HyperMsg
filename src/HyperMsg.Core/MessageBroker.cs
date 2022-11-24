@@ -6,12 +6,10 @@ namespace HyperMsg;
 /// <summary>
 /// Provides implementation for MessageSender and MessageHandlerRegistry
 /// </summary>
-public class MessageBroker : IDispatcher, IRegistry
+public class MessageBroker : ITopic
 {
     private readonly ConcurrentDictionary<Type, Delegate> messageHandlers = new();
-    private readonly object sync = new();
-
-    public IRegistry Registry => this;
+    private readonly object sync = new();    
 
     public void Dispatch<T>(T data)
     {
@@ -50,7 +48,7 @@ public class MessageBroker : IDispatcher, IRegistry
         }
     }
 
-    public void Deregister<T>(Action<T> messageHandler)
+    public void Unregister<T>(Action<T> messageHandler)
     {
         lock (sync)
         {

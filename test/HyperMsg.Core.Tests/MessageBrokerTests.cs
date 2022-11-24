@@ -37,7 +37,7 @@ public class MessageBrokerTests
         var message = Guid.NewGuid().ToString();
         var handler = A.Fake<Action<Guid>>();
         broker.Register(handler);
-        broker.Deregister(handler);
+        broker.Unregister(handler);
 
         broker.Dispatch(message);
 

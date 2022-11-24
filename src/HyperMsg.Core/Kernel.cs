@@ -24,7 +24,7 @@ public class Kernel : IDispatcher, IRegistry, ITransportGateway
 
     public void Register<T>(Action<T> handler) => broker.Register(handler);
 
-    public void Deregister<T>(Action<T> handler) => broker.Deregister(handler);
+    public void Unregister<T>(Action<T> handler) => broker.Unregister(handler);
 
     public void ReadBuffer(IBufferReader bufferReader) => decoder.Invoke(bufferReader, broker);
 
