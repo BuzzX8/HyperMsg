@@ -4,12 +4,12 @@ namespace HyperMsg.Socket;
 
 public class TransmissionService : Service
 {
-    private readonly System.Net.Sockets.Socket socket;
+    private readonly SocketHolder socketHolder;
     private readonly SocketAsyncEventArgs asyncEventArgs;
 
-    public TransmissionService(ITopic topic, System.Net.Sockets.Socket socket) : base(topic)
+    public TransmissionService(ITopic topic, SocketHolder socketHolder) : base(topic)
     {
-        this.socket = socket;
+        this.socketHolder = socketHolder;
         asyncEventArgs = new();
         asyncEventArgs.Completed += OperationCompleted;
     }
@@ -41,9 +41,9 @@ public class TransmissionService : Service
     private void Send(Send message)
     {
         asyncEventArgs.SetBuffer(message.Buffer);
-        if (!socket.SendAsync(asyncEventArgs))
+        if (!socketHolder.Socket.SendAsync(asyncEventArgs))
         {
-            OperationCompleted(socket, asyncEventArgs);
+            OperationCompleted(socketHolder, asyncEventArgs);
         }
     }
 
@@ -52,13 +52,6 @@ public class TransmissionService : Service
         base.Dispose();
         asyncEventArgs.Completed -= OperationCompleted;
         asyncEventArgs.Dispose();
-
-        if (socket.Connected)
-        {
-            socket.Shutdown(SocketShutdown.Both);
-        }
-
-        socket.Dispose();
     }
 }
 

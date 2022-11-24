@@ -5,12 +5,12 @@ namespace HyperMsg.Socket;
 
 public class ConnectionService : Service
 {
-    private readonly System.Net.Sockets.Socket socket;
+    private readonly SocketHolder socketHolder;
     private readonly SocketAsyncEventArgs asyncEventArgs;
 
-    public ConnectionService(ITopic topic, System.Net.Sockets.Socket socket) : base(topic)
+    public ConnectionService(ITopic topic, SocketHolder socketHolder) : base(topic)
     {
-        this.socket = socket;
+        this.socketHolder = socketHolder;
 
         asyncEventArgs = new();
         asyncEventArgs.Completed += OperationCompleted;
@@ -46,23 +46,23 @@ public class ConnectionService : Service
     {
         asyncEventArgs.RemoteEndPoint = connect.RemoteEndPoint;
 
-        if (!socket.ConnectAsync(asyncEventArgs))
+        if (!socketHolder.Socket.ConnectAsync(asyncEventArgs))
         {
-            OperationCompleted(socket, asyncEventArgs);
+            OperationCompleted(socketHolder, asyncEventArgs);
         }
     }
 
     private void Disconnect(Disconnect _)
     {
-        if (!socket.Connected)
+        if (!socketHolder.Socket.Connected)
         {
             Dispatch(new DisconnectResult(SocketError.NotConnected));
             return;
         }
 
-        if (!socket.DisconnectAsync(asyncEventArgs))
+        if (!socketHolder.Socket.DisconnectAsync(asyncEventArgs))
         {
-            OperationCompleted(socket, asyncEventArgs);
+            OperationCompleted(socketHolder, asyncEventArgs);
         }
     }
 
@@ -70,14 +70,7 @@ public class ConnectionService : Service
     {
         base.Dispose();
         asyncEventArgs.Completed -= OperationCompleted;
-        asyncEventArgs.Dispose();
-
-        if (socket.Connected)
-        {
-            socket.Shutdown(SocketShutdown.Both);
-        }
-
-        socket.Dispose();
+        asyncEventArgs.Dispose();    
     }
 }
 

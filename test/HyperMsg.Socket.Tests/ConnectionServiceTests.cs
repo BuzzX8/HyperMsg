@@ -8,8 +8,8 @@ public class ConnectionServiceTests : IDisposable
     private static readonly IPEndPoint endPoint = new(IPAddress.Loopback, 8080);
 
     private readonly MessageBroker broker;
+    private readonly SocketHolder socketHolder;
     private readonly ConnectionService connectionService;
-    private readonly System.Net.Sockets.Socket socket;
 
     private readonly System.Net.Sockets.Socket acceptingSocket;
     private readonly ManualResetEventSlim syncEvent;
@@ -17,8 +17,8 @@ public class ConnectionServiceTests : IDisposable
     public ConnectionServiceTests()
     {
         broker = new();
-        socket = new(SocketType.Stream, ProtocolType.Tcp);
-        connectionService = new(broker, socket);
+        socketHolder = new();
+        connectionService = new(broker, socketHolder);
         connectionService.StartAsync(default);
 
         acceptingSocket = new(SocketType.Stream, ProtocolType.Tcp);
@@ -123,5 +123,6 @@ public class ConnectionServiceTests : IDisposable
         connectionService.Dispose();
         acceptingSocket.Close();
         acceptingSocket.Dispose();
+        socketHolder.Dispose();
     }
 }

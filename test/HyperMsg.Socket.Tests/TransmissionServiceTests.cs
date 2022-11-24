@@ -8,8 +8,8 @@ public class TransmissionServiceTests : IDisposable
     private static readonly IPEndPoint endPoint = new(IPAddress.Loopback, 8081);
 
     private readonly MessageBroker broker;
+    private readonly SocketHolder socketHolder;
     private readonly TransmissionService transmissionService;
-    private readonly System.Net.Sockets.Socket socket;
 
     private readonly System.Net.Sockets.Socket acceptingSocket;
     private readonly ManualResetEventSlim syncEvent;
@@ -17,8 +17,8 @@ public class TransmissionServiceTests : IDisposable
     public TransmissionServiceTests()
     {
         broker = new();
-        socket = new(SocketType.Stream, ProtocolType.Tcp);
-        transmissionService = new(broker, socket);
+        socketHolder = new();
+        transmissionService = new(broker, socketHolder);
         transmissionService.StartAsync(default);
 
         acceptingSocket = new(SocketType.Stream, ProtocolType.Tcp);
@@ -41,7 +41,7 @@ public class TransmissionServiceTests : IDisposable
         acceptingSocket.Bind(endPoint);
         acceptingSocket.Listen();
 
-        socket.Connect(endPoint);
+        socketHolder.Socket.Connect(endPoint);
         var acceptedSocket = acceptingSocket.Accept();
 
         broker.Dispatch(new Send(message));
@@ -60,6 +60,7 @@ public class TransmissionServiceTests : IDisposable
 
     public void Dispose()
     {
+        socketHolder.Dispose();
         transmissionService.Dispose();
         acceptingSocket.Close();
         acceptingSocket.Dispose();
