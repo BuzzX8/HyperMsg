@@ -54,6 +54,35 @@ public class TransmissionServiceTests : IDisposable
         Assert.Equal(SocketError.Success, result.Error);
     }
 
+    [Fact]
+    public void Dispatching_Receive_Message_() 
+    {
+        var message = Guid.NewGuid().ToByteArray();
+        var acceptedMessage = new byte[message.Length];
+        var result = default(ReceiveResult);
+
+        broker.Register<ReceiveResult>(r =>
+        {
+            result = r;
+            SetSyncEvent();
+        });
+
+        acceptingSocket.Bind(endPoint);
+        acceptingSocket.Listen();
+
+        socketHolder.Socket.Connect(endPoint);
+        var acceptedSocket = acceptingSocket.Accept();
+
+        broker.Dispatch(new Receive(acceptedMessage));
+        acceptedSocket.Send(message);
+
+        WaitSyncEvent();
+
+        Assert.Equal(message, acceptedMessage);
+        Assert.Equal(SocketError.Success, result.Error);
+        Assert.Equal(message.Length, result.BytesTransferred);
+    }
+
     private void SetSyncEvent() => syncEvent.Set();
 
     private void WaitSyncEvent() => syncEvent.Wait(TimeSpan.FromSeconds(10));
