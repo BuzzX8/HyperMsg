@@ -5,17 +5,15 @@ namespace HyperMsg;
 
 public class CodingServiceTests
 {
-    public readonly IBuffer buffer;
     public readonly IEncoder encoder;
     public readonly Decoder decoder;
     public readonly CodingService service;
 
     public CodingServiceTests()
     {
-        buffer = A.Fake<IBuffer>();
         encoder = A.Fake<IEncoder>();
         decoder = A.Fake<Decoder>();
-        service = new (decoder, encoder, buffer);
+        service = new (decoder, encoder, 100, 100);
     }
 
     [Fact]
@@ -25,18 +23,18 @@ public class CodingServiceTests
 
         service.Dispatch(message);
 
-        A.CallTo(() => encoder.Encode(buffer.Writer, message)).MustHaveHappened();
+        A.CallTo(() => encoder.Encode(service.EncodingBuffer.Writer, message)).MustHaveHappened();
     }
 
     [Fact]
     public void Dispatching_Message_Invokes_MessageEncoded_Event()
     {
-        var handler = A.Fake<Action<IBufferReader>>();
+        var handler = A.Fake<Action>();
         service.MessageEncoded += handler;
 
         service.Dispatch(Guid.NewGuid());
 
-        A.CallTo(() => handler.Invoke(buffer.Reader)).MustHaveHappened();
+        A.CallTo(() => handler.Invoke()).MustHaveHappened();
     }
 
     [Fact]
@@ -44,8 +42,8 @@ public class CodingServiceTests
     {
         var receivingBuffer = A.Fake<IBuffer>();
 
-        service.DecodeMessage(receivingBuffer.Reader);
+        service.DecodeMessage();
 
-        A.CallTo(() => decoder.Invoke(receivingBuffer.Reader, A<IDispatcher>._)).MustHaveHappened();
+        A.CallTo(() => decoder.Invoke(service.DecodingBuffer.Reader, A<IDispatcher>._)).MustHaveHappened();
     }
 }

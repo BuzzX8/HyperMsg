@@ -2,7 +2,11 @@
 
 public interface ICoderGateway
 {
-    void DecodeMessage(IBufferReader bufferReader);
+    IBuffer DecodingBuffer { get; }
 
-    event Action<IBufferReader> MessageEncoded;
+    IBuffer EncodingBuffer { get; }
+
+    void DecodeMessage();
+
+    event Action MessageEncoded;
 }
