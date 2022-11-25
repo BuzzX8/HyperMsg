@@ -1,32 +1,45 @@
 ﻿namespace HyperMsg;
 
-public class CodingService : ITopic, ICoderGateway
+public class CodingService : ITopic, ICoderGateway, IDisposable
 {
     private readonly Decoder decoder;
     private readonly IEncoder encoder;
-    private readonly IBuffer buffer;
 
+    private readonly Buffer encodingBuffer;
+    private readonly Buffer decodingBuffer;
     private readonly MessageBroker broker;
 
-    public CodingService(Decoder decoder, IEncoder encoder, IBuffer buffer)
+    public CodingService(Decoder decoder, IEncoder encoder, int decodingBufferSize, int encodingBufferSize)
     {
         this.decoder = decoder;
         this.encoder = encoder;
-        this.buffer = buffer;
+
+        decodingBuffer = BufferFactory.Shared.CreateBuffer(decodingBufferSize);
+        encodingBuffer = BufferFactory.Shared.CreateBuffer(encodingBufferSize);
         broker = new();
     }
 
+    public IBuffer DecodingBuffer => decodingBuffer;
+
+    public IBuffer EncodingBuffer => encodingBuffer;
+
     public void Dispatch<T>(T message)
     {
-        encoder.Encode(buffer.Writer, message);
-        MessageEncoded?.Invoke(buffer.Reader);
+        encoder.Encode(encodingBuffer.Writer, message);
+        MessageEncoded?.Invoke();
     }
 
     public void Register<T>(Action<T> handler) => broker.Register(handler);
 
     public void Unregister<T>(Action<T> handler) => broker.Unregister(handler);
 
-    public void DecodeMessage(IBufferReader bufferReader) => decoder.Invoke(bufferReader, broker);
+    public void DecodeMessage() => decoder.Invoke(decodingBuffer.Reader, broker);
 
-    public event Action<IBufferReader> MessageEncoded;
+    public event Action MessageEncoded;
+
+    public void Dispose()
+    {
+        encodingBuffer.Dispose();
+        decodingBuffer.Dispose();
+    }
 }
