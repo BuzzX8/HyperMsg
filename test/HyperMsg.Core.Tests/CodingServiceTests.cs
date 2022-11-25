@@ -19,7 +19,7 @@ public class CodingServiceTests
     }
 
     [Fact]
-    public void Dispatch_Invokes_Serializer()
+    public void Dispatching_Message_Invokes_Encoder()
     {
         var message = Guid.NewGuid();
 
@@ -29,7 +29,7 @@ public class CodingServiceTests
     }
 
     [Fact]
-    public void Dispatch_Invokes_SendingBufferUpdated_Event()
+    public void Dispatching_Message_Invokes_MessageEncoded_Event()
     {
         var handler = A.Fake<Action<IBufferReader>>();
         service.MessageEncoded += handler;
@@ -40,11 +40,11 @@ public class CodingServiceTests
     }
 
     [Fact]
-    public void OnReceivingBufferUpdated_Invokes_Deserializer()
+    public void DecodeMessage_Invokes_Decoder()
     {
         var receivingBuffer = A.Fake<IBuffer>();
 
-        service.TryDecodeMessage(receivingBuffer.Reader);
+        service.DecodeMessage(receivingBuffer.Reader);
 
         A.CallTo(() => decoder.Invoke(receivingBuffer.Reader, A<IDispatcher>._)).MustHaveHappened();
     }

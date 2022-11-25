@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public class CodingService : IDispatcher, IRegistry, ICoderGateway
+public class CodingService : ITopic, ICoderGateway
 {
     private readonly Decoder decoder;
     private readonly IEncoder encoder;
@@ -26,7 +26,7 @@ public class CodingService : IDispatcher, IRegistry, ICoderGateway
 
     public void Unregister<T>(Action<T> handler) => broker.Unregister(handler);
 
-    public void TryDecodeMessage(IBufferReader bufferReader) => decoder.Invoke(bufferReader, broker);
+    public void DecodeMessage(IBufferReader bufferReader) => decoder.Invoke(bufferReader, broker);
 
     public event Action<IBufferReader> MessageEncoded;
 }
