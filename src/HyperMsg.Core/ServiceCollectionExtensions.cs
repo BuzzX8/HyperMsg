@@ -6,15 +6,11 @@ public static class ServiceCollectionExtensions
 {
     public const int DefaultBufferSize = 65 * 1024;
 
-    public static IServiceCollection AddKernel(this IServiceCollection services, Decoder deserializer, IEncoder serializer, int bufferSize = DefaultBufferSize) =>
-        services.AddKernel(deserializer, serializer, BufferFactory.Shared.CreateBuffer(bufferSize));
-
-    public static IServiceCollection AddKernel(this IServiceCollection services, Decoder deserializer, IEncoder serializer, IBuffer sendingBuffer)
+    public static IServiceCollection AddCodingService(this IServiceCollection services, Decoder deserializer, IEncoder serializer, int decodingBufferSize = DefaultBufferSize, int encodingBufferSize = DefaultBufferSize)
     {
-        var kernel = new Kernel(deserializer, serializer, sendingBuffer);
+        var service = new CodingService(deserializer, serializer, decodingBufferSize, encodingBufferSize);
 
-        return services.AddSingleton<IDispatcher>(kernel)
-            .AddSingleton<IRegistry>(kernel)
-            .AddSingleton<ITransportGateway>(kernel);
+        return services.AddSingleton(service)
+            .AddSingleton<ICoderGateway>(service);
     }
 }

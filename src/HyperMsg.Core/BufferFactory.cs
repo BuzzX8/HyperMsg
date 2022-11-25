@@ -8,12 +8,12 @@ public class BufferFactory
 
     public static readonly BufferFactory Shared = new(MemoryPool<byte>.Shared);
 
-    internal BufferFactory(MemoryPool<byte> memoryPool)
+    private BufferFactory(MemoryPool<byte> memoryPool)
     {
         this.memoryPool = memoryPool ?? throw new ArgumentNullException(nameof(memoryPool));
     }
 
-    public IBuffer CreateBuffer(int bufferSize)
+    public Buffer CreateBuffer(int bufferSize)
     {
         var memory = memoryPool.Rent(bufferSize);
         return new Buffer(memory);
