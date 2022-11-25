@@ -1,44 +1,35 @@
 ﻿namespace HyperMsg.Socket;
 
 public class SocketService : Service
-{
-    private readonly IBuffer receivingBuffer;
+{    
     private readonly ICoderGateway coderGateway;
 
-    private IBufferReader? reader;
-
-    public SocketService(ITopic socketTopic, ICoderGateway coderGateway, IBuffer receivingBuffer) : base(socketTopic)
+    public SocketService(ITopic socketTopic, ICoderGateway coderGateway) : base(socketTopic)
     {
-        this.coderGateway = coderGateway ?? throw new ArgumentNullException(nameof(coderGateway));
-        this.receivingBuffer = receivingBuffer ?? throw new ArgumentNullException(nameof(receivingBuffer));
+        this.coderGateway = coderGateway ?? throw new ArgumentNullException(nameof(coderGateway));        
         this.coderGateway.MessageEncoded += MessageEncoded;
     }
 
-    private void MessageEncoded(IBufferReader reader)
+    private void MessageEncoded()
     {
-        this.reader = reader;
-        //Dispatch(new Send(reader.GetMemory()));
+        var memory = coderGateway.EncodingBuffer.Reader.GetMemory();
+        //Dispatch(new Send(memory));
     }
 
     private void Receive()
     {
-        var memory = receivingBuffer.Writer.GetMemory();
+        var memory = coderGateway.EncodingBuffer.Writer.GetMemory();
         Dispatch(new Receive(memory));
     }
 
     private void OnSendResult(SendResult message)
     {
-        if (reader is null)
+        if (message.Error != System.Net.Sockets.SocketError.Success)
         {
             return;
         }
 
-        if (message.Error != System.Net.Sockets.SocketError.Success)
-        {
-            reader.Advance(message.BytesTransferred);
-        }
-
-        reader = null;
+        coderGateway.EncodingBuffer.Reader.Advance(message.BytesTransferred);
     }
 
     private void OnReceiveResult(ReceiveResult message)
@@ -48,7 +39,8 @@ public class SocketService : Service
             return;
         }
 
-        coderGateway.DecodeMessage(receivingBuffer.Reader);
+        coderGateway.DecodingBuffer.Writer.Advance(message.BytesTransferred);
+        coderGateway.DecodeMessage();
     }
 
     protected override void RegisterHandlers(IRegistry registry)
