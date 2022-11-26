@@ -10,15 +10,19 @@ public class SocketService : Service
         this.coderGateway.MessageEncoded += MessageEncoded;
     }
 
+    private IBuffer DecodingBuffer => coderGateway.DecodingBuffer;
+
+    private IBuffer EncodingBuffer => coderGateway.EncodingBuffer;
+
     private void MessageEncoded()
     {
-        var memory = coderGateway.EncodingBuffer.Reader.GetMemory();
-        //Dispatch(new Send(memory));
+        var memory = EncodingBuffer.Reader.GetMemory();
+        Dispatch(new Send(memory));
     }
 
-    private void Receive()
+    public void Receive()
     {
-        var memory = coderGateway.EncodingBuffer.Writer.GetMemory();
+        var memory = EncodingBuffer.Writer.GetMemory();
         Dispatch(new Receive(memory));
     }
 
@@ -29,7 +33,7 @@ public class SocketService : Service
             return;
         }
 
-        coderGateway.EncodingBuffer.Reader.Advance(message.BytesTransferred);
+        EncodingBuffer.Reader.Advance(message.BytesTransferred);
     }
 
     private void OnReceiveResult(ReceiveResult message)
@@ -39,7 +43,7 @@ public class SocketService : Service
             return;
         }
 
-        coderGateway.DecodingBuffer.Writer.Advance(message.BytesTransferred);
+        DecodingBuffer.Writer.Advance(message.BytesTransferred);
         coderGateway.DecodeMessage();
     }
 

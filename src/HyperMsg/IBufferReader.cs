@@ -11,7 +11,7 @@ public interface IBufferReader
     /// <param name="count">Number of elements.</param>
     void Advance(int count);    
 
-    ReadOnlyMemory<byte> GetMemory();
+    Memory<byte> GetMemory();
 
-    ReadOnlySpan<byte> GetSpan();
+    Span<byte> GetSpan();
 }
