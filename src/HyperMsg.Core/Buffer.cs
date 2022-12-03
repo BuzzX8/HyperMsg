@@ -50,9 +50,9 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
         }
     }
 
-    ReadOnlyMemory<byte> IBufferReader.GetMemory() => CommitedMemory;
+    Memory<byte> IBufferReader.GetMemory() => CommitedMemory;
 
-    ReadOnlySpan<byte> IBufferReader.GetSpan() => CommitedMemory.Span;
+    Span<byte> IBufferReader.GetSpan() => CommitedMemory.Span;
 
     #endregion
 

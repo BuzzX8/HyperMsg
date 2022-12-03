@@ -42,6 +42,11 @@ public class TransmissionService : Service
 
     private void Send(Send message)
     {
+        if (message.Buffer.Length is 0)
+        {
+            return;
+        }
+
         asyncEventArgs.SetBuffer(message.Buffer);
         if (!socketHolder.Socket.SendAsync(asyncEventArgs))
         {
