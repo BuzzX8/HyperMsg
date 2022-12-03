@@ -64,7 +64,8 @@ public class MessageTransmissionTests : IDisposable
         Assert.NotNull(acceptedSocket);
 
         var receivedMessage = new byte[16];
-        acceptedSocket.Receive(receivedMessage);
+        var receiveTask = acceptedSocket.ReceiveAsync(receivedMessage, SocketFlags.None);
+        receiveTask.Wait(TimeSpan.FromSeconds(10));
 
         Assert.Equal(message.ToByteArray(), receivedMessage);
     }
