@@ -74,10 +74,10 @@ public class ConnectionService : Service
     }
 }
 
-public record struct Connect(EndPoint RemoteEndPoint);
+internal record struct Connect(EndPoint RemoteEndPoint);
 
 public record struct ConnectResult(EndPoint? RemoteEndPoint, SocketError Error);
 
-public record struct Disconnect;
+internal record struct Disconnect;
 
 public record struct DisconnectResult(SocketError Error);

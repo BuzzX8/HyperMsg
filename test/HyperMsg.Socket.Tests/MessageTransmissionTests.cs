@@ -58,7 +58,7 @@ public class MessageTransmissionTests : IDisposable
             syncEvent.Set();
         });
 
-        transportTopic.Dispatch(new Connect(endPoint));
+        transportTopic.DispatchConnectionRequest(endPoint);
         syncEvent.Wait(TimeSpan.FromSeconds(10));
 
         Assert.NotNull(acceptedSocket);
@@ -91,7 +91,7 @@ public class MessageTransmissionTests : IDisposable
             syncEvent.Set();
         });
 
-        transportTopic.Dispatch(new Connect(endPoint));
+        transportTopic.DispatchConnectionRequest(endPoint);
         syncEvent.Wait(TimeSpan.FromSeconds(10));
         syncEvent.Reset();
 
