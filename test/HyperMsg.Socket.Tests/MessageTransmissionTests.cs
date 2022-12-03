@@ -28,7 +28,7 @@ public class MessageTransmissionTests : IDisposable
 
         transportTopic = new MessageBroker();
 
-        services.AddCodingService(null, encoder);
+        services.AddCodingService(DecodeGuid, encoder);
         services.AddSocketService(transportTopic);
 
         provider = services.BuildServiceProvider();
@@ -67,6 +67,47 @@ public class MessageTransmissionTests : IDisposable
         acceptedSocket.Receive(receivedMessage);
 
         Assert.Equal(message.ToByteArray(), receivedMessage);
+    }
+
+    [Fact]
+    public void Dispatching_ReceiveInBuffer_Receives_Message()
+    {
+        var message = Guid.NewGuid();
+        var receivedMessage = Guid.Empty;
+        var acceptedSocket = default(System.Net.Sockets.Socket);
+        var syncEvent = new ManualResetEventSlim();
+
+        listeningSocket.Bind(endPoint);
+        listeningSocket.Listen();
+        transportTopic.Register<ConnectResult>(r =>
+        {
+            acceptedSocket = listeningSocket.Accept();            
+            syncEvent.Set();
+        });
+        messageTopic.Register<Guid>(m =>
+        {
+            receivedMessage = m;
+            syncEvent.Set();
+        });
+
+        transportTopic.Dispatch(new Connect(endPoint));
+        syncEvent.Wait(TimeSpan.FromSeconds(10));
+        syncEvent.Reset();
+
+        Assert.NotNull(acceptedSocket);
+
+        acceptedSocket.Send(message.ToByteArray());
+        transportTopic.Dispatch(new ReceiveInBuffer());
+        syncEvent.Wait(TimeSpan.FromSeconds(10));
+
+        Assert.Equal(message, receivedMessage);
+    }
+
+    private static void DecodeGuid(IBufferReader reader, IDispatcher dispatcher)
+    {
+        var span = reader.GetSpan();
+        var message = new Guid(span);
+        dispatcher.Dispatch(message);
     }
 
     public void Dispose()

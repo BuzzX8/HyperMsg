@@ -22,9 +22,11 @@ public class SocketService : Service
 
     public void Receive()
     {
-        var memory = EncodingBuffer.Writer.GetMemory();
+        var memory = DecodingBuffer.Writer.GetMemory();
         Dispatch(new Receive(memory));
     }
+
+    private void OnReceiveInBuffer(ReceiveInBuffer _) => Receive();
 
     private void OnSendResult(SendResult message)
     {
@@ -51,12 +53,14 @@ public class SocketService : Service
     {
         registry.Register<SendResult>(OnSendResult);
         registry.Register<ReceiveResult>(OnReceiveResult);
+        registry.Register<ReceiveInBuffer>(OnReceiveInBuffer);
     }
 
     protected override void UnregisterHandlers(IRegistry registry)
     {
         registry.Unregister<SendResult>(OnSendResult);
         registry.Unregister<ReceiveResult>(OnReceiveResult);
+        registry.Unregister<ReceiveInBuffer>(OnReceiveInBuffer);
     }
 
     public override void Dispose()
@@ -65,3 +69,5 @@ public class SocketService : Service
         coderGateway.MessageEncoded -= MessageEncoded;
     }
 }
+
+public record struct ReceiveInBuffer();
