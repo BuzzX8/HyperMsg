@@ -20,13 +20,11 @@ public class SocketService : Service
         Dispatch(new SendRequest(memory));
     }
 
-    public void Receive()
+    private void OnReceiveInBuffer(ReceiveInBufferRequest _)
     {
         var memory = DecodingBuffer.Writer.GetMemory();
         Dispatch(new ReceiveRequest(memory));
     }
-
-    private void OnReceiveInBuffer(ReceiveInBufferRequest _) => Receive();
 
     private void OnSendResult(SendResult message)
     {

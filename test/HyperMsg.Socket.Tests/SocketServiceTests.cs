@@ -13,17 +13,20 @@ public class SocketServiceTests
         messageBroker = new();
         coderGateway = A.Fake<ICoderGateway>();
         socketService = new(messageBroker, coderGateway);
+        socketService.StartAsync(default);
     }
 
     [Fact]
-    public void Receive_Dispatches_Receive_Message()
+    public void DispatchReceiveInBufferRequest_Dispatches_ReceiveRequest_Message()
     {
         var bufferContent = Guid.NewGuid().ToByteArray();
         var dispatchedMessage = default(ReceiveRequest);
         messageBroker.Register<ReceiveRequest>(s => dispatchedMessage = s);
-        A.CallTo(() => coderGateway.EncodingBuffer.Writer.GetMemory(0)).Returns(bufferContent);
+        A.CallTo(() => coderGateway.DecodingBuffer.Writer.GetMemory(0)).Returns(bufferContent);
 
-        socketService.Receive();
+        messageBroker.DispatchReceiveInBufferRequest();
+
+        Assert.Equal(bufferContent, dispatchedMessage.Buffer);
     }
 
     [Fact]
