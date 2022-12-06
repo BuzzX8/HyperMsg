@@ -30,17 +30,17 @@ public class TransmissionService : Service
 
     protected override void RegisterHandlers(IRegistry registry)
     {
-        registry.Register<Send>(Send);
-        registry.Register<Receive>(Receive);
+        registry.Register<SendRequest>(Send);
+        registry.Register<ReceiveRequest>(Receive);
     }
 
     protected override void UnregisterHandlers(IRegistry registry)
     {
-        registry.Unregister<Send>(Send);
-        registry.Unregister<Receive>(Receive);
+        registry.Unregister<SendRequest>(Send);
+        registry.Unregister<ReceiveRequest>(Receive);
     }
 
-    private void Send(Send message)
+    private void Send(SendRequest message)
     {
         if (message.Buffer.Length is 0)
         {
@@ -54,7 +54,7 @@ public class TransmissionService : Service
         }
     }
 
-    private void Receive(Receive message)
+    private void Receive(ReceiveRequest message)
     {
         asyncEventArgs.SetBuffer(message.Buffer);
         if (!socketHolder.Socket.ReceiveAsync(asyncEventArgs))
@@ -71,10 +71,10 @@ public class TransmissionService : Service
     }
 }
 
-public record struct Send(Memory<byte> Buffer);
+public record struct SendRequest(Memory<byte> Buffer);
 
 public record struct SendResult(int BytesTransferred, SocketError Error);
 
-public record struct Receive(Memory<byte> Buffer);
+public record struct ReceiveRequest(Memory<byte> Buffer);
 
 public record struct ReceiveResult(int BytesTransferred, SocketError Error);
