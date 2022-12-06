@@ -28,7 +28,7 @@ public class ConnectionServiceTests : IDisposable
     #region
 
     [Fact]
-    public void DispatchConnectionRequest_Creates_Socket_Connection()
+    public void DispatchConnectRequest_Creates_Socket_Connection()
     {
         var result = default(ConnectResult);
         
@@ -42,7 +42,7 @@ public class ConnectionServiceTests : IDisposable
         acceptingSocket.Listen();
         var acceptingTask = acceptingSocket.AcceptAsync();
 
-        broker.DispatchConnectionRequest(endPoint);
+        broker.DispatchConnectRequest(endPoint);
         WaitSyncEvent();
 
         Assert.Equal(endPoint, result.RemoteEndPoint);
@@ -52,7 +52,7 @@ public class ConnectionServiceTests : IDisposable
     }
 
     [Fact]
-    public void DispatchConnectionRequest_For_Connected_Socket_Throws_Exception()
+    public void DispatchConnectRequest_For_Connected_Socket_Throws_Exception()
     {
         var result = default(ConnectResult);
 
@@ -66,11 +66,11 @@ public class ConnectionServiceTests : IDisposable
         acceptingSocket.Listen();
         var acceptingTask = acceptingSocket.AcceptAsync();
 
-        broker.DispatchConnectionRequest(endPoint);
+        broker.DispatchConnectRequest(endPoint);
         WaitSyncEvent();
         syncEvent.Reset();
         
-        Assert.Throws<SocketException>(() => broker.DispatchConnectionRequest(endPoint));
+        Assert.Throws<SocketException>(() => broker.DispatchConnectRequest(endPoint));
     }
 
     #endregion
@@ -88,7 +88,7 @@ public class ConnectionServiceTests : IDisposable
             SetSyncEvent();
         });
 
-        broker.DispatchConnectionRequest(endPoint);
+        broker.DispatchConnectRequest(endPoint);
         WaitSyncEvent();
 
         Assert.Equal(endPoint, result.RemoteEndPoint);
@@ -96,7 +96,7 @@ public class ConnectionServiceTests : IDisposable
     }
 
     [Fact]
-    public void Dispatching_Disconnect_Message_For_Disonnected_Socket()
+    public void DispatchDisconnectRequest_For_Disonnected_Socket_Throws_Exception()
     {
         var result = default(DisconnectResult);
         
@@ -106,7 +106,7 @@ public class ConnectionServiceTests : IDisposable
             SetSyncEvent();
         });
 
-        broker.DispatchDisconnectionRequest();
+        broker.DispatchDisconnectRequest();
         WaitSyncEvent();
 
         Assert.Equal(SocketError.NotConnected, result.Error);

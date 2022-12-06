@@ -17,16 +17,16 @@ public class SocketService : Service
     private void MessageEncoded()
     {
         var memory = EncodingBuffer.Reader.GetMemory();
-        Dispatch(new Send(memory));
+        Dispatch(new SendRequest(memory));
     }
 
     public void Receive()
     {
         var memory = DecodingBuffer.Writer.GetMemory();
-        Dispatch(new Receive(memory));
+        Dispatch(new ReceiveRequest(memory));
     }
 
-    private void OnReceiveInBuffer(ReceiveInBuffer _) => Receive();
+    private void OnReceiveInBuffer(ReceiveInBufferRequest _) => Receive();
 
     private void OnSendResult(SendResult message)
     {
@@ -53,14 +53,14 @@ public class SocketService : Service
     {
         registry.Register<SendResult>(OnSendResult);
         registry.Register<ReceiveResult>(OnReceiveResult);
-        registry.Register<ReceiveInBuffer>(OnReceiveInBuffer);
+        registry.Register<ReceiveInBufferRequest>(OnReceiveInBuffer);
     }
 
     protected override void UnregisterHandlers(IRegistry registry)
     {
         registry.Unregister<SendResult>(OnSendResult);
         registry.Unregister<ReceiveResult>(OnReceiveResult);
-        registry.Unregister<ReceiveInBuffer>(OnReceiveInBuffer);
+        registry.Unregister<ReceiveInBufferRequest>(OnReceiveInBuffer);
     }
 
     public override void Dispose()
@@ -70,4 +70,4 @@ public class SocketService : Service
     }
 }
 
-public record struct ReceiveInBuffer();
+public record struct ReceiveInBufferRequest();

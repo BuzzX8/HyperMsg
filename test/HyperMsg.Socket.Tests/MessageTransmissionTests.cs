@@ -58,7 +58,7 @@ public class MessageTransmissionTests : IDisposable
             syncEvent.Set();
         });
 
-        transportTopic.DispatchConnectionRequest(endPoint);
+        transportTopic.DispatchConnectRequest(endPoint);
         syncEvent.Wait(TimeSpan.FromSeconds(10));
 
         Assert.NotNull(acceptedSocket);
@@ -91,14 +91,14 @@ public class MessageTransmissionTests : IDisposable
             syncEvent.Set();
         });
 
-        transportTopic.DispatchConnectionRequest(endPoint);
+        transportTopic.DispatchConnectRequest(endPoint);
         syncEvent.Wait(TimeSpan.FromSeconds(10));
         syncEvent.Reset();
 
         Assert.NotNull(acceptedSocket);
 
         acceptedSocket.Send(message.ToByteArray());
-        transportTopic.Dispatch(new ReceiveInBuffer());
+        transportTopic.DispatchReceiveInBufferRequest();
         syncEvent.Wait(TimeSpan.FromSeconds(10));
 
         Assert.Equal(message, receivedMessage);

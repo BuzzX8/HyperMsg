@@ -32,17 +32,17 @@ public class ConnectionService : Service
 
     protected override void RegisterHandlers(IRegistry registry)
     {
-        registry.Register<Connect>(Connect);
-        registry.Register<Disconnect>(Disconnect);
+        registry.Register<ConnectRequest>(Connect);
+        registry.Register<DisconnectRequest>(Disconnect);
     }
     
     protected override void UnregisterHandlers(IRegistry registry)
     {
-        registry.Unregister<Connect>(Connect);
-        registry.Unregister<Disconnect>(Disconnect);
+        registry.Unregister<ConnectRequest>(Connect);
+        registry.Unregister<DisconnectRequest>(Disconnect);
     }
 
-    private void Connect(Connect connect)
+    private void Connect(ConnectRequest connect)
     {
         asyncEventArgs.RemoteEndPoint = connect.RemoteEndPoint;
 
@@ -52,7 +52,7 @@ public class ConnectionService : Service
         }
     }
 
-    private void Disconnect(Disconnect _)
+    private void Disconnect(DisconnectRequest _)
     {
         if (!socketHolder.Socket.Connected)
         {
@@ -74,10 +74,10 @@ public class ConnectionService : Service
     }
 }
 
-internal record struct Connect(EndPoint RemoteEndPoint);
+public record struct ConnectRequest(EndPoint RemoteEndPoint);
 
 public record struct ConnectResult(EndPoint? RemoteEndPoint, SocketError Error);
 
-internal record struct Disconnect;
+public record struct DisconnectRequest;
 
 public record struct DisconnectResult(SocketError Error);

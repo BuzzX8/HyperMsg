@@ -44,7 +44,7 @@ public class TransmissionServiceTests : IDisposable
         socketHolder.Socket.Connect(endPoint);
         var acceptedSocket = acceptingSocket.Accept();
 
-        broker.Dispatch(new Send(message));
+        broker.DispatchSendRequest(message);
 
         WaitSyncEvent();
         var received = acceptedSocket.Receive(acceptedMessage);
@@ -73,7 +73,7 @@ public class TransmissionServiceTests : IDisposable
         socketHolder.Socket.Connect(endPoint);
         var acceptedSocket = acceptingSocket.Accept();
 
-        broker.Dispatch(new Receive(acceptedMessage));
+        broker.DispatchReceiveRequest(acceptedMessage);
         acceptedSocket.Send(message);
 
         WaitSyncEvent();
