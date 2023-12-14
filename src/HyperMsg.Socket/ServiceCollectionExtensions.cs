@@ -19,8 +19,8 @@ public static class ServiceCollectionExtensions
                 var holder = provider.GetRequiredService<SocketHolder>();
                 return new TransmissionService(transportTopic, holder);
             })
-            .AddHostedService(provider => 
-            { 
+            .AddHostedService(provider =>
+            {
                 var coderGateway = provider.GetRequiredService<ICoderGateway>();
                 return new SocketService(transportTopic, coderGateway);
             });

@@ -9,7 +9,7 @@ namespace HyperMsg;
 public class MessageBroker
 {
     private readonly ConcurrentDictionary<Type, Delegate> messageHandlers = new();
-    private readonly object sync = new();    
+    private readonly object sync = new();
 
     public void Dispatch<T>(T data)
     {

@@ -12,7 +12,7 @@ public class ServiceCollectionExtensionTests
     public void AddSocketService_Adds_Required_Services()
     {
         var coderGateway = A.Fake<ICoderGateway>();
-        
+
         services.AddSingleton(coderGateway);
         services.AddSocketService();
         var provider = services.BuildServiceProvider();

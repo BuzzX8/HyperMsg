@@ -55,7 +55,7 @@ public class TransmissionServiceTests : IDisposable
     }
 
     [Fact]
-    public void Dispatching_Receive_Message_() 
+    public void Dispatching_Receive_Message_()
     {
         var message = Guid.NewGuid().ToByteArray();
         var acceptedMessage = new byte[message.Length];
