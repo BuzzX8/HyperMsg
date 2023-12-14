@@ -1,12 +1,12 @@
 ﻿namespace HyperMsg.Socket;
 
 public class SocketService : Service
-{    
+{
     private readonly ICoderGateway coderGateway;
 
     public SocketService(ITopic socketTopic, ICoderGateway coderGateway) : base(socketTopic)
     {
-        this.coderGateway = coderGateway ?? throw new ArgumentNullException(nameof(coderGateway));        
+        this.coderGateway = coderGateway ?? throw new ArgumentNullException(nameof(coderGateway));
         this.coderGateway.MessageEncoded += MessageEncoded;
     }
 

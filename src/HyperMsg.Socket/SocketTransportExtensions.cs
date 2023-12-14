@@ -13,7 +13,7 @@ public static class SocketTransportExtensions
     public static void DispatchSendRequest(this IDispatcher dispatcher, Memory<byte> buffer)
         => dispatcher.Dispatch(new SendRequest(buffer));
 
-    public static void DispatchReceiveRequest(this IDispatcher dispatcher, Memory<byte> buffer) 
+    public static void DispatchReceiveRequest(this IDispatcher dispatcher, Memory<byte> buffer)
         => dispatcher.Dispatch(new ReceiveRequest(buffer));
 
     public static void DispatchReceiveInBufferRequest(this IDispatcher dispatcher)

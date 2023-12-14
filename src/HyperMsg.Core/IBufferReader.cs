@@ -9,7 +9,7 @@ public interface IBufferReader
     /// Advances reading position on specified number of elements.
     /// </summary>
     /// <param name="count">Number of elements.</param>
-    void Advance(int count);    
+    void Advance(int count);
 
     Memory<byte> GetMemory();
 

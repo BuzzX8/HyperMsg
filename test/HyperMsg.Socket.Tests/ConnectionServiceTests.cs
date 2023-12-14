@@ -31,7 +31,7 @@ public class ConnectionServiceTests : IDisposable
     public void DispatchConnectRequest_Creates_Socket_Connection()
     {
         var result = default(ConnectResult);
-        
+
         broker.Register<ConnectResult>(c =>
         {
             result = c;
@@ -69,7 +69,7 @@ public class ConnectionServiceTests : IDisposable
         broker.DispatchConnectRequest(endPoint);
         WaitSyncEvent();
         syncEvent.Reset();
-        
+
         Assert.Throws<SocketException>(() => broker.DispatchConnectRequest(endPoint));
     }
 
@@ -81,7 +81,7 @@ public class ConnectionServiceTests : IDisposable
     public void DispatchConnectionRequest_Returns_Error_For_Failed_Connection()
     {
         var result = default(ConnectResult);
-        
+
         broker.Register<ConnectResult>(c =>
         {
             result = c;
@@ -99,7 +99,7 @@ public class ConnectionServiceTests : IDisposable
     public void DispatchDisconnectRequest_For_Disonnected_Socket_Throws_Exception()
     {
         var result = default(DisconnectResult);
-        
+
         broker.Register<DisconnectResult>(c =>
         {
             result = c;

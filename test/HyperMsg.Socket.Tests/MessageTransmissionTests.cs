@@ -16,7 +16,7 @@ public class MessageTransmissionTests : IDisposable
 
     private static readonly IPEndPoint endPoint = new(IPAddress.Loopback, 8083);
 
-    public MessageTransmissionTests() 
+    public MessageTransmissionTests()
     {
         var encoder = new CompositeEncoder();
         encoder.Add<Guid>((w, m) =>
@@ -35,7 +35,7 @@ public class MessageTransmissionTests : IDisposable
 
         var hostedServices = provider.GetServices<IHostedService>();
 
-        foreach(var service in hostedServices)
+        foreach (var service in hostedServices)
             service.StartAsync(default).Wait();
 
         messageTopic = provider.GetRequiredService<CodingService>();
@@ -82,7 +82,7 @@ public class MessageTransmissionTests : IDisposable
         listeningSocket.Listen();
         transportTopic.Register<ConnectResult>(r =>
         {
-            acceptedSocket = listeningSocket.Accept();            
+            acceptedSocket = listeningSocket.Accept();
             syncEvent.Set();
         });
         messageTopic.Register<Guid>(m =>

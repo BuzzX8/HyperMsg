@@ -16,11 +16,11 @@ public class ConnectionService : Service
         asyncEventArgs.Completed += OperationCompleted;
     }
 
-    private void OperationCompleted(object? _, SocketAsyncEventArgs eventArgs) 
+    private void OperationCompleted(object? _, SocketAsyncEventArgs eventArgs)
     {
         switch (eventArgs.LastOperation)
         {
-            case SocketAsyncOperation.Connect: 
+            case SocketAsyncOperation.Connect:
                 Dispatch(new ConnectResult(eventArgs.RemoteEndPoint, eventArgs.SocketError));
                 break;
 
@@ -35,7 +35,7 @@ public class ConnectionService : Service
         registry.Register<ConnectRequest>(Connect);
         registry.Register<DisconnectRequest>(Disconnect);
     }
-    
+
     protected override void UnregisterHandlers(IRegistry registry)
     {
         registry.Unregister<ConnectRequest>(Connect);
@@ -70,7 +70,7 @@ public class ConnectionService : Service
     {
         base.Dispose();
         asyncEventArgs.Completed -= OperationCompleted;
-        asyncEventArgs.Dispose();    
+        asyncEventArgs.Dispose();
     }
 }
 
