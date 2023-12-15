@@ -8,22 +8,16 @@ public class DecodingPipelineTests
     [Fact]
     public void New_Creates_DecodingPipeline()
     {
-        var buffer = new byte[1024];
         var expected = Guid.NewGuid();
 
         var pipeline = DecodingPipeline.New(
             b =>
             {
                 var buffer = new byte[16];
-                b.CopyTo(buffer);
+                b[..buffer.Length].CopyTo(buffer);
                 return new Result<(Guid, int)>((new Guid(buffer), 16));
             },
-            b =>
-            {
-                expected.ToByteArray().CopyTo(b);
-                return new Result<int>(expected.ToByteArray().Length);
-            },
-            buffer);
+            () => new Result<Memory<byte>>(expected.ToByteArray()));
 
         var actual = pipeline();
 
@@ -33,22 +27,16 @@ public class DecodingPipelineTests
     [Fact]
     public async Task NewAsync_Creates_DecodingPipeline()
     {
-        var buffer = new byte[1024];
         var expected = Guid.NewGuid();
 
         var pipeline = DecodingPipeline.NewAsync(
             b =>
             {
                 var buffer = new byte[16];
-                b.CopyTo(buffer);
+                b[..buffer.Length].CopyTo(buffer);
                 return new Result<(Guid, int)>((new Guid(buffer), 16));
             },
-            (b, t) =>
-            {
-                expected.ToByteArray().CopyTo(b);
-                return ValueTask.FromResult(new Result<int>(expected.ToByteArray().Length));
-            },
-            buffer);
+            _ => ValueTask.FromResult(new Result<Memory<byte>>(expected.ToByteArray())));
 
 
         var actual = await pipeline(default);
