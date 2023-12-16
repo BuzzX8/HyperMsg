@@ -8,16 +8,11 @@ namespace HyperMsg;
 public sealed class Buffer : IBufferReader, IBufferWriter
 {
     private readonly Memory<byte> memory;
-    private readonly object sync;
 
     private int position;
     private int length;
 
-    public Buffer(Memory<byte> memory)
-    {
-        this.memory = memory;
-        sync = new();
-    }
+    public Buffer(Memory<byte> memory) => this.memory = memory;
 
     private Memory<byte> Memory => memory;
 
@@ -38,16 +33,13 @@ public sealed class Buffer : IBufferReader, IBufferWriter
             throw new ArgumentOutOfRangeException(nameof(count));
         }
 
-        lock (sync)
+        if (count > length)
         {
-            if (count > length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-
-            position += count;
-            length -= count;
+            throw new ArgumentOutOfRangeException(nameof(count));
         }
+
+        position += count;
+        length -= count;
     }
 
     Memory<byte> IBufferReader.GetMemory() => CommitedMemory;
@@ -65,15 +57,12 @@ public sealed class Buffer : IBufferReader, IBufferWriter
             throw new ArgumentOutOfRangeException(nameof(count));
         }
 
-        lock (sync)
+        if (count > AvailableMemory || count < 0)
         {
-            if (count > AvailableMemory || count < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-
-            length += count;
+            throw new ArgumentOutOfRangeException(nameof(count));
         }
+
+        length += count;
     }
 
     Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint)
@@ -83,24 +72,21 @@ public sealed class Buffer : IBufferReader, IBufferWriter
             throw new ArgumentOutOfRangeException(nameof(sizeHint));
         }
 
-        lock (sync)
+        if (length == 0)
         {
-            if (length == 0)
-            {
-                position = 0;
-            }
-
-            var freeMemPos = position + length;
-
-            if (sizeHint > AvailableMemory - freeMemPos || sizeHint == 0)
-            {
-                CommitedMemory.CopyTo(Memory);
-                position = 0;
-                freeMemPos = length;
-            }
-
-            return Memory[freeMemPos..];
+            position = 0;
         }
+
+        var freeMemPos = position + length;
+
+        if (sizeHint > AvailableMemory - freeMemPos || sizeHint == 0)
+        {
+            CommitedMemory.CopyTo(Memory);
+            position = 0;
+            freeMemPos = length;
+        }
+
+        return Memory[freeMemPos..];
     }
 
     Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)
