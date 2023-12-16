@@ -2,10 +2,10 @@
 
 public static class EncodingPipeline
 {
-    public static Func<T, Result<Unit>> New<T>(Encoder<T> encoder, Func<Memory<byte>, Result<Unit>> bufferWriter, Memory<byte> buffer)
+    public static Func<T, Result<Unit>> New<T>(Func<Memory<byte>, T, Result<int>> encoder, Func<Memory<byte>, Result<Unit>> bufferWriter, Memory<byte> buffer)
         => New(encoder, bufferWriter, () => new Result<Memory<byte>>(buffer));
 
-    public static Func<T, Result<Unit>> New<T>(Encoder<T> encoder, Func<Memory<byte>, Result<Unit>> bufferWriter, Func<Result<Memory<byte>>> bufferProvider)
+    public static Func<T, Result<Unit>> New<T>(Func<Memory<byte>, T, Result<int>> encoder, Func<Memory<byte>, Result<Unit>> bufferWriter, Func<Result<Memory<byte>>> bufferProvider)
     {
         return message => bufferProvider().Match(
             Succ: buffer => encoder(buffer, message).Match(
@@ -14,10 +14,10 @@ public static class EncodingPipeline
             Fail: error => new Result<Unit>(error));
     }
 
-    public static Func<T, CancellationToken, ValueTask<Result<Unit>>> NewAsync<T>(Encoder<T> encoder, Func<Memory<byte>, CancellationToken, ValueTask<Result<Unit>>> bufferWriter, Memory<byte> buffer)
+    public static Func<T, CancellationToken, ValueTask<Result<Unit>>> NewAsync<T>(Func<Memory<byte>, T, Result<int>> encoder, Func<Memory<byte>, CancellationToken, ValueTask<Result<Unit>>> bufferWriter, Memory<byte> buffer)
         => NewAsync(encoder, bufferWriter, () => new Result<Memory<byte>>(buffer));
 
-    public static Func<T, CancellationToken, ValueTask<Result<Unit>>> NewAsync<T>(Encoder<T> encoder, Func<Memory<byte>, CancellationToken, ValueTask<Result<Unit>>> bufferWriter, Func<Result<Memory<byte>>> bufferProvider)
+    public static Func<T, CancellationToken, ValueTask<Result<Unit>>> NewAsync<T>(Func<Memory<byte>, T, Result<int>> encoder, Func<Memory<byte>, CancellationToken, ValueTask<Result<Unit>>> bufferWriter, Func<Result<Memory<byte>>> bufferProvider)
     {
         return (message, token) => bufferProvider().Match(
             Succ: buffer => encoder(buffer, message).Match(

@@ -2,7 +2,7 @@
 
 public static class DecodingPipeline
 {
-    public static Func<Result<T>> New<T>(Decoder<T> decoder, Func<Result<Memory<byte>>> bufferProvider)
+    public static Func<Result<T>> New<T>(Func<ReadOnlyMemory<byte>, Result<(T message, int bytesDecoded)>> decoder, Func<Result<Memory<byte>>> bufferProvider)
     {
         return () => bufferProvider().Match(
             Succ: buffer => decoder(buffer).Match(
@@ -11,7 +11,7 @@ public static class DecodingPipeline
             Fail: error => new Result<T>(error));
     }
 
-    public static Func<CancellationToken, ValueTask<Result<T>>> NewAsync<T>(Decoder<T> decoder, Func<CancellationToken, ValueTask<Result<Memory<byte>>>> bufferProvider)
+    public static Func<CancellationToken, ValueTask<Result<T>>> NewAsync<T>(Func<ReadOnlyMemory<byte>, Result<(T message, int bytesDecoded)>> decoder, Func<CancellationToken, ValueTask<Result<Memory<byte>>>> bufferProvider)
     {
         return async token => (await bufferProvider(token)).Match(
             Succ: buffer => decoder(buffer).Match(
