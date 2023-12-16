@@ -5,21 +5,16 @@ namespace HyperMsg;
 /// <summary>
 /// Provides implementation for buffer interfaces
 /// </summary>
-public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
+public sealed class Buffer : IBufferReader, IBufferWriter
 {
-    private readonly IMemoryOwner<byte> memoryOwner;
-    private readonly object sync;
+    private readonly Memory<byte> memory;
 
     private int position;
     private int length;
 
-    public Buffer(IMemoryOwner<byte> memoryOwner)
-    {
-        this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
-        sync = new();
-    }
+    public Buffer(Memory<byte> memory) => this.memory = memory;
 
-    private Memory<byte> Memory => memoryOwner.Memory;
+    private Memory<byte> Memory => memory;
 
     public IBufferReader Reader => this;
 
@@ -38,16 +33,13 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
             throw new ArgumentOutOfRangeException(nameof(count));
         }
 
-        lock (sync)
+        if (count > length)
         {
-            if (count > length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-
-            position += count;
-            length -= count;
+            throw new ArgumentOutOfRangeException(nameof(count));
         }
+
+        position += count;
+        length -= count;
     }
 
     Memory<byte> IBufferReader.GetMemory() => CommitedMemory;
@@ -65,15 +57,12 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
             throw new ArgumentOutOfRangeException(nameof(count));
         }
 
-        lock (sync)
+        if (count > AvailableMemory || count < 0)
         {
-            if (count > AvailableMemory || count < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-
-            length += count;
+            throw new ArgumentOutOfRangeException(nameof(count));
         }
+
+        length += count;
     }
 
     Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint)
@@ -83,24 +72,21 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
             throw new ArgumentOutOfRangeException(nameof(sizeHint));
         }
 
-        lock (sync)
+        if (length == 0)
         {
-            if (length == 0)
-            {
-                position = 0;
-            }
-
-            var freeMemPos = position + length;
-
-            if (sizeHint > AvailableMemory - freeMemPos || sizeHint == 0)
-            {
-                CommitedMemory.CopyTo(Memory);
-                position = 0;
-                freeMemPos = length;
-            }
-
-            return Memory[freeMemPos..];
+            position = 0;
         }
+
+        var freeMemPos = position + length;
+
+        if (sizeHint > AvailableMemory - freeMemPos || sizeHint == 0)
+        {
+            CommitedMemory.CopyTo(Memory);
+            position = 0;
+            freeMemPos = length;
+        }
+
+        return Memory[freeMemPos..];
     }
 
     Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)
@@ -112,6 +98,4 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
     #endregion
 
     public void Clear() => position = length = 0;
-
-    public void Dispose() => memoryOwner.Dispose();
 }
