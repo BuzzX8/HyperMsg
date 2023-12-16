@@ -3,14 +3,14 @@ using Xunit;
 
 namespace HyperMsg;
 
-public class DecodingPipelineTests
+public class DecodingReaderTests
 {
     [Fact]
     public void New_Creates_DecodingPipeline()
     {
         var expected = Guid.NewGuid();
 
-        var pipeline = DecodingPipeline.New(
+        var reader = DecodingReader.New(
             b =>
             {
                 var buffer = new byte[16];
@@ -19,7 +19,7 @@ public class DecodingPipelineTests
             },
             () => new Result<Memory<byte>>(expected.ToByteArray()));
 
-        var actual = pipeline();
+        var actual = reader();
 
         Assert.Equal(expected, actual);
     }
@@ -29,7 +29,7 @@ public class DecodingPipelineTests
     {
         var expected = Guid.NewGuid();
 
-        var pipeline = DecodingPipeline.NewAsync(
+        var reader = DecodingReader.NewAsync(
             b =>
             {
                 var buffer = new byte[16];
@@ -39,7 +39,7 @@ public class DecodingPipelineTests
             _ => ValueTask.FromResult(new Result<Memory<byte>>(expected.ToByteArray())));
 
 
-        var actual = await pipeline(default);
+        var actual = await reader(default);
 
         Assert.Equal(expected, actual);
     }

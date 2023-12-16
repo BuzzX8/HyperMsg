@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public static class DecodingPipeline
+public static class DecodingReader
 {
     public static Func<Result<T>> New<T>(Func<ReadOnlyMemory<byte>, Result<(T message, int bytesDecoded)>> decoder, Func<Result<Memory<byte>>> bufferProvider)
     {
@@ -18,6 +18,5 @@ public static class DecodingPipeline
                 Succ: r => new Result<T>(r.message),
                 Fail: error => new Result<T>(error)),
             Fail: error => new Result<T>(error));
-            
     }
 }

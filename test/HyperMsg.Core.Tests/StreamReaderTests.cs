@@ -16,7 +16,7 @@ public static class StreamReaderTests
         var actual = reader(buffer).Match(
             Succ: buffer => buffer,
             Fail: error => throw error);
-                
+
         Assert.Equal(expected, actual.ToArray());
     }
 
@@ -32,7 +32,7 @@ public static class StreamReaderTests
         var actual = (await reader(buffer, CancellationToken.None)).Match(
             Succ: buffer => buffer,
             Fail: error => throw error);
-                
+
         Assert.Equal(expected, actual.ToArray());
     }
 }

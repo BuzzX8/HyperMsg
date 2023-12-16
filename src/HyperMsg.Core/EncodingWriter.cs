@@ -1,6 +1,6 @@
 ﻿namespace HyperMsg;
 
-public static class EncodingPipeline
+public static class EncodingWriter
 {
     public static Func<T, Result<Unit>> New<T>(Func<Memory<byte>, T, Result<int>> encoder, Func<Memory<byte>, Result<Unit>> bufferWriter, Memory<byte> buffer)
         => New(encoder, bufferWriter, () => new Result<Memory<byte>>(buffer));
