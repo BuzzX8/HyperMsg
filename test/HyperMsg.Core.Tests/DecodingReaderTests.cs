@@ -14,10 +14,15 @@ public class DecodingReaderTests
             b =>
             {
                 var buffer = new byte[16];
-                b[..buffer.Length].CopyTo(buffer);
+                b.CopyTo(buffer);
                 return new Result<(Guid, int)>((new Guid(buffer), 16));
             },
-            () => new Result<Memory<byte>>(expected.ToByteArray()));
+            b =>
+            {
+                expected.ToByteArray().CopyTo(b);
+                return new Result<int>(expected.ToByteArray().Length);
+            },
+            expected.ToByteArray());
 
         var actual = reader();
 
@@ -33,10 +38,15 @@ public class DecodingReaderTests
             b =>
             {
                 var buffer = new byte[16];
-                b[..buffer.Length].CopyTo(buffer);
+                b.CopyTo(buffer);
                 return new Result<(Guid, int)>((new Guid(buffer), 16));
             },
-            _ => ValueTask.FromResult(new Result<Memory<byte>>(expected.ToByteArray())));
+            (b, t) =>
+            {
+                expected.ToByteArray().CopyTo(b);
+                return ValueTask.FromResult(new Result<int>(expected.ToByteArray().Length));
+            },
+            expected.ToByteArray());
 
 
         var actual = await reader(default);
