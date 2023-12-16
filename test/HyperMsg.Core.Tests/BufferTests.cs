@@ -6,7 +6,6 @@ namespace HyperMsg;
 
 public class BufferTests
 {
-    private readonly IMemoryOwner<byte> memoryOwner;
     private readonly Memory<byte> memory;
     private readonly Buffer buffer;
 
@@ -14,10 +13,8 @@ public class BufferTests
 
     public BufferTests()
     {
-        memoryOwner = A.Fake<IMemoryOwner<byte>>();
         memory = new byte[MemorySize];
-        A.CallTo(() => memoryOwner.Memory).Returns(memory);
-        buffer = new Buffer(memoryOwner);
+        buffer = new Buffer(memory);
     }
 
     [Fact]
@@ -60,14 +57,6 @@ public class BufferTests
         var bytes = buffer.Reader.GetMemory();
 
         Assert.Equal(0, bytes.Length);
-    }
-
-    [Fact]
-    public void Dispose_Disposes_MemoryOwner()
-    {
-        buffer.Dispose();
-
-        A.CallTo(() => memoryOwner.Dispose()).MustHaveHappened();
     }
 
     [Fact]

@@ -5,21 +5,21 @@ namespace HyperMsg;
 /// <summary>
 /// Provides implementation for buffer interfaces
 /// </summary>
-public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
+public sealed class Buffer : IBufferReader, IBufferWriter
 {
-    private readonly IMemoryOwner<byte> memoryOwner;
+    private readonly Memory<byte> memory;
     private readonly object sync;
 
     private int position;
     private int length;
 
-    public Buffer(IMemoryOwner<byte> memoryOwner)
+    public Buffer(Memory<byte> memory)
     {
-        this.memoryOwner = memoryOwner ?? throw new ArgumentNullException(nameof(memoryOwner));
+        this.memory = memory;
         sync = new();
     }
 
-    private Memory<byte> Memory => memoryOwner.Memory;
+    private Memory<byte> Memory => memory;
 
     public IBufferReader Reader => this;
 
@@ -112,6 +112,4 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter, IDisposable
     #endregion
 
     public void Clear() => position = length = 0;
-
-    public void Dispose() => memoryOwner.Dispose();
 }
