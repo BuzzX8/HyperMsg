@@ -1,40 +1,20 @@
 ﻿namespace HyperMsg;
 
-using BufferProvider = Func<Result<Memory<byte>>>;
-using ByteWriter = Func<Memory<byte>, Result<int>>;
-using AsyncByteWriter = Func<Memory<byte>, CancellationToken, ValueTask<Result<int>>>;
+using BufferProvider = Func<Fin<ReadOnlyMemory<byte>>>;
+using static Fin<ReadOnlyMemory<byte>>;
+
+public readonly record struct DecodingResult<T>(T Message, int BytesDecoded);
+
+public delegate Fin<DecodingResult<T>> Decoder<T>(ReadOnlyMemory<byte> buffer);
 
 public static class DecodingReader
 {
-    public static Func<Result<T>> New<T>(Func<ReadOnlyMemory<byte>, Result<(T message, int bytesDecoded)>> decoder, ByteWriter byteWriter, Memory<byte> buffer)
-    {
-        return New(decoder, byteWriter, () => new(buffer));
-    }
+    public static Func<Fin<DecodingResult<T>>> New<T>(Decoder<T> decoder, Memory<byte> buffer) => New(decoder, () => Succ(buffer));
 
-    public static Func<Result<T>> New<T>(Func<ReadOnlyMemory<byte>, Result<(T message, int bytesDecoded)>> decoder, ByteWriter byteWriter, BufferProvider bufferProvider)
+    public static Func<Fin<DecodingResult<T>>> New<T>(Decoder<T> decoder, BufferProvider bufferProvider)
     {
-        return () => bufferProvider().Match(
-            Succ: buffer => byteWriter(buffer).Match(
-                Succ: bytesWritten => decoder(buffer[..bytesWritten]).Match(
-                    Succ: r => new(r.message),
-                    Fail: error => new Result<T>(error)),
-                Fail: error => new Result<T>(error)),
-            Fail: error => new Result<T>(error));
-    }
-
-    public static Func<CancellationToken, ValueTask<Result<T>>> NewAsync<T>(Func<ReadOnlyMemory<byte>, Result<(T message, int bytesDecoded)>> decoder, AsyncByteWriter byteWriter, Memory<byte> buffer)
-    {
-        return NewAsync(decoder, byteWriter, () => new Result<Memory<byte>>(buffer));
-    }
-
-    public static Func<CancellationToken, ValueTask<Result<T>>> NewAsync<T>(Func<ReadOnlyMemory<byte>, Result<(T message, int bytesDecoded)>> decoder, AsyncByteWriter byteWriter, BufferProvider bufferProvider)
-    {
-        return token => bufferProvider().Match(
-            Succ: (Func<Memory<byte>, ValueTask<Result<T>>>)(async (buffer) => await (await byteWriter(buffer, token)).Match(
-                Succ: bytesWritten => decoder(buffer[..bytesWritten]).Match(
-                    Succ: r => ValueTask.FromResult(new Result<T>(r.message)),
-                    Fail: error => ValueTask.FromResult(new Result<T>(error))),
-                Fail: error => ValueTask.FromResult(new Result<T>(error)))),
-            Fail: error => ValueTask.FromResult(new Result<T>(error)));
+        return  () => bufferProvider().Match(
+            Succ: buffer => decoder(buffer),
+            Fail: error => Fin<DecodingResult<T>>.Fail(error));
     }
 }
