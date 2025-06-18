@@ -1,4 +1,5 @@
 ﻿using FakeItEasy;
+using HyperMsg.IO;
 using Xunit;
 
 namespace HyperMsg;

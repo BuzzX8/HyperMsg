@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace HyperMsg;
+namespace HyperMsg.IO;
 
 /// <summary>
 /// Provides implementation for MessageSender and MessageHandlerRegistry

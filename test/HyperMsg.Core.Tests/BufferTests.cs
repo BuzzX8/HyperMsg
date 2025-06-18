@@ -1,6 +1,6 @@
 ﻿using HyperMsg.Buffers;
-using System.Buffers;
 using Xunit;
+using Buffer = HyperMsg.Buffers.Buffer;
 
 namespace HyperMsg;
 

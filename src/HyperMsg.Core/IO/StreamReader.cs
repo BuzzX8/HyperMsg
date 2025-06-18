@@ -1,4 +1,4 @@
-﻿namespace HyperMsg;
+﻿namespace HyperMsg.IO;
 
 public static class StreamReader
 {
