@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using HyperMsg.Coding;
+using Xunit;
 
 namespace HyperMsg;
 

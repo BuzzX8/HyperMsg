@@ -1,4 +1,4 @@
-﻿namespace HyperMsg;
+﻿namespace HyperMsg.Coding;
 
 using BufferProvider = Func<ReadOnlyMemory<byte>>;
 
