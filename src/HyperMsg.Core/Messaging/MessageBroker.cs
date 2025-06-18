@@ -6,7 +6,7 @@ namespace HyperMsg.Messaging;
 /// <summary>
 /// Provides implementation for MessageSender and MessageHandlerRegistry
 /// </summary>
-public class MessageBroker
+public class MessageBroker : IDispatcher, IHandlerRegistry, IDisposable
 {
     private readonly ConcurrentDictionary<Type, Delegate> messageHandlers = new();
     private readonly object sync = new();
@@ -33,6 +33,11 @@ public class MessageBroker
         }
     }
 
+    public async Task DispatchAsync<T>(T data, CancellationToken cancellationToken = default) where T : notnull
+    {
+        throw new NotImplementedException("Async dispatch is not implemented yet.");
+    }
+
     public void Register<T>(Action<T> messageHandler)
     {
         lock (sync)
@@ -46,6 +51,11 @@ public class MessageBroker
                 messageHandlers[typeof(T)] = messageHandler;
             }
         }
+    }
+
+    public void Register<T>(Func<T, CancellationToken, Task> asyncMessageHandler)
+    {
+        throw new NotImplementedException("Async message handler registration is not implemented yet.");
     }
 
     public void Unregister<T>(Action<T> messageHandler)
@@ -64,5 +74,15 @@ public class MessageBroker
                 messageHandlers[typeof(T)] = source;
             }
         }
+    }
+
+    public void Unregister<T>(Func<T, CancellationToken, Task> asyncMessageHandler)
+    {
+        throw new NotImplementedException("Async message handler unregistration is not implemented yet.");
+    }
+
+    public void Dispose()
+    {
+        messageHandlers.Clear();
     }
 }
