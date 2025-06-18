@@ -1,4 +1,4 @@
-﻿namespace HyperMsg;
+﻿namespace HyperMsg.Buffers;
 
 /// <summary>
 /// Defines methods for reading data from buffer.

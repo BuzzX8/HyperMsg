@@ -1,4 +1,5 @@
 ﻿using FakeItEasy;
+using HyperMsg.Buffers;
 using System.Buffers;
 using Xunit;
 

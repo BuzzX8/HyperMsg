@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using HyperMsg.Buffers;
+using System.Buffers;
 using Xunit;
 
 namespace HyperMsg;

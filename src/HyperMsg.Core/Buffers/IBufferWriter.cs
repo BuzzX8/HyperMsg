@@ -1,6 +1,6 @@
 ﻿using System.Buffers;
 
-namespace HyperMsg;
+namespace HyperMsg.Buffers;
 
 public interface IBufferWriter : IBufferWriter<byte>
 { }
