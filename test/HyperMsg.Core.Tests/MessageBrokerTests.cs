@@ -1,5 +1,5 @@
 ﻿using FakeItEasy;
-using HyperMsg.IO;
+using HyperMsg.Messaging;
 using Xunit;
 
 namespace HyperMsg;
