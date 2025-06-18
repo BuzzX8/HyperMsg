@@ -1,6 +1,4 @@
-﻿using LanguageExt;
-using LanguageExt.Common;
-using Xunit;
+﻿using Xunit;
 
 namespace HyperMsg;
 
@@ -16,13 +14,15 @@ public class DecodingReaderTests
             {
                 var buffer = new byte[16];
                 b.CopyTo(buffer);
-                return Fin<DecodingResult<Guid>>.Succ(new DecodingResult<Guid>(new Guid(buffer), 16));
+                return new DecodingResult<Guid>(new Guid(buffer), b.Length);
             },
             expected.ToByteArray());
 
         var result = reader();
 
-        Assert.True(result.IsSucc);
-        Assert.Equal(expected, result.Case);
+        var (actualMessage, bytesDecoded) = reader.Invoke();
+
+        Assert.Equal(16, bytesDecoded);
+        Assert.Equal(expected, actualMessage);
     }
 }
