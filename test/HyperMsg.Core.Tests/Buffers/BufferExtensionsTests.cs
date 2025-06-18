@@ -1,9 +1,8 @@
 ﻿using FakeItEasy;
-using HyperMsg.Buffers;
 using System.Buffers;
 using Xunit;
 
-namespace HyperMsg;
+namespace HyperMsg.Buffers;
 
 public class BufferExtensionsTests
 {

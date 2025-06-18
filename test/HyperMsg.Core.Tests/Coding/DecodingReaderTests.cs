@@ -1,7 +1,6 @@
-﻿using HyperMsg.Coding;
-using Xunit;
+﻿using Xunit;
 
-namespace HyperMsg;
+namespace HyperMsg.Coding;
 
 public class DecodingReaderTests
 {
