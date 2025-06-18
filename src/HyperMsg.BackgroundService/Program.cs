@@ -1,4 +1,4 @@
-using HyperMsg.BackgroundService;
+using HyperMsg.Messaging;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddHostedService<Worker>();

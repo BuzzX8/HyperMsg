@@ -1,4 +1,4 @@
-namespace HyperMsg.BackgroundService;
+namespace HyperMsg.Messaging;
 
 public class Worker : BackgroundService
 {
