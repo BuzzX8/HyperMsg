@@ -1,10 +1,6 @@
-﻿namespace HyperMsg;
+﻿namespace HyperMsg.Coding;
 
 using BufferProvider = Func<ReadOnlyMemory<byte>>;
-
-public readonly record struct DecodingResult<T>(T Message, int BytesDecoded);
-
-public delegate DecodingResult<T> Decoder<T>(ReadOnlyMemory<byte> buffer);
 
 public static class DecodingReader
 {

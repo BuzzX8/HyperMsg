@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace HyperMsg;
+namespace HyperMsg.IO;
 
 public class StreamWriterTests
 {

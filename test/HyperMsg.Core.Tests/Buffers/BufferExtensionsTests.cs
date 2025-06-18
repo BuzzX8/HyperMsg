@@ -2,7 +2,7 @@
 using System.Buffers;
 using Xunit;
 
-namespace HyperMsg;
+namespace HyperMsg.Buffers;
 
 public class BufferExtensionsTests
 {

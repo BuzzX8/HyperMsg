@@ -1,7 +1,6 @@
-﻿using System.Buffers;
-using Xunit;
+﻿using Xunit;
 
-namespace HyperMsg;
+namespace HyperMsg.Buffers;
 
 public class BufferTests
 {
@@ -72,7 +71,7 @@ public class BufferTests
     [Fact]
     public void GetMemory_Defrags_Buffer()
     {
-        var dataSize = MemorySize - (MemorySize / 4);
+        var dataSize = MemorySize - MemorySize / 4;
         var bytes = Enumerable.Range(0, dataSize).Select(i => Guid.NewGuid().ToByteArray()[0]).ToArray();
         WriteBytes(bytes);
         buffer.Reader.Advance(MemorySize / 4);
@@ -99,7 +98,7 @@ public class BufferTests
     public void Write_Extension_Writes_Over_Buffer_Size()
     {
         var data = Guid.NewGuid().ToByteArray();
-        var iterationCount = (MemorySize / data.Length) + 2;
+        var iterationCount = MemorySize / data.Length + 2;
 
         for (int i = 0; i < iterationCount; i++)
         {

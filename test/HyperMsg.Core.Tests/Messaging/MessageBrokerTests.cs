@@ -1,7 +1,7 @@
 ﻿using FakeItEasy;
 using Xunit;
 
-namespace HyperMsg;
+namespace HyperMsg.Messaging;
 
 public class MessageBrokerTests
 {
