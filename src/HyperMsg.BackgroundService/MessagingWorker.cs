@@ -1,4 +1,6 @@
-namespace HyperMsg.Messaging;
+using HyperMsg.Messaging;
+
+namespace HyperMsg.Hosting;
 
 public class MessagingWorker(MessageBroker messageBroker, ILogger<MessagingWorker> logger) : BackgroundService
 {

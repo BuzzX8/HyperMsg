@@ -1,4 +1,6 @@
-﻿namespace HyperMsg.Messaging;
+﻿using HyperMsg.Messaging;
+
+namespace HyperMsg.Hosting;
 
 public static class MessagingExtensions
 {
