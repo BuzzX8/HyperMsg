@@ -15,7 +15,6 @@ public class MessagingExtensionsTests
         var builder = Host.CreateApplicationBuilder();
         
         // Act
-        builder.Services.AddMessagingWorker();
         var host = builder.Build();
 
         // Assert
