@@ -9,6 +9,7 @@ public static class MessagingExtensions
         var messageBroker = new MessageBroker();
         services.AddSingleton<IDispatcher>(messageBroker);
         services.AddSingleton<IHandlerRegistry>(messageBroker);
+        services.AddSingleton(messageBroker);
         return services;
     }
 }
