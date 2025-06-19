@@ -6,10 +6,20 @@ public class MessagingExtensionsTests
 {
     public MessagingExtensionsTests()
     {
-        var builder = Host.CreateApplicationBuilder();
-        builder.Services.AddMessagingWorker();
+    }
 
+    [Fact]
+    public void AddMessagingWorker_ShouldRegisterServices()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        
+        // Act
+        builder.Services.AddMessagingWorker();
         var host = builder.Build();
-        host.Run();
+
+        // Assert
+        //host.StartAsync();
+        Assert.Fail("This test is not implemented yet. Please implement the test logic to verify service registration.");
     }
 }

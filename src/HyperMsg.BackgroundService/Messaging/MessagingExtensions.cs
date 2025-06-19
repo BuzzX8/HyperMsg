@@ -6,6 +6,6 @@ public static class MessagingExtensions
     {
         return services
             .AddMessageBroker()
-            .AddHostedService<Worker>();
+            .AddHostedService<MessagingWorker>();
     }
 }
