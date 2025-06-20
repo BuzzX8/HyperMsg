@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 
-namespace HyperMsg.BackgroundService.Tests;
+namespace HyperMsg.Hosting.Tests;
 
 public class MessagingExtensionsTests
 {
