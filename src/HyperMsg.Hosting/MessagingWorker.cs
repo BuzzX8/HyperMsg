@@ -2,14 +2,14 @@ using HyperMsg.Messaging;
 
 namespace HyperMsg.Hosting;
 
-public class MessagingWorker(MessageBroker messageBroker, ILogger<MessagingWorker> logger) : BackgroundService
+public class MessagingWorker(IMessagingContext messagingContext, ILogger<MessagingWorker> logger) : BackgroundService
 {
-    private readonly MessageBroker messageBroker = messageBroker;
+    private readonly IMessagingContext messagingContext = messagingContext;
     private readonly ILogger<MessagingWorker> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await RegisterHandlersAsync(messageBroker, messageBroker, stoppingToken);
+        await RegisterHandlersAsync(messagingContext.Dispatcher, messagingContext.HandlerRegistry, stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)
         {

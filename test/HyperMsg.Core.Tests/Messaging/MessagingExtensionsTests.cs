@@ -16,11 +16,12 @@ public class MessagingExtensionsTests
     public void AddMessageBroker_ShouldRegisterServices()
     {
         // Act
-        services.AddMessageBroker();
+        services.AdMessagingContext();
 
         var serviceProvider = services.BuildServiceProvider();
 
         Assert.NotNull(serviceProvider.GetService<IDispatcher>());
         Assert.NotNull(serviceProvider.GetService<IHandlerRegistry>());
+        Assert.NotNull(serviceProvider.GetService<IMessagingContext>());
     }
 }

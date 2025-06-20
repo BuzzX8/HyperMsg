@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\HyperMsg.BackgroundService\HyperMsg.BackgroundService.csproj" />
+    <ProjectReference Include="..\..\src\HyperMsg.Hosting\HyperMsg.Hosting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
