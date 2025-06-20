@@ -22,5 +22,6 @@ public class MessagingExtensionsTests
 
         Assert.NotNull(serviceProvider.GetService<IDispatcher>());
         Assert.NotNull(serviceProvider.GetService<IHandlerRegistry>());
+        Assert.NotNull(serviceProvider.GetService<IMessagingContext>());
     }
 }
