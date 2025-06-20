@@ -16,7 +16,7 @@ public class MessagingExtensionsTests
     public void AddMessageBroker_ShouldRegisterServices()
     {
         // Act
-        services.AddMessageBroker();
+        services.AdMessagingContext();
 
         var serviceProvider = services.BuildServiceProvider();
 
