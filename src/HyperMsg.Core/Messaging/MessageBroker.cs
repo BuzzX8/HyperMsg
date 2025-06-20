@@ -6,10 +6,14 @@ namespace HyperMsg.Messaging;
 /// <summary>
 /// Provides implementation for MessageSender and MessageHandlerRegistry
 /// </summary>
-public class MessageBroker : IDispatcher, IHandlerRegistry, IDisposable
+public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, IDisposable
 {
     private readonly ConcurrentDictionary<Type, Delegate> messageHandlers = new();
     private readonly object sync = new();
+
+    public IDispatcher Dispatcher => this;
+
+    public IHandlerRegistry HandlerRegistry => this;
 
     public void Dispatch<T>(T data)
     {
