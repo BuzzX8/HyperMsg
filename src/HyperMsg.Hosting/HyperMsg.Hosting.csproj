@@ -4,7 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-HyperMsg.BackgroundService-465f47d6-0ded-4ac2-ac98-724d37baa93b</UserSecretsId>
     <OutputType>Library</OutputType>
   </PropertyGroup>
 

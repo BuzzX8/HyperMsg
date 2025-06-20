@@ -7,7 +7,7 @@ public static class MessagingExtensions
     public static IServiceCollection AddMessagingWorker(this IServiceCollection services)
     {
         return services
-            .AdMessagingContext()
+            .AddMessagingContext()
             .AddHostedService<MessagingWorker>();
     }
 }
