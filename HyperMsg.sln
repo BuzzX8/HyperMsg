@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperMsg.Core.Tests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperMsg.Core", "src\HyperMsg.Core\HyperMsg.Core.csproj", "{28095222-DF2A-4D27-AB5D-CC710487CFBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperMsg.Hosting", "src\HyperMsg.BackgroundService\HyperMsg.Hosting.csproj", "{1881E0CD-DF0A-2F58-5AA7-95D2E6BD7821}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperMsg.Hosting", "src\HyperMsg.Hosting\HyperMsg.Hosting.csproj", "{1881E0CD-DF0A-2F58-5AA7-95D2E6BD7821}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperMsg.BackgroundService.Tests", "test\HyperMsg.BackgroundService.Tests\HyperMsg.BackgroundService.Tests.csproj", "{8627D8AC-F9D8-174A-2D6B-213C08A79D20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperMsg.Hosting.Tests", "test\HyperMsg.Hosting.Tests\HyperMsg.Hosting.Tests.csproj", "{8627D8AC-F9D8-174A-2D6B-213C08A79D20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
