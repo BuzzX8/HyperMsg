@@ -9,9 +9,10 @@
     </Description>
     <ImplicitUsings>enable</ImplicitUsings>
     <PackageIcon>logo.png</PackageIcon>
+    <PackageIconUrl>logo.png</PackageIconUrl>
   </PropertyGroup>
-
   <ItemGroup>
+    <None Include="logo.png" Pack="true" PackagePath="" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
     <PackageReference Include="System.IO.Ports" Version="9.0.6" />
   </ItemGroup>
