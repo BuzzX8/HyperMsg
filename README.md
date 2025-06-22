@@ -52,3 +52,5 @@ HyperMsg is a modular messaging framework for .NET, designed to abstract communi
 
 **In summary:**
 HyperMsg provides a lightweight, extensible infrastructure for message-based communication, with a focus on modularity, testability, and integration with .NET's dependency injection and hosting model. The core is built around buffer management, serialization, and a flexible message broker pattern.
+
+![HyperMsg Logo](HyperMsgMoto.png)
