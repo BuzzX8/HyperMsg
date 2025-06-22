@@ -8,10 +8,12 @@
       HyperMsg.Core is a lightweight, extensible messaging framework that abstracts communication protocols from their underlying transport mechanisms. Designed for performance, clarity, and modularity, it enables structured, typed messaging across serial, TCP, UDP, or custom transports.
     </Description>
     <ImplicitUsings>enable</ImplicitUsings>
+    <PackageIcon>NugetLogo.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+    <None Include="../../NugetLogo.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
