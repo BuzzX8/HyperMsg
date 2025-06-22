@@ -2,20 +2,16 @@
 
 public interface ITransport : IAsyncDisposable
 {
-    /// <summary>
-    /// begins receiving and pushing data to InputBuffer
-    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-    /// </summary>
-    Task StartAsync(CancellationToken cancellationToken);
+    IConnection Connection { get; }
+    Stream InputStream { get; }
+    Stream OutputStream { get; }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="data"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken);
-        
-    event Action<Exception> OnError;
-    event Action OnDisconnected;
+    // Event triggered when data is received on the input stream
+    event Action<int> DataReceived;
+
+    // Event triggered when data is written to the output stream
+    event Action<int> DataSent;
+
+    // Event triggered when the connection state changes (e.g., connected/disconnected)
+    event Action<ConnectionState> ConnectionStateChanged;
 }
