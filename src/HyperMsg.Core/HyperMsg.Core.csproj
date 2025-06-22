@@ -4,7 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>HyperMsg</RootNamespace>
     <RepositoryUrl>https://github.com/BuzzX8/HyperMsg</RepositoryUrl>
-    <Description>Provides implementaion for fundamental interfaces, basic extensions and serialization.</Description>
+    <Description>
+      HyperMsg.Core is a lightweight, extensible messaging framework that abstracts communication protocols from their underlying transport mechanisms. Designed for performance, clarity, and modularity, it enables structured, typed messaging across serial, TCP, UDP, or custom transports.
+    </Description>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
