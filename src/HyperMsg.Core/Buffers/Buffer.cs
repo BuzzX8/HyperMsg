@@ -5,12 +5,15 @@ namespace HyperMsg.Buffers;
 /// <summary>
 /// Provides implementation for buffer interfaces
 /// </summary>
-public sealed class Buffer : IBufferReader, IBufferWriter
+public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter
 {
     private readonly Memory<byte> memory;
 
     private int position;
     private int length;
+
+    public event Action<int> DataWritten;
+    public event Action<int> DataRead;
 
     public Buffer(Memory<byte> memory) => this.memory = memory;
 
