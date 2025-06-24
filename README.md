@@ -1,7 +1,8 @@
 ![HyperMsg Logo](images/logo.png)
 
+[![Core Build](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml)
+
 # HyperMsg Core
-[![Build and Test](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml)
 
 HyperMsg is a modular messaging framework for .NET, designed to abstract communication protocols and provide core facilities for buffering, serialization, and message dispatching.
 
