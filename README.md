@@ -1,4 +1,6 @@
-![HyperMsg Logo](logo.png)
+![HyperMsg Logo](images/logo.png)
+
+[![Core Build](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml)
 
 # HyperMsg Core
 
@@ -9,6 +11,10 @@ HyperMsg is a modular messaging framework for .NET, designed to abstract communi
 - **HyperMsg.Core**: Core library with buffering, coding (serialization), and messaging abstractions and implementations.
 - **HyperMsg.Hosting**: Extensions for integrating messaging into .NET Generic Host (background services).
 - **Test Projects**: Unit tests for core and hosting components.
+
+## Core package design
+
+![Diagram](images/core_design.svg)
 
 ## Main Components
 
@@ -53,4 +59,4 @@ HyperMsg is a modular messaging framework for .NET, designed to abstract communi
 **In summary:**
 HyperMsg provides a lightweight, extensible infrastructure for message-based communication, with a focus on modularity, testability, and integration with .NET's dependency injection and hosting model. The core is built around buffer management, serialization, and a flexible message broker pattern.
 
-![HyperMsg Logo](HyperMsgMoto.png)
+![HyperMsg Logo](images/footer.png)
