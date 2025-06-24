@@ -10,6 +10,10 @@ HyperMsg is a modular messaging framework for .NET, designed to abstract communi
 - **HyperMsg.Hosting**: Extensions for integrating messaging into .NET Generic Host (background services).
 - **Test Projects**: Unit tests for core and hosting components.
 
+## Core package design
+
+![Diagram](images/core_design.svg)
+
 ## Main Components
 
 ### 1. Buffering (`HyperMsg.Core.Buffers`)
