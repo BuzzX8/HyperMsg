@@ -2,39 +2,52 @@
 using HyperMsg.Transport;
 using System.Net.Sockets;
 
-public class SocketTransport : ITransport, IConnection, IAsyncDisposable
+public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
 {
     private readonly Socket _socket;
-    private readonly IBufferingContext _context;
-    private readonly byte[] _receiveBuffer;
-
+    private readonly IBufferingContext _bufferingContext;
     private Task? _receiveLoop;
     private CancellationTokenSource? _cts;
 
-    public IConnection Connection => throw new NotImplementedException();
-
-    public Stream InputStream => throw new NotImplementedException();
-
-    public Stream OutputStream => throw new NotImplementedException();
-
-    public ConnectionState State => throw new NotImplementedException();
-
-    public event Action<Exception>? OnError;
-    public event Action? OnDisconnected;
-    public event Action<int> DataReceived;
-    public event Action<int> DataSent;
-    public event Action<ConnectionState> ConnectionStateChanged;
-
-    public SocketTransport(Socket socket, IBufferingContext context, int bufferSize = 1024)
+    public SocketTransport(Socket socket, IBufferingContext context)
     {
         _socket = socket;
-        _context = context;
-        _receiveBuffer = new byte[bufferSize];
+        _bufferingContext = context;
 
-        //_context.OutputBuffer.DataAppended += OnDataAppended;
+        _bufferingContext.Output.DataWritten += OnDataAppended;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    #region IConnection Members
+
+    public Task OpenAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task CloseAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
+
+    public event Action<Exception> OnError;
+
+    public event Action<ConnectionState> ConnectionStateChanged;
+
+    #endregion
+
+    public IConnection Connection => this;
+
+    public async Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
+    {
+        if (State != ConnectionState.Connected)
+            throw new InvalidOperationException("Cannot send data when the connection is not open.");
+
+        await _socket.SendAsync(data, SocketFlags.None, cancellationToken);
+    }
+
+    private Task StartAsync(CancellationToken cancellationToken)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _receiveLoop = Task.Run(() => ReceiveLoopAsync(_cts.Token), _cts.Token);
@@ -75,14 +88,13 @@ public class SocketTransport : ITransport, IConnection, IAsyncDisposable
         }
         catch (Exception ex)
         {
-            OnError?.Invoke(ex);
+            //OnError?.Invoke(ex);
         }
     }
 
-    public async Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
-    {
-        await _socket.SendAsync(data, SocketFlags.None, cancellationToken);
-    }
+    public event Action<ReadOnlyMemory<byte>> DataReceived;
+
+    public event Action<ReadOnlyMemory<byte>> DataSent;
 
     public async ValueTask DisposeAsync()
     {
@@ -98,15 +110,5 @@ public class SocketTransport : ITransport, IConnection, IAsyncDisposable
         //        await _receiveLoop;
         //    _cts.Dispose();
         //}
-    }
-
-    public Task OpenAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task CloseAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

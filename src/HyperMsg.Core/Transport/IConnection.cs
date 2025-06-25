@@ -10,7 +10,7 @@ public interface IConnection
 
     event Action<Exception> OnError;
 
-    event Action OnDisconnected;
+    event Action<ConnectionState> ConnectionStateChanged;
 }
 
 public enum ConnectionState

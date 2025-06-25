@@ -2,7 +2,7 @@
 
 namespace HyperMsg.Transport;
 
-public class SerialTransport(SerialPort serialPort) : ITransport, IConnection, IAsyncDisposable
+public class SerialTransport(SerialPort serialPort) : ITransportContext, IConnection, IAsyncDisposable
 {
     private readonly SerialPort serialPort = serialPort;
 
