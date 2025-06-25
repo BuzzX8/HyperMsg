@@ -5,23 +5,44 @@ using System.Net.Sockets;
 public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
 {
     private readonly Socket _socket;
-    private readonly IBufferingContext _bufferingContext;
+    private readonly IBuffer _outputBuffer;
     private Task? _receiveLoop;
     private CancellationTokenSource? _cts;
 
-    public SocketTransport(Socket socket, IBufferingContext context)
+    public SocketTransport(Socket socket, IBuffer outputBuffer)
     {
         _socket = socket;
-        _bufferingContext = context;
+        _outputBuffer = outputBuffer;
 
-        _bufferingContext.Output.DataWritten += OnDataAppended;
+        _outputBuffer.DataAppended += OnDataAppended;
     }
 
     #region IConnection Members
 
     public Task OpenAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        if (State == ConnectionState.Connected)
+            return Task.CompletedTask;
+
+        if (State == ConnectionState.Connecting)
+            throw new InvalidOperationException("Connection is already in progress.");
+
+        State = ConnectionState.Connecting;
+
+        try
+        {
+            _socket.Connect(_socket.RemoteEndPoint!);
+            State = ConnectionState.Connected;
+            StartAsync(cancellationToken);
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            State = ConnectionState.Disconnected;
+            OnError?.Invoke(ex);
+            throw;
+        }
+        
     }
 
     public Task CloseAsync(CancellationToken cancellationToken)
@@ -37,6 +58,8 @@ public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
 
     #endregion
 
+    #region ITransportContext Members
+    
     public IConnection Connection => this;
 
     public async Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
@@ -46,6 +69,8 @@ public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
 
         await _socket.SendAsync(data, SocketFlags.None, cancellationToken);
     }
+
+    #endregion
 
     private Task StartAsync(CancellationToken cancellationToken)
     {
@@ -60,12 +85,12 @@ public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
         {
             while (!token.IsCancellationRequested)
             {
-                int bytesRead = await _socket.ReceiveAsync(_receiveBuffer, SocketFlags.None, token);
-                if (bytesRead == 0)
-                {
-                    OnDisconnected?.Invoke();
-                    break;
-                }
+                //int bytesRead = await _socket.ReceiveAsync(_receiveBuffer, SocketFlags.None, token);
+                //if (bytesRead == 0)
+                //{
+                //    OnDisconnected?.Invoke();
+                //    break;
+                //}
 
                 //_context.InputBuffer.Write(_receiveBuffer.AsSpan(0, bytesRead));
             }
@@ -76,12 +101,13 @@ public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
         }
     }
 
-    private async void OnDataAppended(int _)
+    private void OnDataAppended(int bytesAppended)
     {
         try
         {
-            //var data = _context.OutputBuffer.Data;
-            //if (data.Length == 0) return;
+            var memory = _outputBuffer.Reader.GetMemory();
+
+            if (memory.Length == 0) return;
 
             //int sent = await _socket.SendAsync(data.ToArray(), SocketFlags.None);
             //_context.OutputBuffer.Advance(sent);
@@ -94,11 +120,9 @@ public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
 
     public event Action<ReadOnlyMemory<byte>> DataReceived;
 
-    public event Action<ReadOnlyMemory<byte>> DataSent;
-
     public async ValueTask DisposeAsync()
     {
-        //_context.OutputBuffer.DataAppended -= OnDataAppended;
+        _outputBuffer.DataAppended -= OnDataAppended;
 
         //try { _socket.Shutdown(SocketShutdown.Both); } catch { }
         //_socket.Close();

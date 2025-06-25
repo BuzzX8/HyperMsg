@@ -7,6 +7,4 @@ public interface ITransportContext : IAsyncDisposable
     Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default);
 
     event Action<ReadOnlyMemory<byte>> DataReceived;
-
-    event Action<ReadOnlyMemory<byte>> DataSent;
 }

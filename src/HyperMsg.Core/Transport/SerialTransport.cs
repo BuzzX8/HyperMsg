@@ -2,7 +2,7 @@
 
 namespace HyperMsg.Transport;
 
-public class SerialTransport(SerialPort serialPort) : ITransportContext, IConnection, IAsyncDisposable
+public class SerialTransport(SerialPort serialPort) //: ITransportContext, IConnection, IAsyncDisposable
 {
     private readonly SerialPort serialPort = serialPort;
 
@@ -63,7 +63,7 @@ public class SerialTransport(SerialPort serialPort) : ITransportContext, IConnec
         }
     }
 
-    ValueTask IAsyncDisposable.DisposeAsync()
+    ValueTask DisposeAsync()
     {
         serialPort?.Dispose();
         return ValueTask.CompletedTask;
