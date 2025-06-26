@@ -3,7 +3,7 @@ using System.Net.WebSockets;
 
 namespace HyperMsg.Transport;
 
-public class WebSocketTransport(WebSocket webSocket) : ITransport, IConnection, IAsyncDisposable
+public class WebSocketTransport(WebSocket webSocket) //: ITransport, IConnection, IAsyncDisposable
 {
     private readonly WebSocket _webSocket = webSocket;
 

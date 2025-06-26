@@ -2,39 +2,77 @@
 using HyperMsg.Transport;
 using System.Net.Sockets;
 
-public class SocketTransport : ITransport, IConnection, IAsyncDisposable
+public class SocketTransport : ITransportContext, IConnection, IAsyncDisposable
 {
     private readonly Socket _socket;
-    private readonly IBufferingContext _context;
-    private readonly byte[] _receiveBuffer;
-
+    private readonly IBuffer _outputBuffer;
     private Task? _receiveLoop;
     private CancellationTokenSource? _cts;
 
-    public IConnection Connection => throw new NotImplementedException();
-
-    public Stream InputStream => throw new NotImplementedException();
-
-    public Stream OutputStream => throw new NotImplementedException();
-
-    public ConnectionState State => throw new NotImplementedException();
-
-    public event Action<Exception>? OnError;
-    public event Action? OnDisconnected;
-    public event Action<int> DataReceived;
-    public event Action<int> DataSent;
-    public event Action<ConnectionState> ConnectionStateChanged;
-
-    public SocketTransport(Socket socket, IBufferingContext context, int bufferSize = 1024)
+    public SocketTransport(Socket socket, IBuffer outputBuffer)
     {
         _socket = socket;
-        _context = context;
-        _receiveBuffer = new byte[bufferSize];
+        _outputBuffer = outputBuffer;
 
-        //_context.OutputBuffer.DataAppended += OnDataAppended;
+        _outputBuffer.DataAppended += OnDataAppended;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    #region IConnection Members
+
+    public Task OpenAsync(CancellationToken cancellationToken)
+    {
+        if (State == ConnectionState.Connected)
+            return Task.CompletedTask;
+
+        if (State == ConnectionState.Connecting)
+            throw new InvalidOperationException("Connection is already in progress.");
+
+        State = ConnectionState.Connecting;
+
+        try
+        {
+            _socket.Connect(_socket.RemoteEndPoint!);
+            State = ConnectionState.Connected;
+            StartAsync(cancellationToken);
+            return Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            State = ConnectionState.Disconnected;
+            OnError?.Invoke(ex);
+            throw;
+        }
+        
+    }
+
+    public Task CloseAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ConnectionState State { get; private set; } = ConnectionState.Disconnected;
+
+    public event Action<Exception> OnError;
+
+    public event Action<ConnectionState> ConnectionStateChanged;
+
+    #endregion
+
+    #region ITransportContext Members
+    
+    public IConnection Connection => this;
+
+    public async Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
+    {
+        if (State != ConnectionState.Connected)
+            throw new InvalidOperationException("Cannot send data when the connection is not open.");
+
+        await _socket.SendAsync(data, SocketFlags.None, cancellationToken);
+    }
+
+    #endregion
+
+    private Task StartAsync(CancellationToken cancellationToken)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _receiveLoop = Task.Run(() => ReceiveLoopAsync(_cts.Token), _cts.Token);
@@ -47,12 +85,12 @@ public class SocketTransport : ITransport, IConnection, IAsyncDisposable
         {
             while (!token.IsCancellationRequested)
             {
-                int bytesRead = await _socket.ReceiveAsync(_receiveBuffer, SocketFlags.None, token);
-                if (bytesRead == 0)
-                {
-                    OnDisconnected?.Invoke();
-                    break;
-                }
+                //int bytesRead = await _socket.ReceiveAsync(_receiveBuffer, SocketFlags.None, token);
+                //if (bytesRead == 0)
+                //{
+                //    OnDisconnected?.Invoke();
+                //    break;
+                //}
 
                 //_context.InputBuffer.Write(_receiveBuffer.AsSpan(0, bytesRead));
             }
@@ -63,30 +101,28 @@ public class SocketTransport : ITransport, IConnection, IAsyncDisposable
         }
     }
 
-    private async void OnDataAppended(int _)
+    private void OnDataAppended(int bytesAppended)
     {
         try
         {
-            //var data = _context.OutputBuffer.Data;
-            //if (data.Length == 0) return;
+            var memory = _outputBuffer.Reader.GetMemory();
+
+            if (memory.Length == 0) return;
 
             //int sent = await _socket.SendAsync(data.ToArray(), SocketFlags.None);
             //_context.OutputBuffer.Advance(sent);
         }
         catch (Exception ex)
         {
-            OnError?.Invoke(ex);
+            //OnError?.Invoke(ex);
         }
     }
 
-    public async Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
-    {
-        await _socket.SendAsync(data, SocketFlags.None, cancellationToken);
-    }
+    public event Action<ReadOnlyMemory<byte>> DataReceived;
 
     public async ValueTask DisposeAsync()
     {
-        //_context.OutputBuffer.DataAppended -= OnDataAppended;
+        _outputBuffer.DataAppended -= OnDataAppended;
 
         //try { _socket.Shutdown(SocketShutdown.Both); } catch { }
         //_socket.Close();
@@ -98,15 +134,5 @@ public class SocketTransport : ITransport, IConnection, IAsyncDisposable
         //        await _receiveLoop;
         //    _cts.Dispose();
         //}
-    }
-
-    public Task OpenAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task CloseAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
     }
 }

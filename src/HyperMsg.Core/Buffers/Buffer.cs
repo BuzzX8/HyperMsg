@@ -5,17 +5,15 @@ namespace HyperMsg.Buffers;
 /// <summary>
 /// Provides implementation for buffer interfaces
 /// </summary>
-public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter
+public sealed class Buffer(Memory<byte> memory) : IBuffer, IBufferReader, IBufferWriter
 {
-    private readonly Memory<byte> memory;
+    private readonly Memory<byte> memory = memory;
 
     private int position;
     private int length;
 
-    public event Action<int> DataWritten;
+    public event Action<int> DataAppended;
     public event Action<int> DataRead;
-
-    public Buffer(Memory<byte> memory) => this.memory = memory;
 
     private Memory<byte> Memory => memory;
 
@@ -31,15 +29,8 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter
 
     void IBufferReader.Advance(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count));
-        }
-
-        if (count > length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(count, length);
 
         position += count;
         length -= count;
@@ -55,10 +46,7 @@ public sealed class Buffer : IBuffer, IBufferReader, IBufferWriter
 
     void IBufferWriter<byte>.Advance(int count)
     {
-        if (count < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(count));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         if (count > AvailableMemory || count < 0)
         {
