@@ -1,0 +1,7 @@
+namespace HyperMsg.Core.Messaging;
+
+public class MessageEnvelope<T>
+{
+    public T Payload { get; }
+    public ISession Session { get; }
+}
