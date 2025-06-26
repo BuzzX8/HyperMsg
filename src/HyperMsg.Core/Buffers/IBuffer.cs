@@ -12,7 +12,7 @@ public interface IBuffer : IBufferReader, IBufferWriter
     /// <summary>
     /// Occurs when data is written to the buffer.
     /// </summary>
-    event Action<int> DataWritten;
+    event Action<int> DataAppended;
 
     /// <summary>
     /// Occurs when data is read from the buffer.

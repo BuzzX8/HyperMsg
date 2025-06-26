@@ -1,7 +1,7 @@
 ﻿
 namespace HyperMsg.Transport
 {
-    public class PipeTransport : ITransport
+    public class PipeTransport //: ITransport
     {
         public IConnection Connection => throw new NotImplementedException();
 
