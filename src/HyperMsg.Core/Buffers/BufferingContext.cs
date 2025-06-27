@@ -1,3 +1,4 @@
+
 namespace HyperMsg.Buffers;
 
 /// <summary>
@@ -10,4 +11,18 @@ public class BufferingContext(Memory<byte> memory) : IBufferingContext
 
     public IBuffer Input => inputBuffer;
     public IBuffer Output => outputBuffer;
+
+    public ICollection<Func<IBuffer, Task>> InputHandlers => throw new NotImplementedException();
+
+    public ICollection<Func<IBuffer, Task>> OutputHandlers => throw new NotImplementedException();
+
+    public Task RequestInputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task RequestOutputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }
