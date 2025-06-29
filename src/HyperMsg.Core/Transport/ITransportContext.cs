@@ -14,15 +14,23 @@ public interface ITransportContext : IAsyncDisposable
     IConnection Connection { get; }
     
     /// <summary>
+    /// Gets the collection of handlers that are invoked when data is received.
+    /// </summary>
+    ICollection<ReceiveDataHandler> ReceiveDataHandlers { get; }
+
+    /// <summary>
     /// Asynchronously sends data over the transport connection.
     /// </summary>
     /// <param name="data">The data to send as a read-only memory buffer.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous send operation.</returns>
     Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Occurs when data is received from the transport connection.
-    /// </summary>
-    event Action<ReadOnlyMemory<byte>> DataReceived;
 }
+
+/// <summary>
+/// Represents a handler for processing received data asynchronously.
+/// </summary>
+/// <param name="data">The received data as a read-only memory buffer.</param>
+/// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+/// <returns>A ValueTask that represents the asynchronous operation.</returns>
+public delegate ValueTask ReceiveDataHandler(ReadOnlyMemory<byte> data, CancellationToken cancellationToken);
