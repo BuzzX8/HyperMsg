@@ -2,11 +2,11 @@ using HyperMsg.Messaging;
 
 namespace HyperMsg.Hosting;
 
-public class MessagingWorker(IMessagingContext messagingContext, IEnumerable<IMessagingComponent> components, ILogger<MessagingWorker> logger) : BackgroundService
+public class MessagingWorker(IMessagingContext messagingContext, IEnumerable<IMessagingComponent> components) : BackgroundService
 {
     private readonly IMessagingContext messagingContext = messagingContext;
     private readonly IMessagingComponent[] components = [.. components];
-    private readonly ILogger<MessagingWorker> _logger = logger;
+    //private readonly ILogger<MessagingWorker> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -44,7 +44,7 @@ public class MessagingWorker(IMessagingContext messagingContext, IEnumerable<IMe
     protected virtual Task OnHeartBeatAsync(CancellationToken cancellationToken)
     {
         // Override this method in derived classes to handle heartbeat events
-        _logger.LogInformation("Heartbeat event triggered at {Time}", DateTimeOffset.Now);
+        //_logger.LogInformation("Heartbeat event triggered at {Time}", DateTimeOffset.Now);
         return Task.CompletedTask;
     }
 }

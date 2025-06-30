@@ -2,7 +2,7 @@
 
 namespace HyperMsg.Hosting;
 
-public static class MessagingExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddMessagingWorker(this IServiceCollection services)
     {
