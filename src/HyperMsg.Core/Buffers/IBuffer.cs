@@ -8,14 +8,4 @@ public interface IBuffer : IBufferReader, IBufferWriter
     IBufferReader Reader { get; }
     IBufferWriter Writer { get; }
     void Clear();
-
-    /// <summary>
-    /// Occurs when data is written to the buffer.
-    /// </summary>
-    event Action<int> DataAppended;
-
-    /// <summary>
-    /// Occurs when data is read from the buffer.
-    /// </summary>
-    event Action<int> DataRead;
 }
