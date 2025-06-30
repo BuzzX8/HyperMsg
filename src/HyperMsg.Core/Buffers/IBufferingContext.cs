@@ -20,13 +20,13 @@ public interface IBufferingContext
     /// Gets the collection of handlers to process the input buffer.
     /// Each handler is a function that takes an <see cref="IBuffer"/> and returns a <see cref="Task"/>.
     /// </summary>
-    ICollection<Func<IBuffer, Task>> InputHandlers { get; }
+    ICollection<BufferHandler> InputHandlers { get; }
 
     /// <summary>
     /// Gets the collection of handlers to process the output buffer.
     /// Each handler is a function that takes an <see cref="IBuffer"/> and returns a <see cref="Task"/>.
     /// </summary>
-    ICollection<Func<IBuffer, Task>> OutputHandlers { get; }
+    ICollection<BufferHandler> OutputHandlers { get; }
 
     /// <summary>
     /// Requests processing of the specified input buffer by invoking all registered input handlers.
@@ -44,3 +44,13 @@ public interface IBufferingContext
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task RequestOutputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Represents a delegate that processes a buffer asynchronously.
+/// </summary>
+/// <param name="buffer">The buffer to be processed. Must not be null.</param>
+/// <param name="cancellationToken">A token that can be used to cancel the operation. The implementation should honor the cancellation request if
+/// possible.</param>
+/// <returns>A <see cref="ValueTask"/> that represents the asynchronous operation. The task completes when the buffer processing
+/// is finished.</returns>
+public delegate ValueTask BufferHandler(IBuffer buffer, CancellationToken cancellationToken);

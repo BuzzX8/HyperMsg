@@ -1,7 +1,5 @@
 namespace HyperMsg.Buffers;
 
-
-
 /// <summary>
 /// Default implementation of IBufferingContext, managing a single Buffer instance.
 /// </summary>
@@ -13,33 +11,29 @@ public class BufferingContext(ulong inputBufferSize, ulong outputBufferSize) : I
     public IBuffer Input => inputBuffer;
     public IBuffer Output => outputBuffer;
 
-    public ICollection<Func<IBuffer, Task>> InputHandlers { get; } = [];
+    public ICollection<BufferHandler> InputHandlers { get; } = [];
 
-    public ICollection<Func<IBuffer, Task>> OutputHandlers { get; } = [];
+    public ICollection<BufferHandler> OutputHandlers { get; } = [];
 
     public async Task RequestInputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default)
     {
-        if (buffer is null)
-        {
-            throw new ArgumentNullException(nameof(buffer), "Buffer cannot be null.");
-        }
+        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
+
         // Invoke all input handlers with the provided buffer
         foreach (var handler in InputHandlers)
         {
-            await handler.Invoke(buffer);
+            await handler.Invoke(buffer, cancellationToken);
         }
     }
 
     public async Task RequestOutputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default)
     {
-        if (buffer is null)
-        {
-            throw new ArgumentNullException(nameof(buffer), "Buffer cannot be null.");
-        }
+        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
+
         // Invoke all output handlers with the provided buffer
         foreach (var handler in OutputHandlers)
         {
-            await handler.Invoke(buffer);
+            await handler.Invoke(buffer, cancellationToken);
         }
     }
 }
