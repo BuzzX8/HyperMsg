@@ -12,7 +12,7 @@ namespace HyperMsg.Transport.Sockets;
 /// </remarks>
 public class SocketTransport(Socket socket) : ITransportContext, IConnection, IAsyncDisposable
 {
-    private readonly Socket _socket = socket;
+    private readonly Socket _socket = socket ?? throw new ArgumentNullException(nameof(socket), "Socket cannot be null. Please provide a valid socket instance.");
     private CancellationTokenSource? _cts;
     private Task? _receiveLoop;
 
@@ -41,6 +41,8 @@ public class SocketTransport(Socket socket) : ITransportContext, IConnection, IA
     {
         if (State != ConnectionState.Disconnected)
             throw new InvalidOperationException("Connection is already open or opening.");
+
+        //await _socket.ConnectAsync(cancellationToken);
 
         ChangeState(ConnectionState.Connecting);
 
