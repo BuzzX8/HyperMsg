@@ -44,21 +44,11 @@ public class SocketTransport(Socket socket, EndPoint endPoint) : ITransportConte
         if (State != ConnectionState.Disconnected)
             throw new InvalidOperationException("Connection is already open or opening.");
 
-        await _socket.ConnectAsync(_endPoint, cancellationToken);
-
         ChangeState(ConnectionState.Connecting);
 
         try
         {
-            // If the socket is not connected, connect it (assume it's not connected yet)
-            if (!_socket.Connected)
-            {
-                // The socket must have been created with the correct endpoint
-                // If not, user should connect manually before passing in
-                // Otherwise, you can add endpoint as a parameter to OpenAsync
-                // For now, just check if it's connected
-                throw new InvalidOperationException("Socket must be connected before opening.");
-            }
+            await _socket.ConnectAsync(_endPoint, cancellationToken);
 
             ChangeState(ConnectionState.Connected);
 
