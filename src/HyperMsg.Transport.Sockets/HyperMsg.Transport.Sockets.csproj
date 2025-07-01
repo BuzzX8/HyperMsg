@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HyperMsg.Core\HyperMsg.Core.csproj" />
+  </ItemGroup>
+
 </Project>
