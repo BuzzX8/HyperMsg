@@ -1,9 +1,11 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 
 namespace HyperMsg.Transport.Sockets.Tests;
 
 public class SocketTransportTests : IDisposable
 {
+    private readonly IPEndPoint _endPoint = new IPEndPoint(IPAddress.Loopback, 12345);
     private readonly SocketTransport _transport;
     private readonly Socket _socket;
 
@@ -12,8 +14,8 @@ public class SocketTransportTests : IDisposable
     public SocketTransportTests()
     {
         _socket = new(SocketType.Stream, ProtocolType.Tcp);
-        _transport = new(_socket);
-        _listener = new(System.Net.IPAddress.Loopback, 12345);
+        _transport = new(_socket, _endPoint);
+        _listener = new(_endPoint);
     }
 
     [Fact]
@@ -23,7 +25,9 @@ public class SocketTransportTests : IDisposable
         _listener.Start();
         
         // Act
+        Assert.Equal(ConnectionState.Disconnected, _transport.State);
         await _transport.OpenAsync(CancellationToken.None);
+
         // Assert
         Assert.Equal(ConnectionState.Connected, _transport.State);
     }

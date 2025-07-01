@@ -1,5 +1,6 @@
 ﻿using HyperMsg.Buffers;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 
 namespace HyperMsg.Transport.Sockets;
@@ -10,9 +11,10 @@ namespace HyperMsg.Transport.Sockets;
 /// <remarks>
 /// This class manages the lifecycle and data transmission of a <see cref="Socket"/> connection, including state management and event notification.
 /// </remarks>
-public class SocketTransport(Socket socket) : ITransportContext, IConnection, IAsyncDisposable
+public class SocketTransport(Socket socket, EndPoint endPoint) : ITransportContext, IConnection, IAsyncDisposable
 {
     private readonly Socket _socket = socket ?? throw new ArgumentNullException(nameof(socket), "Socket cannot be null. Please provide a valid socket instance.");
+    private readonly EndPoint _endPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint), "EndPoint cannot be null. Please provide a valid endpoint instance.");
     private CancellationTokenSource? _cts;
     private Task? _receiveLoop;
 
@@ -27,7 +29,7 @@ public class SocketTransport(Socket socket) : ITransportContext, IConnection, IA
         if (State != newState)
         {
             State = newState;
-            ConnectionStateChanged?.Invoke(State);
+            StateChanged?.Invoke(State);
         }
     }
 
@@ -42,7 +44,7 @@ public class SocketTransport(Socket socket) : ITransportContext, IConnection, IA
         if (State != ConnectionState.Disconnected)
             throw new InvalidOperationException("Connection is already open or opening.");
 
-        //await _socket.ConnectAsync(cancellationToken);
+        await _socket.ConnectAsync(_endPoint, cancellationToken);
 
         ChangeState(ConnectionState.Connecting);
 
@@ -234,7 +236,7 @@ public class SocketTransport(Socket socket) : ITransportContext, IConnection, IA
     }
 
     /// <inheritdoc/>
-    public event Action<ConnectionState> ConnectionStateChanged;
+    public event Action<ConnectionState> StateChanged;
 
     /// <summary>
     /// Occurs when data is received from the socket.
