@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Net.Sockets;
 
-namespace HyperMsg.Transport;
+namespace HyperMsg.Transport.Sockets;
 
 /// <summary>
 /// Provides a socket-based transport implementation for the HyperMsg framework.
@@ -77,7 +77,7 @@ public class SocketTransport(Socket socket) : ITransportContext, IConnection, IA
     public async Task CloseAsync(CancellationToken cancellationToken)
     {
         if (State == ConnectionState.Disconnected || State == ConnectionState.Disconnecting)
-            return Task.CompletedTask;
+            return;
 
         ChangeState(ConnectionState.Disconnecting);
 
