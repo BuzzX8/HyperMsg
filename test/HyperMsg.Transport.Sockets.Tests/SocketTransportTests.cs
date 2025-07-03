@@ -7,7 +7,7 @@ namespace HyperMsg.Transport.Sockets.Tests;
 
 public class SocketTransportTests : IDisposable
 {
-    private readonly IPEndPoint _endPoint = new IPEndPoint(IPAddress.Loopback, 12345);
+    private readonly IPEndPoint _endPoint = new(IPAddress.Loopback, 12345);
     private readonly Socket _socket;
     private readonly TcpListener _listener;
     private readonly SocketTransport _transport;
@@ -23,17 +23,17 @@ public class SocketTransportTests : IDisposable
     public async Task OpenAsync_ShouldChangeStateToConnected_WhenSocketIsConnected()
     {
         _listener.Start();
-        Assert.Equal(ConnectionState.Disconnected, _transport.State);
-        await _transport.OpenAsync(CancellationToken.None);
-        Assert.Equal(ConnectionState.Connected, _transport.State);
+        Assert.Equal(ConnectionState.Disconnected, _transport.Connection.State);
+        await _transport.Connection.OpenAsync(CancellationToken.None);
+        Assert.Equal(ConnectionState.Connected, _transport.Connection.State);
     }
 
     [Fact]
     public async Task OpenAsync_ShouldThrow_WhenAlreadyOpen()
     {
         _listener.Start();
-        await _transport.OpenAsync(CancellationToken.None);
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _transport.OpenAsync(CancellationToken.None));
+        await _transport.Connection.OpenAsync(CancellationToken.None);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _transport.Connection.OpenAsync(CancellationToken.None));
     }
 
     [Fact]
@@ -46,11 +46,11 @@ public class SocketTransportTests : IDisposable
     public async Task CloseAsync_ShouldBeIdempotent()
     {
         _listener.Start();
-        await _transport.OpenAsync(CancellationToken.None);
-        await _transport.CloseAsync(CancellationToken.None);
-        var stateAfterFirst = _transport.State;
-        await _transport.CloseAsync(CancellationToken.None);
-        Assert.Equal(stateAfterFirst, _transport.State);
+        await _transport.Connection.OpenAsync(CancellationToken.None);
+        await _transport.Connection.CloseAsync(CancellationToken.None);
+        var stateAfterFirst = _transport.Connection.State;
+        await _transport.Connection.CloseAsync(CancellationToken.None);
+        Assert.Equal(stateAfterFirst, _transport.Connection.State);
     }
 
     [Fact]
@@ -70,8 +70,8 @@ public class SocketTransportTests : IDisposable
     {
         _listener.Start();
         ConnectionState? observed = null;
-        _transport.StateChanged += s => observed = s;
-        await _transport.OpenAsync(CancellationToken.None);
+        _transport.Connection.StateChanged += s => observed = s;
+        await _transport.Connection.OpenAsync(CancellationToken.None);
         Assert.Equal(ConnectionState.Connected, observed);
     }
 
@@ -90,8 +90,8 @@ public class SocketTransportTests : IDisposable
     public async Task DisposeAsync_ShouldCleanupResources()
     {
         _listener.Start();
-        await _transport.OpenAsync(CancellationToken.None);
-        await _transport.DisposeAsync();
+        await _transport.Connection.OpenAsync(CancellationToken.None);
+        _transport.Dispose();
         Assert.False(_socket.Connected);
     }
 
@@ -102,7 +102,7 @@ public class SocketTransportTests : IDisposable
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
         }
-        _transport.DisposeAsync().AsTask().Wait();
+        _transport.Dispose();
         _listener.Stop();
     }
 }

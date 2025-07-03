@@ -6,7 +6,7 @@
 /// <remarks>
 /// Implementations of this interface are responsible for handling the underlying connection and providing asynchronous data sending capabilities.
 /// </remarks>
-public interface ITransportContext : IAsyncDisposable
+public interface ITransportContext
 {
     /// <summary>
     /// Gets the connection associated with the transport context.
