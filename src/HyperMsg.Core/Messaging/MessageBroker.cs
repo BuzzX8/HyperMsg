@@ -42,7 +42,7 @@ public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, I
         throw new NotImplementedException("Async dispatch is not implemented yet.");
     }
 
-    public void Register<T>(Action<T> messageHandler)
+    public void Register<T>(MessageHandler<T> messageHandler)
     {
         lock (sync)
         {
@@ -57,12 +57,12 @@ public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, I
         }
     }
 
-    public void Register<T>(Func<T, CancellationToken, Task> asyncMessageHandler)
+    public void Register<T>(AsyncMessageHandler<T> asyncMessageHandler)
     {
         throw new NotImplementedException("Async message handler registration is not implemented yet.");
     }
 
-    public void Unregister<T>(Action<T> messageHandler)
+    public void Unregister<T>(MessageHandler<T> messageHandler)
     {
         lock (sync)
         {
@@ -80,13 +80,10 @@ public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, I
         }
     }
 
-    public void Unregister<T>(Func<T, CancellationToken, Task> asyncMessageHandler)
+    public void Unregister<T>(AsyncMessageHandler<T> asyncMessageHandler)
     {
         throw new NotImplementedException("Async message handler unregistration is not implemented yet.");
     }
 
-    public void Dispose()
-    {
-        messageHandlers.Clear();
-    }
+    public void Dispose() => messageHandlers.Clear();
 }
