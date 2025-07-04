@@ -58,10 +58,10 @@ internal class SocketConnection(Socket socket, EndPoint endPoint) : IConnection
     /// Closes the socket connection and stops the receive loop.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    public async Task CloseAsync(CancellationToken cancellationToken)
+    public Task CloseAsync(CancellationToken cancellationToken)
     {
         if (State == ConnectionState.Disconnected || State == ConnectionState.Disconnecting)
-            return;
+            return Task.CompletedTask;
 
         ChangeState(ConnectionState.Disconnecting);
 
@@ -78,6 +78,8 @@ internal class SocketConnection(Socket socket, EndPoint endPoint) : IConnection
         {
             ChangeState(ConnectionState.Disconnected);
         }
+
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>

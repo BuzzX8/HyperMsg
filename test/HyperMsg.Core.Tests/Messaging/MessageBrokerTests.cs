@@ -11,7 +11,7 @@ public class MessageBrokerTests
     public void Dispatch_Invokes_Registered_Handler()
     {
         var message = Guid.NewGuid();
-        var handler = A.Fake<Action<Guid>>();
+        var handler = A.Fake<MessageHandler<Guid>>();
         broker.Register(handler);
 
         broker.Dispatch(message);
@@ -23,7 +23,7 @@ public class MessageBrokerTests
     public void Dispatch_Does_Not_Invokes_Registered_Handler()
     {
         var message = Guid.NewGuid().ToString();
-        var handler = A.Fake<Action<Guid>>();
+        var handler = A.Fake<MessageHandler<Guid>>();
         broker.Register(handler);
 
         broker.Dispatch(message);
@@ -35,7 +35,7 @@ public class MessageBrokerTests
     public void Dispatch_Does_Not_Invokes_Deregistered_Handler()
     {
         var message = Guid.NewGuid().ToString();
-        var handler = A.Fake<Action<Guid>>();
+        var handler = A.Fake<MessageHandler<Guid>>();
         broker.Register(handler);
         broker.Unregister(handler);
 
