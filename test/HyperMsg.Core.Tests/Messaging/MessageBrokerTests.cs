@@ -12,7 +12,7 @@ public class MessageBrokerTests
     {
         var message = Guid.NewGuid();
         var handler = A.Fake<MessageHandler<Guid>>();
-        broker.Register<Guid>(handler);
+        broker.Register(handler);
 
         broker.Dispatch(message);
 

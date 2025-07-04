@@ -39,9 +39,4 @@ public class SocketTransport(Socket socket, EndPoint endPoint) : ITransportConte
     #endregion
 
     public void Dispose() => _connection.Dispose();
-
-    /// <summary>
-    /// Occurs when data is received from the socket.
-    /// </summary>
-    public event Action<ReadOnlyMemory<byte>>? DataReceived;
 }
