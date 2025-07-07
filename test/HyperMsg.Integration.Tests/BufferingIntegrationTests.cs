@@ -1,34 +1,17 @@
 ﻿using HyperMsg.Buffers;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace HyperMsg.Integration.Tests;
 
-public class BufferingIntegrationTests : IDisposable
+public class BufferingIntegrationTests : IntegrationTestsBase
 {
-    private readonly IHost _host;
-
-    public BufferingIntegrationTests()
+    public BufferingIntegrationTests() : base((context, services) => services.AddBufferingContext())
     {
-        _host = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                services.AddBufferingContext();
-            })
-            .Build();
-        _host.StartAsync();
     }
 
     [Fact]
     public void BufferingContext_ShouldBeAvailable()
     {
-        var bufferingContext = _host.Services.GetService<IBufferingContext>();
+        var bufferingContext = GetRequiredService<IBufferingContext>();
         Assert.NotNull(bufferingContext);
-    }
-
-    void IDisposable.Dispose()
-    {
-        _host.StopAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
-        _host.Dispose();
     }
 }
