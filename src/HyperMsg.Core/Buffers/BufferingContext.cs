@@ -15,25 +15,21 @@ public class BufferingContext(ulong inputBufferSize, ulong outputBufferSize) : I
 
     public ICollection<BufferHandler> OutputHandlers { get; } = [];
 
-    public async Task RequestInputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default)
+    public async Task RequestInputBufferHandling(CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
-
         // Invoke all input handlers with the provided buffer
         foreach (var handler in InputHandlers)
         {
-            await handler.Invoke(buffer, cancellationToken);
+            await handler.Invoke(inputBuffer, cancellationToken);
         }
     }
 
-    public async Task RequestOutputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default)
+    public async Task RequestOutputBufferHandling(CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(buffer, nameof(buffer));
-
         // Invoke all output handlers with the provided buffer
         foreach (var handler in OutputHandlers)
         {
-            await handler.Invoke(buffer, cancellationToken);
+            await handler.Invoke(outputBuffer, cancellationToken);
         }
     }
 }

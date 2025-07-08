@@ -31,18 +31,16 @@ public interface IBufferingContext
     /// <summary>
     /// Requests processing of the specified input buffer by invoking all registered input handlers.
     /// </summary>
-    /// <param name="buffer">The input buffer to be processed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task RequestInputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default);
+    Task RequestInputBufferHandling(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Requests processing of the specified output buffer by invoking all registered output handlers.
     /// </summary>
-    /// <param name="buffer">The output buffer to be processed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task RequestOutputBufferHandling(IBuffer buffer, CancellationToken cancellationToken = default);
+    Task RequestOutputBufferHandling(CancellationToken cancellationToken = default);
 }
 
 /// <summary>

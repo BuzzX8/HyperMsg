@@ -57,18 +57,9 @@ public class BufferingContextTests
         context.InputHandlers.Add(async (b, ct) => { callOrder.Add(1); await Task.Yield(); });
         context.InputHandlers.Add(async (b, ct) => { callOrder.Add(2); await Task.Yield(); });
 
-        await context.RequestInputBufferHandling(buffer);
+        await context.RequestInputBufferHandling();
 
         Assert.Equal([ 1, 2 ], callOrder);
-    }
-
-    [Fact]
-    public async Task RequestInputBufferHandling_ThrowsOnNullBuffer()
-    {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
-
-        await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            context.RequestInputBufferHandling(null!));
     }
 
     [Fact]
@@ -81,17 +72,8 @@ public class BufferingContextTests
         context.OutputHandlers.Add(async (b, ct) => { callOrder.Add(1); await Task.Yield(); });
         context.OutputHandlers.Add(async (b, ct) => { callOrder.Add(2); await Task.Yield(); });
 
-        await context.RequestOutputBufferHandling(buffer);
+        await context.RequestOutputBufferHandling();
 
         Assert.Equal(new[] { 1, 2 }, callOrder);
-    }
-
-    [Fact]
-    public async Task RequestOutputBufferHandling_ThrowsOnNullBuffer()
-    {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
-
-        await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            context.RequestOutputBufferHandling(null!));
     }
 }

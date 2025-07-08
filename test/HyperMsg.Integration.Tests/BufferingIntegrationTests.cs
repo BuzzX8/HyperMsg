@@ -1,4 +1,5 @@
-﻿using HyperMsg.Buffers;
+﻿using FakeItEasy;
+using HyperMsg.Buffers;
 
 namespace HyperMsg.Integration.Tests;
 
@@ -13,5 +14,18 @@ public class BufferingIntegrationTests : IntegrationTestsBase
     {
         var bufferingContext = GetRequiredService<IBufferingContext>();
         Assert.NotNull(bufferingContext);
+    }
+
+    [Fact]
+    public async Task BufferingContext_RequestInputBufferHandling_InvokesInputHandlers()
+    {
+        var inputHandler = A.Fake<BufferHandler>();
+        var context = GetRequiredService<IBufferingContext>();
+        context.InputHandlers.Add(inputHandler);
+
+        Assert.Contains(inputHandler, context.InputHandlers);
+        await context.RequestInputBufferHandling();
+
+        A.CallTo(() => inputHandler(context.Input, A<CancellationToken>._)).MustHaveHappened();
     }
 }
