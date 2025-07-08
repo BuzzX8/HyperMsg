@@ -28,4 +28,17 @@ public class BufferingIntegrationTests : IntegrationTestsBase
 
         A.CallTo(() => inputHandler(context.Input, A<CancellationToken>._)).MustHaveHappened();
     }
+
+    [Fact]
+    public async Task BufferingContext_RequestOutputBufferHandling_InvokesOutputHandlers()
+    {
+        var outputHandler = A.Fake<BufferHandler>();
+        var context = GetRequiredService<IBufferingContext>();
+        context.OutputHandlers.Add(outputHandler);
+
+        Assert.Contains(outputHandler, context.OutputHandlers);
+        await context.RequestOutputBufferHandling();
+
+        A.CallTo(() => outputHandler(context.Output, A<CancellationToken>._)).MustHaveHappened();
+    }
 }
