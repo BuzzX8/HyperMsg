@@ -38,5 +38,8 @@ public class SocketTransport(ISocket socket) : ITransportContext, IDisposable
 
     #endregion
 
-    public void Dispose() => _connection.Dispose();
+    public void Dispose()
+    {
+        _connection.Dispose();
+    }
 }

@@ -19,6 +19,8 @@ public class SocketTransportTests : IDisposable
         Assert.Equal(ConnectionState.Disconnected, _transport.Connection.State);
         await _transport.Connection.OpenAsync(CancellationToken.None);
         Assert.Equal(ConnectionState.Connected, _transport.Connection.State);
+        A.CallTo(() => _socket.OpenAsync(A<CancellationToken>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 
     [Fact]
@@ -53,22 +55,14 @@ public class SocketTransportTests : IDisposable
         Assert.Equal(ConnectionState.Connected, observed);
     }
 
-    //[Fact]
-    //public async Task OnError_Event_ShouldFire_OnSocketError()
-    //{
-    //    Exception? observed = null;
-    //    _transport.OnError += ex => observed = ex;
-    //    // Force error by closing socket before open
-    //    _socket.Close();
-    //    await Assert.ThrowsAsync<Exception>(() => _transport.OpenAsync(CancellationToken.None));
-    //    Assert.NotNull(observed);
-    //}
-
     [Fact]
     public async Task DisposeAsync_ShouldCleanupResources()
     {
         await _transport.Connection.OpenAsync(CancellationToken.None);
         _transport.Dispose();
+        Assert.Equal(ConnectionState.Disconnected, _transport.Connection.State);
+        A.CallTo(() => _socket.CloseAsync(A<CancellationToken>.Ignored))
+            .MustHaveHappenedOnceExactly();
     }
 
     public void Dispose() => _transport?.Dispose();
