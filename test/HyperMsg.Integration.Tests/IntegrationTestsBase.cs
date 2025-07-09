@@ -19,7 +19,7 @@ public abstract class IntegrationTestsBase : IDisposable
 
     protected TService GetRequiredService<TService>() where TService : notnull => ServiceProvider.GetRequiredService<TService>();
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         _host.StopAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
         _host.Dispose();

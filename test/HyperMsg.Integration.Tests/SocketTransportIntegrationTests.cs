@@ -1,12 +1,15 @@
 ﻿using HyperMsg.Transport;
 using HyperMsg.Transport.Sockets;
 using System.Net;
+using System.Net.Sockets;
 
 namespace HyperMsg.Integration.Tests;
 
 public class SocketTransportIntegrationTests : IntegrationTestsBase
 {
-    private static EndPoint EndPoint => new IPEndPoint(IPAddress.Loopback, 8088);
+    private static IPEndPoint EndPoint => new(IPAddress.Loopback, 8088);
+
+    private TcpListener _listener = new(EndPoint);
 
     public SocketTransportIntegrationTests() : base((_, services) => services.AddClientSocketTransport(EndPoint))
     {
@@ -20,5 +23,26 @@ public class SocketTransportIntegrationTests : IntegrationTestsBase
         // Assert
         Assert.NotNull(transport);
         Assert.IsType<SocketTransport>(transport);
+    }
+
+    [Fact]
+    public async Task SocketTransport_Connection_OpenAsync_Should_Connect()
+    {
+        // Arrange
+        var transport = GetRequiredService<ITransportContext>();
+        _listener.Start();
+        // Act
+        var connectTask = transport.Connection.OpenAsync(default);
+        var acceptedSocket = await _listener.AcceptTcpClientAsync();
+        // Assert
+        Assert.NotNull(acceptedSocket);
+        Assert.True(connectTask.IsCompletedSuccessfully);
+        Assert.Equal(ConnectionState.Connected, transport.Connection.State);
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        _listener.Stop();
     }
 }
