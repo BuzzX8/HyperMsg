@@ -1,18 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Sockets;
 
 namespace HyperMsg.Transport.Sockets;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds the socket transport services to the specified <see cref="IServiceCollection"/>.
-    /// </summary>
-    /// <param name="services">The service collection to add the transport services to.</param>
-    /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddSocketTransport(this IServiceCollection services)
+    public static IServiceCollection AddClientSocketTransport(this IServiceCollection services, EndPoint endPoint) => services.AddSingleton<ITransportContext>(services => new SocketTransport(CreateDefaultClientSocket(endPoint)));
+
+    private static ISocket CreateDefaultClientSocket(EndPoint endPoint)
     {
-        // Register the socket transport as a singleton service
-        services.AddSingleton<ITransportContext, SocketTransport>();
-        return services;
+        var socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        return new SocketAdapter(socket, endPoint);
     }
 }

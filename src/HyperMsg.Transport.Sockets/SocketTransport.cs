@@ -9,9 +9,9 @@ namespace HyperMsg.Transport.Sockets;
 /// <remarks>
 /// This class manages the lifecycle and data transmission of a <see cref="Socket"/> connection, including state management and event notification.
 /// </remarks>
-public class SocketTransport(Socket socket, EndPoint endPoint) : ITransportContext, IDisposable
+public class SocketTransport(ISocket socket) : ITransportContext, IDisposable
 {
-    private readonly SocketConnection _connection = new(socket, endPoint);
+    private readonly SocketConnection _connection = new(socket);
 
     #region ITransportContext Members
 
@@ -33,7 +33,7 @@ public class SocketTransport(Socket socket, EndPoint endPoint) : ITransportConte
         if (_connection.State != ConnectionState.Connected)
             throw new InvalidOperationException("Cannot send data when the connection is not open.");
 
-        await _connection.Socket.SendAsync(data, SocketFlags.None, cancellationToken);
+        await _connection.Socket.SendAsync(data, cancellationToken);
     }
 
     #endregion
