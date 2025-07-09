@@ -32,11 +32,10 @@ public class SocketTransportIntegrationTests : IntegrationTestsBase
         var transport = GetRequiredService<ITransportContext>();
         _listener.Start();
         // Act
-        var connectTask = transport.Connection.OpenAsync(default);
+        await transport.Connection.OpenAsync(default);
         var acceptedSocket = await _listener.AcceptTcpClientAsync();
         // Assert
         Assert.NotNull(acceptedSocket);
-        Assert.True(connectTask.IsCompletedSuccessfully);
         Assert.Equal(ConnectionState.Connected, transport.Connection.State);
     }
 
