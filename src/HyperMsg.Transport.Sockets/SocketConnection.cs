@@ -91,7 +91,9 @@ internal class SocketConnection(ISocket socket) : IConnection, IDisposable
     {
         try
         {
+            ChangeState(ConnectionState.Disconnecting);
             _socket.CloseAsync(default).Wait();
+            ChangeState(ConnectionState.Disconnected);
         }
         catch
         {
