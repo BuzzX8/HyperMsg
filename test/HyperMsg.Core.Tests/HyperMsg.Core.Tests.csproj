@@ -30,8 +30,4 @@
     <ProjectReference Include="..\..\src\HyperMsg.Core\HyperMsg.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Coding\" />
-  </ItemGroup>
-
 </Project>
