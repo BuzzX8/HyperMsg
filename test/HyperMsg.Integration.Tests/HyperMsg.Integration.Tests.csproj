@@ -22,6 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\HyperMsg.Core\HyperMsg.Core.csproj" />
+    <ProjectReference Include="..\..\src\HyperMsg.Hosting\HyperMsg.Hosting.csproj" />
     <ProjectReference Include="..\..\src\HyperMsg.Transport.Sockets\HyperMsg.Transport.Sockets.csproj" />
   </ItemGroup>
 

@@ -90,47 +90,46 @@ public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, I
         };
     }
 
-    public void Register<T>(MessageHandler<T> messageHandler)
+    public void Register<T>(MessageHandler<T> messageHandler) => Register(typeof(T), messageHandler);
+
+    public void Register<T>(AsyncMessageHandler<T> asyncMessageHandler) => Register(typeof(T), asyncMessageHandler);
+
+    private void Register(Type messageType, Delegate messageHandler)
     {
         lock (sync)
         {
-            if (messageHandlers.TryGetValue(typeof(T), out var handler))
+            if (messageHandlers.TryGetValue(messageType, out var handler))
             {
-                messageHandlers[typeof(T)] = Delegate.Combine(messageHandler, handler);
+                messageHandlers[messageType] = Delegate.Combine(messageHandler, handler);
             }
             else
             {
-                messageHandlers[typeof(T)] = messageHandler;
+                messageHandlers[messageType] = messageHandler;
             }
         }
     }
 
-    public void Register<T>(AsyncMessageHandler<T> asyncMessageHandler)
-    {
-        throw new NotImplementedException("Async message handler registration is not implemented yet.");
-    }
+    public void Unregister<T>(MessageHandler<T> messageHandler) => Unregister(typeof(T), messageHandler);
 
-    public void Unregister<T>(MessageHandler<T> messageHandler)
+    public void Unregister<T>(AsyncMessageHandler<T> asyncMessageHandler) => Unregister(typeof(T), asyncMessageHandler);
+
+    private void Unregister(Type messageType, Delegate messageHandler)
     {
+        if (!messageHandlers.TryGetValue(messageType, out var handler))
+            return;
+
         lock (sync)
         {
-            var source = Delegate.Remove(messageHandlers[typeof(T)], messageHandler);
-
+            var source = Delegate.Remove(handler, messageHandler);
             if (source == null)
             {
-                messageHandlers.TryRemove(typeof(T), out var value);
-                return;
+                messageHandlers.TryRemove(messageType, out _);
             }
             else
             {
-                messageHandlers[typeof(T)] = source;
+                messageHandlers[messageType] = source;
             }
         }
-    }
-
-    public void Unregister<T>(AsyncMessageHandler<T> asyncMessageHandler)
-    {
-        throw new NotImplementedException("Async message handler unregistration is not implemented yet.");
     }
 
     public void Dispose() => messageHandlers.Clear();

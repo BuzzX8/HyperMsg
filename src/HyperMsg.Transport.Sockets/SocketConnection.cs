@@ -1,15 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
 
 namespace HyperMsg.Transport.Sockets;
 
-internal class SocketConnection(Socket socket, EndPoint endPoint) : IConnection
+internal class SocketConnection(ISocket socket) : IConnection, IDisposable
 {
-    private readonly Socket _socket = socket ?? throw new ArgumentNullException(nameof(socket), "Socket cannot be null. Please provide a valid socket instance.");
-    private readonly EndPoint _endPoint = endPoint ?? throw new ArgumentNullException(nameof(endPoint), "EndPoint cannot be null. Please provide a valid endpoint instance.");
+    private readonly ISocket _socket = socket ?? throw new ArgumentNullException(nameof(socket), "Socket cannot be null. Please provide a valid socket instance.");
 
-    internal Socket Socket => _socket;
+    internal ISocket Socket => _socket;
 
     #region IConnection Members
 
@@ -41,7 +38,7 @@ internal class SocketConnection(Socket socket, EndPoint endPoint) : IConnection
 
         try
         {
-            await _socket.ConnectAsync(_endPoint, cancellationToken);
+            await _socket.OpenAsync(cancellationToken);
 
             ChangeState(ConnectionState.Connected);
         }
@@ -67,8 +64,7 @@ internal class SocketConnection(Socket socket, EndPoint endPoint) : IConnection
 
         try
         {
-            _socket.Shutdown(SocketShutdown.Both);
-            _socket.Close();
+            return _socket.CloseAsync(cancellationToken);
         }
         catch (Exception ex)
         {
@@ -95,15 +91,15 @@ internal class SocketConnection(Socket socket, EndPoint endPoint) : IConnection
     {
         try
         {
-            _socket.Shutdown(SocketShutdown.Both);
+            ChangeState(ConnectionState.Disconnecting);
+            _socket.CloseAsync(default).Wait();
+            ChangeState(ConnectionState.Disconnected);
         }
         catch
         {
             // Ignore exceptions during shutdown, as the socket may already be closed.
             Debugger.Break();
         }
-
-        _socket.Close();
     }
 
     /// <inheritdoc/>
