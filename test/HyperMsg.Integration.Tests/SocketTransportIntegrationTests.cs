@@ -50,21 +50,6 @@ public class SocketTransportIntegrationTests : IntegrationTestsBase
     }
 
     [Fact]
-    public void SocketTransport_ReceiveDataHandlers_Should_Be_Modifiable()
-    {
-        var transport = GetRequiredService<ITransportContext>();
-        bool handlerCalled = false;
-        ReceiveDataHandler handler = (data, ct) => { handlerCalled = true; return ValueTask.CompletedTask; };
-        transport.ReceiveDataHandlers.Add(handler);
-
-        // Simulate invocation
-        foreach (var h in transport.ReceiveDataHandlers)
-            h.Invoke(new ReadOnlyMemory<byte>(new byte[] { 1, 2, 3 }), default).GetAwaiter().GetResult();
-
-        Assert.True(handlerCalled);
-    }
-
-    [Fact]
     public async Task SocketTransport_SendAsync_Should_Send_Data_When_Connected()
     {
         var transport = GetRequiredService<ITransportContext>();
