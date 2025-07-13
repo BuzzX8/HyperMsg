@@ -111,11 +111,12 @@ public class SocketTransportIntegrationTests : IntegrationTestsBase
         // Act
         var data = new byte[] { 1, 2, 3 };
         bufferingContext.Output.Writer.Write(data);
-        //bufferingContext.Output.Writer.Advance(data.Length);
         await bufferingContext.RequestOutputBufferHandling(default);
+        var receivedData = new byte[data.Length];
+        await acceptedSocket.Client.ReceiveAsync(receivedData, SocketFlags.None);
         // Assert
         Assert.NotEmpty(bufferingContext.OutputHandlers);
-        //Assert.Equal(data, bufferingContext.Output.ToArray());
+        //Assert.Equal(data, bufferingContext.Output.);
     }
 
     public override void Dispose()

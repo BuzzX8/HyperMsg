@@ -29,7 +29,7 @@ internal class SocketConnection(ISocket socket) : IConnection, IDisposable
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="InvalidOperationException">Thrown if the connection is already open or the socket is not connected.</exception>
-    public async Task OpenAsync(CancellationToken cancellationToken)
+    public async ValueTask OpenAsync(CancellationToken cancellationToken)
     {
         if (State != ConnectionState.Disconnected)
             throw new InvalidOperationException("Connection is already open or opening.");
@@ -55,10 +55,10 @@ internal class SocketConnection(ISocket socket) : IConnection, IDisposable
     /// Closes the socket connection and stops the receive loop.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    public Task CloseAsync(CancellationToken cancellationToken)
+    public ValueTask CloseAsync(CancellationToken cancellationToken)
     {
         if (State == ConnectionState.Disconnected || State == ConnectionState.Disconnecting)
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
 
         ChangeState(ConnectionState.Disconnecting);
 
@@ -75,7 +75,7 @@ internal class SocketConnection(ISocket socket) : IConnection, IDisposable
             ChangeState(ConnectionState.Disconnected);
         }
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc/>
@@ -92,7 +92,7 @@ internal class SocketConnection(ISocket socket) : IConnection, IDisposable
         try
         {
             ChangeState(ConnectionState.Disconnecting);
-            _socket.CloseAsync(default).Wait();
+            _socket.CloseAsync(default).AsTask().Wait();
             ChangeState(ConnectionState.Disconnected);
         }
         catch

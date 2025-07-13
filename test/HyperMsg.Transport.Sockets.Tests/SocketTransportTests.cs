@@ -27,7 +27,7 @@ public class SocketTransportTests : IDisposable
     public async Task OpenAsync_ShouldThrow_WhenAlreadyOpen()
     {
         await _transport.Connection.OpenAsync(CancellationToken.None);
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _transport.Connection.OpenAsync(CancellationToken.None));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _transport.Connection.OpenAsync(CancellationToken.None).AsTask());
     }
 
     [Fact]

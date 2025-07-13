@@ -22,14 +22,14 @@ public static class ServiceCollectionExtensions
         {
             var bufferingContext = services.GetService<IBufferingContext>();
             var socket = CreateDefaultClientSocket(endPoint);
-            var transportContext = new SocketTransport(CreateDefaultClientSocket(endPoint));
+            var transportContext = new SocketTransport(socket);
 
             if (bufferingContext is not null)
             {
-                bufferingContext.OutputHandlers.Add((buffer, _) => 
+                bufferingContext.OutputHandlers.Add(async (buffer, ctx) => 
                 {
                     var data = buffer.Reader.GetMemory();
-                    return ValueTask.CompletedTask;
+                    await transportContext.SendAsync(data, ctx);
                 });
             }
 

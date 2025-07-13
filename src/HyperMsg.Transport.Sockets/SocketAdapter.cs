@@ -22,14 +22,14 @@ internal class SocketAdapter(Socket socket, EndPoint endPoint) : ISocket
     /// Closes the socket connection asynchronously.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    public Task CloseAsync(CancellationToken cancellationToken)
+    public ValueTask CloseAsync(CancellationToken cancellationToken)
     {
         if (_socket.Connected)
         {
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
         }
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     /// <inheritdoc/>
@@ -37,12 +37,12 @@ internal class SocketAdapter(Socket socket, EndPoint endPoint) : ISocket
     /// Opens the socket connection asynchronously.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    public Task OpenAsync(CancellationToken cancellationToken)
+    public ValueTask OpenAsync(CancellationToken cancellationToken)
     {
         if (_socket.Connected)
             throw new InvalidOperationException("Socket is already connected.");
 
-        return _socket.ConnectAsync(_endPoint, cancellationToken).AsTask();
+        return _socket.ConnectAsync(_endPoint, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -51,7 +51,7 @@ internal class SocketAdapter(Socket socket, EndPoint endPoint) : ISocket
     /// </summary>
     /// <param name="memory">The buffer to store the received data.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    public async Task ReceiveAsync(Memory<byte> memory, CancellationToken cancellationToken)
+    public async ValueTask ReceiveAsync(Memory<byte> memory, CancellationToken cancellationToken)
     {
         if (!_socket.Connected)
             throw new InvalidOperationException("Socket is not connected.");
@@ -69,14 +69,20 @@ internal class SocketAdapter(Socket socket, EndPoint endPoint) : ISocket
     /// </summary>
     /// <param name="data">The data to send.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    public Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
+    public async ValueTask SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
     {
         if (!_socket.Connected)
             throw new InvalidOperationException("Socket is not connected.");
 
-        return _socket.SendAsync(data, SocketFlags.None, cancellationToken).AsTask();
+        var bytesSent = await _socket.SendAsync(data, SocketFlags.None, cancellationToken);
+        if (bytesSent > 0)
+        {
+            OnDataSent?.Invoke(this, data[..bytesSent]);
+        }
     }
-    
+
+    public event EventHandler<ReadOnlyMemory<byte>>? OnDataSent;
+
     /// <summary>
     /// Occurs when data is received from the socket.
     /// </summary>
