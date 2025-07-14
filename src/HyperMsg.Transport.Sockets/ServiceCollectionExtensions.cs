@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using HyperMsg.Buffers;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Sockets;
 
@@ -15,8 +16,26 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection to add the transport to.</param>
     /// <param name="endPoint">The remote endpoint to connect the socket to.</param>
     /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
-    public static IServiceCollection AddClientSocketTransport(this IServiceCollection services, EndPoint endPoint) 
-        => services.AddSingleton<ITransportContext>(services => new SocketTransport(CreateDefaultClientSocket(endPoint)));
+    public static IServiceCollection AddClientSocketTransport(this IServiceCollection services, EndPoint endPoint)
+    {        
+        return services.AddSingleton<ITransportContext>(services =>
+        {
+            var bufferingContext = services.GetService<IBufferingContext>();
+            var socket = CreateDefaultClientSocket(endPoint);
+            var transportContext = new SocketTransport(socket);
+
+            if (bufferingContext is not null)
+            {
+                bufferingContext.OutputHandlers.Add(async (buffer, ctx) => 
+                {
+                    var data = buffer.Reader.GetMemory();
+                    await transportContext.SendAsync(data, ctx);
+                });
+            }
+
+            return transportContext;
+        });
+    }
 
     /// <summary>
     /// Creates a default client socket for the specified endpoint.

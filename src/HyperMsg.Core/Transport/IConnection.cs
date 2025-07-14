@@ -10,14 +10,14 @@ public interface IConnection
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous open operation.</returns>
-    Task OpenAsync(CancellationToken cancellationToken);
+    ValueTask OpenAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Asynchronously closes the connection.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous close operation.</returns>
-    Task CloseAsync(CancellationToken cancellationToken);
+    ValueTask CloseAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets the current state of the connection.
