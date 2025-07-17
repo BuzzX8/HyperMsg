@@ -2,11 +2,9 @@
 
 internal class HandlerRegistration : IDisposable
 {
-    private readonly Delegate handler;
-    private readonly IHandlerRegistry registry;
+    private readonly Action unregAction;
 
-    public void Dispose()
-    {
-        throw new NotImplementedException();
-    }
+    public HandlerRegistration(Action unregAction) => this.unregAction = unregAction;
+
+    public void Dispose() => unregAction.Invoke();
 }
