@@ -10,8 +10,9 @@ public class ServiceCollectionExtensionsTests
     {        
         // Arrange
         var services = new ServiceCollection();
-        
+
         // Act
+        services.AddLogging();
         services.AddMessagingWorker();
 
         // Assert
