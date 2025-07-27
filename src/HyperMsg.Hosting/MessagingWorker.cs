@@ -11,11 +11,6 @@ public class MessagingWorker(IMessagingContext messagingContext, IEnumerable<IMe
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await RegisterHandlersAsync(messagingContext, stoppingToken);
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await OnHeartBeatAsync(stoppingToken);
-        }
     }
 
     protected virtual Task RegisterHandlersAsync(IMessagingContext messagingContext, CancellationToken cancellationToken)
@@ -38,13 +33,6 @@ public class MessagingWorker(IMessagingContext messagingContext, IEnumerable<IMe
             var component = components[i];
             component.Detach(messagingContext);
         }
-        return Task.CompletedTask;
-    }
-
-    protected virtual Task OnHeartBeatAsync(CancellationToken cancellationToken)
-    {
-        // Override this method in derived classes to handle heartbeat events
-        //_logger.LogInformation("Heartbeat event triggered at {Time}", DateTimeOffset.Now);
         return Task.CompletedTask;
     }
 }

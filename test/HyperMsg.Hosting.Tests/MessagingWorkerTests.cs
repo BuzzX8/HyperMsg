@@ -33,66 +33,6 @@ public class MessagingWorkerTests
 
         // Assert
         A.CallTo(() => componentFake.Attach(_broker)).MustHaveHappened();
-        //A.CallTo(() => componentFake.Detach(_broker)).MustHaveHappened();
+        A.CallTo(() => componentFake.Detach(_broker)).MustNotHaveHappened();
     }
-
-    //[Fact]
-    //public async Task RegisterHandlersAsync_RegistersHandlers()
-    //{
-    //    // Arrange
-    //    var called = false;
-    //    var workerFake = A.Fake<MessagingWorker>(
-    //        options => options.WithArgumentsForConstructor(() => new MessagingWorker(_broker, _components))
-    //                          .CallsBaseMethods());
-
-    //    A.CallTo(() => workerFake.RegisterHandlersAsync(A<IMessagingContext>._, A<CancellationToken>._))
-    //        .Invokes(() => called = true)
-    //        .Returns(Task.CompletedTask);
-
-    //    // Act
-    //    await workerFake.StartAsync(CancellationToken.None);
-
-    //    // Assert
-    //    Assert.True(called);
-    //}
-
-    //[Fact]
-    //public async Task UnregisterHandlersAsync_UnregistersHandlers()
-    //{
-    //    // Arrange
-    //    var called = false;
-    //    var workerFake = A.Fake<MessagingWorker>(
-    //        options => options.WithArgumentsForConstructor(() => new MessagingWorker(_broker, _components))
-    //                          .CallsBaseMethods());
-
-    //    A.CallTo(() => workerFake.UnregisterHandlersAsync(A<IMessagingContext>._, A<CancellationToken>._))
-    //        .Invokes(() => called = true)
-    //        .Returns(Task.CompletedTask);
-
-    //    // Act
-    //    await workerFake.StopAsync(CancellationToken.None);
-
-    //    // Assert
-    //    Assert.True(called);
-    //}
-
-    //[Fact]
-    //public async Task OnHeartBeatAsync_CanBeCalled()
-    //{
-    //    // Arrange
-    //    var called = false;
-    //    var workerFake = A.Fake<MessagingWorker>(
-    //        options => options.WithArgumentsForConstructor(() => new MessagingWorker(_broker, _components))
-    //                          .CallsBaseMethods());
-
-    //    A.CallTo(() => workerFake.OnHeartBeatAsync(A<CancellationToken>._))
-    //        .Invokes(() => called = true)
-    //        .Returns(Task.CompletedTask);
-
-    //    // Act
-    //    await workerFake.StartAsync(CancellationToken.None);
-
-    //    // Assert
-    //    Assert.True(called);
-    //}
 }
