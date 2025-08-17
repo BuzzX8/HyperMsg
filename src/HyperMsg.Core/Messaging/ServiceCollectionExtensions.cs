@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
         {
             context.HandlerRegistry.RegisterHandler(messageHandler);
         };
-        return services.AddSingleton(configurator);
+        return services.AddScoped(_ => configurator);
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
         {
             context.HandlerRegistry.RegisterHandler(messageHandler);
         };
-        return services.AddSingleton(configurator);
+        return services.AddScoped(_ => configurator);
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ public static class ServiceCollectionExtensions
     /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
     public static IServiceCollection AddMessagingContext(this IServiceCollection services)
     {
-        return services.AddSingleton<IDispatcher, MessageBroker>(provider =>
+        return services.AddScoped<IDispatcher, MessageBroker>(provider =>
         {
             var messageBroker = new MessageBroker();
 
@@ -61,8 +61,8 @@ public static class ServiceCollectionExtensions
             return messageBroker;
         }
         )
-            .AddSingleton<IHandlerRegistry, MessageBroker>()
-            .AddSingleton<IMessagingContext, MessageBroker>();
+            .AddScoped<IHandlerRegistry, MessageBroker>()
+            .AddScoped<IMessagingContext, MessageBroker>();
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection to add the messaging component to.</param>
     /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
     public static IServiceCollection AddMessagingComponent<T>(this IServiceCollection services) where T : class, IMessagingComponent
-        => services.AddSingleton<IMessagingComponent, T>();
+        => services.AddScoped<IMessagingComponent, T>();
 
     /// <summary>
     /// Registers the specified messaging component instance as a singleton implementation of <see cref="IMessagingComponent"/>.
@@ -82,7 +82,7 @@ public static class ServiceCollectionExtensions
     /// <param name="component">The messaging component instance to register.</param>
     /// <returns>The updated <see cref="IServiceCollection"/>.</returns>
     public static IServiceCollection AddMessagingComponent<T>(this IServiceCollection services, T component) where T : class, IMessagingComponent
-        => services.AddSingleton<IMessagingComponent>(component);
+        => services.AddScoped<IMessagingComponent>(_ => component);
 }
 
 /// <summary>
