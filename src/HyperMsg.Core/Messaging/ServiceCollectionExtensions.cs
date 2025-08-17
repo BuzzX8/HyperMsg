@@ -58,6 +58,13 @@ public static class ServiceCollectionExtensions
                 handler.Invoke(messageBroker);
             }
 
+            var components = provider.GetServices<IMessagingComponent>();
+
+            foreach (var component in components)
+            {
+                component.Attach(messageBroker);
+            }
+
             return messageBroker;
         }
         )
