@@ -10,10 +10,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <PackageIcon>logo.png</PackageIcon>
     <PackageIconUrl>logo.png</PackageIconUrl>
+    <Version>0.9.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Include="logo.png" Pack="true" PackagePath="" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HyperMsg.Messaging\HyperMsg.Messaging.csproj" />
   </ItemGroup>
 
 </Project>

@@ -15,7 +15,7 @@ public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, I
 
     public IHandlerRegistry HandlerRegistry => this;
 
-    public void Dispatch<T>(T data)
+    public void Dispatch<T>(T data) where T : notnull
     {
         if (!messageHandlers.ContainsKey(typeof(T)))
         {
@@ -36,7 +36,7 @@ public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, I
         }
         catch (TargetInvocationException e)
         {
-            throw e.InnerException;
+            throw e.InnerException ?? e;
         }
     }
 
@@ -76,19 +76,16 @@ public class MessageBroker : IDispatcher, IHandlerRegistry, IMessagingContext, I
         }
         catch (TargetInvocationException e)
         {
-            throw e.InnerException;
+            throw e.InnerException ?? e;
         }
     }
 
-    private Task InvokeHandlerAsync<T>(T data, Delegate handler, CancellationToken cancellationToken) where T : notnull
+    private Task InvokeHandlerAsync<T>(T data, Delegate handler, CancellationToken cancellationToken) where T : notnull => handler switch
     {
-        return handler switch
-        {
-            MessageHandler<T> messageHandler => Task.Run(() => messageHandler.Invoke(data), cancellationToken),
-            AsyncMessageHandler<T> asyncMessageHandler => asyncMessageHandler.Invoke(data, cancellationToken),
-            _ => throw new InvalidOperationException($"Unsupported handler type: {handler.GetType()}")
-        };
-    }
+        MessageHandler<T> messageHandler => Task.Run(() => messageHandler.Invoke(data), cancellationToken),
+        AsyncMessageHandler<T> asyncMessageHandler => asyncMessageHandler.Invoke(data, cancellationToken),
+        _ => throw new InvalidOperationException($"Unsupported handler type: {handler.GetType()}")
+    };
 
     public void Register<T>(MessageHandler<T> messageHandler) => Register(typeof(T), messageHandler);
 
