@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HyperMsg.Coding\HyperMsg.Coding.csproj" />
     <ProjectReference Include="..\HyperMsg.Messaging\HyperMsg.Messaging.csproj" />
   </ItemGroup>
 
