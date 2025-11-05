@@ -18,7 +18,7 @@ HyperMsg is a modular messaging framework for .NET, designed to abstract communi
 
 ## Main Components
 
-### 1. Buffering (`HyperMsg.Core.Buffers`)
+### 1. Buffering (`HyperMsg.Buffers`)
 - `Buffer`: Implements `IBufferReader` and `IBufferWriter` for efficient memory management.
 - `IBufferReader` / `IBufferWriter`: Interfaces for reading from and writing to buffers.
 - `BufferExtensions`: Extension methods for buffer operations (advance, write, try-write).
@@ -29,12 +29,13 @@ HyperMsg is a modular messaging framework for .NET, designed to abstract communi
 - `DecodingResult`: Record struct holding a decoded message and the number of bytes decoded.
 - `EncodingWriter` / `DecodingReader`: Factories for creating encoding/decoding pipelines.
 
-### 3. Messaging (`HyperMsg.Core.Messaging`)
+### 3. Messaging (`HyperMsg.Messaging`)
 - `MessageBroker`: Central class implementing `IDispatcher`, `IHandlerRegistry`, and `IMessagingContext`. Manages message handlers and dispatches messages to them.
 - `IDispatcher`: Interface for dispatching messages synchronously/asynchronously.
 - `IHandlerRegistry`: Interface for registering/unregistering message handlers.
 - `IMessagingContext`: Provides access to dispatcher and handler registry.
 - `IMessagingComponent`: Interface for attachable/detachable messaging components.
+- `MessagingComponentBase`: Abstract base class implementing `IMessagingComponent` that provides a standard lifecycle (Attach/Detach), safe access to the `IMessagingContext`, and helper methods for registering/unregistering handlers. Offers optional hooks for initialization and cleanup, making it easier to create reusable, DI-friendly messaging components and background workers that integrate with the `MessageBroker`.
 - `ServiceCollectionExtensions`: Extension methods for registering messaging services/components with DI.
 
 ### 4. Hosting Integration (`HyperMsg.Hosting`)
