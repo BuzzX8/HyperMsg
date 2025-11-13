@@ -1,11 +1,13 @@
-using System.Collections.Generic;
-
 namespace HyperMsg.Messaging;
 
 public class MessagingContextBuilder
 {
-    private readonly List<MessagingContextConfigurator> _configurators = [];
+    private readonly List<Action<IMessagingContext>> _configurators = [];
     private readonly List<IMessagingComponent> _components = [];
+
+    internal MessagingContextBuilder()
+    {
+    }
 
     public MessagingContextBuilder AddHandler<T>(MessageHandler<T> handler)
     {

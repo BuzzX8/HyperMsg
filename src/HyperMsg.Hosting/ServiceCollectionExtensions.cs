@@ -6,8 +6,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddMessagingWorker(this IServiceCollection services)
     {
-        return services
-            .AddMessagingContext()
-            .AddHostedService<MessagingWorker>();
+        return services;
+            //.AddHostedService<MessagingWorker>()
+            //.AddMessagingContext();
     }
 }

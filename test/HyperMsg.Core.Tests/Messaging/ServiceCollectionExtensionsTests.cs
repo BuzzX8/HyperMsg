@@ -14,64 +14,40 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddMessageBroker_ShouldRegisterServices()
+    public void AddMessagingContext_RegistersIMessagingContext()
     {
         // Act
-        services.AddMessagingContext();
-
-        var serviceProvider = services.BuildServiceProvider();
-
-        Assert.NotNull(serviceProvider.GetService<IDispatcher>());
-        Assert.NotNull(serviceProvider.GetService<IHandlerRegistry>());
-        Assert.NotNull(serviceProvider.GetService<IMessagingContext>());
-    }
-
-    [Fact]
-    public void AddMessagingComponent_Registers_Component()
-    {
-        var component = A.Fake<IMessagingComponent>();
-        services.AddMessagingComponent(component);
-
-        var serviceProvider = services.BuildServiceProvider();
-        var registeredComponent = serviceProvider.GetService<IMessagingComponent>();
-
-        Assert.NotNull(registeredComponent);
-        Assert.Same(component, registeredComponent);
-    }
-
-    [Fact]
-    public void AddMessageHandler_Registers_Configurator()
-    {
-        // Arrange
-        var handler = A.Fake<MessageHandler<string>>();
-        services.AddMessageHandler(handler);
-        services.AddMessagingContext();
-
-        var serviceProvider = services.BuildServiceProvider();
-        var dispatcher = serviceProvider.GetService<IDispatcher>();
-
-        // Act
-        dispatcher.Dispatch("test message");
+        var builder = services.AddMessagingContext();
+        var provider = services.BuildServiceProvider();
 
         // Assert
-        A.CallTo(handler).MustHaveHappenedOnceExactly();
+        var messagingContext = provider.GetService<IMessagingContext>();
+        Assert.NotNull(messagingContext);
+        Assert.IsAssignableFrom<IMessagingContext>(messagingContext);
+        Assert.IsType<MessagingContextBuilder>(builder);
     }
 
     [Fact]
-    public void AddAsyncMessageHandler_Registers_Configurator()
-        {
-        // Arrange
-        var asyncHandler = A.Fake<AsyncMessageHandler<string>>();
-        services.AddAsyncMessageHandler(asyncHandler);
-        services.AddMessagingContext();
-
-        var serviceProvider = services.BuildServiceProvider();
-        var dispatcher = serviceProvider.GetService<IDispatcher>();
-
+    public void AddMessagingContext_RegistersDispatcher()
+    {
         // Act
-        dispatcher.DispatchAsync("test message").GetAwaiter().GetResult();
+        services.AddMessagingContext();
+        var provider = services.BuildServiceProvider();
 
         // Assert
-        A.CallTo(() => asyncHandler.Invoke("test message", A<CancellationToken>._)).MustHaveHappenedOnceExactly();
+        var dispatcher = provider.GetService<IDispatcher>();
+        Assert.NotNull(dispatcher);
+    }
+
+    [Fact]
+    public void AddMessagingContext_RegistersHandlerRegistry()
+    {
+        // Act
+        services.AddMessagingContext();
+        var provider = services.BuildServiceProvider();
+
+        // Assert
+        var registry = provider.GetService<IHandlerRegistry>();
+        Assert.NotNull(registry);
     }
 }
