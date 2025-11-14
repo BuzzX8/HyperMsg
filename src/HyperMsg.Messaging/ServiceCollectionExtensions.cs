@@ -7,13 +7,11 @@ public static class ServiceCollectionExtensions
 {
     public static MessagingContextBuilder AddMessagingContext(this IServiceCollection services)
     {
-        services.TryAddSingleton(services =>
-        {
-            return new MessageBroker();
-        });
-        services.TryAddSingleton<IMessagingContext>();
-        services.TryAddSingleton<IDispatcher, MessageBroker>();
-        services.TryAddSingleton<IHandlerRegistry, MessageBroker>();
+        var messageBroker = new MessageBroker();
+        
+        services.TryAddSingleton<IMessagingContext>(messageBroker);
+        services.TryAddSingleton<IDispatcher>(messageBroker);
+        services.TryAddSingleton<IHandlerRegistry>(messageBroker);
 
         return new(services);
     }

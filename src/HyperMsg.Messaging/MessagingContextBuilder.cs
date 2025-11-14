@@ -6,10 +6,7 @@ public class MessagingContextBuilder
 {
     private readonly IServiceCollection services;
 
-    internal MessagingContextBuilder(IServiceCollection services)
-    {
-        this.services = services;
-    }
+    internal MessagingContextBuilder(IServiceCollection services) => this.services = services;
 
     public IServiceCollection Services => services;
 
