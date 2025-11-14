@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace HyperMsg.Messaging;
 
@@ -6,15 +7,14 @@ public static class ServiceCollectionExtensions
 {
     public static MessagingContextBuilder AddMessagingContext(this IServiceCollection services)
     {
-        var messagingContextBuilder = new MessagingContextBuilder();        
-               
-        services.AddSingleton(sp =>
+        services.TryAddSingleton(services =>
         {
-            return messagingContextBuilder.Build();
+            return new MessageBroker();
         });
-        services.AddSingleton(provider => provider.GetRequiredService<IMessagingContext>().Dispatcher);
-        services.AddSingleton(provider => provider.GetRequiredService<IMessagingContext>().HandlerRegistry);
+        services.TryAddSingleton<IMessagingContext>();
+        services.TryAddSingleton<IDispatcher, MessageBroker>();
+        services.TryAddSingleton<IHandlerRegistry, MessageBroker>();
 
-        return messagingContextBuilder;
+        return new(services);
     }
 }
