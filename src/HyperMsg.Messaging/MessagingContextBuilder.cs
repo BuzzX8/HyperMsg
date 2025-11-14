@@ -37,6 +37,13 @@ public class MessagingContextBuilder
 
     public MessagingContextBuilder AddComponent(IMessagingComponent component)
     {
+        //TODO: Implement AddComponent(IMessagingComponent)
+        return this;
+    }
+
+    public MessagingContextBuilder AddComponent<T>() where T : IMessagingComponent
+    {
+        //TODO: Implement AddComponent<T>
         return this;
     }
 }
