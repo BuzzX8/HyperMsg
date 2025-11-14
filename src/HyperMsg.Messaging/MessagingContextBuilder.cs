@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace HyperMsg.Messaging;
 
@@ -12,11 +13,25 @@ public class MessagingContextBuilder
 
     public MessagingContextBuilder AddHandler<T>(MessageHandler<T> handler)
     {
+        MessagingContextConfigurator configurator = (context) =>
+        {
+            context.HandlerRegistry.RegisterHandler(handler);
+        };
+
+        services.AddSingleton(configurator);
+
         return this;
     }
 
     public MessagingContextBuilder AddAsyncHandler<T>(AsyncMessageHandler<T> handler)
     {
+        MessagingContextConfigurator configurator = (context) =>
+        {
+            context.HandlerRegistry.RegisterHandler(handler);
+        };
+
+        services.AddSingleton(configurator);
+
         return this;
     }
 
@@ -25,3 +40,5 @@ public class MessagingContextBuilder
         return this;
     }
 }
+
+public delegate void MessagingContextConfigurator(IMessagingContext messagingContext);
