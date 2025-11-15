@@ -108,5 +108,10 @@ public class ServiceCollectionExtensionsTests
         
         Assert.Contains(component, components);
         Assert.Contains(component2, components);
+
+        var context = serviceProvider.GetRequiredService<IMessagingContext>();
+
+        A.CallTo(() => component.Attach(context)).MustHaveHappenedOnceExactly();
+        A.CallTo(() => component2.Attach(context)).MustHaveHappenedOnceExactly();
     }
 }

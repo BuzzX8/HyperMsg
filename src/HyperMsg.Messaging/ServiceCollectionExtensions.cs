@@ -10,11 +10,18 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(sp =>
         {
             var handlers = sp.GetServices<MessagingContextConfigurator>();
+            var components = sp.GetServices<IMessagingComponent>();
+
             var broker = new MessageBroker();
 
             foreach (var configure in handlers)
             {
                 configure(broker);
+            }
+
+            foreach (var component in components)
+            {
+                component.Attach(broker);
             }
 
             return broker;
