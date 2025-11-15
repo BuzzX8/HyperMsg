@@ -94,4 +94,19 @@ public class ServiceCollectionExtensionsTests
         A.CallTo(() => handler(message, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
         A.CallTo(() => handler2(message, A<CancellationToken>._)).MustHaveHappenedOnceExactly();
     }
+
+    [Fact]
+    public void AddComponent_MessagingContextBuilder_RegistersComponent()
+    {
+        var builder = services.AddMessagingContext();
+        var component = A.Fake<IMessagingComponent>();
+        var component2 = A.Fake<IMessagingComponent>();
+        builder.AddComponent(component);
+        builder.AddComponent(component2);
+        var serviceProvider = services.BuildServiceProvider();
+        var components = serviceProvider.GetServices<IMessagingComponent>();
+        
+        Assert.Contains(component, components);
+        Assert.Contains(component2, components);
+    }
 }

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace HyperMsg.Messaging;
 
@@ -15,7 +14,7 @@ public class MessagingContextBuilder
     {
         MessagingContextConfigurator configurator = (context) =>
         {
-            context.HandlerRegistry.RegisterHandler(handler);
+            context.HandlerRegistry.Register(handler);
         };
 
         services.AddSingleton(configurator);
@@ -27,7 +26,7 @@ public class MessagingContextBuilder
     {
         MessagingContextConfigurator configurator = (context) =>
         {
-            context.HandlerRegistry.RegisterHandler(handler);
+            context.HandlerRegistry.Register(handler);
         };
 
         services.AddSingleton(configurator);
@@ -37,13 +36,7 @@ public class MessagingContextBuilder
 
     public MessagingContextBuilder AddComponent(IMessagingComponent component)
     {
-        //TODO: Implement AddComponent(IMessagingComponent)
-        return this;
-    }
-
-    public MessagingContextBuilder AddComponent<T>() where T : IMessagingComponent
-    {
-        //TODO: Implement AddComponent<T>
+        services.AddSingleton(component);
         return this;
     }
 }
