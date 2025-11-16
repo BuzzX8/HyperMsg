@@ -41,4 +41,4 @@ public class MessagingContextBuilder
     }
 }
 
-public delegate void MessagingContextConfigurator(IMessagingContext messagingContext);
+internal delegate void MessagingContextConfigurator(IMessagingContext messagingContext);
