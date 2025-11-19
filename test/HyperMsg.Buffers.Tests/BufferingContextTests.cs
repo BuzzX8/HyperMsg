@@ -1,6 +1,4 @@
-﻿using Xunit;
-
-namespace HyperMsg.Buffers;
+﻿namespace HyperMsg.Buffers;
 
 public class BufferingContextTests
 {
