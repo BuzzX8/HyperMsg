@@ -4,12 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.9.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HyperMsg.Buffers\HyperMsg.Buffers.csproj" />
-    <ProjectReference Include="..\HyperMsg.Core\HyperMsg.Core.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
   </ItemGroup>
 
 </Project>

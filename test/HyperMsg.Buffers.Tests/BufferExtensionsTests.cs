@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using System.Buffers;
-using Xunit;
 
 namespace HyperMsg.Buffers;
 

@@ -1,7 +1,13 @@
 ﻿namespace HyperMsg.Coding;
 
-internal class CodingContext<T>(Encoder<T> encoder, Decoder<T> decoder) : ICodingContext<T>
+public class CodingContext<T>
 {
-    public Encoder<T> Encoder { get; } = encoder;
-    public Decoder<T> Decoder { get; } = decoder;
+    internal CodingContext(Encoder<T> encoder, Decoder<T> decoder)
+    {
+        Encoder = encoder;
+        Decoder = decoder;
+    }
+
+    public Encoder<T> Encoder { get; private set; }
+    public Decoder<T> Decoder { get; private set; }
 }

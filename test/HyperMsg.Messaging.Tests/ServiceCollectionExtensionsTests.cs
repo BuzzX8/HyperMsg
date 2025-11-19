@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace HyperMsg.Messaging;
 
