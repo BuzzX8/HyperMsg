@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/HyperMsg.Core.Tests/HyperMsg.Core.Tests.csproj" />
+    <Project Path="test/HyperMsg.Messaging.Tests/HyperMsg.Messaging.Tests.csproj" Id="0590646b-eb34-4cff-9209-12fd2aefefd4" />
     <Project Path="test/HyperMsg.Transport.Sockets.Tests/HyperMsg.Transport.Sockets.Tests.csproj" />
   </Folder>
 </Solution>
