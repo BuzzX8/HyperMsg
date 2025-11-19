@@ -1,0 +1,17 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/HyperMsg.Coding/HyperMsg.Coding.csproj" />
+    <Project Path="src/HyperMsg.Core/HyperMsg.Core.csproj" />
+    <Project Path="src/HyperMsg.Messaging/HyperMsg.Messaging.csproj" />
+    <Project Path="src/HyperMsg.Transport.Sockets/HyperMsg.Transport.Sockets.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/HyperMsg.Core.Tests/HyperMsg.Core.Tests.csproj" />
+    <Project Path="test/HyperMsg.Transport.Sockets.Tests/HyperMsg.Transport.Sockets.Tests.csproj" />
+  </Folder>
+</Solution>
