@@ -14,7 +14,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="logo.png" Pack="true" PackagePath="" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HyperMsg.Coding\HyperMsg.Coding.csproj" />
