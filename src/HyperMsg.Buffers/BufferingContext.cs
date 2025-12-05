@@ -3,33 +3,46 @@ namespace HyperMsg.Buffers;
 /// <summary>
 /// Default implementation of IBufferingContext, managing a single Buffer instance.
 /// </summary>
-public class BufferingContext(ulong inputBufferSize, ulong outputBufferSize) : IBufferingContext
+public class BufferingContext : IBufferingContext
 {
-    private readonly Buffer inputBuffer = new(new byte[inputBufferSize]);
-    private readonly Buffer outputBuffer = new(new byte[outputBufferSize]);
+    const ulong DefaultInputBufferSize = 1024 * 1024;
+    const ulong DefaultOutputBufferSize = 1024 * 1024;
+
+    private readonly Buffer inputBuffer;
+    private readonly Buffer outputBuffer;
 
     public IBuffer Input => inputBuffer;
+
     public IBuffer Output => outputBuffer;
 
-    public ICollection<BufferHandler> InputHandlers { get; } = [];
-
-    public ICollection<BufferHandler> OutputHandlers { get; } = [];
-
-    public async Task RequestInputBufferHandling(CancellationToken cancellationToken = default)
+    public BufferingContext()
+        : this(DefaultInputBufferSize, DefaultOutputBufferSize)
     {
-        // Invoke all input handlers with the provided buffer
-        foreach (var handler in InputHandlers)
+    }
+
+    public BufferingContext(ulong inputBufferSize, ulong outputBufferSize)
+    {
+        inputBuffer = new (new byte[inputBufferSize]);
+        outputBuffer = new (new byte[outputBufferSize]);
+    }
+
+    public async ValueTask RequestInputBufferHandling(CancellationToken cancellationToken = default)
+    {
+        if (InputBufferHandlingRequested != null)
         {
-            await handler.Invoke(inputBuffer, cancellationToken);
+            await InputBufferHandlingRequested(inputBuffer, cancellationToken);
         }
     }
 
-    public async Task RequestOutputBufferHandling(CancellationToken cancellationToken = default)
+    public async ValueTask RequestOutputBufferHandling(CancellationToken cancellationToken = default)
     {
-        // Invoke all output handlers with the provided buffer
-        foreach (var handler in OutputHandlers)
+        if (OutputBufferHandlingRequested != null)
         {
-            await handler.Invoke(outputBuffer, cancellationToken);
+            await OutputBufferHandlingRequested(outputBuffer, cancellationToken);
         }
     }
+
+    public event BufferHandler? InputBufferHandlingRequested;
+
+    public event BufferHandler? OutputBufferHandlingRequested;
 }

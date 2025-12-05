@@ -17,30 +17,22 @@ public interface IBufferingContext
     IBuffer Output { get; }
 
     /// <summary>
-    /// Gets the collection of handlers to process the input buffer.
-    /// Each handler is a function that takes an <see cref="IBuffer"/> and returns a <see cref="Task"/>.
-    /// </summary>
-    ICollection<BufferHandler> InputHandlers { get; }
-
-    /// <summary>
-    /// Gets the collection of handlers to process the output buffer.
-    /// Each handler is a function that takes an <see cref="IBuffer"/> and returns a <see cref="Task"/>.
-    /// </summary>
-    ICollection<BufferHandler> OutputHandlers { get; }
-
-    /// <summary>
     /// Requests processing of the specified input buffer by invoking all registered input handlers.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task RequestInputBufferHandling(CancellationToken cancellationToken = default);
+    ValueTask RequestInputBufferHandling(CancellationToken cancellationToken);
 
     /// <summary>
     /// Requests processing of the specified output buffer by invoking all registered output handlers.
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task RequestOutputBufferHandling(CancellationToken cancellationToken = default);
+    ValueTask RequestOutputBufferHandling(CancellationToken cancellationToken);
+
+    public event BufferHandler? InputBufferHandlingRequested;
+
+    public event BufferHandler? OutputBufferHandlingRequested;
 }
 
 /// <summary>

@@ -2,76 +2,59 @@
 
 public class BufferingContextTests
 {
-    private const ulong InputBufferSize = 16;
-    private const ulong OutputBufferSize = 32;
-
     [Fact]
-    public void Input_ReturnsInputBufferInstance()
+    public void Constructor_Initializes_Input_And_Output_Buffers()
     {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
+        var ctx = new BufferingContext();
 
-        var input = context.Input;
-
-        Assert.NotNull(input);
-        Assert.IsAssignableFrom<IBuffer>(input);
+        Assert.NotNull(ctx.Input);
+        Assert.NotNull(ctx.Output);
     }
 
     [Fact]
-    public void Output_ReturnsOutputBufferInstance()
+    public void Default_Buffers_Have_AtLeast_Default_Capacity()
     {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
+        const int OneMiB = 1024 * 1024;
+        var ctx = new BufferingContext();
 
-        var output = context.Output;
+        var inputCapacity = ctx.Input.Writer.GetMemory(1).Length;
+        var outputCapacity = ctx.Output.Writer.GetMemory(1).Length;
 
-        Assert.NotNull(output);
-        Assert.IsAssignableFrom<IBuffer>(output);
+        Assert.True(inputCapacity >= OneMiB, $"Input capacity {inputCapacity} is less than {OneMiB}");
+        Assert.True(outputCapacity >= OneMiB, $"Output capacity {outputCapacity} is less than {OneMiB}");
     }
 
     [Fact]
-    public void InputHandlers_InitializesAsEmptyCollection()
+    public async Task RequestInputBufferHandling_Rises_InputBufferHandlingRequested_Event()
     {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
+        var ctx = new BufferingContext();
 
-        Assert.NotNull(context.InputHandlers);
-        Assert.Empty(context.InputHandlers);
+        var eventRaised = false;
+        ctx.InputBufferHandlingRequested += (sender, buffer) =>
+        {
+            eventRaised = true;
+            return ValueTask.CompletedTask;
+        };
+
+        await ctx.RequestInputBufferHandling();
+
+        Assert.True(eventRaised, "InputBufferHandlingRequested event was not raised.");
     }
 
     [Fact]
-    public void OutputHandlers_InitializesAsEmptyCollection()
+    public async Task RequestOutputBufferHandling_Rises_OutputBufferHandlingRequested()
     {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
+        var ctx = new BufferingContext();
 
-        Assert.NotNull(context.OutputHandlers);
-        Assert.Empty(context.OutputHandlers);
-    }
+        var eventRaised = false;
+        ctx.OutputBufferHandlingRequested += (sender, buffer) =>
+        {
+            eventRaised = true;
+            return ValueTask.CompletedTask;
+        };
 
-    [Fact]
-    public async Task RequestInputBufferHandling_InvokesAllInputHandlers()
-    {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
-        var buffer = context.Input;
-        var callOrder = new List<int>();
+        await ctx.RequestOutputBufferHandling();
 
-        context.InputHandlers.Add(async (b, ct) => { callOrder.Add(1); await Task.Yield(); });
-        context.InputHandlers.Add(async (b, ct) => { callOrder.Add(2); await Task.Yield(); });
-
-        await context.RequestInputBufferHandling();
-
-        Assert.Equal([ 1, 2 ], callOrder);
-    }
-
-    [Fact]
-    public async Task RequestOutputBufferHandling_InvokesAllOutputHandlers()
-    {
-        var context = new BufferingContext(InputBufferSize, OutputBufferSize);
-        var buffer = context.Output;
-        var callOrder = new List<int>();
-
-        context.OutputHandlers.Add(async (b, ct) => { callOrder.Add(1); await Task.Yield(); });
-        context.OutputHandlers.Add(async (b, ct) => { callOrder.Add(2); await Task.Yield(); });
-
-        await context.RequestOutputBufferHandling();
-
-        Assert.Equal(new[] { 1, 2 }, callOrder);
+        Assert.True(eventRaised, "OutputBufferHandlingRequested event was not raised.");
     }
 }
