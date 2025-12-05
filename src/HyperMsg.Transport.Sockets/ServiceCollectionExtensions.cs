@@ -26,11 +26,11 @@ public static class ServiceCollectionExtensions
 
             if (bufferingContext is not null)
             {
-                bufferingContext.OutputHandlers.Add(async (buffer, ctx) => 
+                bufferingContext.OutputBufferHandlingRequested += async (buffer, ctx) => 
                 {
                     var data = buffer.Reader.GetMemory();
                     await transportContext.SendAsync(data, ctx);
-                });
+                };
             }
 
             return transportContext;
