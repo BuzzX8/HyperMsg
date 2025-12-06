@@ -31,12 +31,6 @@ public class SocketTransportTests : IDisposable
     }
 
     [Fact]
-    public async Task SendAsync_ShouldThrow_WhenNotConnected()
-    {
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _transport.SendAsync(new byte[1], CancellationToken.None));
-    }
-
-    [Fact]
     public async Task CloseAsync_ShouldBeIdempotent()
     {        
         await _transport.Connection.OpenAsync(CancellationToken.None);

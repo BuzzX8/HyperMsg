@@ -2,7 +2,7 @@
 
 public interface IChannel
 {    
-    Task<int> SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default);
+    ValueTask<int> SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default);
 
-    Task<int> ReceiveAsync(Memory<byte> data, CancellationToken cancellationToken = default);
+    ValueTask<int> ReceiveAsync(Memory<byte> data, CancellationToken cancellationToken = default);
 }

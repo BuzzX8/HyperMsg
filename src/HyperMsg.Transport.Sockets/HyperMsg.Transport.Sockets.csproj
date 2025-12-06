@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HyperMsg.Buffers\HyperMsg.Buffers.csproj" />
+    <ProjectReference Include="..\HyperMsg.Transport\HyperMsg.Transport.csproj" />
   </ItemGroup>
 
 </Project>

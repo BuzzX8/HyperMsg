@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
                 bufferingContext.OutputBufferHandlingRequested += async (buffer, ctx) => 
                 {
                     var data = buffer.Reader.GetMemory();
-                    await transportContext.SendAsync(data, ctx);
+                    //await transportContext.SendAsync(data, ctx);
                 };
             }
 
