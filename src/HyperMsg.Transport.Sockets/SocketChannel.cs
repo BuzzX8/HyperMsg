@@ -1,13 +1,8 @@
 ﻿namespace HyperMsg.Transport.Sockets;
 
-public class SocketChannel : IChannel
+internal class SocketChannel(ISocket socket) : IChannel
 {
-    private readonly ISocket _socket;
-
-    public SocketChannel(ISocket socket)
-    {
-        _socket = socket;
-    }
+    private readonly ISocket _socket = socket;
 
     public ValueTask<int> SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {
