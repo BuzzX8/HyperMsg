@@ -7,9 +7,9 @@
   <Folder Name="/src/">
     <Project Path="src/HyperMsg.Buffers/HyperMsg.Buffers.csproj" Id="5c7084f1-c1c3-42a1-8d34-b0d15e2380b6" />
     <Project Path="src/HyperMsg.Coding/HyperMsg.Coding.csproj" />
-    <Project Path="src/HyperMsg.Core/HyperMsg.Core.csproj" />
     <Project Path="src/HyperMsg.Messaging/HyperMsg.Messaging.csproj" />
     <Project Path="src/HyperMsg.Transport.Sockets/HyperMsg.Transport.Sockets.csproj" />
+    <Project Path="src/HyperMsg.Transport/HyperMsg.Transport.csproj" Id="612b812b-5101-498c-aef1-a57bbd047f63" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/HyperMsg.Buffers.Tests/HyperMsg.Buffers.Tests.csproj" Id="4eaa777d-4418-4f70-86ad-c99d4a403f03" />
