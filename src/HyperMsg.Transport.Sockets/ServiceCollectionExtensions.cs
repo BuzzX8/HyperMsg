@@ -29,7 +29,9 @@ public static class ServiceCollectionExtensions
                 bufferingContext.OutputBufferHandlingRequested += async (buffer, ctx) => 
                 {
                     var data = buffer.Reader.GetMemory();
-                    //await transportContext.SendAsync(data, ctx);
+                    var channel = transportContext.Channel;
+
+                    await channel.SendAsync(data, ctx);
                 };
             }
 
@@ -37,11 +39,6 @@ public static class ServiceCollectionExtensions
         });
     }
 
-    /// <summary>
-    /// Creates a default client socket for the specified endpoint.
-    /// </summary>
-    /// <param name="endPoint">The remote endpoint to connect the socket to.</param>
-    /// <returns>An <see cref="ISocket"/> instance configured for the endpoint.</returns>
     private static ISocket CreateDefaultClientSocket(EndPoint endPoint)
     {
         var socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
