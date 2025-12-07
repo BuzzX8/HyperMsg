@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 
 namespace HyperMsg.Transport.Sockets;
 
@@ -12,29 +11,14 @@ namespace HyperMsg.Transport.Sockets;
 public class SocketTransport(ISocket socket) : ITransportContext, IDisposable
 {
     private readonly SocketConnection _connection = new(socket);
+    private readonly SocketChannel _channel = new(socket);
 
     #region ITransportContext Members
 
     /// <inheritdoc/>
     public IConnection Connection => _connection;
 
-    /// <inheritdoc/>
-    public ICollection<ReceiveDataHandler> ReceiveDataHandlers { get; } = [];
-
-    /// <inheritdoc/>
-    /// <summary>
-    /// Sends data asynchronously over the socket connection.
-    /// </summary>
-    /// <param name="data">The data to send.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <exception cref="InvalidOperationException">Thrown if the connection is not open.</exception>
-    public async Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
-    {
-        if (_connection.State != ConnectionState.Connected)
-            throw new InvalidOperationException("Cannot send data when the connection is not open.");
-
-        await _connection.Socket.SendAsync(data, cancellationToken);
-    }
+    public IChannel Channel => _channel;
 
     #endregion
 

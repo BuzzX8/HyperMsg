@@ -7,9 +7,4 @@
     <Version>0.9.0</Version>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HyperMsg.Buffers\HyperMsg.Buffers.csproj" />
-    <ProjectReference Include="..\HyperMsg.Transport\HyperMsg.Transport.csproj" />
-  </ItemGroup>
-
 </Project>
