@@ -42,7 +42,27 @@ public class BufferingContext : IBufferingContext
         }
     }
 
+    public async ValueTask RequestInputBufferUpdate(CancellationToken cancellationToken = default)
+    {
+        if (InputBufferUpdateRequested != null)
+        {
+            await InputBufferUpdateRequested(inputBuffer, cancellationToken);
+        }
+    }
+
+    public async ValueTask RequestOutputBufferUpdate(CancellationToken cancellationToken = default)
+    {
+        if (OutputBufferUpdateRequested != null)
+        {
+            await OutputBufferUpdateRequested(outputBuffer, cancellationToken);
+        }
+    }
+
     public event BufferHandler? InputBufferHandlingRequested;
 
     public event BufferHandler? OutputBufferHandlingRequested;
+
+    public event BufferHandler? InputBufferUpdateRequested;
+
+    public event BufferHandler? OutputBufferUpdateRequested;
 }

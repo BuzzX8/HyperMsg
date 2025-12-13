@@ -30,7 +30,7 @@ public class BufferingContextTests
         var ctx = new BufferingContext();
 
         var eventRaised = false;
-        ctx.InputBufferHandlingRequested += (sender, buffer) =>
+        ctx.InputBufferHandlingRequested += (buffer, ct) =>
         {
             eventRaised = true;
             return ValueTask.CompletedTask;
@@ -47,7 +47,7 @@ public class BufferingContextTests
         var ctx = new BufferingContext();
 
         var eventRaised = false;
-        ctx.OutputBufferHandlingRequested += (sender, buffer) =>
+        ctx.OutputBufferHandlingRequested += (buffer, ct) =>
         {
             eventRaised = true;
             return ValueTask.CompletedTask;
@@ -56,5 +56,53 @@ public class BufferingContextTests
         await ctx.RequestOutputBufferHandling();
 
         Assert.True(eventRaised, "OutputBufferHandlingRequested event was not raised.");
+    }
+
+    [Fact]
+    public async Task RequestInputBufferUpdate_Raises_InputBufferUpdateRequested_Event_And_Forwards_Buffer_And_CancellationToken()
+    {
+        var ctx = new BufferingContext();
+
+        IBuffer? received = null;
+        var observedCancellation = false;
+
+        ctx.InputBufferUpdateRequested += (buffer, ct) =>
+        {
+            received = buffer;
+            observedCancellation = ct.IsCancellationRequested;
+            return ValueTask.CompletedTask;
+        };
+
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        await ctx.RequestInputBufferUpdate(cts.Token);
+
+        Assert.Same(ctx.Input, received);
+        Assert.True(observedCancellation, "CancellationToken was not forwarded to the input update handler.");
+    }
+
+    [Fact]
+    public async Task RequestOutputBufferUpdate_Raises_OutputBufferUpdateRequested_Event_And_Forwards_Buffer_And_CancellationToken()
+    {
+        var ctx = new BufferingContext();
+
+        IBuffer? received = null;
+        var observedCancellation = false;
+
+        ctx.OutputBufferUpdateRequested += (buffer, ct) =>
+        {
+            received = buffer;
+            observedCancellation = ct.IsCancellationRequested;
+            return ValueTask.CompletedTask;
+        };
+
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        await ctx.RequestOutputBufferUpdate(cts.Token);
+
+        Assert.Same(ctx.Output, received);
+        Assert.True(observedCancellation, "CancellationToken was not forwarded to the output update handler.");
     }
 }
