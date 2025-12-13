@@ -30,9 +30,17 @@ public interface IBufferingContext
     /// <returns>A task that represents the asynchronous operation.</returns>
     ValueTask RequestOutputBufferHandling(CancellationToken cancellationToken);
 
+    ValueTask RequestInputBufferUpdate(CancellationToken cancellationToken);
+
+    ValueTask RequestOutputBufferUpdate(CancellationToken cancellationToken);
+
     public event BufferHandler? InputBufferHandlingRequested;
 
     public event BufferHandler? OutputBufferHandlingRequested;
+
+    public event BufferHandler? InputBufferUpdateRequested;
+
+    public event BufferHandler? OutputBufferUpdateRequested;
 }
 
 /// <summary>
