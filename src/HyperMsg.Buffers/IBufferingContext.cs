@@ -7,40 +7,66 @@ namespace HyperMsg.Buffers;
 public interface IBufferingContext
 {
     /// <summary>
-    /// Gets the input buffer used for reading data.
+    /// Gets the input buffer used for receiving data.
     /// </summary>
-    IBuffer Input { get; }
+    IBuffer InputBuffer { get; }
     
     /// <summary>
-    /// Gets the output buffer used for writing data.
+    /// Gets the output buffer used for sending data.
     /// </summary>
-    IBuffer Output { get; }
+    IBuffer OutputBuffer { get; }
 
     /// <summary>
-    /// Requests processing of the specified input buffer by invoking all registered input handlers.
+    /// Requests that the input buffer be updated by downstream processors.
     /// </summary>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    ValueTask RequestInputBufferHandling(CancellationToken cancellationToken);
+    /// <param name="cancellationToken">A token to observe while waiting for the update to complete.</param>
+    /// <returns>A <see cref="ValueTask"/> that completes when the request has been processed.</returns>
+    ValueTask RequestInputBufferDownstreamUpdate(CancellationToken cancellationToken);
 
     /// <summary>
-    /// Requests processing of the specified output buffer by invoking all registered output handlers.
+    /// Requests that the input buffer be updated by upstream processors.
     /// </summary>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    ValueTask RequestOutputBufferHandling(CancellationToken cancellationToken);
+    /// <param name="cancellationToken">A token to observe while waiting for the update to complete.</param>
+    /// <returns>A <see cref="ValueTask"/> that completes when the request has been processed.</returns>
+    ValueTask RequestInputBufferUpstreamUpdate(CancellationToken cancellationToken);
 
-    ValueTask RequestInputBufferUpdate(CancellationToken cancellationToken);
+    /// <summary>
+    /// Requests that the output buffer be updated by downstream processors.
+    /// </summary>
+    /// <param name="cancellationToken">A token to observe while waiting for the update to complete.</param>
+    /// <returns>A <see cref="ValueTask"/> that completes when the request has been processed.</returns>
+    ValueTask RequestOutputBufferDownstreamUpdate(CancellationToken cancellationToken);
 
-    ValueTask RequestOutputBufferUpdate(CancellationToken cancellationToken);
+    /// <summary>
+    /// Requests that the output buffer be updated by upstream processors.
+    /// </summary>
+    /// <param name="cancellationToken">A token to observe while waiting for the update to complete.</param>
+    /// <returns>A <see cref="ValueTask"/> that completes when the request has been processed.</returns>
+    ValueTask RequestOutputBufferUpstreamUpdate(CancellationToken cancellationToken);
 
-    public event BufferHandler? InputBufferHandlingRequested;
+    /// <summary>
+    /// Raised when a downstream update of the input buffer is requested.
+    /// Handlers should process the <see cref="InputBuffer"/> and respect the provided <see cref="CancellationToken"/>.
+    /// </summary>
+    public event BufferHandler? InputBufferDownstreamUpdateRequested;
 
-    public event BufferHandler? OutputBufferHandlingRequested;
+    /// <summary>
+    /// Raised when an upstream update of the input buffer is requested.
+    /// Handlers should process the <see cref="InputBuffer"/> and respect the provided <see cref="CancellationToken"/>.
+    /// </summary>
+    public event BufferHandler? InputBufferUpstreamUpdateRequested;
 
-    public event BufferHandler? InputBufferUpdateRequested;
+    /// <summary>
+    /// Raised when a downstream update of the output buffer is requested.
+    /// Handlers should process the <see cref="OutputBuffer"/> and respect the provided <see cref="CancellationToken"/>.
+    /// </summary>
+    public event BufferHandler? OutputBufferDownstreamUpdateRequested;
 
-    public event BufferHandler? OutputBufferUpdateRequested;
+    /// <summary>
+    /// Raised when an upstream update of the output buffer is requested.
+    /// Handlers should process the <see cref="OutputBuffer"/> and respect the provided <see cref="CancellationToken"/>.
+    /// </summary>
+    public event BufferHandler? OutputBufferUpstreamUpdateRequested;
 }
 
 /// <summary>

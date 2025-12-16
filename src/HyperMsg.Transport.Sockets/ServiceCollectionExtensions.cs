@@ -26,7 +26,7 @@ public static class ServiceCollectionExtensions
 
             if (bufferingContext is not null)
             {
-                bufferingContext.OutputBufferHandlingRequested += async (buffer, ctx) => 
+                bufferingContext.OutputBufferDownstreamUpdateRequested += async (buffer, ctx) => 
                 {
                     var data = buffer.Reader.GetMemory();
                     var channel = transportContext.Channel;

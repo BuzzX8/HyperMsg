@@ -1,8 +1,5 @@
 namespace HyperMsg.Buffers;
 
-/// <summary>
-/// Default implementation of IBufferingContext, managing a single Buffer instance.
-/// </summary>
 public class BufferingContext : IBufferingContext
 {
     const ulong DefaultInputBufferSize = 1024 * 1024;
@@ -11,9 +8,9 @@ public class BufferingContext : IBufferingContext
     private readonly Buffer inputBuffer;
     private readonly Buffer outputBuffer;
 
-    public IBuffer Input => inputBuffer;
+    public IBuffer InputBuffer => inputBuffer;
 
-    public IBuffer Output => outputBuffer;
+    public IBuffer OutputBuffer => outputBuffer;
 
     public BufferingContext()
         : this(DefaultInputBufferSize, DefaultOutputBufferSize)
@@ -26,43 +23,44 @@ public class BufferingContext : IBufferingContext
         outputBuffer = new (new byte[outputBufferSize]);
     }
 
-    public async ValueTask RequestInputBufferHandling(CancellationToken cancellationToken = default)
+
+    public async ValueTask RequestInputBufferDownstreamUpdate(CancellationToken cancellationToken = default)
     {
-        if (InputBufferHandlingRequested != null)
+        if (InputBufferDownstreamUpdateRequested != null)
         {
-            await InputBufferHandlingRequested(inputBuffer, cancellationToken);
+            await InputBufferDownstreamUpdateRequested(inputBuffer, cancellationToken);
         }
     }
 
-    public async ValueTask RequestOutputBufferHandling(CancellationToken cancellationToken = default)
+    public async ValueTask RequestInputBufferUpstreamUpdate(CancellationToken cancellationToken = default)
     {
-        if (OutputBufferHandlingRequested != null)
+        if (InputBufferUpstreamUpdateRequested != null)
         {
-            await OutputBufferHandlingRequested(outputBuffer, cancellationToken);
+            await InputBufferUpstreamUpdateRequested(inputBuffer, cancellationToken);
         }
     }
 
-    public async ValueTask RequestInputBufferUpdate(CancellationToken cancellationToken = default)
+    public async ValueTask RequestOutputBufferDownstreamUpdate(CancellationToken cancellationToken = default)
     {
-        if (InputBufferUpdateRequested != null)
+        if (OutputBufferDownstreamUpdateRequested != null)
         {
-            await InputBufferUpdateRequested(inputBuffer, cancellationToken);
+            await OutputBufferDownstreamUpdateRequested(outputBuffer, cancellationToken);
         }
     }
 
-    public async ValueTask RequestOutputBufferUpdate(CancellationToken cancellationToken = default)
+    public async ValueTask RequestOutputBufferUpstreamUpdate(CancellationToken cancellationToken = default)
     {
-        if (OutputBufferUpdateRequested != null)
+        if (OutputBufferUpstreamUpdateRequested != null)
         {
-            await OutputBufferUpdateRequested(outputBuffer, cancellationToken);
+            await OutputBufferUpstreamUpdateRequested(outputBuffer, cancellationToken);
         }
     }
 
-    public event BufferHandler? InputBufferHandlingRequested;
+    public event BufferHandler? InputBufferDownstreamUpdateRequested;
 
-    public event BufferHandler? OutputBufferHandlingRequested;
+    public event BufferHandler? InputBufferUpstreamUpdateRequested;
 
-    public event BufferHandler? InputBufferUpdateRequested;
+    public event BufferHandler? OutputBufferDownstreamUpdateRequested;
 
-    public event BufferHandler? OutputBufferUpdateRequested;
+    public event BufferHandler? OutputBufferUpstreamUpdateRequested;
 }

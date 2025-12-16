@@ -7,8 +7,8 @@ public class BufferingContextTests
     {
         var ctx = new BufferingContext();
 
-        Assert.NotNull(ctx.Input);
-        Assert.NotNull(ctx.Output);
+        Assert.NotNull(ctx.InputBuffer);
+        Assert.NotNull(ctx.OutputBuffer);
     }
 
     [Fact]
@@ -17,8 +17,8 @@ public class BufferingContextTests
         const int OneMiB = 1024 * 1024;
         var ctx = new BufferingContext();
 
-        var inputCapacity = ctx.Input.Writer.GetMemory(1).Length;
-        var outputCapacity = ctx.Output.Writer.GetMemory(1).Length;
+        var inputCapacity = ctx.InputBuffer.Writer.GetMemory(1).Length;
+        var outputCapacity = ctx.OutputBuffer.Writer.GetMemory(1).Length;
 
         Assert.True(inputCapacity >= OneMiB, $"Input capacity {inputCapacity} is less than {OneMiB}");
         Assert.True(outputCapacity >= OneMiB, $"Output capacity {outputCapacity} is less than {OneMiB}");
@@ -30,13 +30,13 @@ public class BufferingContextTests
         var ctx = new BufferingContext();
 
         var eventRaised = false;
-        ctx.InputBufferHandlingRequested += (buffer, ct) =>
+        ctx.InputBufferDownstreamUpdateRequested += (buffer, ct) =>
         {
             eventRaised = true;
             return ValueTask.CompletedTask;
         };
 
-        await ctx.RequestInputBufferHandling();
+        await ctx.RequestInputBufferDownstreamUpdate();
 
         Assert.True(eventRaised, "InputBufferHandlingRequested event was not raised.");
     }
@@ -47,13 +47,13 @@ public class BufferingContextTests
         var ctx = new BufferingContext();
 
         var eventRaised = false;
-        ctx.OutputBufferHandlingRequested += (buffer, ct) =>
+        ctx.OutputBufferDownstreamUpdateRequested += (buffer, ct) =>
         {
             eventRaised = true;
             return ValueTask.CompletedTask;
         };
 
-        await ctx.RequestOutputBufferHandling();
+        await ctx.RequestOutputBufferDownstreamUpdate();
 
         Assert.True(eventRaised, "OutputBufferHandlingRequested event was not raised.");
     }
@@ -66,7 +66,7 @@ public class BufferingContextTests
         IBuffer? received = null;
         var observedCancellation = false;
 
-        ctx.InputBufferUpdateRequested += (buffer, ct) =>
+        ctx.InputBufferUpstreamUpdateRequested += (buffer, ct) =>
         {
             received = buffer;
             observedCancellation = ct.IsCancellationRequested;
@@ -76,9 +76,9 @@ public class BufferingContextTests
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
-        await ctx.RequestInputBufferUpdate(cts.Token);
+        await ctx.RequestInputBufferUpstreamUpdate(cts.Token);
 
-        Assert.Same(ctx.Input, received);
+        Assert.Same(ctx.InputBuffer, received);
         Assert.True(observedCancellation, "CancellationToken was not forwarded to the input update handler.");
     }
 
@@ -90,7 +90,7 @@ public class BufferingContextTests
         IBuffer? received = null;
         var observedCancellation = false;
 
-        ctx.OutputBufferUpdateRequested += (buffer, ct) =>
+        ctx.OutputBufferUpstreamUpdateRequested += (buffer, ct) =>
         {
             received = buffer;
             observedCancellation = ct.IsCancellationRequested;
@@ -100,9 +100,9 @@ public class BufferingContextTests
         using var cts = new CancellationTokenSource();
         cts.Cancel();
 
-        await ctx.RequestOutputBufferUpdate(cts.Token);
+        await ctx.RequestOutputBufferUpstreamUpdate(cts.Token);
 
-        Assert.Same(ctx.Output, received);
+        Assert.Same(ctx.OutputBuffer, received);
         Assert.True(observedCancellation, "CancellationToken was not forwarded to the output update handler.");
     }
 }
