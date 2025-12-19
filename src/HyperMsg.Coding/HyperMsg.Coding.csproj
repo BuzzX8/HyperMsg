@@ -5,6 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Version>0.9.2512.19</Version>
+    <Authors>BuzzX8</Authors>
+    <Description>Encoding and decoding primitives for HyperMsg, including varint and framing helpers.</Description>
+    <PackageTags>coding,encoding,decoding,varint,hypermsg</PackageTags>
+    <RepositoryUrl>https://github.com/BuzzX8/HyperMsg</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
