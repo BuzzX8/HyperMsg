@@ -1,5 +1,3 @@
-![HyperMsg Logo](images/logo.png)
-
 [![Core Build](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/BuzzX8/HyperMsg/actions/workflows/build-and-test.yml)
 
 ## Packaging and Installing in a Local NuGet Feed
@@ -45,10 +43,3 @@ Now you can install the package in your project:
 # For Windows PowerShell
  dotnet add package HyperMsg.Core --source LocalFeed
 ```
-
----
-
-**In summary:**
-HyperMsg provides a lightweight, extensible infrastructure for message-based communication, with a focus on modularity, testability, and integration with .NET's dependency injection and hosting model. The core is built around buffer management, serialization, and a flexible message broker pattern.
-
-![HyperMsg Logo](images/footer.png)
