@@ -11,12 +11,14 @@ namespace HyperMsg.Transport.Sockets;
 /// </remarks>
 public class SocketTransport : ITransportContext, IDisposable
 {
+    private readonly ISocket _socket;
     private readonly SocketConnection _connection;
     private readonly SocketChannel _channel;
     private readonly IBufferingContext? bufferingContext;
 
     public SocketTransport(ISocket socket, IBufferingContext? bufferingContext=null)
     {
+        _socket = socket;
         _connection = new(socket);
         _channel = new(socket);
 
@@ -30,12 +32,16 @@ public class SocketTransport : ITransportContext, IDisposable
 
     private async ValueTask BufferingContext_OutputBufferDownstreamUpdateRequested(IBuffer buffer, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var memory = buffer.Reader.GetMemory();
+        var bytesSent = await _socket.SendAsync(memory, cancellationToken);
+        buffer.Reader.Advance(bytesSent);
     }
 
-    private ValueTask BufferingContext_InputBufferUpstreamUpdateRequested(IBuffer buffer, CancellationToken cancellationToken)
+    private async ValueTask BufferingContext_InputBufferUpstreamUpdateRequested(IBuffer buffer, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var memory = buffer.Writer.GetMemory();
+        var bytesReceived = await _socket.ReceiveAsync(memory, cancellationToken);
+        buffer.Writer.Advance(bytesReceived);
     }
 
     #region ITransportContext Members
@@ -50,5 +56,7 @@ public class SocketTransport : ITransportContext, IDisposable
     public void Dispose()
     {
         _connection.Dispose();
+        bufferingContext?.InputBufferUpstreamUpdateRequested -= BufferingContext_InputBufferUpstreamUpdateRequested;
+        bufferingContext?.OutputBufferDownstreamUpdateRequested -= BufferingContext_OutputBufferDownstreamUpdateRequested;
     }
 }
