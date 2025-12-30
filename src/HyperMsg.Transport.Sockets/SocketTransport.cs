@@ -53,7 +53,7 @@ public class SocketTransport : ITransportContext, IDisposable
 
     #endregion
 
-    public void Dispose()
+    public void Dispose() 
     {
         _connection.Dispose();
         bufferingContext?.InputBufferUpstreamUpdateRequested -= BufferingContext_InputBufferUpstreamUpdateRequested;

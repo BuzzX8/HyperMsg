@@ -1,16 +1,18 @@
 ﻿using FakeItEasy;
+using HyperMsg.Buffers;
 
 namespace HyperMsg.Transport.Sockets.Tests;
 
 public class SocketTransportTests : IDisposable
 {
     private readonly ISocket _socket;
+    private readonly BufferingContext _bufferingContext = new();
     private readonly SocketTransport _transport;
 
     public SocketTransportTests()
     {
         _socket = A.Fake<ISocket>();
-        _transport = new(_socket);
+        _transport = new(_socket, _bufferingContext);
     }
 
     [Fact]
@@ -57,6 +59,48 @@ public class SocketTransportTests : IDisposable
         Assert.Equal(ConnectionState.Disconnected, _transport.Connection.State);
         A.CallTo(() => _socket.CloseAsync(A<CancellationToken>.Ignored))
             .MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public async Task BufferingContext_RequestOutputBufferDownstreamUpdate_()
+    {
+        var message = Guid.NewGuid().ToByteArray();
+        _bufferingContext.OutputBuffer.Writer.Write(message);
+
+        var receivedMessage = default(byte[]);
+
+        A.CallTo(() => _socket.SendAsync(A<ReadOnlyMemory<byte>>.Ignored, A<CancellationToken>.Ignored))
+            .ReturnsLazily((ReadOnlyMemory<byte> buffer, CancellationToken _) =>
+            {
+                receivedMessage = buffer.ToArray();
+                return buffer.Length;
+            });
+
+        await _bufferingContext.RequestOutputBufferDownstreamUpdate(CancellationToken.None);
+
+        Assert.Equal(message, receivedMessage);
+
+        A.CallTo(() => _socket.SendAsync(A<ReadOnlyMemory<byte>>.Ignored, A<CancellationToken>.Ignored))
+            .MustHaveHappenedOnceExactly();
+    }
+
+    [Fact]
+    public async Task BufferingContext_RequestInputBufferUpstreamUpdate_()
+    {
+        var dataToReceive = Guid.NewGuid().ToByteArray();
+
+        A.CallTo(() => _socket.ReceiveAsync(A<Memory<byte>>.Ignored, A<CancellationToken>.Ignored))
+            .ReturnsLazily((Memory<byte> buffer, CancellationToken _) =>
+            {
+                dataToReceive.CopyTo(buffer);
+                return dataToReceive.Length;
+            });
+
+        await _bufferingContext.RequestInputBufferUpstreamUpdate(CancellationToken.None);
+
+        var receivedMessage = _bufferingContext.InputBuffer.Reader.GetMemory();
+        
+        Assert.Equal(dataToReceive, receivedMessage);
     }
 
     public void Dispose() => _transport?.Dispose();
